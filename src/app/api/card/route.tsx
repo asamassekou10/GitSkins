@@ -235,8 +235,6 @@ function generateCardImage(
   username: string,
   theme: ReturnType<typeof getTheme>
 ): NextResponse {
-  const contributionGraph = generateContributionGraph(data.contributionCalendar.weeks, theme);
-
   const imageResponse = new ImageResponse(
     (
       <div
