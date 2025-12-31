@@ -1,0 +1,91 @@
+/**
+ * GitSkins - API Validation Schemas
+ * 
+ * Zod schemas for validating all API inputs.
+ * Ensures type safety and prevents invalid data from reaching business logic.
+ */
+
+import { z } from 'zod';
+import type { ThemeName } from '@/types';
+import { getThemeRegistry } from '@/registry/themes';
+
+/**
+ * Valid theme names from the registry
+ */
+const validThemeNames = Object.keys(getThemeRegistry()) as ThemeName[];
+
+/**
+ * Username validation schema
+ * - Must be a non-empty string
+ * - GitHub usernames: 1-39 characters, alphanumeric and hyphens
+ * - Case-insensitive
+ */
+export const usernameSchema = z
+  .string()
+  .min(1, 'Username is required')
+  .max(39, 'Username must be 39 characters or less')
+  .regex(
+    /^[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?$/,
+    'Username must contain only alphanumeric characters and hyphens'
+  )
+  .transform((val) => val.toLowerCase().trim());
+
+/**
+ * Theme name validation schema
+ * - Must be a valid theme from the registry
+ * - Case-insensitive
+ * - Defaults to 'satan' if not provided
+ */
+export const themeSchema = z
+  .string()
+  .optional()
+  .default('satan')
+  .transform((val) => {
+    const normalized = val?.toLowerCase() as ThemeName;
+    if (validThemeNames.includes(normalized)) {
+      return normalized;
+    }
+    return 'satan' as ThemeName; // Fallback to default
+  });
+
+/**
+ * Complete card API query parameters schema
+ * Username is optional at schema level, but we validate it if provided
+ */
+export const cardQuerySchema = z.object({
+  username: usernameSchema.optional().or(z.literal('')),
+  theme: themeSchema,
+});
+
+/**
+ * Type inference from schema
+ */
+export type CardQueryParams = z.infer<typeof cardQuerySchema>;
+
+/**
+ * Validate and parse query parameters
+ * 
+ * @param params - Raw query parameters from Next.js
+ * @returns Validated and parsed parameters
+ * @throws ZodError if validation fails
+ */
+export function validateCardQuery(params: {
+  username: string | null;
+  theme?: string | null;
+}): CardQueryParams {
+  // Normalize empty strings to undefined
+  const normalizedUsername = params.username && params.username.trim() !== '' 
+    ? params.username.trim() 
+    : undefined;
+  
+  const result = cardQuerySchema.parse({
+    username: normalizedUsername,
+    theme: params.theme || undefined,
+  });
+  
+  // Return with username as undefined if empty, so API can handle it
+  return {
+    ...result,
+    username: result.username && result.username !== '' ? result.username : undefined,
+  };
+}
