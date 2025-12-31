@@ -342,7 +342,42 @@ function generateCardImage(
           >
             Contribution Graph
           </div>
-          {contributionGraph}
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'row',
+              gap: imageConfig.squareGap,
+            }}
+          >
+            {data.contributionCalendar.weeks.map((week, weekIndex) => (
+              <div
+                key={weekIndex}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: imageConfig.squareGap,
+                }}
+              >
+                {week.contributionDays.map((day, dayIndex) => {
+                  const color = getFireColor(day.contributionCount, theme);
+                  const glow = hasGlow(day.contributionCount);
+
+                  return (
+                    <div
+                      key={`${weekIndex}-${dayIndex}`}
+                      style={{
+                        width: imageConfig.squareSize,
+                        height: imageConfig.squareSize,
+                        background: color,
+                        borderRadius: 2,
+                        boxShadow: glow ? generateGlow(color, imageConfig.squareSize) : 'none',
+                      }}
+                    />
+                  );
+                })}
+              </div>
+            ))}
+          </div>
         </div>
 
 
