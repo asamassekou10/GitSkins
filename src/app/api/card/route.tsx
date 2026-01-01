@@ -294,17 +294,16 @@ function generateCardImage(
             >
               <span>@{username}</span>
             </div>
-            {data.bio ? (
-              <div
-                style={{
-                  fontSize: 16,
-                  color: theme.secondaryText,
-                  opacity: 0.8,
-                }}
-              >
-                <span>{truncateBio(data.bio)}</span>
-              </div>
-            ) : null}
+            <div
+              style={{
+                fontSize: 16,
+                color: theme.secondaryText,
+                opacity: 0.8,
+                display: data.bio ? 'flex' : 'none',
+              }}
+            >
+              <span>{truncateBio(data.bio || '')}</span>
+            </div>
           </div>
           {/* Stats */}
           <div
