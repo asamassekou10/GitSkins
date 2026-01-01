@@ -47,13 +47,13 @@ function generateErrorImage(
         }}
       >
         <div style={{ fontSize: 48, marginBottom: 20, fontWeight: 'bold' }}>
-          {message}
+          <span>{message}</span>
         </div>
-        {subtitle && (
+        {subtitle ? (
           <div style={{ fontSize: 24, marginTop: 20, color: '#ff6b35' }}>
-            {subtitle}
+            <span>{subtitle}</span>
           </div>
-        )}
+        ) : null}
         <div
           style={{
             position: 'absolute',
@@ -64,7 +64,7 @@ function generateErrorImage(
             opacity: 0.7,
           }}
         >
-          {siteConfig.footerText}
+          <span>{siteConfig.footerText}</span>
         </div>
       </div>
     ),
@@ -145,10 +145,10 @@ function generateUserNotFoundImage(
         }}
       >
         <div style={{ fontSize: 72, marginBottom: 20, fontWeight: 'bold' }}>
-          SOUL NOT FOUND
+          <span>SOUL NOT FOUND</span>
         </div>
         <div style={{ fontSize: 32, color: theme.secondaryText }}>
-          @{username}
+          <span>@{username}</span>
         </div>
         <div
           style={{
@@ -159,7 +159,7 @@ function generateUserNotFoundImage(
             color: theme.secondaryText,
           }}
         >
-          {siteConfig.footerText}
+          <span>{siteConfig.footerText}</span>
         </div>
       </div>
     ),
@@ -340,7 +340,7 @@ function generateCardImage(
               fontWeight: 'bold',
             }}
           >
-            Contribution Graph
+            <span>Contribution Graph</span>
           </div>
           <div
             style={{
@@ -392,7 +392,7 @@ function generateCardImage(
             opacity: 0.7,
           }}
         >
-          {siteConfig.footerText}
+          <span>{siteConfig.footerText}</span>
         </div>
       </div>
     ),
