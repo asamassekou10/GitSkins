@@ -46,11 +46,11 @@ function generateErrorImage(
           border: '4px solid #30363d',
         }}
       >
-        <div style={{ fontSize: 48, marginBottom: 20, fontWeight: 'bold' }}>
+        <div style={{ fontSize: 48, marginBottom: 20, fontWeight: 'bold', display: 'flex' }}>
           <span>{message}</span>
         </div>
         {subtitle ? (
-          <div style={{ fontSize: 24, marginTop: 20, color: '#ff6b35' }}>
+          <div style={{ fontSize: 24, marginTop: 20, color: '#ff6b35', display: 'flex' }}>
             <span>{subtitle}</span>
           </div>
         ) : null}
@@ -62,6 +62,7 @@ function generateErrorImage(
             fontSize: 18,
             color: '#ff6b35',
             opacity: 0.7,
+            display: 'flex',
           }}
         >
           <span>{siteConfig.footerText}</span>
@@ -101,10 +102,10 @@ function generateMissingUsernameImage(theme: ReturnType<typeof getTheme>): NextR
           fontFamily: 'system-ui',
         }}
       >
-        <div style={{ fontSize: 48, marginBottom: 20 }}>
+        <div style={{ fontSize: 48, marginBottom: 20, display: 'flex' }}>
           <span>{siteConfig.name}</span>
         </div>
-        <div style={{ fontSize: 24, color: theme.secondaryText }}>
+        <div style={{ fontSize: 24, color: theme.secondaryText, display: 'flex' }}>
           <span>Add ?username=yourname to get started</span>
         </div>
       </div>
@@ -146,10 +147,10 @@ function generateUserNotFoundImage(
           border: `4px solid ${theme.borderColor}`,
         }}
       >
-        <div style={{ fontSize: 72, marginBottom: 20, fontWeight: 'bold' }}>
+        <div style={{ fontSize: 72, marginBottom: 20, fontWeight: 'bold', display: 'flex' }}>
           <span>SOUL NOT FOUND</span>
         </div>
-        <div style={{ fontSize: 32, color: theme.secondaryText }}>
+        <div style={{ fontSize: 32, color: theme.secondaryText, display: 'flex' }}>
           <span>@{username}</span>
         </div>
         <div
@@ -159,6 +160,7 @@ function generateUserNotFoundImage(
             right: 30,
             fontSize: 18,
             color: theme.secondaryText,
+            display: 'flex',
           }}
         >
           <span>{siteConfig.footerText}</span>
@@ -281,6 +283,7 @@ function generateCardImage(
                 fontWeight: 'bold',
                 color: theme.primaryText,
                 marginBottom: 8,
+                display: 'flex',
               }}
             >
               <span>{data.name || username}</span>
@@ -290,6 +293,7 @@ function generateCardImage(
                 fontSize: 20,
                 color: theme.secondaryText,
                 marginBottom: 8,
+                display: 'flex',
               }}
             >
               <span>@{username}</span>
@@ -339,6 +343,7 @@ function generateCardImage(
               color: theme.primaryText,
               marginBottom: 15,
               fontWeight: 'bold',
+              display: 'flex',
             }}
           >
             <span>Contribution Graph</span>
@@ -391,6 +396,7 @@ function generateCardImage(
             fontSize: 18,
             color: theme.secondaryText,
             opacity: 0.7,
+            display: 'flex',
           }}
         >
           <span>{siteConfig.footerText}</span>
