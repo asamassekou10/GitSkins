@@ -292,7 +292,7 @@ function generateCardImage(
             >
               @{username}
             </div>
-            {data.bio && (
+            {data.bio ? (
               <div
                 style={{
                   fontSize: 16,
@@ -302,7 +302,7 @@ function generateCardImage(
               >
                 {truncateBio(data.bio)}
               </div>
-            )}
+            ) : null}
           </div>
           {/* Stats */}
           <div
