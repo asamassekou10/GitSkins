@@ -101,9 +101,11 @@ function generateMissingUsernameImage(theme: ReturnType<typeof getTheme>): NextR
           fontFamily: 'system-ui',
         }}
       >
-        <div style={{ fontSize: 48, marginBottom: 20 }}>{siteConfig.name}</div>
+        <div style={{ fontSize: 48, marginBottom: 20 }}>
+          <span>{siteConfig.name}</span>
+        </div>
         <div style={{ fontSize: 24, color: theme.secondaryText }}>
-          Add ?username=yourname to get started
+          <span>Add ?username=yourname to get started</span>
         </div>
       </div>
     ),
@@ -281,7 +283,7 @@ function generateCardImage(
                 marginBottom: 8,
               }}
             >
-              {data.name || username}
+              <span>{data.name || username}</span>
             </div>
             <div
               style={{
@@ -290,7 +292,7 @@ function generateCardImage(
                 marginBottom: 8,
               }}
             >
-              @{username}
+              <span>@{username}</span>
             </div>
             {data.bio ? (
               <div
@@ -300,7 +302,7 @@ function generateCardImage(
                   opacity: 0.8,
                 }}
               >
-                {truncateBio(data.bio)}
+                <span>{truncateBio(data.bio)}</span>
               </div>
             ) : null}
           </div>
