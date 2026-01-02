@@ -78,7 +78,7 @@ export const securityConfig = {
     defaultSrc: ["'self'"],
     imgSrc: ["'self'", 'https:', 'data:'],
     styleSrc: ["'self'", "'unsafe-inline'"],
-    scriptSrc: ["'self'"],
+    scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
   },
   /** Allowed origins for CORS */
   allowedOrigins: process.env.ALLOWED_ORIGINS
