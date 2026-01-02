@@ -3,7 +3,7 @@
 # 🔥 HELL'S FORGE 🔥
 ### *Where Code Burns Eternal*
 
-![Profile Card](https://gitskins.vercel.app/api/premium-card?username=torvalds&theme=satan)
+![Profile Card](https://gitskins.com/api/premium-card?username=torvalds&theme=satan)
 
 </div>
 
@@ -13,9 +13,9 @@
 
 <div align="center">
 
-![Stats](https://gitskins.vercel.app/api/stats?username=torvalds&theme=satan)
+![Stats](https://gitskins.com/api/stats?username=torvalds&theme=satan)
 
-![Streak](https://gitskins.vercel.app/api/streak?username=torvalds&theme=satan)
+![Streak](https://gitskins.com/api/streak?username=torvalds&theme=satan)
 
 </div>
 
@@ -25,7 +25,7 @@
 
 <div align="center">
 
-![Languages](https://gitskins.vercel.app/api/languages?username=torvalds&theme=satan)
+![Languages](https://gitskins.com/api/languages?username=torvalds&theme=satan)
 
 </div>
 
@@ -64,7 +64,7 @@ npm run dev
 
 ## ⚔️ Forged By Dark Arts
 
-This cursed creation uses the **Satan theme** from [GitSkins](https://gitskins.vercel.app) - featuring:
+This cursed creation uses the **Satan theme** from [GitSkins](https://gitskins.com) - featuring:
 
 - **UnifrakturMaguntia Font** - Gothic blackletter typography
 - **Hellfire Gradients** - Deep crimson to obsidian black
@@ -129,6 +129,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 <sub>🔥 **GitSkins Satan Theme Example** 🔥</sub>
 <br>
-<sub>Customize your own at [gitskins.vercel.app](https://gitskins.vercel.app)</sub>
+<sub>Customize your own at [gitskins.vercel.app](https://gitskins.com)</sub>
 
 </div>
