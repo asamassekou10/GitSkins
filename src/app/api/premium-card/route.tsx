@@ -327,8 +327,8 @@ async function generatePremiumCardImage(
             {
               name: theme.font.family,
               data: fontData,
-              weight: theme.font.weight || 400,
-              style: 'normal',
+              weight: (theme.font.weight || 400) as 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900,
+              style: 'normal' as const,
             },
           ]
         : undefined,
@@ -369,6 +369,11 @@ export async function GET(request: NextRequest) {
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Invalid parameters';
       return generateErrorImage('Validation Error', errorMessage);
+    }
+
+    // Double-check username
+    if (!validatedParams.username) {
+      return generateErrorImage('Missing Username', 'Add ?username=yourname');
     }
 
     // Fetch GitHub data
