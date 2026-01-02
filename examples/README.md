@@ -66,7 +66,7 @@ Beautiful README examples showcasing all 5 premium GitSkins themes. Click on eac
 
 ## 🔗 Create Your Own
 
-Visit [gitskins.vercel.app](https://gitskins.vercel.app) to:
+Visit [gitskins.com](https://gitskins.com) to:
 - Preview all themes live
 - Generate custom widget URLs
 - Copy markdown snippets
@@ -78,6 +78,6 @@ Visit [gitskins.vercel.app](https://gitskins.vercel.app) to:
 
 **Made with ❤️ by GitSkins**
 
-[🏠 Home](https://gitskins.vercel.app) • [📖 Docs](../README.md) • [⭐ Star](https://github.com/yourusername/gitskins)
+[🏠 Home](https://gitskins.com) • [📖 Docs](../README.md) • [⭐ Star](https://github.com/yourusername/gitskins)
 
 </div>

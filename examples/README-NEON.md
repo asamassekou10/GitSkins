@@ -3,7 +3,7 @@
 # ⚡ CYBER NEXUS ⚡
 ### *> NEURAL INTERFACE ACTIVATED_*
 
-![Profile Card](https://gitskins.vercel.app/api/premium-card?username=kentcdodds&theme=neon)
+![Profile Card](https://gitskins.com/api/premium-card?username=kentcdodds&theme=neon)
 
 </div>
 
@@ -13,9 +13,9 @@
 
 <div align="center">
 
-![Stats](https://gitskins.vercel.app/api/stats?username=kentcdodds&theme=neon)
+![Stats](https://gitskins.com/api/stats?username=kentcdodds&theme=neon)
 
-![Streak](https://gitskins.vercel.app/api/streak?username=kentcdodds&theme=neon)
+![Streak](https://gitskins.com/api/streak?username=kentcdodds&theme=neon)
 
 </div>
 
@@ -25,7 +25,7 @@
 
 <div align="center">
 
-![Languages](https://gitskins.vercel.app/api/languages?username=kentcdodds&theme=neon)
+![Languages](https://gitskins.com/api/languages?username=kentcdodds&theme=neon)
 
 </div>
 
@@ -71,7 +71,7 @@ npm run dev
 
 ## 🎨 VISUAL INTERFACE
 
-Powered by the **Neon theme** from [GitSkins](https://gitskins.vercel.app):
+Powered by the **Neon theme** from [GitSkins](https://gitskins.com):
 
 - **JetBrains Mono Font** - Monospace perfection
 - **Cyan + Magenta** - Classic cyberpunk palette
@@ -140,6 +140,6 @@ MIT License - Full access granted. See [LICENSE](LICENSE) for terminal output.
 
 <sub>⚡ **GitSkins Neon Theme Example** ⚡</sub>
 <br>
-<sub>Jack in at [gitskins.vercel.app](https://gitskins.vercel.app)</sub>
+<sub>Jack in at [gitskins.com](https://gitskins.com)</sub>
 
 </div>

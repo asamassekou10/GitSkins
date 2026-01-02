@@ -3,7 +3,7 @@
 # 🍃 Garden of Code 🍃
 ### *where tranquility meets technology*
 
-![Profile Card](https://gitskins.vercel.app/api/premium-card?username=gaearon&theme=zen)
+![Profile Card](https://gitskins.com/api/premium-card?username=gaearon&theme=zen)
 
 </div>
 
@@ -13,9 +13,9 @@
 
 <div align="center">
 
-![Stats](https://gitskins.vercel.app/api/stats?username=gaearon&theme=zen)
+![Stats](https://gitskins.com/api/stats?username=gaearon&theme=zen)
 
-![Streak](https://gitskins.vercel.app/api/streak?username=gaearon&theme=zen)
+![Streak](https://gitskins.com/api/streak?username=gaearon&theme=zen)
 
 </div>
 
@@ -25,7 +25,7 @@
 
 <div align="center">
 
-![Languages](https://gitskins.vercel.app/api/languages?username=gaearon&theme=zen)
+![Languages](https://gitskins.com/api/languages?username=gaearon&theme=zen)
 
 </div>
 
@@ -66,7 +66,7 @@ npm run dev
 
 ## 🎨 Aesthetic
 
-Designed with the **Zen theme** from [GitSkins](https://gitskins.vercel.app):
+Designed with the **Zen theme** from [GitSkins](https://gitskins.com):
 
 - **Lora Font** - Elegant serif typography
 - **Rice Paper Background** - Warm, natural tones
@@ -130,6 +130,6 @@ MIT License - shared freely with all.
 
 <sub>🍃 **GitSkins Zen Theme Example** 🍃</sub>
 <br>
-<sub>Find your peace at [gitskins.vercel.app](https://gitskins.vercel.app)</sub>
+<sub>Find your peace at [gitskins.com](https://gitskins.com)</sub>
 
 </div>

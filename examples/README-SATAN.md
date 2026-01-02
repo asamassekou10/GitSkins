@@ -129,6 +129,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 <sub>🔥 **GitSkins Satan Theme Example** 🔥</sub>
 <br>
-<sub>Customize your own at [gitskins.vercel.app](https://gitskins.com)</sub>
+<sub>Customize your own at [gitskins.com](https://gitskins.com)</sub>
 
 </div>

@@ -3,7 +3,7 @@
 # 🦇 Night Coder 🦇
 ### `// immortal code from the shadows`
 
-![Profile Card](https://gitskins.vercel.app/api/premium-card?username=sindresorhus&theme=dracula)
+![Profile Card](https://gitskins.com/api/premium-card?username=sindresorhus&theme=dracula)
 
 </div>
 
@@ -13,9 +13,9 @@
 
 <div align="center">
 
-![Stats](https://gitskins.vercel.app/api/stats?username=sindresorhus&theme=dracula)
+![Stats](https://gitskins.com/api/stats?username=sindresorhus&theme=dracula)
 
-![Streak](https://gitskins.vercel.app/api/streak?username=sindresorhus&theme=dracula)
+![Streak](https://gitskins.com/api/streak?username=sindresorhus&theme=dracula)
 
 </div>
 
@@ -25,7 +25,7 @@
 
 <div align="center">
 
-![Languages](https://gitskins.vercel.app/api/languages?username=sindresorhus&theme=dracula)
+![Languages](https://gitskins.com/api/languages?username=sindresorhus&theme=dracula)
 
 </div>
 
@@ -88,7 +88,7 @@ npm run dev
 
 ## 🎨 The Dracula Aesthetic
 
-Powered by the legendary **Dracula theme** from [GitSkins](https://gitskins.vercel.app):
+Powered by the legendary **Dracula theme** from [GitSkins](https://gitskins.com):
 
 - **Fira Code Font** - Monospace with ligatures for the discerning vampire
 - **Purple + Pink + Green** - The iconic Dracula color scheme
@@ -161,6 +161,6 @@ MIT License - Even immortals share their knowledge. See [LICENSE](LICENSE).
 
 <sub>🦇 **GitSkins Dracula Theme Example** 🦇</sub>
 <br>
-<sub>Embrace the night at [gitskins.vercel.app](https://gitskins.vercel.app)</sub>
+<sub>Embrace the night at [gitskins.com](https://gitskins.com)</sub>
 
 </div>

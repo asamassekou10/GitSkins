@@ -3,7 +3,7 @@
 # Professional Portfolio
 ### Clean, modern, and to the point
 
-![Profile Card](https://gitskins.vercel.app/api/premium-card?username=tj&theme=github-dark)
+![Profile Card](https://gitskins.com/api/premium-card?username=tj&theme=github-dark)
 
 </div>
 
@@ -13,9 +13,9 @@
 
 <div align="center">
 
-![Stats](https://gitskins.vercel.app/api/stats?username=tj&theme=github-dark)
+![Stats](https://gitskins.com/api/stats?username=tj&theme=github-dark)
 
-![Streak](https://gitskins.vercel.app/api/streak?username=tj&theme=github-dark)
+![Streak](https://gitskins.com/api/streak?username=tj&theme=github-dark)
 
 </div>
 
@@ -25,7 +25,7 @@
 
 <div align="center">
 
-![Languages](https://gitskins.vercel.app/api/languages?username=tj&theme=github-dark)
+![Languages](https://gitskins.com/api/languages?username=tj&theme=github-dark)
 
 </div>
 
@@ -67,7 +67,7 @@ npm run dev
 
 ## Theme
 
-Built with the **GitHub Dark theme** from [GitSkins](https://gitskins.vercel.app):
+Built with the **GitHub Dark theme** from [GitSkins](https://gitskins.com):
 
 - **Inter Font** - GitHub's official font
 - **Authentic Colors** - Exact GitHub dark palette (#0d1117)
@@ -121,6 +121,6 @@ For questions or collaboration opportunities, please reach out via [email](mailt
 
 <sub>**GitSkins GitHub Dark Theme Example**</sub>
 <br>
-<sub>Create yours at [gitskins.vercel.app](https://gitskins.vercel.app)</sub>
+<sub>Create yours at [gitskins.com](https://gitskins.com)</sub>
 
 </div>
