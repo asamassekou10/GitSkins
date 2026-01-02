@@ -18,7 +18,7 @@ const themes = [
 ];
 
 const widgets = [
-  { id: 'card', name: 'Profile Card', path: '/api/card', description: 'Full profile with contribution graph' },
+  { id: 'card', name: 'Profile Card', path: '/api/premium-card', description: 'Full profile with contribution graph' },
   { id: 'stats', name: 'Stats', path: '/api/stats', description: 'Stars, contributions, repos, followers' },
   { id: 'languages', name: 'Languages', path: '/api/languages', description: 'Top 5 programming languages' },
   { id: 'streak', name: 'Streak', path: '/api/streak', description: 'Current streak and total days' },
