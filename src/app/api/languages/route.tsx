@@ -60,7 +60,7 @@ function generateErrorImage(message: string, theme: Theme): NextResponse {
 }
 
 /**
- * Generate languages widget image
+ * Generate languages widget image with premium design
  */
 function generateLanguagesImage(
   languages: LanguageStat[],
@@ -72,26 +72,61 @@ function generateLanguagesImage(
         style={{
           width,
           height,
-          background: theme.bg,
+          background: `linear-gradient(135deg, ${theme.bg} 0%, ${theme.cardBg} 100%)`,
           display: 'flex',
           flexDirection: 'column',
           fontFamily: 'system-ui',
-          border: `2px solid ${theme.borderColor}`,
-          borderRadius: 12,
+          border: `1px solid ${theme.borderColor}`,
+          borderRadius: 16,
           padding: 20,
+          position: 'relative',
+          overflow: 'hidden',
         }}
       >
+        {/* Decorative element */}
+        <div
+          style={{
+            position: 'absolute',
+            bottom: -30,
+            left: -30,
+            width: 100,
+            height: 100,
+            background: `radial-gradient(circle, ${theme.accentColor}10 0%, transparent 70%)`,
+            display: 'flex',
+          }}
+        />
+
         {/* Title */}
         <div
           style={{
-            fontSize: 16,
-            fontWeight: 'bold',
-            color: theme.primaryText,
-            marginBottom: 12,
             display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginBottom: 16,
+            gap: 8,
           }}
         >
-          <span>Top Languages</span>
+          <div
+            style={{
+              width: 4,
+              height: 20,
+              background: theme.accentColor,
+              borderRadius: 2,
+              display: 'flex',
+            }}
+          />
+          <div
+            style={{
+              fontSize: 14,
+              fontWeight: 600,
+              color: theme.secondaryText,
+              letterSpacing: 1,
+              textTransform: 'uppercase',
+              display: 'flex',
+            }}
+          >
+            <span>Top Languages</span>
+          </div>
         </div>
 
         {/* Language bars */}
@@ -99,7 +134,7 @@ function generateLanguagesImage(
           style={{
             display: 'flex',
             flexDirection: 'column',
-            gap: 8,
+            gap: 12,
             flex: 1,
           }}
         >
@@ -111,39 +146,59 @@ function generateLanguagesImage(
                   display: 'flex',
                   flexDirection: 'row',
                   alignItems: 'center',
-                  gap: 10,
+                  gap: 12,
                 }}
               >
-                {/* Language name */}
+                {/* Language dot and name */}
                 <div
                   style={{
-                    width: 90,
-                    fontSize: 12,
-                    color: theme.secondaryText,
+                    width: 100,
                     display: 'flex',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 8,
                   }}
                 >
-                  <span>{lang.name}</span>
+                  <div
+                    style={{
+                      width: 10,
+                      height: 10,
+                      borderRadius: '50%',
+                      backgroundColor: lang.color,
+                      boxShadow: `0 0 8px ${lang.color}60`,
+                      display: 'flex',
+                    }}
+                  />
+                  <div
+                    style={{
+                      fontSize: 12,
+                      fontWeight: 500,
+                      color: theme.primaryText,
+                      display: 'flex',
+                    }}
+                  >
+                    <span>{lang.name}</span>
+                  </div>
                 </div>
 
                 {/* Progress bar background */}
                 <div
                   style={{
                     flex: 1,
-                    height: 10,
+                    height: 8,
                     backgroundColor: theme.progressBg,
-                    borderRadius: 5,
+                    borderRadius: 4,
                     display: 'flex',
                     overflow: 'hidden',
                   }}
                 >
-                  {/* Progress bar fill */}
+                  {/* Progress bar fill with gradient */}
                   <div
                     style={{
                       width: `${lang.percentage}%`,
                       height: '100%',
-                      backgroundColor: lang.color,
-                      borderRadius: 5,
+                      background: `linear-gradient(90deg, ${lang.color} 0%, ${lang.color}cc 100%)`,
+                      borderRadius: 4,
                       display: 'flex',
                     }}
                   />
@@ -152,8 +207,9 @@ function generateLanguagesImage(
                 {/* Percentage */}
                 <div
                   style={{
-                    width: 40,
+                    width: 45,
                     fontSize: 12,
+                    fontWeight: 600,
                     color: theme.secondaryText,
                     textAlign: 'right',
                     display: 'flex',
@@ -177,6 +233,7 @@ function generateLanguagesImage(
                 style={{
                   fontSize: 14,
                   color: theme.secondaryText,
+                  opacity: 0.7,
                   display: 'flex',
                 }}
               >

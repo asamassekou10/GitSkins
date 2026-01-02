@@ -60,7 +60,7 @@ function generateErrorImage(message: string, theme: Theme): NextResponse {
 }
 
 /**
- * Generate stats widget image
+ * Generate stats widget image with premium design
  */
 function generateStatsImage(stats: CompactStats, theme: Theme): NextResponse {
   const imageResponse = new ImageResponse(
@@ -69,140 +69,301 @@ function generateStatsImage(stats: CompactStats, theme: Theme): NextResponse {
         style={{
           width,
           height,
-          background: theme.bg,
+          background: `linear-gradient(135deg, ${theme.bg} 0%, ${theme.cardBg} 100%)`,
           display: 'flex',
           flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
           fontFamily: 'system-ui',
-          border: `2px solid ${theme.borderColor}`,
-          borderRadius: 12,
-          padding: 20,
+          border: `1px solid ${theme.borderColor}`,
+          borderRadius: 16,
+          padding: 24,
+          position: 'relative',
+          overflow: 'hidden',
         }}
       >
-        {/* Main stat - Stars */}
+        {/* Subtle glow effect in corner */}
         <div
           style={{
+            position: 'absolute',
+            top: -50,
+            right: -50,
+            width: 150,
+            height: 150,
+            background: `radial-gradient(circle, ${theme.accentColor}15 0%, transparent 70%)`,
             display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            marginBottom: 20,
           }}
-        >
-          <div
-            style={{
-              fontSize: 36,
-              fontWeight: 'bold',
-              color: theme.primaryText,
-              display: 'flex',
-            }}
-          >
-            <span>{stats.totalStars.toLocaleString()}</span>
-          </div>
-          <div
-            style={{
-              fontSize: 14,
-              color: theme.secondaryText,
-              display: 'flex',
-            }}
-          >
-            <span>Total Stars</span>
-          </div>
-        </div>
+        />
 
-        {/* Secondary stats row */}
+        {/* Title */}
         <div
           style={{
             display: 'flex',
             flexDirection: 'row',
-            gap: 30,
-            justifyContent: 'center',
+            alignItems: 'center',
+            marginBottom: 20,
+            gap: 8,
           }}
         >
-          {/* Contributions */}
+          <div
+            style={{
+              width: 4,
+              height: 20,
+              background: theme.accentColor,
+              borderRadius: 2,
+              display: 'flex',
+            }}
+          />
+          <div
+            style={{
+              fontSize: 14,
+              fontWeight: 600,
+              color: theme.secondaryText,
+              letterSpacing: 1,
+              textTransform: 'uppercase',
+              display: 'flex',
+            }}
+          >
+            <span>GitHub Stats</span>
+          </div>
+        </div>
+
+        {/* Stats Grid - 2x2 layout */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            flex: 1,
+            gap: 16,
+          }}
+        >
+          {/* Top Row */}
           <div
             style={{
               display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
+              flexDirection: 'row',
+              gap: 16,
+              flex: 1,
             }}
           >
+            {/* Stars - Featured */}
             <div
               style={{
-                fontSize: 24,
-                fontWeight: 'bold',
-                color: theme.primaryText,
+                flex: 1,
+                background: theme.cardBg,
+                borderRadius: 12,
+                padding: 16,
                 display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                border: `1px solid ${theme.borderColor}`,
               }}
             >
-              <span>{stats.totalContributions.toLocaleString()}</span>
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 8,
+                  marginBottom: 4,
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: 18,
+                    display: 'flex',
+                  }}
+                >
+                  <span>⭐</span>
+                </div>
+                <div
+                  style={{
+                    fontSize: 28,
+                    fontWeight: 700,
+                    color: theme.primaryText,
+                    display: 'flex',
+                  }}
+                >
+                  <span>{stats.totalStars.toLocaleString()}</span>
+                </div>
+              </div>
+              <div
+                style={{
+                  fontSize: 11,
+                  color: theme.secondaryText,
+                  opacity: 0.8,
+                  display: 'flex',
+                }}
+              >
+                <span>Total Stars Earned</span>
+              </div>
             </div>
+
+            {/* Contributions */}
             <div
               style={{
-                fontSize: 12,
-                color: theme.secondaryText,
+                flex: 1,
+                background: theme.cardBg,
+                borderRadius: 12,
+                padding: 16,
                 display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                border: `1px solid ${theme.borderColor}`,
               }}
             >
-              <span>Contributions</span>
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 8,
+                  marginBottom: 4,
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: 18,
+                    display: 'flex',
+                  }}
+                >
+                  <span>🔥</span>
+                </div>
+                <div
+                  style={{
+                    fontSize: 28,
+                    fontWeight: 700,
+                    color: theme.primaryText,
+                    display: 'flex',
+                  }}
+                >
+                  <span>{stats.totalContributions.toLocaleString()}</span>
+                </div>
+              </div>
+              <div
+                style={{
+                  fontSize: 11,
+                  color: theme.secondaryText,
+                  opacity: 0.8,
+                  display: 'flex',
+                }}
+              >
+                <span>Contributions This Year</span>
+              </div>
             </div>
           </div>
 
-          {/* Repos */}
+          {/* Bottom Row */}
           <div
             style={{
               display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
+              flexDirection: 'row',
+              gap: 16,
+              flex: 1,
             }}
           >
+            {/* Repos */}
             <div
               style={{
-                fontSize: 24,
-                fontWeight: 'bold',
-                color: theme.primaryText,
+                flex: 1,
+                background: theme.cardBg,
+                borderRadius: 12,
+                padding: 16,
                 display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                border: `1px solid ${theme.borderColor}`,
               }}
             >
-              <span>{stats.totalRepos.toLocaleString()}</span>
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 8,
+                  marginBottom: 4,
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: 18,
+                    display: 'flex',
+                  }}
+                >
+                  <span>📦</span>
+                </div>
+                <div
+                  style={{
+                    fontSize: 28,
+                    fontWeight: 700,
+                    color: theme.primaryText,
+                    display: 'flex',
+                  }}
+                >
+                  <span>{stats.totalRepos.toLocaleString()}</span>
+                </div>
+              </div>
+              <div
+                style={{
+                  fontSize: 11,
+                  color: theme.secondaryText,
+                  opacity: 0.8,
+                  display: 'flex',
+                }}
+              >
+                <span>Public Repositories</span>
+              </div>
             </div>
-            <div
-              style={{
-                fontSize: 12,
-                color: theme.secondaryText,
-                display: 'flex',
-              }}
-            >
-              <span>Repos</span>
-            </div>
-          </div>
 
-          {/* Followers */}
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-            }}
-          >
+            {/* Followers */}
             <div
               style={{
-                fontSize: 24,
-                fontWeight: 'bold',
-                color: theme.primaryText,
+                flex: 1,
+                background: theme.cardBg,
+                borderRadius: 12,
+                padding: 16,
                 display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                border: `1px solid ${theme.borderColor}`,
               }}
             >
-              <span>{stats.followers.toLocaleString()}</span>
-            </div>
-            <div
-              style={{
-                fontSize: 12,
-                color: theme.secondaryText,
-                display: 'flex',
-              }}
-            >
-              <span>Followers</span>
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 8,
+                  marginBottom: 4,
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: 18,
+                    display: 'flex',
+                  }}
+                >
+                  <span>👥</span>
+                </div>
+                <div
+                  style={{
+                    fontSize: 28,
+                    fontWeight: 700,
+                    color: theme.primaryText,
+                    display: 'flex',
+                  }}
+                >
+                  <span>{stats.followers.toLocaleString()}</span>
+                </div>
+              </div>
+              <div
+                style={{
+                  fontSize: 11,
+                  color: theme.secondaryText,
+                  opacity: 0.8,
+                  display: 'flex',
+                }}
+              >
+                <span>Followers</span>
+              </div>
             </div>
           </div>
         </div>

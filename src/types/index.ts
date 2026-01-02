@@ -39,7 +39,7 @@ export interface Theme {
 /**
  * Theme name identifier (must match registry keys)
  */
-export type ThemeName = 'satan' | 'neon' | 'zen';
+export type ThemeName = 'satan' | 'neon' | 'zen' | 'github-dark' | 'dracula';
 
 /**
  * Single day contribution data from GitHub API

@@ -9,6 +9,8 @@ import type { Theme, ThemeName } from '@/types';
 import { satanTheme } from './satan';
 import { neonTheme } from './neon';
 import { zenTheme } from './zen';
+import { githubDarkTheme } from './github-dark';
+import { draculaTheme } from './dracula';
 
 /**
  * Theme registry map
@@ -18,6 +20,8 @@ const themes: Record<ThemeName, Theme> = {
   satan: satanTheme,
   neon: neonTheme,
   zen: zenTheme,
+  'github-dark': githubDarkTheme,
+  dracula: draculaTheme,
 } as const;
 
 /**

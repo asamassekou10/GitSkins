@@ -103,11 +103,11 @@ export const rateLimitConfig = {
  */
 export const widgetConfig = {
   /** Stats widget dimensions */
-  stats: { width: 400, height: 200 },
+  stats: { width: 495, height: 195 },
   /** Languages widget dimensions */
-  languages: { width: 400, height: 200 },
+  languages: { width: 350, height: 220 },
   /** Streak widget dimensions */
-  streak: { width: 400, height: 150 },
+  streak: { width: 495, height: 150 },
   /** Repo card widget dimensions */
-  repos: { width: 400, height: 150 },
+  repos: { width: 400, height: 140 },
 } as const;

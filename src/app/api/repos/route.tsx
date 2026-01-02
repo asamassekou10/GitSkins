@@ -82,7 +82,7 @@ function generateErrorImage(message: string, theme: Theme): NextResponse {
 }
 
 /**
- * Generate repo widget image
+ * Generate repo widget image with premium design
  */
 function generateRepoImage(repo: RepoData, theme: Theme): NextResponse {
   const imageResponse = new ImageResponse(
@@ -91,26 +91,58 @@ function generateRepoImage(repo: RepoData, theme: Theme): NextResponse {
         style={{
           width,
           height,
-          background: theme.bg,
+          background: `linear-gradient(135deg, ${theme.bg} 0%, ${theme.cardBg} 100%)`,
           display: 'flex',
           flexDirection: 'column',
           fontFamily: 'system-ui',
-          border: `2px solid ${theme.borderColor}`,
-          borderRadius: 12,
-          padding: 16,
+          border: `1px solid ${theme.borderColor}`,
+          borderRadius: 16,
+          padding: 18,
           justifyContent: 'space-between',
+          position: 'relative',
+          overflow: 'hidden',
         }}
       >
-        {/* Repo name */}
+        {/* Decorative corner glow */}
         <div
           style={{
-            fontSize: 18,
-            fontWeight: 'bold',
-            color: theme.primaryText,
+            position: 'absolute',
+            top: -40,
+            right: -40,
+            width: 100,
+            height: 100,
+            background: `radial-gradient(circle, ${theme.accentColor}12 0%, transparent 70%)`,
             display: 'flex',
           }}
+        />
+
+        {/* Top section: Repo icon and name */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 10,
+          }}
         >
-          <span>{repo.name}</span>
+          <div
+            style={{
+              fontSize: 18,
+              display: 'flex',
+            }}
+          >
+            <span>📁</span>
+          </div>
+          <div
+            style={{
+              fontSize: 18,
+              fontWeight: 700,
+              color: theme.primaryText,
+              display: 'flex',
+            }}
+          >
+            <span>{repo.name}</span>
+          </div>
         </div>
 
         {/* Description */}
@@ -118,12 +150,15 @@ function generateRepoImage(repo: RepoData, theme: Theme): NextResponse {
           style={{
             fontSize: 12,
             color: theme.secondaryText,
+            lineHeight: 1.4,
             flex: 1,
             display: 'flex',
             alignItems: 'center',
+            paddingTop: 8,
+            paddingBottom: 8,
           }}
         >
-          <span>{truncateDescription(repo.description) || 'No description'}</span>
+          <span>{truncateDescription(repo.description, 80) || 'No description available'}</span>
         </div>
 
         {/* Stats row */}
@@ -132,7 +167,9 @@ function generateRepoImage(repo: RepoData, theme: Theme): NextResponse {
             display: 'flex',
             flexDirection: 'row',
             alignItems: 'center',
-            gap: 16,
+            gap: 20,
+            paddingTop: 10,
+            borderTop: `1px solid ${theme.borderColor}`,
           }}
         >
           {/* Stars */}
@@ -141,27 +178,26 @@ function generateRepoImage(repo: RepoData, theme: Theme): NextResponse {
               display: 'flex',
               flexDirection: 'row',
               alignItems: 'center',
-              gap: 4,
+              gap: 6,
             }}
           >
             <div
               style={{
                 fontSize: 14,
-                color: theme.secondaryText,
+                display: 'flex',
+              }}
+            >
+              <span>⭐</span>
+            </div>
+            <div
+              style={{
+                fontSize: 13,
+                fontWeight: 600,
+                color: theme.primaryText,
                 display: 'flex',
               }}
             >
               <span>{formatNumber(repo.stargazerCount)}</span>
-            </div>
-            <div
-              style={{
-                fontSize: 12,
-                color: theme.secondaryText,
-                opacity: 0.7,
-                display: 'flex',
-              }}
-            >
-              <span>stars</span>
             </div>
           </div>
 
@@ -171,27 +207,26 @@ function generateRepoImage(repo: RepoData, theme: Theme): NextResponse {
               display: 'flex',
               flexDirection: 'row',
               alignItems: 'center',
-              gap: 4,
+              gap: 6,
             }}
           >
             <div
               style={{
                 fontSize: 14,
-                color: theme.secondaryText,
+                display: 'flex',
+              }}
+            >
+              <span>🔀</span>
+            </div>
+            <div
+              style={{
+                fontSize: 13,
+                fontWeight: 600,
+                color: theme.primaryText,
                 display: 'flex',
               }}
             >
               <span>{formatNumber(repo.forkCount)}</span>
-            </div>
-            <div
-              style={{
-                fontSize: 12,
-                color: theme.secondaryText,
-                opacity: 0.7,
-                display: 'flex',
-              }}
-            >
-              <span>forks</span>
             </div>
           </div>
 
@@ -202,22 +237,28 @@ function generateRepoImage(repo: RepoData, theme: Theme): NextResponse {
                 display: 'flex',
                 flexDirection: 'row',
                 alignItems: 'center',
-                gap: 4,
+                gap: 6,
                 marginLeft: 'auto',
+                background: theme.cardBg,
+                padding: '4px 10px',
+                borderRadius: 12,
+                border: `1px solid ${theme.borderColor}`,
               }}
             >
               <div
                 style={{
-                  width: 10,
-                  height: 10,
+                  width: 8,
+                  height: 8,
                   borderRadius: '50%',
                   backgroundColor: repo.primaryLanguage.color || '#808080',
+                  boxShadow: `0 0 6px ${repo.primaryLanguage.color || '#808080'}60`,
                   display: 'flex',
                 }}
               />
               <div
                 style={{
-                  fontSize: 12,
+                  fontSize: 11,
+                  fontWeight: 500,
                   color: theme.secondaryText,
                   display: 'flex',
                 }}

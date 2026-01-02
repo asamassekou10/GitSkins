@@ -232,7 +232,7 @@ function generateContributionGraph(
 }
 
 /**
- * Generate success card image
+ * Generate success card image with premium design
  */
 function generateCardImage(
   data: GitHubData,
@@ -245,54 +245,100 @@ function generateCardImage(
         style={{
           width: imageConfig.width,
           height: imageConfig.height,
-          background: theme.bg,
+          background: `linear-gradient(145deg, ${theme.bg} 0%, ${theme.cardBg} 50%, ${theme.bg} 100%)`,
           display: 'flex',
           flexDirection: 'column',
           fontFamily: 'system-ui',
-          border: `4px solid ${theme.borderColor}`,
+          border: `2px solid ${theme.borderColor}`,
+          borderRadius: 20,
           position: 'relative',
+          overflow: 'hidden',
         }}
       >
+        {/* Decorative gradient orbs */}
+        <div
+          style={{
+            position: 'absolute',
+            top: -100,
+            right: -100,
+            width: 300,
+            height: 300,
+            background: `radial-gradient(circle, ${theme.accentColor}15 0%, transparent 70%)`,
+            display: 'flex',
+          }}
+        />
+        <div
+          style={{
+            position: 'absolute',
+            bottom: -80,
+            left: -80,
+            width: 250,
+            height: 250,
+            background: `radial-gradient(circle, ${theme.accentColor}10 0%, transparent 70%)`,
+            display: 'flex',
+          }}
+        />
+
         {/* Header Section */}
         <div
           style={{
             display: 'flex',
             flexDirection: 'row',
             alignItems: 'center',
-            padding: '30px 50px',
-            borderBottom: `2px solid ${theme.borderColor}`,
+            padding: '28px 40px',
+            borderBottom: `1px solid ${theme.borderColor}`,
           }}
         >
-          {/* Avatar */}
-          <img
-            src={data.avatarUrl}
-            alt={username}
-            width="80"
-            height="80"
+          {/* Avatar with glow */}
+          <div
             style={{
-              borderRadius: '50%',
-              border: `3px solid ${theme.accentColor}`,
-              marginRight: 20,
+              display: 'flex',
+              position: 'relative',
             }}
-          />
+          >
+            <div
+              style={{
+                position: 'absolute',
+                top: -5,
+                left: -5,
+                width: 90,
+                height: 90,
+                background: `radial-gradient(circle, ${theme.accentColor}30 0%, transparent 70%)`,
+                borderRadius: '50%',
+                display: 'flex',
+              }}
+            />
+            <img
+              src={data.avatarUrl}
+              alt={username}
+              width="80"
+              height="80"
+              style={{
+                borderRadius: '50%',
+                border: `3px solid ${theme.accentColor}`,
+                marginRight: 24,
+              }}
+            />
+          </div>
           {/* User Info */}
           <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
             <div
               style={{
-                fontSize: 36,
-                fontWeight: 'bold',
+                fontSize: 32,
+                fontWeight: 700,
                 color: theme.primaryText,
-                marginBottom: 8,
+                marginBottom: 6,
                 display: 'flex',
+                letterSpacing: -0.5,
               }}
             >
               <span>{data.name || username}</span>
             </div>
             <div
               style={{
-                fontSize: 20,
+                fontSize: 18,
                 color: theme.secondaryText,
-                marginBottom: 8,
+                marginBottom: 6,
                 display: 'flex',
               }}
             >
@@ -300,31 +346,64 @@ function generateCardImage(
             </div>
             <div
               style={{
-                fontSize: 16,
+                fontSize: 14,
                 color: theme.secondaryText,
-                opacity: 0.8,
+                opacity: 0.75,
                 display: data.bio ? 'flex' : 'none',
               }}
             >
               <span>{truncateBio(data.bio || '')}</span>
             </div>
           </div>
-          {/* Stats */}
+          {/* Stats Cards */}
           <div
             style={{
               display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'flex-end',
-              gap: 10,
+              flexDirection: 'row',
+              gap: 16,
             }}
           >
-            <div style={{ fontSize: 24, color: theme.primaryText, display: 'flex' }}>
-              <span style={{ color: theme.secondaryText }}>⭐ </span>
-              <span>{data.totalStars.toLocaleString()} stars</span>
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                background: theme.cardBg,
+                padding: '12px 20px',
+                borderRadius: 12,
+                border: `1px solid ${theme.borderColor}`,
+              }}
+            >
+              <div style={{ fontSize: 14, display: 'flex', marginBottom: 4 }}>
+                <span>⭐</span>
+              </div>
+              <div style={{ fontSize: 22, fontWeight: 700, color: theme.primaryText, display: 'flex' }}>
+                <span>{data.totalStars.toLocaleString()}</span>
+              </div>
+              <div style={{ fontSize: 10, color: theme.secondaryText, opacity: 0.8, display: 'flex' }}>
+                <span>stars</span>
+              </div>
             </div>
-            <div style={{ fontSize: 24, color: theme.primaryText, display: 'flex' }}>
-              <span style={{ color: theme.secondaryText }}>🔥 </span>
-              <span>{data.totalContributions.toLocaleString()} contributions</span>
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                background: theme.cardBg,
+                padding: '12px 20px',
+                borderRadius: 12,
+                border: `1px solid ${theme.borderColor}`,
+              }}
+            >
+              <div style={{ fontSize: 14, display: 'flex', marginBottom: 4 }}>
+                <span>🔥</span>
+              </div>
+              <div style={{ fontSize: 22, fontWeight: 700, color: theme.primaryText, display: 'flex' }}>
+                <span>{data.totalContributions.toLocaleString()}</span>
+              </div>
+              <div style={{ fontSize: 10, color: theme.secondaryText, opacity: 0.8, display: 'flex' }}>
+                <span>contributions</span>
+              </div>
             </div>
           </div>
         </div>
@@ -332,27 +411,52 @@ function generateCardImage(
         {/* Contribution Graph */}
         <div
           style={{
-            padding: '30px 50px',
+            padding: '24px 40px',
             display: 'flex',
             flexDirection: 'column',
+            flex: 1,
           }}
         >
           <div
             style={{
-              fontSize: 24,
-              color: theme.primaryText,
-              marginBottom: 15,
-              fontWeight: 'bold',
               display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginBottom: 16,
+              gap: 8,
             }}
           >
-            <span>Contribution Graph</span>
+            <div
+              style={{
+                width: 4,
+                height: 18,
+                background: theme.accentColor,
+                borderRadius: 2,
+                display: 'flex',
+              }}
+            />
+            <div
+              style={{
+                fontSize: 14,
+                color: theme.secondaryText,
+                fontWeight: 600,
+                letterSpacing: 0.5,
+                textTransform: 'uppercase',
+                display: 'flex',
+              }}
+            >
+              <span>Contribution Activity</span>
+            </div>
           </div>
           <div
             style={{
               display: 'flex',
               flexDirection: 'row',
               gap: imageConfig.squareGap,
+              background: theme.cardBg,
+              padding: 16,
+              borderRadius: 12,
+              border: `1px solid ${theme.borderColor}`,
             }}
           >
             {data.contributionCalendar.weeks.map((week, weekIndex) => (
@@ -375,7 +479,7 @@ function generateCardImage(
                         width: imageConfig.squareSize,
                         height: imageConfig.squareSize,
                         background: color,
-                        borderRadius: 2,
+                        borderRadius: 3,
                         boxShadow: glow ? generateGlow(color, imageConfig.squareSize) : 'none',
                       }}
                     />
@@ -386,16 +490,15 @@ function generateCardImage(
           </div>
         </div>
 
-
         {/* Footer */}
         <div
           style={{
             position: 'absolute',
-            bottom: 20,
-            right: 30,
-            fontSize: 18,
+            bottom: 16,
+            right: 24,
+            fontSize: 12,
             color: theme.secondaryText,
-            opacity: 0.7,
+            opacity: 0.5,
             display: 'flex',
           }}
         >

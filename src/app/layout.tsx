@@ -1,8 +1,14 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'GitSkins - GitHub Profile Card Generator',
-  description: 'Generate dynamic, custom-themed GitHub profile cards',
+  title: 'GitSkins - Beautiful GitHub README Widgets',
+  description: 'Generate dynamic, custom-themed widgets for your GitHub profile. Stats, languages, streaks, and more.',
+  keywords: 'GitHub, README, widgets, profile, stats, themes, developer',
+  openGraph: {
+    title: 'GitSkins - Beautiful GitHub README Widgets',
+    description: 'Generate dynamic, custom-themed widgets for your GitHub profile.',
+    type: 'website',
+  },
 };
 
 export default function RootLayout({
@@ -12,6 +18,32 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <style>{`
+          * {
+            box-sizing: border-box;
+          }
+          body {
+            margin: 0;
+            padding: 0;
+            background: #0a0a0a;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+          }
+          ::selection {
+            background: #ff450040;
+          }
+          input:focus {
+            border-color: #ff4500 !important;
+          }
+          button:hover {
+            opacity: 0.9;
+          }
+          img {
+            max-width: 100%;
+          }
+        `}</style>
+      </head>
       <body>{children}</body>
     </html>
   );

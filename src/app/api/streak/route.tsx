@@ -60,7 +60,7 @@ function generateErrorImage(message: string, theme: Theme): NextResponse {
 }
 
 /**
- * Generate streak widget image
+ * Generate streak widget image with premium design
  */
 function generateStreakImage(streak: StreakData, theme: Theme): NextResponse {
   const imageResponse = new ImageResponse(
@@ -69,39 +69,85 @@ function generateStreakImage(streak: StreakData, theme: Theme): NextResponse {
         style={{
           width,
           height,
-          background: theme.bg,
+          background: `linear-gradient(135deg, ${theme.bg} 0%, ${theme.cardBg} 100%)`,
           display: 'flex',
           flexDirection: 'row',
           alignItems: 'center',
-          justifyContent: 'space-around',
+          justifyContent: 'center',
           fontFamily: 'system-ui',
-          border: `2px solid ${theme.borderColor}`,
-          borderRadius: 12,
-          padding: 20,
+          border: `1px solid ${theme.borderColor}`,
+          borderRadius: 16,
+          padding: 24,
+          gap: 24,
+          position: 'relative',
+          overflow: 'hidden',
         }}
       >
-        {/* Current Streak */}
+        {/* Fire glow background for current streak */}
         <div
           style={{
+            position: 'absolute',
+            left: 60,
+            top: '50%',
+            width: 80,
+            height: 80,
+            background: `radial-gradient(circle, ${theme.streakColors.fire}20 0%, transparent 70%)`,
+            transform: 'translateY(-50%)',
+            display: 'flex',
+          }}
+        />
+
+        {/* Current Streak - Featured */}
+        <div
+          style={{
+            flex: 1,
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
+            justifyContent: 'center',
+            background: theme.cardBg,
+            borderRadius: 12,
+            padding: 16,
+            border: `1px solid ${theme.borderColor}`,
+            height: '100%',
           }}
         >
           <div
             style={{
-              fontSize: 32,
-              fontWeight: 'bold',
-              color: theme.streakColors.fire,
               display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 8,
+              marginBottom: 6,
             }}
           >
-            <span>{streak.currentStreak}</span>
+            <div
+              style={{
+                fontSize: 24,
+                display: 'flex',
+              }}
+            >
+              <span>🔥</span>
+            </div>
+            <div
+              style={{
+                fontSize: 36,
+                fontWeight: 700,
+                color: theme.streakColors.fire,
+                display: 'flex',
+                textShadow: `0 0 20px ${theme.streakColors.fire}40`,
+              }}
+            >
+              <span>{streak.currentStreak}</span>
+            </div>
           </div>
           <div
             style={{
-              fontSize: 12,
+              fontSize: 11,
               color: theme.secondaryText,
+              fontWeight: 500,
+              textTransform: 'uppercase',
+              letterSpacing: 0.5,
               display: 'flex',
             }}
           >
@@ -112,25 +158,53 @@ function generateStreakImage(streak: StreakData, theme: Theme): NextResponse {
         {/* Longest Streak */}
         <div
           style={{
+            flex: 1,
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
+            justifyContent: 'center',
+            background: theme.cardBg,
+            borderRadius: 12,
+            padding: 16,
+            border: `1px solid ${theme.borderColor}`,
+            height: '100%',
           }}
         >
           <div
             style={{
-              fontSize: 32,
-              fontWeight: 'bold',
-              color: theme.streakColors.trophy,
               display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 8,
+              marginBottom: 6,
             }}
           >
-            <span>{streak.longestStreak}</span>
+            <div
+              style={{
+                fontSize: 24,
+                display: 'flex',
+              }}
+            >
+              <span>🏆</span>
+            </div>
+            <div
+              style={{
+                fontSize: 36,
+                fontWeight: 700,
+                color: theme.streakColors.trophy,
+                display: 'flex',
+              }}
+            >
+              <span>{streak.longestStreak}</span>
+            </div>
           </div>
           <div
             style={{
-              fontSize: 12,
+              fontSize: 11,
               color: theme.secondaryText,
+              fontWeight: 500,
+              textTransform: 'uppercase',
+              letterSpacing: 0.5,
               display: 'flex',
             }}
           >
@@ -141,25 +215,53 @@ function generateStreakImage(streak: StreakData, theme: Theme): NextResponse {
         {/* Total Active Days */}
         <div
           style={{
+            flex: 1,
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
+            justifyContent: 'center',
+            background: theme.cardBg,
+            borderRadius: 12,
+            padding: 16,
+            border: `1px solid ${theme.borderColor}`,
+            height: '100%',
           }}
         >
           <div
             style={{
-              fontSize: 32,
-              fontWeight: 'bold',
-              color: theme.streakColors.calendar,
               display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 8,
+              marginBottom: 6,
             }}
           >
-            <span>{streak.totalActiveDays}</span>
+            <div
+              style={{
+                fontSize: 24,
+                display: 'flex',
+              }}
+            >
+              <span>📅</span>
+            </div>
+            <div
+              style={{
+                fontSize: 36,
+                fontWeight: 700,
+                color: theme.streakColors.calendar,
+                display: 'flex',
+              }}
+            >
+              <span>{streak.totalActiveDays}</span>
+            </div>
           </div>
           <div
             style={{
-              fontSize: 12,
+              fontSize: 11,
               color: theme.secondaryText,
+              fontWeight: 500,
+              textTransform: 'uppercase',
+              letterSpacing: 0.5,
               display: 'flex',
             }}
           >
