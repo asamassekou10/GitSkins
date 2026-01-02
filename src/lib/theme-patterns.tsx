@@ -357,7 +357,7 @@ export function ZenBackground({ theme }: { theme: Theme }) {
         style={{
           position: 'absolute',
           bottom: 110,
-          left: 'calc(40% + 10px)',
+          left: '42%',
           width: 160,
           height: 160,
           border: `1px solid ${theme.accentColor}15`,
@@ -407,7 +407,7 @@ export function GitHubDarkBackground({ theme }: { theme: Theme }) {
         }}
       />
 
-      {/* Octagon shapes (simplified Octocat reference) */}
+      {/* Octagon shapes (simplified Octocat reference) - using rounded square instead of clipPath */}
       <div
         style={{
           position: 'absolute',
@@ -416,7 +416,8 @@ export function GitHubDarkBackground({ theme }: { theme: Theme }) {
           width: 80,
           height: 80,
           background: `${theme.accentColor}15`,
-          clipPath: 'polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)',
+          borderRadius: 12,
+          transform: 'rotate(45deg)',
           display: 'flex',
         }}
       />
