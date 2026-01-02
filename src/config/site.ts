@@ -1,6 +1,6 @@
 /**
  * GitSkins - Site Configuration
- * 
+ *
  * Centralized configuration for URLs, metadata, and default settings.
  * All environment-dependent values should be defined here.
  */
@@ -37,12 +37,12 @@ export const apiConfig = {
  * Image generation constants
  */
 export const imageConfig = {
-  /** Canvas width in pixels */
-  width: 1200,
-  /** Canvas height in pixels */
-  height: 600,
+  /** Canvas width in pixels - 2x for better quality */
+  width: 1600,
+  /** Canvas height in pixels - 2x for better quality */
+  height: 800,
   /** Contribution square size in pixels */
-  squareSize: 10,
+  squareSize: 11,
   /** Gap between squares in pixels */
   squareGap: 3,
   /** Graph starting X position */
@@ -99,15 +99,15 @@ export const rateLimitConfig = {
 } as const;
 
 /**
- * Widget dimensions configuration
+ * Widget dimensions configuration - Higher resolution for better quality
  */
 export const widgetConfig = {
   /** Stats widget dimensions */
-  stats: { width: 495, height: 195 },
+  stats: { width: 600, height: 240 },
   /** Languages widget dimensions */
-  languages: { width: 350, height: 220 },
+  languages: { width: 450, height: 280 },
   /** Streak widget dimensions */
-  streak: { width: 495, height: 150 },
+  streak: { width: 600, height: 200 },
   /** Repo card widget dimensions */
-  repos: { width: 400, height: 140 },
+  repos: { width: 500, height: 180 },
 } as const;
