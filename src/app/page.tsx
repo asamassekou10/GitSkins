@@ -145,7 +145,7 @@ export default function Home() {
           >
             <img
               key={`preview-${username}-${selectedTheme}`}
-              src={`/api/card?username=${username}&theme=${selectedTheme}`}
+              src={`/api/premium-card?username=${username}&theme=${selectedTheme}`}
               alt="GitSkins Preview"
               style={{
                 width: '100%',
