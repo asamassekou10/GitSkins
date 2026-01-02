@@ -12,8 +12,6 @@ import { fetchGitHubData } from '@/lib/github';
 import { getTheme } from '@/registry/themes';
 import {
   getFireColor,
-  hasGlow,
-  generateGlow,
   truncateBio,
 } from '@/lib/image-generator';
 import { imageConfig, apiConfig, siteConfig } from '@/config/site';
@@ -181,56 +179,6 @@ function generateUserNotFoundImage(
       'Cache-Control': `public, max-age=${apiConfig.cacheMaxAge}, s-maxage=${apiConfig.cacheSMaxAge}`,
     },
   });
-}
-
-/**
- * Generate contribution graph using Flex layout
- * 
- * Structure: Flex Row of Weeks, each Week is a Flex Column of 7 Day Squares
- * This approach works better with Satori's limited CSS support
- */
-function generateContributionGraph(
-  weeks: Array<{ contributionDays: Array<{ contributionCount: number; date: string }> }>,
-  theme: ReturnType<typeof getTheme>
-): JSX.Element {
-  return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'row',
-        gap: imageConfig.squareGap,
-      }}
-    >
-      {weeks.map((week, weekIndex) => (
-        <div
-          key={weekIndex}
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: imageConfig.squareGap,
-          }}
-        >
-          {week.contributionDays.map((day, dayIndex) => {
-            const color = getFireColor(day.contributionCount, theme);
-            const glow = hasGlow(day.contributionCount);
-
-            return (
-              <div
-                key={`${weekIndex}-${dayIndex}`}
-                style={{
-                  width: imageConfig.squareSize,
-                  height: imageConfig.squareSize,
-                  background: color,
-                  borderRadius: 2,
-                  boxShadow: glow ? generateGlow(color, imageConfig.squareSize) : 'none',
-                }}
-              />
-            );
-          })}
-        </div>
-      ))}
-    </div>
-  );
 }
 
 /**
@@ -478,7 +426,6 @@ function generateCardImage(
               >
                 {week.contributionDays.map((day, dayIndex) => {
                   const color = getFireColor(day.contributionCount, theme);
-                  const glow = hasGlow(day.contributionCount);
 
                   return (
                     <div
@@ -488,7 +435,6 @@ function generateCardImage(
                         height: imageConfig.squareSize,
                         background: color,
                         borderRadius: 3,
-                        boxShadow: glow ? generateGlow(color, imageConfig.squareSize) : 'none',
                       }}
                     />
                   );
