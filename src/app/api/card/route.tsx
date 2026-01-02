@@ -17,7 +17,9 @@ import {
   truncateBio,
 } from '@/lib/image-generator';
 import { imageConfig, apiConfig, siteConfig } from '@/config/site';
-import type { GitHubData } from '@/types';
+import { getThemeIcons } from '@/lib/theme-icons';
+import { getThemeBackground } from '@/lib/theme-patterns';
+import type { GitHubData, ThemeName } from '@/types';
 
 export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
@@ -237,8 +239,11 @@ function generateContributionGraph(
 function generateCardImage(
   data: GitHubData,
   username: string,
-  theme: ReturnType<typeof getTheme>
+  theme: ReturnType<typeof getTheme>,
+  themeName: ThemeName
 ): NextResponse {
+  const themeIcons = getThemeIcons(themeName);
+  const iconColor = theme.iconColor || theme.accentColor;
   const imageResponse = new ImageResponse(
     (
       <div
@@ -255,6 +260,9 @@ function generateCardImage(
           overflow: 'hidden',
         }}
       >
+        {/* Theme-specific background patterns */}
+        {getThemeBackground(themeName, theme)}
+
         {/* Decorative gradient orbs */}
         <div
           style={{
@@ -374,8 +382,8 @@ function generateCardImage(
                 border: `1px solid ${theme.borderColor}`,
               }}
             >
-              <div style={{ fontSize: 14, display: 'flex', marginBottom: 4 }}>
-                <span>⭐</span>
+              <div style={{ display: 'flex', marginBottom: 4 }}>
+                {themeIcons.star({ size: 20, color: iconColor })}
               </div>
               <div style={{ fontSize: 22, fontWeight: 700, color: theme.primaryText, display: 'flex' }}>
                 <span>{data.totalStars.toLocaleString()}</span>
@@ -395,8 +403,8 @@ function generateCardImage(
                 border: `1px solid ${theme.borderColor}`,
               }}
             >
-              <div style={{ fontSize: 14, display: 'flex', marginBottom: 4 }}>
-                <span>🔥</span>
+              <div style={{ display: 'flex', marginBottom: 4 }}>
+                {themeIcons.fire({ size: 20, color: iconColor })}
               </div>
               <div style={{ fontSize: 22, fontWeight: 700, color: theme.primaryText, display: 'flex' }}>
                 <span>{data.totalContributions.toLocaleString()}</span>
@@ -586,7 +594,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Generate and return card image
-    return generateCardImage(data, validatedParams.username, theme);
+    return generateCardImage(data, validatedParams.username, theme, validatedParams.theme || 'satan');
   } catch (error) {
     // Unexpected error - always return image, never JSON
     console.error('Unexpected error generating card:', error);

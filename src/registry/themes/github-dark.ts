@@ -30,4 +30,5 @@ export const githubDarkTheme: Theme = {
     trophy: '#e3b341',  // GitHub gold for achievements
     calendar: '#26a641', // GitHub green for activity
   },
+  iconColor: '#58a6ff', // GitHub blue for icons
 } as const;

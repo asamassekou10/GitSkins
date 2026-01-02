@@ -21,4 +21,5 @@ export const neonTheme: Theme = {
     trophy: '#ff00ff',
     calendar: '#00d9ff',
   },
+  iconColor: '#00ffff',
 } as const;

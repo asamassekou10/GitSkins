@@ -30,4 +30,5 @@ export const draculaTheme: Theme = {
     trophy: '#f1fa8c', // Dracula yellow
     calendar: '#50fa7b', // Dracula green
   },
+  iconColor: '#bd93f9', // Dracula purple
 } as const;

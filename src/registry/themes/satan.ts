@@ -21,4 +21,5 @@ export const satanTheme: Theme = {
     trophy: '#ffd700',
     calendar: '#ff6b35',
   },
+  iconColor: '#ff4500',
 } as const;

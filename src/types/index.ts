@@ -34,6 +34,8 @@ export interface Theme {
     /** Total days calendar icon */
     calendar: string;
   };
+  /** Icon color for theme-specific custom icons */
+  iconColor?: string;
 }
 
 /**

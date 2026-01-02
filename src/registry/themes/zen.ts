@@ -21,4 +21,5 @@ export const zenTheme: Theme = {
     trophy: '#8b7355',
     calendar: '#4a7c2a',
   },
+  iconColor: '#4a7c2a',
 } as const;
