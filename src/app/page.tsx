@@ -31,12 +31,33 @@ export default function Home() {
 
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://gitskins.com';
 
-  const copyToClipboard = (widget: typeof widgets[0]) => {
-    const url = `${baseUrl}${widget.path}?username=${username}&theme=${selectedTheme}`;
-    const markdown = `![${widget.name}](${url})`;
-    navigator.clipboard.writeText(markdown);
-    setCopied(widget.id);
-    setTimeout(() => setCopied(null), 2000);
+  const copyToClipboard = async (widget: typeof widgets[0]) => {
+    try {
+      const url = `${baseUrl}${widget.path}?username=${username}&theme=${selectedTheme}`;
+      const markdown = `![${widget.name}](${url})`;
+      await navigator.clipboard.writeText(markdown);
+      setCopied(widget.id);
+      setTimeout(() => setCopied(null), 2000);
+    } catch (error) {
+      console.error('Failed to copy to clipboard:', error);
+      // Fallback for older browsers
+      const url = `${baseUrl}${widget.path}?username=${username}&theme=${selectedTheme}`;
+      const markdown = `![${widget.name}](${url})`;
+      const textArea = document.createElement('textarea');
+      textArea.value = markdown;
+      textArea.style.position = 'fixed';
+      textArea.style.opacity = '0';
+      document.body.appendChild(textArea);
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        setCopied(widget.id);
+        setTimeout(() => setCopied(null), 2000);
+      } catch (err) {
+        console.error('Fallback copy failed:', err);
+      }
+      document.body.removeChild(textArea);
+    }
   };
 
   return (
@@ -123,6 +144,7 @@ export default function Home() {
             }}
           >
             <img
+              key={`preview-${username}-${selectedTheme}`}
               src={`/api/card?username=${username}&theme=${selectedTheme}`}
               alt="GitSkins Preview"
               style={{
@@ -243,6 +265,7 @@ export default function Home() {
                 {themes.map((theme) => (
                   <button
                     key={theme.id}
+                    type="button"
                     onClick={() => setSelectedTheme(theme.id)}
                     style={{
                       padding: '12px 20px',
@@ -313,6 +336,7 @@ export default function Home() {
                     </p>
                   </div>
                   <button
+                    type="button"
                     onClick={() => copyToClipboard(widget)}
                     style={{
                       padding: '10px 16px',
@@ -341,6 +365,7 @@ export default function Home() {
                   }}
                 >
                   <img
+                    key={`${widget.id}-${username}-${selectedTheme}`}
                     src={`${widget.path}?username=${username}&theme=${selectedTheme}`}
                     alt={`${widget.name} preview`}
                     style={{
