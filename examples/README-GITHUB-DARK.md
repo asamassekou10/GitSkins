@@ -3,7 +3,7 @@
 # Professional Portfolio
 ### Clean, modern, and to the point
 
-![Profile Card](https://gitskins.com/api/premium-card?username=tj&theme=github-dark)
+![Profile Card](https://gitskins.com/api/premium-card?username=tj&theme=github-dark&v=1)
 
 </div>
 
@@ -13,9 +13,9 @@
 
 <div align="center">
 
-![Stats](https://gitskins.com/api/stats?username=tj&theme=github-dark)
+![Stats](https://gitskins.com/api/stats?username=tj&theme=github-dark&v=1)
 
-![Streak](https://gitskins.com/api/streak?username=tj&theme=github-dark)
+![Streak](https://gitskins.com/api/streak?username=tj&theme=github-dark&v=1)
 
 </div>
 
@@ -25,7 +25,7 @@
 
 <div align="center">
 
-![Languages](https://gitskins.com/api/languages?username=tj&theme=github-dark)
+![Languages](https://gitskins.com/api/languages?username=tj&theme=github-dark&v=1)
 
 </div>
 

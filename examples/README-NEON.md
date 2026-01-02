@@ -3,7 +3,7 @@
 # ⚡ CYBER NEXUS ⚡
 ### *> NEURAL INTERFACE ACTIVATED_*
 
-![Profile Card](https://gitskins.com/api/premium-card?username=kentcdodds&theme=neon)
+![Profile Card](https://gitskins.com/api/premium-card?username=kentcdodds&theme=neon&v=1)
 
 </div>
 
@@ -13,9 +13,9 @@
 
 <div align="center">
 
-![Stats](https://gitskins.com/api/stats?username=kentcdodds&theme=neon)
+![Stats](https://gitskins.com/api/stats?username=kentcdodds&theme=neon&v=1)
 
-![Streak](https://gitskins.com/api/streak?username=kentcdodds&theme=neon)
+![Streak](https://gitskins.com/api/streak?username=kentcdodds&theme=neon&v=1)
 
 </div>
 
@@ -25,7 +25,7 @@
 
 <div align="center">
 
-![Languages](https://gitskins.com/api/languages?username=kentcdodds&theme=neon)
+![Languages](https://gitskins.com/api/languages?username=kentcdodds&theme=neon&v=1)
 
 </div>
 

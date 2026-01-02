@@ -3,7 +3,7 @@
 # 🦇 Night Coder 🦇
 ### `// immortal code from the shadows`
 
-![Profile Card](https://gitskins.com/api/premium-card?username=sindresorhus&theme=dracula)
+![Profile Card](https://gitskins.com/api/premium-card?username=sindresorhus&theme=dracula&v=1)
 
 </div>
 
@@ -13,9 +13,9 @@
 
 <div align="center">
 
-![Stats](https://gitskins.com/api/stats?username=sindresorhus&theme=dracula)
+![Stats](https://gitskins.com/api/stats?username=sindresorhus&theme=dracula&v=1)
 
-![Streak](https://gitskins.com/api/streak?username=sindresorhus&theme=dracula)
+![Streak](https://gitskins.com/api/streak?username=sindresorhus&theme=dracula&v=1)
 
 </div>
 
@@ -25,7 +25,7 @@
 
 <div align="center">
 
-![Languages](https://gitskins.com/api/languages?username=sindresorhus&theme=dracula)
+![Languages](https://gitskins.com/api/languages?username=sindresorhus&theme=dracula&v=1)
 
 </div>
 

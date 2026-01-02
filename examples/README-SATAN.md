@@ -3,7 +3,7 @@
 # 🔥 HELL'S FORGE 🔥
 ### *Where Code Burns Eternal*
 
-![Profile Card](https://gitskins.com/api/premium-card?username=torvalds&theme=satan)
+![Profile Card](https://gitskins.com/api/premium-card?username=torvalds&theme=satan&v=1)
 
 </div>
 
@@ -13,9 +13,9 @@
 
 <div align="center">
 
-![Stats](https://gitskins.com/api/stats?username=torvalds&theme=satan)
+![Stats](https://gitskins.com/api/stats?username=torvalds&theme=satan&v=1)
 
-![Streak](https://gitskins.com/api/streak?username=torvalds&theme=satan)
+![Streak](https://gitskins.com/api/streak?username=torvalds&theme=satan&v=1)
 
 </div>
 
@@ -25,7 +25,7 @@
 
 <div align="center">
 
-![Languages](https://gitskins.com/api/languages?username=torvalds&theme=satan)
+![Languages](https://gitskins.com/api/languages?username=torvalds&theme=satan&v=1)
 
 </div>
 

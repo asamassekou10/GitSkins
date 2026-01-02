@@ -3,7 +3,7 @@
 # 🍃 Garden of Code 🍃
 ### *where tranquility meets technology*
 
-![Profile Card](https://gitskins.com/api/premium-card?username=gaearon&theme=zen)
+![Profile Card](https://gitskins.com/api/premium-card?username=gaearon&theme=zen&v=1)
 
 </div>
 
@@ -13,9 +13,9 @@
 
 <div align="center">
 
-![Stats](https://gitskins.com/api/stats?username=gaearon&theme=zen)
+![Stats](https://gitskins.com/api/stats?username=gaearon&theme=zen&v=1)
 
-![Streak](https://gitskins.com/api/streak?username=gaearon&theme=zen)
+![Streak](https://gitskins.com/api/streak?username=gaearon&theme=zen&v=1)
 
 </div>
 
@@ -25,7 +25,7 @@
 
 <div align="center">
 
-![Languages](https://gitskins.com/api/languages?username=gaearon&theme=zen)
+![Languages](https://gitskins.com/api/languages?username=gaearon&theme=zen&v=1)
 
 </div>
 

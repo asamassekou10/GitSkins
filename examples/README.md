@@ -62,6 +62,8 @@ Beautiful README examples showcasing all 5 premium GitSkins themes. Click on eac
 4. **Customize the content** to match your project
 5. **Paste into your README.md**
 
+> **💡 Tip**: All examples include `&v=1` to avoid GitHub's image caching. If images don't show up immediately, wait 5-10 minutes or increment the version (`&v=2`, `&v=3`). [Read more about caching](../GITHUB_CACHING.md)
+
 ---
 
 ## 🔗 Create Your Own
