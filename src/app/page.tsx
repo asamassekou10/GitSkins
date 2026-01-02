@@ -157,6 +157,181 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Interactive Showcase Section */}
+      <section
+        style={{
+          padding: '80px 20px',
+          background: 'linear-gradient(180deg, #0a0a0a 0%, #0d0d0d 100%)',
+          position: 'relative',
+          overflow: 'hidden',
+        }}
+      >
+        {/* Gradient orb */}
+        <div
+          style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '600px',
+            height: '600px',
+            background: 'radial-gradient(circle, rgba(138, 43, 226, 0.1) 0%, transparent 70%)',
+            pointerEvents: 'none',
+          }}
+        />
+
+        <div
+          style={{
+            maxWidth: '1200px',
+            margin: '0 auto',
+            position: 'relative',
+            textAlign: 'center',
+          }}
+        >
+          <div
+            style={{
+              display: 'inline-block',
+              padding: '8px 20px',
+              background: 'linear-gradient(135deg, rgba(138, 43, 226, 0.2) 0%, rgba(255, 20, 147, 0.2) 100%)',
+              border: '1px solid rgba(138, 43, 226, 0.3)',
+              borderRadius: '24px',
+              fontSize: '14px',
+              fontWeight: 600,
+              color: '#c084fc',
+              marginBottom: '24px',
+            }}
+          >
+            NEW
+          </div>
+
+          <h2
+            style={{
+              fontSize: 'clamp(32px, 6vw, 56px)',
+              fontWeight: 800,
+              margin: 0,
+              marginBottom: '20px',
+              letterSpacing: '-1px',
+              background: 'linear-gradient(135deg, #a855f7 0%, #ec4899 50%, #f97316 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+            }}
+          >
+            Interactive Showcase
+          </h2>
+
+          <p
+            style={{
+              fontSize: 'clamp(16px, 2.5vw, 20px)',
+              color: '#aaa',
+              margin: '0 auto',
+              marginBottom: '40px',
+              maxWidth: '700px',
+              lineHeight: 1.6,
+            }}
+          >
+            Experience your GitHub profile with <strong style={{ color: '#c084fc' }}>full animations</strong>,{' '}
+            <strong style={{ color: '#ec4899' }}>interactive effects</strong>, and{' '}
+            <strong style={{ color: '#f97316' }}>3D transitions</strong> - no GitHub restrictions!
+          </p>
+
+          {/* Feature highlights */}
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+              gap: '20px',
+              maxWidth: '900px',
+              margin: '0 auto',
+              marginBottom: '40px',
+            }}
+          >
+            {[
+              { icon: '✨', label: 'Animated Gradients' },
+              { icon: '🎬', label: '3D Card Flips' },
+              { icon: '🎨', label: 'Theme Morphing' },
+              { icon: '💫', label: 'Glow Effects' },
+            ].map((feature) => (
+              <div
+                key={feature.label}
+                style={{
+                  padding: '16px',
+                  background: 'rgba(255, 255, 255, 0.03)',
+                  borderRadius: '12px',
+                  border: '1px solid rgba(255, 255, 255, 0.05)',
+                }}
+              >
+                <div style={{ fontSize: '24px', marginBottom: '8px' }}>{feature.icon}</div>
+                <div style={{ fontSize: '14px', color: '#888' }}>{feature.label}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* CTA Button */}
+          <a
+            href={`/showcase/@${username}`}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '12px',
+              padding: '18px 40px',
+              fontSize: '18px',
+              fontWeight: 700,
+              background: 'linear-gradient(135deg, #a855f7 0%, #ec4899 100%)',
+              border: 'none',
+              borderRadius: '16px',
+              color: '#fff',
+              textDecoration: 'none',
+              cursor: 'pointer',
+              transition: 'transform 0.2s, box-shadow 0.2s',
+              boxShadow: '0 10px 40px rgba(168, 85, 247, 0.3)',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = '0 15px 50px rgba(168, 85, 247, 0.4)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 10px 40px rgba(168, 85, 247, 0.3)';
+            }}
+          >
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <polygon points="10 8 16 12 10 16 10 8" />
+            </svg>
+            View Interactive Showcase
+          </a>
+
+          <p
+            style={{
+              fontSize: '14px',
+              color: '#666',
+              margin: 0,
+              marginTop: '20px',
+            }}
+          >
+            Try it: <code style={{
+              background: '#1a1a1a',
+              padding: '4px 12px',
+              borderRadius: '6px',
+              color: '#a855f7',
+              fontSize: '13px',
+            }}>
+              gitskins.com/showcase/@{username}
+            </code>
+          </p>
+        </div>
+      </section>
+
       {/* Generator Section */}
       <section
         style={{
