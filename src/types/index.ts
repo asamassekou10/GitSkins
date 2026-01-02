@@ -21,6 +21,19 @@ export interface Theme {
   accentColor: string;
   /** Fire colors for contribution graph: [low, medium, high] intensity */
   fireColors: [string, string, string];
+  /** Secondary background for widget cards */
+  cardBg: string;
+  /** Progress bar background color */
+  progressBg: string;
+  /** Colors for streak widget icons */
+  streakColors: {
+    /** Current streak fire icon */
+    fire: string;
+    /** Longest streak trophy icon */
+    trophy: string;
+    /** Total days calendar icon */
+    calendar: string;
+  };
 }
 
 /**
@@ -98,6 +111,79 @@ export interface CardQueryParams {
   username: string;
   /** Theme name (optional, defaults to 'satan') */
   theme?: ThemeName;
+}
+
+/**
+ * Streak statistics calculated from contribution data
+ */
+export interface StreakData {
+  /** Current consecutive days with contributions */
+  currentStreak: number;
+  /** Longest consecutive days with contributions */
+  longestStreak: number;
+  /** Total days with at least one contribution */
+  totalActiveDays: number;
+}
+
+/**
+ * Aggregated language statistics
+ */
+export interface LanguageStat {
+  /** Language name (e.g., "TypeScript") */
+  name: string;
+  /** GitHub-assigned color hex code */
+  color: string;
+  /** Percentage of total code */
+  percentage: number;
+  /** Total bytes of code */
+  bytes: number;
+}
+
+/**
+ * Compact user stats for stats widget
+ */
+export interface CompactStats {
+  /** Total stars across all repositories */
+  totalStars: number;
+  /** Total contributions this year */
+  totalContributions: number;
+  /** Total public repositories */
+  totalRepos: number;
+  /** Total followers */
+  followers: number;
+}
+
+/**
+ * Repository data for repo widget
+ */
+export interface RepoData {
+  /** Repository name */
+  name: string;
+  /** Repository description */
+  description: string | null;
+  /** Number of stars */
+  stargazerCount: number;
+  /** Number of forks */
+  forkCount: number;
+  /** Primary language */
+  primaryLanguage: {
+    name: string;
+    color: string;
+  } | null;
+}
+
+/**
+ * Extended GitHub data with additional fields for widgets
+ */
+export interface ExtendedGitHubData extends GitHubData {
+  /** Streak statistics */
+  streak: StreakData;
+  /** Aggregated language statistics */
+  languages: LanguageStat[];
+  /** Compact stats */
+  stats: CompactStats;
+  /** Pinned/featured repositories */
+  pinnedRepos: RepoData[];
 }
 
 /**

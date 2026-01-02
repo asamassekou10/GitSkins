@@ -64,7 +64,7 @@ export type CardQueryParams = z.infer<typeof cardQuerySchema>;
 
 /**
  * Validate and parse query parameters
- * 
+ *
  * @param params - Raw query parameters from Next.js
  * @returns Validated and parsed parameters
  * @throws ZodError if validation fails
@@ -74,18 +74,92 @@ export function validateCardQuery(params: {
   theme?: string | null;
 }): CardQueryParams {
   // Normalize empty strings to undefined
-  const normalizedUsername = params.username && params.username.trim() !== '' 
-    ? params.username.trim() 
-    : undefined;
-  
+  const normalizedUsername =
+    params.username && params.username.trim() !== ''
+      ? params.username.trim()
+      : undefined;
+
   const result = cardQuerySchema.parse({
     username: normalizedUsername,
     theme: params.theme || undefined,
   });
-  
+
   // Return with username as undefined if empty, so API can handle it
   return {
     ...result,
     username: result.username && result.username !== '' ? result.username : undefined,
   };
+}
+
+/**
+ * Widget query schema (used by stats, languages, streak widgets)
+ * Username is required for widgets
+ */
+export const widgetQuerySchema = z.object({
+  username: usernameSchema,
+  theme: themeSchema,
+});
+
+export type WidgetQueryParams = z.infer<typeof widgetQuerySchema>;
+
+/**
+ * Validate widget query parameters
+ *
+ * @param params - Raw query parameters
+ * @returns Validated parameters
+ * @throws ZodError if validation fails
+ */
+export function validateWidgetQuery(params: {
+  username: string | null;
+  theme?: string | null;
+}): WidgetQueryParams {
+  if (!params.username || params.username.trim() === '') {
+    throw new Error('Username is required');
+  }
+
+  return widgetQuerySchema.parse({
+    username: params.username.trim(),
+    theme: params.theme || undefined,
+  });
+}
+
+/**
+ * Repo widget query schema
+ * Requires both username and repo name
+ */
+export const repoQuerySchema = z.object({
+  username: usernameSchema,
+  repo: z
+    .string()
+    .min(1, 'Repository name is required')
+    .max(100, 'Repository name must be 100 characters or less'),
+  theme: themeSchema,
+});
+
+export type RepoQueryParams = z.infer<typeof repoQuerySchema>;
+
+/**
+ * Validate repo widget query parameters
+ *
+ * @param params - Raw query parameters
+ * @returns Validated parameters
+ * @throws ZodError if validation fails
+ */
+export function validateRepoQuery(params: {
+  username: string | null;
+  repo: string | null;
+  theme?: string | null;
+}): RepoQueryParams {
+  if (!params.username || params.username.trim() === '') {
+    throw new Error('Username is required');
+  }
+  if (!params.repo || params.repo.trim() === '') {
+    throw new Error('Repository name is required');
+  }
+
+  return repoQuerySchema.parse({
+    username: params.username.trim(),
+    repo: params.repo.trim(),
+    theme: params.theme || undefined,
+  });
 }

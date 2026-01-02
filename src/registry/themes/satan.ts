@@ -14,4 +14,11 @@ export const satanTheme: Theme = {
   secondaryText: '#ff6b35',
   accentColor: '#ff4500',
   fireColors: ['#3d0000', '#990000', '#ff4500'],
+  cardBg: '#161b22',
+  progressBg: '#21262d',
+  streakColors: {
+    fire: '#ff4500',
+    trophy: '#ffd700',
+    calendar: '#ff6b35',
+  },
 } as const;

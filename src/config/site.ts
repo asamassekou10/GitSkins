@@ -97,3 +97,17 @@ export const rateLimitConfig = {
   /** Enable rate limiting (set to false to disable) */
   enabled: process.env.ENABLE_RATE_LIMITING === 'true',
 } as const;
+
+/**
+ * Widget dimensions configuration
+ */
+export const widgetConfig = {
+  /** Stats widget dimensions */
+  stats: { width: 400, height: 200 },
+  /** Languages widget dimensions */
+  languages: { width: 400, height: 200 },
+  /** Streak widget dimensions */
+  streak: { width: 400, height: 150 },
+  /** Repo card widget dimensions */
+  repos: { width: 400, height: 150 },
+} as const;

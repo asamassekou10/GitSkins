@@ -11,8 +11,13 @@ import type {
   ContributionDay,
   ContributionWeek,
   Language,
+  ExtendedGitHubData,
+  LanguageStat,
+  CompactStats,
+  RepoData,
 } from '@/types';
 import { githubConfig } from '@/config/site';
+import { calculateStreaks } from './streak-calculator';
 
 /**
  * Initialize Octokit client
@@ -133,7 +138,7 @@ function transformResponse(
 
 /**
  * Fetch GitHub user data via GraphQL API
- * 
+ *
  * @param username - GitHub username (validated)
  * @returns GitHubData object or null if user not found
  * @throws Error for API failures (rate limits, network errors, etc.)
@@ -183,5 +188,320 @@ export async function fetchGitHubData(
 
     // Re-throw unexpected errors
     throw error;
+  }
+}
+
+/**
+ * Extended GraphQL query for widget data
+ * Includes languages, followers, and pinned repos
+ */
+const EXTENDED_GRAPHQL_QUERY = `
+  query($username: String!) {
+    user(login: $username) {
+      name
+      bio
+      avatarUrl
+      followers {
+        totalCount
+      }
+      repositories(first: 100, ownerAffiliations: OWNER, isFork: false, orderBy: {field: STARGAZERS, direction: DESC}) {
+        totalCount
+        nodes {
+          stargazers {
+            totalCount
+          }
+          languages(first: 10, orderBy: {field: SIZE, direction: DESC}) {
+            edges {
+              size
+              node {
+                name
+                color
+              }
+            }
+          }
+        }
+      }
+      pinnedItems(first: 6, types: REPOSITORY) {
+        nodes {
+          ... on Repository {
+            name
+            description
+            stargazerCount
+            forkCount
+            primaryLanguage {
+              name
+              color
+            }
+          }
+        }
+      }
+      contributionsCollection {
+        contributionCalendar {
+          totalContributions
+          weeks {
+            contributionDays {
+              contributionCount
+              date
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
+/**
+ * Extended GraphQL response type
+ */
+interface ExtendedGraphQLResponse {
+  user: {
+    name: string | null;
+    bio: string | null;
+    avatarUrl: string;
+    followers: {
+      totalCount: number;
+    };
+    repositories: {
+      totalCount: number;
+      nodes: Array<{
+        stargazers: {
+          totalCount: number;
+        };
+        languages: {
+          edges: Array<{
+            size: number;
+            node: {
+              name: string;
+              color: string | null;
+            };
+          }>;
+        };
+      }>;
+    };
+    pinnedItems: {
+      nodes: Array<{
+        name: string;
+        description: string | null;
+        stargazerCount: number;
+        forkCount: number;
+        primaryLanguage: {
+          name: string;
+          color: string;
+        } | null;
+      }>;
+    };
+    contributionsCollection: {
+      contributionCalendar: {
+        totalContributions: number;
+        weeks: Array<{
+          contributionDays: Array<{
+            contributionCount: number;
+            date: string;
+          }>;
+        }>;
+      };
+    };
+  } | null;
+}
+
+/**
+ * Repository data type for language aggregation
+ */
+type RepositoriesData = NonNullable<ExtendedGraphQLResponse['user']>['repositories'];
+
+/**
+ * Aggregate language statistics from repositories
+ */
+function aggregateLanguages(repos: RepositoriesData): LanguageStat[] {
+  const totals = new Map<string, { bytes: number; color: string }>();
+
+  for (const repo of repos.nodes) {
+    for (const edge of repo.languages.edges) {
+      const existing = totals.get(edge.node.name) || {
+        bytes: 0,
+        color: edge.node.color || '#808080',
+      };
+      existing.bytes += edge.size;
+      totals.set(edge.node.name, existing);
+    }
+  }
+
+  const totalBytes = Array.from(totals.values()).reduce(
+    (sum, lang) => sum + lang.bytes,
+    0
+  );
+
+  if (totalBytes === 0) {
+    return [];
+  }
+
+  return Array.from(totals.entries())
+    .map(([name, data]) => ({
+      name,
+      color: data.color,
+      bytes: data.bytes,
+      percentage: Math.round((data.bytes / totalBytes) * 100),
+    }))
+    .sort((a, b) => b.bytes - a.bytes)
+    .slice(0, 5);
+}
+
+/**
+ * Fetch extended GitHub user data for widgets
+ *
+ * @param username - GitHub username (validated)
+ * @returns ExtendedGitHubData object or null if user not found
+ */
+export async function fetchExtendedGitHubData(
+  username: string
+): Promise<ExtendedGitHubData | null> {
+  try {
+    const response = await octokit.graphql<ExtendedGraphQLResponse>(
+      EXTENDED_GRAPHQL_QUERY,
+      {
+        username,
+      }
+    );
+
+    if (!response.user) {
+      return null;
+    }
+
+    const { user } = response;
+    const weeks = user.contributionsCollection.contributionCalendar.weeks;
+
+    // Calculate total stars
+    const totalStars = user.repositories.nodes.reduce(
+      (sum, repo) => sum + repo.stargazers.totalCount,
+      0
+    );
+
+    // Aggregate languages
+    const languages = aggregateLanguages(user.repositories);
+
+    // Calculate streaks
+    const streak = calculateStreaks(weeks);
+
+    // Build compact stats
+    const stats: CompactStats = {
+      totalStars,
+      totalContributions:
+        user.contributionsCollection.contributionCalendar.totalContributions,
+      totalRepos: user.repositories.totalCount,
+      followers: user.followers.totalCount,
+    };
+
+    // Transform pinned repos
+    const pinnedRepos: RepoData[] = user.pinnedItems.nodes.map((repo) => ({
+      name: repo.name,
+      description: repo.description,
+      stargazerCount: repo.stargazerCount,
+      forkCount: repo.forkCount,
+      primaryLanguage: repo.primaryLanguage,
+    }));
+
+    return {
+      name: user.name,
+      bio: user.bio,
+      avatarUrl: user.avatarUrl,
+      totalContributions:
+        user.contributionsCollection.contributionCalendar.totalContributions,
+      totalStars,
+      topLanguages: [],
+      contributionCalendar: { weeks },
+      streak,
+      languages,
+      stats,
+      pinnedRepos,
+    };
+  } catch (error: unknown) {
+    // Handle "User Not Found" errors
+    if (
+      error &&
+      typeof error === 'object' &&
+      'errors' in error &&
+      Array.isArray(error.errors) &&
+      error.errors.length > 0
+    ) {
+      const firstError = error.errors[0];
+      if (
+        typeof firstError === 'object' &&
+        firstError !== null &&
+        'type' in firstError &&
+        firstError.type === 'NOT_FOUND'
+      ) {
+        return null;
+      }
+    }
+
+    // Handle other GraphQL errors
+    if (
+      error &&
+      typeof error === 'object' &&
+      'message' in error &&
+      typeof error.message === 'string' &&
+      error.message.includes('Could not resolve')
+    ) {
+      return null;
+    }
+
+    // Re-throw unexpected errors
+    throw error;
+  }
+}
+
+/**
+ * Fetch a specific repository's data
+ *
+ * @param username - GitHub username
+ * @param repoName - Repository name
+ * @returns RepoData object or null if not found
+ */
+export async function fetchRepoData(
+  username: string,
+  repoName: string
+): Promise<RepoData | null> {
+  const REPO_QUERY = `
+    query($owner: String!, $name: String!) {
+      repository(owner: $owner, name: $name) {
+        name
+        description
+        stargazerCount
+        forkCount
+        primaryLanguage {
+          name
+          color
+        }
+      }
+    }
+  `;
+
+  try {
+    const response = await octokit.graphql<{
+      repository: {
+        name: string;
+        description: string | null;
+        stargazerCount: number;
+        forkCount: number;
+        primaryLanguage: { name: string; color: string } | null;
+      } | null;
+    }>(REPO_QUERY, {
+      owner: username,
+      name: repoName,
+    });
+
+    if (!response.repository) {
+      return null;
+    }
+
+    return {
+      name: response.repository.name,
+      description: response.repository.description,
+      stargazerCount: response.repository.stargazerCount,
+      forkCount: response.repository.forkCount,
+      primaryLanguage: response.repository.primaryLanguage,
+    };
+  } catch {
+    return null;
   }
 }
