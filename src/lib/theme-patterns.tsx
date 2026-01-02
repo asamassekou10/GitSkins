@@ -492,20 +492,30 @@ export function GitHubDarkBackground({ theme }: { theme: Theme }) {
 
 /**
  * Get theme-specific background pattern component
+ * Returns a wrapper div to ensure Satori compatibility
  */
-export function getThemeBackground(themeName: string, theme: Theme): JSX.Element | null {
+export function getThemeBackground(themeName: string, theme: Theme): JSX.Element {
+  let BackgroundComponent: JSX.Element;
+
   switch (themeName) {
     case 'satan':
-      return <SatanBackground theme={theme} />;
+      BackgroundComponent = <SatanBackground theme={theme} />;
+      break;
     case 'neon':
-      return <NeonBackground theme={theme} />;
+      BackgroundComponent = <NeonBackground theme={theme} />;
+      break;
     case 'dracula':
-      return <DraculaBackground theme={theme} />;
+      BackgroundComponent = <DraculaBackground theme={theme} />;
+      break;
     case 'zen':
-      return <ZenBackground theme={theme} />;
+      BackgroundComponent = <ZenBackground theme={theme} />;
+      break;
     case 'github-dark':
-      return <GitHubDarkBackground theme={theme} />;
+      BackgroundComponent = <GitHubDarkBackground theme={theme} />;
+      break;
     default:
-      return null;
+      BackgroundComponent = <></>;
   }
+
+  return BackgroundComponent;
 }
