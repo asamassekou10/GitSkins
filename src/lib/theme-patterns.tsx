@@ -12,7 +12,7 @@ import type { Theme } from '@/types';
  */
 export function SatanBackground({ theme }: { theme: Theme }) {
   return (
-    <>
+    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex' }}>
       {/* Flame particles - layered for depth */}
       <div
         style={{
@@ -69,7 +69,7 @@ export function SatanBackground({ theme }: { theme: Theme }) {
           display: 'flex',
         }}
       />
-    </>
+    </div>
   );
 }
 
@@ -78,7 +78,7 @@ export function SatanBackground({ theme }: { theme: Theme }) {
  */
 export function NeonBackground({ theme }: { theme: Theme }) {
   return (
-    <>
+    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex' }}>
       {/* Cyberpunk grid */}
       <div
         style={{
@@ -166,7 +166,7 @@ export function NeonBackground({ theme }: { theme: Theme }) {
           display: 'flex',
         }}
       />
-    </>
+    </div>
   );
 }
 
@@ -175,7 +175,7 @@ export function NeonBackground({ theme }: { theme: Theme }) {
  */
 export function DraculaBackground({ theme }: { theme: Theme }) {
   return (
-    <>
+    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex' }}>
       {/* Moon glow */}
       <div
         style={{
@@ -254,7 +254,7 @@ export function DraculaBackground({ theme }: { theme: Theme }) {
           display: 'flex',
         }}
       />
-    </>
+    </div>
   );
 }
 
@@ -263,7 +263,7 @@ export function DraculaBackground({ theme }: { theme: Theme }) {
  */
 export function ZenBackground({ theme }: { theme: Theme }) {
   return (
-    <>
+    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex' }}>
       {/* Bamboo stems */}
       <div
         style={{
@@ -379,7 +379,7 @@ export function ZenBackground({ theme }: { theme: Theme }) {
           display: 'flex',
         }}
       />
-    </>
+    </div>
   );
 }
 
@@ -388,7 +388,7 @@ export function ZenBackground({ theme }: { theme: Theme }) {
  */
 export function GitHubDarkBackground({ theme }: { theme: Theme }) {
   return (
-    <>
+    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex' }}>
       {/* Code-like grid pattern */}
       <div
         style={{
@@ -487,7 +487,7 @@ export function GitHubDarkBackground({ theme }: { theme: Theme }) {
           display: 'flex',
         }}
       />
-    </>
+    </div>
   );
 }
 
@@ -515,7 +515,7 @@ export function getThemeBackground(themeName: string, theme: Theme): JSX.Element
       BackgroundComponent = <GitHubDarkBackground theme={theme} />;
       break;
     default:
-      BackgroundComponent = <></>;
+      BackgroundComponent = <div style={{ display: 'flex' }} />;
   }
 
   return BackgroundComponent;
