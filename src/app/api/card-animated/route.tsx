@@ -27,28 +27,13 @@ async function generateAnimatedCardSVG(
   const theme = getPremiumTheme(themeName);
   const bio = truncateBio(data.bio || '', 100);
 
-  // Calculate stats
-  const totalStars = data.repositories.reduce((sum, repo) => sum + repo.stargazers_count, 0);
-  const totalForks = data.repositories.reduce((sum, repo) => sum + repo.forks_count, 0);
+  // Use data from GitHubData type
+  const totalStars = data.totalStars;
+  const totalContributions = data.totalContributions;
 
-  // Get top languages
-  const languages = data.repositories
-    .flatMap((repo) =>
-      Object.entries(repo.languages).map(([lang, bytes]) => ({
-        name: lang,
-        bytes,
-      }))
-    )
-    .reduce((acc, { name, bytes }) => {
-      acc[name] = (acc[name] || 0) + bytes;
-      return acc;
-    }, {} as Record<string, number>);
-
-  const topLanguages = Object.entries(languages)
-    .sort(([, a], [, b]) => b - a)
-    .slice(0, 5);
-
-  const totalBytes = topLanguages.reduce((sum, [, bytes]) => sum + bytes, 0);
+  // Get top languages (GitHubData has topLanguages array)
+  const topLanguages = data.topLanguages.slice(0, 5);
+  const totalLanguages = topLanguages.length;
 
   // Generate theme-specific animations
   const animations = getThemeAnimations(theme.name as PremiumThemeName);
@@ -111,30 +96,23 @@ async function generateAnimatedCardSVG(
   <g transform="translate(40, 150)">
     <!-- Stars -->
     <g ${animations.statsFadeIn}>
-      <rect x="0" y="0" width="160" height="80" class="card-bg" rx="12" opacity="0.3"/>
+      <rect x="0" y="0" width="230" height="80" class="card-bg" rx="12" opacity="0.3"/>
       <text x="16" y="28" class="stat-label secondary">⭐ Stars</text>
       <text x="16" y="58" class="stat-value accent">${totalStars.toLocaleString()}</text>
     </g>
 
-    <!-- Repos -->
-    <g transform="translate(180, 0)" ${animations.statsFadeIn} style="animation-delay: 0.1s">
-      <rect x="0" y="0" width="160" height="80" class="card-bg" rx="12" opacity="0.3"/>
-      <text x="16" y="28" class="stat-label secondary">📦 Repos</text>
-      <text x="16" y="58" class="stat-value accent">${data.repositories.length}</text>
+    <!-- Contributions -->
+    <g transform="translate(250, 0)" ${animations.statsFadeIn} style="animation-delay: 0.1s">
+      <rect x="0" y="0" width="230" height="80" class="card-bg" rx="12" opacity="0.3"/>
+      <text x="16" y="28" class="stat-label secondary">📊 Contributions</text>
+      <text x="16" y="58" class="stat-value accent">${totalContributions.toLocaleString()}</text>
     </g>
 
-    <!-- Forks -->
-    <g transform="translate(360, 0)" ${animations.statsFadeIn} style="animation-delay: 0.2s">
-      <rect x="0" y="0" width="160" height="80" class="card-bg" rx="12" opacity="0.3"/>
-      <text x="16" y="28" class="stat-label secondary">🔱 Forks</text>
-      <text x="16" y="58" class="stat-value accent">${totalForks.toLocaleString()}</text>
-    </g>
-
-    <!-- Followers -->
-    <g transform="translate(540, 0)" ${animations.statsFadeIn} style="animation-delay: 0.3s">
-      <rect x="0" y="0" width="160" height="80" class="card-bg" rx="12" opacity="0.3"/>
-      <text x="16" y="28" class="stat-label secondary">👥 Followers</text>
-      <text x="16" y="58" class="stat-value accent">${data.followers.toLocaleString()}</text>
+    <!-- Languages -->
+    <g transform="translate(500, 0)" ${animations.statsFadeIn} style="animation-delay: 0.2s">
+      <rect x="0" y="0" width="200" height="80" class="card-bg" rx="12" opacity="0.3"/>
+      <text x="16" y="28" class="stat-label secondary">🎨 Languages</text>
+      <text x="16" y="58" class="stat-value accent">${totalLanguages}</text>
     </g>
   </g>
 
@@ -143,14 +121,14 @@ async function generateAnimatedCardSVG(
     <text x="0" y="0" class="stat-label secondary">Top Languages</text>
 
     ${topLanguages
-      .map(([lang, bytes], i) => {
-        const percentage = ((bytes / totalBytes) * 100).toFixed(1);
+      .map((lang, i) => {
+        // Each language has equal representation since we don't have byte counts
+        const barWidth = 560 / topLanguages.length;
         return `
       <g transform="translate(0, ${30 + i * 25})" ${animations.languageFadeIn} style="animation-delay: ${0.4 + i * 0.1}s">
-        <text x="0" y="0" class="subtitle primary">${lang}</text>
+        <text x="0" y="0" class="subtitle primary">${lang.name}</text>
         <rect x="120" y="-12" width="560" height="16" fill="${theme.colors.border}" opacity="0.2" rx="8"/>
-        <rect x="120" y="-12" width="${(parseFloat(percentage) / 100) * 560}" height="16" class="accent" rx="8" ${animations.progressBar}/>
-        <text x="690" y="0" class="subtitle secondary">${percentage}%</text>
+        <rect x="120" y="-12" width="${barWidth}" height="16" fill="${lang.color || theme.colors.accent}" rx="8" ${animations.progressBar}/>
       </g>
     `;
       })
