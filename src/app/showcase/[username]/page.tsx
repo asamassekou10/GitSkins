@@ -18,7 +18,9 @@ const themeLabels: Record<PremiumThemeName, string> = {
 export default function ShowcasePage() {
   const params = useParams();
   const searchParams = useSearchParams();
-  const username = params.username as string;
+  // Remove @ symbol if present (e.g., @octocat -> octocat)
+  const rawUsername = params.username as string;
+  const username = rawUsername.startsWith('@') ? rawUsername.slice(1) : rawUsername;
   const initialTheme = (searchParams.get('theme') || 'satan') as PremiumThemeName;
 
   const [selectedTheme, setSelectedTheme] = useState<PremiumThemeName>(initialTheme);

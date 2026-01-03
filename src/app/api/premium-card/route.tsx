@@ -12,7 +12,6 @@ import { fetchGitHubData } from '@/lib/github';
 import { getPremiumTheme } from '@/registry/themes/premium-registry';
 import { getFireColor, truncateBio } from '@/lib/image-generator';
 import { imageConfig, apiConfig, siteConfig } from '@/config/site';
-import { loadThemeFont } from '@/lib/fonts';
 import { getPremiumBackgroundPattern } from '@/lib/premium-patterns';
 import type { GitHubData } from '@/types';
 import type { PremiumThemeName } from '@/types/premium-theme';
@@ -77,13 +76,10 @@ async function generatePremiumCardImage(
 ): Promise<NextResponse> {
   const theme = getPremiumTheme(themeName);
 
-  // Load the theme's custom font
-  let fontData: ArrayBuffer | undefined;
-  try {
-    fontData = await loadThemeFont(theme);
-  } catch (error) {
-    console.error('Font loading failed, using system font:', error);
-  }
+  // Note: Custom font loading disabled due to Edge runtime compatibility issues
+  // Google Fonts API doesn't work reliably in Edge runtime
+  // Using system fonts provides consistent, fast rendering
+  const fontData: ArrayBuffer | undefined = undefined;
 
   const imageResponse = new ImageResponse(
     (
@@ -94,7 +90,7 @@ async function generatePremiumCardImage(
           background: theme.colors.bg,
           display: 'flex',
           flexDirection: 'column',
-          fontFamily: fontData ? theme.font.family : 'system-ui',
+          fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
           position: 'relative',
           overflow: 'hidden',
         }}

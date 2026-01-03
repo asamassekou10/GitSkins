@@ -19,16 +19,25 @@ const validThemeNames = Object.keys(getThemeRegistry()) as ThemeName[];
  * - Must be a non-empty string
  * - GitHub usernames: 1-39 characters, alphanumeric and hyphens
  * - Case-insensitive
+ * - Strips @ symbol if present (e.g., @octocat -> octocat)
  */
 export const usernameSchema = z
   .string()
   .min(1, 'Username is required')
-  .max(39, 'Username must be 39 characters or less')
-  .regex(
-    /^[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?$/,
-    'Username must contain only alphanumeric characters and hyphens'
-  )
-  .transform((val) => val.toLowerCase().trim());
+  .transform((val) => {
+    // Strip @ symbol if present
+    const cleaned = val.trim().startsWith('@') ? val.trim().slice(1) : val.trim();
+    return cleaned.toLowerCase();
+  })
+  .pipe(
+    z
+      .string()
+      .max(39, 'Username must be 39 characters or less')
+      .regex(
+        /^[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?$/,
+        'Username must contain only alphanumeric characters and hyphens'
+      )
+  );
 
 /**
  * Theme name validation schema
