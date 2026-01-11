@@ -98,7 +98,7 @@ async function generatePremiumCardImage(
         {/* Background Pattern Layer */}
         {getPremiumBackgroundPattern(theme)}
 
-        {/* Main Content Layer (z-index 10) */}
+        {/* Main Content Layer (z-index 10) with glassmorphism */}
         <div
           style={{
             position: 'relative',
@@ -109,9 +109,10 @@ async function generatePremiumCardImage(
             height: '100%',
             border: `2px solid ${theme.colors.border}`,
             borderRadius: 20,
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
           }}
         >
-          {/* Header Section */}
+          {/* Header Section with glassmorphism */}
           <div
             style={{
               display: 'flex',
@@ -119,9 +120,10 @@ async function generatePremiumCardImage(
               alignItems: 'center',
               padding: '28px 40px',
               borderBottom: `1px solid ${theme.colors.border}`,
+              background: 'rgba(255, 255, 255, 0.03)',
             }}
           >
-            {/* Avatar */}
+            {/* Avatar with enhanced glow */}
             <img
               src={data.avatarUrl}
               alt={username}
@@ -131,6 +133,7 @@ async function generatePremiumCardImage(
                 borderRadius: '50%',
                 border: `3px solid ${theme.colors.accent}`,
                 marginRight: 24,
+                boxShadow: `0 0 20px ${theme.colors.accent}80, 0 0 40px ${theme.colors.accent}40`,
               }}
             />
 
@@ -172,24 +175,25 @@ async function generatePremiumCardImage(
               )}
             </div>
 
-            {/* Stats Cards */}
+            {/* Stats Cards with enhanced glassmorphism */}
             <div style={{ display: 'flex', flexDirection: 'row', gap: 16 }}>
               <div
                 style={{
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
-                  background: theme.colors.cardBg,
+                  background: `linear-gradient(135deg, ${theme.colors.cardBg} 0%, ${theme.colors.bg} 100%)`,
                   padding: '12px 20px',
                   borderRadius: 12,
                   border: `1px solid ${theme.colors.border}`,
-                  boxShadow: theme.effects.cardShadow || 'none',
+                  boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+                  position: 'relative',
                 }}
               >
-                <div style={{ fontSize: 22, fontWeight: 700, color: theme.colors.primary, display: 'flex' }}>
+                <div style={{ fontSize: 24, fontWeight: 700, color: theme.colors.primary, display: 'flex' }}>
                   <span>{data.totalStars.toLocaleString()}</span>
                 </div>
-                <div style={{ fontSize: 10, color: theme.colors.secondary, opacity: 0.8, display: 'flex' }}>
+                <div style={{ fontSize: 11, color: theme.colors.secondary, opacity: 0.8, display: 'flex', textTransform: 'uppercase', letterSpacing: 0.5 }}>
                   <span>stars</span>
                 </div>
               </div>
@@ -198,17 +202,18 @@ async function generatePremiumCardImage(
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
-                  background: theme.colors.cardBg,
+                  background: `linear-gradient(135deg, ${theme.colors.cardBg} 0%, ${theme.colors.bg} 100%)`,
                   padding: '12px 20px',
                   borderRadius: 12,
                   border: `1px solid ${theme.colors.border}`,
-                  boxShadow: theme.effects.cardShadow || 'none',
+                  boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+                  position: 'relative',
                 }}
               >
-                <div style={{ fontSize: 22, fontWeight: 700, color: theme.colors.primary, display: 'flex' }}>
+                <div style={{ fontSize: 24, fontWeight: 700, color: theme.colors.primary, display: 'flex' }}>
                   <span>{data.totalContributions.toLocaleString()}</span>
                 </div>
-                <div style={{ fontSize: 10, color: theme.colors.secondary, opacity: 0.8, display: 'flex' }}>
+                <div style={{ fontSize: 11, color: theme.colors.secondary, opacity: 0.8, display: 'flex', textTransform: 'uppercase', letterSpacing: 0.5 }}>
                   <span>contributions</span>
                 </div>
               </div>
@@ -260,11 +265,11 @@ async function generatePremiumCardImage(
                 display: 'flex',
                 flexDirection: 'row',
                 gap: imageConfig.squareGap,
-                background: theme.colors.cardBg,
+                background: `linear-gradient(135deg, ${theme.colors.cardBg} 0%, ${theme.colors.bg} 100%)`,
                 padding: 16,
                 borderRadius: 12,
                 border: `1px solid ${theme.colors.border}`,
-                boxShadow: theme.effects.cardShadow || 'none',
+                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
               }}
             >
               {data.contributionCalendar.weeks.map((week, weekIndex) => (
@@ -284,6 +289,12 @@ async function generatePremiumCardImage(
                     );
                     const color = day.contributionCount === 0 ? theme.colors.cardBg : theme.graphColors[colorIndex];
 
+                    // Add glow for high-activity days
+                    const isHighActivity = day.contributionCount > 10;
+                    const glowShadow = isHighActivity
+                      ? `0 0 8px ${theme.colors.accent}60, 0 0 4px ${theme.colors.accent}40`
+                      : 'none';
+
                     return (
                       <div
                         key={`${weekIndex}-${dayIndex}`}
@@ -292,6 +303,7 @@ async function generatePremiumCardImage(
                           height: imageConfig.squareSize,
                           background: color,
                           borderRadius: 3,
+                          boxShadow: glowShadow,
                         }}
                       />
                     );
