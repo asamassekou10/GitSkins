@@ -13,13 +13,14 @@ export const zenPremiumTheme: PremiumTheme = {
   label: 'Zen (Japanese Garden)',
 
   colors: {
-    bg: '#fdfbf7', // Warm rice paper
-    cardBg: '#fafae6',
-    border: '#d4c5a9',
+    // Subtle gradient from warm paper to natural beige
+    bg: 'linear-gradient(180deg, #fdfbf7 0%, #f5f1e8 50%, #ebe6d9 100%)',
+    cardBg: 'rgba(250, 250, 230, 0.7)', // Semi-transparent for layering
+    border: 'rgba(212, 197, 169, 0.6)', // Soft tan border
     primary: '#2b2d42', // Charcoal text
-    secondary: '#6c757d',
+    secondary: '#6c757d', // Warm gray
     accent: '#84a59d', // Sage green
-    ring: '#84a59d',
+    ring: 'rgba(132, 165, 157, 0.6)', // Sage green with transparency
   },
 
   font: {
@@ -29,10 +30,12 @@ export const zenPremiumTheme: PremiumTheme = {
   },
 
   effects: {
-    // No shadows - flat design
+    // Subtle shadow for depth without breaking zen aesthetic
+    textGlow: '0 1px 2px rgba(0, 0, 0, 0.05)',
+    cardShadow: '0 2px 8px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.05)',
     backgroundPattern: 'enso',
   },
 
-  // Matcha green shades
-  graphColors: ['#e8f5e9', '#81c784', '#66bb6a', '#4caf50', '#2d5016'],
+  // Enhanced matcha green progression: Light Mint -> Matcha -> Forest Green -> Deep Forest
+  graphColors: ['#e8f5e9', '#a5d6a7', '#81c784', '#66bb6a', '#4caf50', '#2d5016'],
 };

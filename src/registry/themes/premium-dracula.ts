@@ -13,13 +13,14 @@ export const draculaPremiumTheme: PremiumTheme = {
   label: 'Dracula',
 
   colors: {
-    bg: '#282a36', // Dracula background
-    cardBg: '#21222c',
-    border: '#44475a', // Dracula current line
-    primary: '#f8f8f2', // Dracula foreground
-    secondary: '#6272a4', // Dracula comment
+    // Deeper gradient for modern look
+    bg: 'linear-gradient(180deg, #282a36 0%, #21222c 50%, #191a21 100%)',
+    cardBg: 'rgba(33, 34, 44, 0.7)', // Semi-transparent for glassmorphism
+    border: 'rgba(68, 71, 90, 0.6)', // Dracula current line with transparency
+    primary: '#f8f8f2', // Dracula foreground (white)
+    secondary: '#6272a4', // Dracula comment (blue-gray)
     accent: '#bd93f9', // Dracula purple
-    ring: '#ff79c6', // Dracula pink
+    ring: 'rgba(255, 121, 198, 0.8)', // Dracula pink with glow
   },
 
   font: {
@@ -29,10 +30,12 @@ export const draculaPremiumTheme: PremiumTheme = {
   },
 
   effects: {
-    cardShadow: '0 4px 12px rgba(189, 147, 249, 0.15)',
+    // Enhanced purple/pink glow
+    textGlow: '0 0 20px rgba(189, 147, 249, 0.4), 0 0 40px rgba(255, 121, 198, 0.3)',
+    cardShadow: '0 8px 32px rgba(189, 147, 249, 0.3), 0 4px 16px rgba(0, 0, 0, 0.6)',
     backgroundPattern: 'dots',
   },
 
-  // Dracula spectrum: purple -> pink -> green
-  graphColors: ['#6272a4', '#bd93f9', '#ff79c6', '#50fa7b', '#f1fa8c'],
+  // Enhanced Dracula spectrum: Gray-Blue -> Blue -> Purple -> Pink -> Green -> Yellow
+  graphColors: ['#44475a', '#6272a4', '#bd93f9', '#ff79c6', '#50fa7b', '#f1fa8c'],
 };

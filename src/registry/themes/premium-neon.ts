@@ -13,13 +13,14 @@ export const neonPremiumTheme: PremiumTheme = {
   label: 'Neon (Cyberpunk)',
 
   colors: {
-    bg: '#09090b', // Deep void
-    cardBg: '#18181b',
-    border: '#00ffff',
-    primary: '#00ffff', // Cyan
-    secondary: '#00d9ff',
-    accent: '#ff00ff', // Hot pink
-    ring: '#00ffff',
+    // Linear gradient with deep blacks and electric blue accents
+    bg: 'linear-gradient(180deg, #0a0a12 0%, #09090b 50%, #000000 100%)',
+    cardBg: 'rgba(24, 24, 27, 0.6)', // Semi-transparent for glassmorphism
+    border: 'rgba(0, 255, 255, 0.5)', // Semi-transparent cyan border
+    primary: '#00ffff', // Electric cyan
+    secondary: '#00d9ff', // Bright cyan
+    accent: '#ff00ff', // Hot pink/magenta
+    ring: 'rgba(0, 255, 255, 0.8)', // Cyan glow
   },
 
   font: {
@@ -29,11 +30,12 @@ export const neonPremiumTheme: PremiumTheme = {
   },
 
   effects: {
-    textGlow: '0 0 10px #00ffff',
-    cardShadow: '0 0 20px rgba(0, 255, 255, 0.3), 0 0 40px rgba(255, 0, 255, 0.2)',
+    // Enhanced multi-layered glow with cyan and magenta
+    textGlow: '0 0 20px rgba(0, 255, 255, 0.8), 0 0 40px rgba(255, 0, 255, 0.4)',
+    cardShadow: '0 8px 32px rgba(0, 255, 255, 0.4), 0 4px 16px rgba(0, 0, 0, 0.6)',
     backgroundPattern: 'grid',
   },
 
-  // Neon gradient: dark -> cyan -> magenta
-  graphColors: ['#1a0033', '#6b46c1', '#00ffff', '#ff00ff', '#00d9ff'],
+  // Enhanced progression: Deep Purple -> Purple -> Blue -> Cyan -> Magenta -> Electric Blue
+  graphColors: ['#1a0033', '#4a148c', '#6b46c1', '#00ffff', '#ff00ff', '#00d9ff'],
 };
