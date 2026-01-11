@@ -78,23 +78,36 @@ function generateStreakImage(streak: StreakData, theme: Theme): NextResponse {
           alignItems: 'center',
           justifyContent: 'center',
           fontFamily: 'system-ui',
-          border: `1px solid ${theme.borderColor}`,
+          border: `2px solid ${theme.borderColor}`,
           borderRadius: 16,
           padding: 24,
           gap: 24,
           position: 'relative',
           overflow: 'hidden',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
         }}
       >
-        {/* Fire glow background for current streak */}
+        {/* Enhanced glow backgrounds */}
         <div
           style={{
             position: 'absolute',
-            left: 60,
+            left: '15%',
             top: '50%',
-            width: 80,
-            height: 80,
-            background: `radial-gradient(circle, ${theme.streakColors.fire}20 0%, transparent 70%)`,
+            width: 120,
+            height: 120,
+            background: `radial-gradient(circle, ${theme.streakColors.fire}25 0%, ${theme.streakColors.fire}10 40%, transparent 70%)`,
+            transform: 'translateY(-50%)',
+            display: 'flex',
+          }}
+        />
+        <div
+          style={{
+            position: 'absolute',
+            right: '15%',
+            top: '50%',
+            width: 120,
+            height: 120,
+            background: `radial-gradient(circle, ${theme.accentColor}15 0%, transparent 70%)`,
             transform: 'translateY(-50%)',
             display: 'flex',
           }}
@@ -108,13 +121,27 @@ function generateStreakImage(streak: StreakData, theme: Theme): NextResponse {
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            background: theme.cardBg,
+            background: `linear-gradient(135deg, ${theme.cardBg} 0%, ${theme.bg} 100%)`,
             borderRadius: 12,
             padding: 16,
             border: `1px solid ${theme.borderColor}`,
             height: '100%',
+            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+            position: 'relative',
           }}
         >
+          {/* Gradient overlay */}
+          <div
+            style={{
+              position: 'absolute',
+              top: 0,
+              right: 0,
+              width: 50,
+              height: 50,
+              background: `radial-gradient(circle at top right, ${theme.streakColors.fire}10 0%, transparent 70%)`,
+              display: 'flex',
+            }}
+          />
           <div
             style={{
               display: 'flex',
@@ -166,13 +193,27 @@ function generateStreakImage(streak: StreakData, theme: Theme): NextResponse {
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            background: theme.cardBg,
+            background: `linear-gradient(135deg, ${theme.cardBg} 0%, ${theme.bg} 100%)`,
             borderRadius: 12,
             padding: 16,
             border: `1px solid ${theme.borderColor}`,
             height: '100%',
+            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+            position: 'relative',
           }}
         >
+          {/* Gradient overlay */}
+          <div
+            style={{
+              position: 'absolute',
+              top: 0,
+              right: 0,
+              width: 50,
+              height: 50,
+              background: `radial-gradient(circle at top right, ${theme.streakColors.trophy}10 0%, transparent 70%)`,
+              display: 'flex',
+            }}
+          />
           <div
             style={{
               display: 'flex',
@@ -223,13 +264,27 @@ function generateStreakImage(streak: StreakData, theme: Theme): NextResponse {
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            background: theme.cardBg,
+            background: `linear-gradient(135deg, ${theme.cardBg} 0%, ${theme.bg} 100%)`,
             borderRadius: 12,
             padding: 16,
             border: `1px solid ${theme.borderColor}`,
             height: '100%',
+            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+            position: 'relative',
           }}
         >
+          {/* Gradient overlay */}
+          <div
+            style={{
+              position: 'absolute',
+              top: 0,
+              right: 0,
+              width: 50,
+              height: 50,
+              background: `radial-gradient(circle at top right, ${theme.streakColors.calendar}10 0%, transparent 70%)`,
+              display: 'flex',
+            }}
+          />
           <div
             style={{
               display: 'flex',

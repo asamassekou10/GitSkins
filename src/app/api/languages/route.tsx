@@ -79,21 +79,33 @@ function generateLanguagesImage(
           display: 'flex',
           flexDirection: 'column',
           fontFamily: 'system-ui',
-          border: `1px solid ${theme.borderColor}`,
+          border: `2px solid ${theme.borderColor}`,
           borderRadius: 16,
           padding: 20,
           position: 'relative',
           overflow: 'hidden',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
         }}
       >
-        {/* Decorative element */}
+        {/* Enhanced glow effects */}
         <div
           style={{
             position: 'absolute',
-            bottom: -30,
-            left: -30,
-            width: 100,
-            height: 100,
+            bottom: -40,
+            left: -40,
+            width: 150,
+            height: 150,
+            background: `radial-gradient(circle, ${theme.accentColor}15 0%, ${theme.accentColor}08 40%, transparent 70%)`,
+            display: 'flex',
+          }}
+        />
+        <div
+          style={{
+            position: 'absolute',
+            top: -40,
+            right: -40,
+            width: 150,
+            height: 150,
             background: `radial-gradient(circle, ${theme.accentColor}10 0%, transparent 70%)`,
             display: 'flex',
           }}
@@ -184,25 +196,28 @@ function generateLanguagesImage(
                   </div>
                 </div>
 
-                {/* Progress bar background */}
+                {/* Progress bar background with glassmorphism */}
                 <div
                   style={{
                     flex: 1,
-                    height: 8,
+                    height: 10,
                     backgroundColor: theme.progressBg,
-                    borderRadius: 4,
+                    borderRadius: 5,
                     display: 'flex',
                     overflow: 'hidden',
+                    border: `1px solid ${theme.borderColor}`,
+                    boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.1)',
                   }}
                 >
-                  {/* Progress bar fill with gradient */}
+                  {/* Progress bar fill with enhanced gradient and glow */}
                   <div
                     style={{
                       width: `${lang.percentage}%`,
                       height: '100%',
-                      background: `linear-gradient(90deg, ${lang.color} 0%, ${lang.color}cc 100%)`,
-                      borderRadius: 4,
+                      background: `linear-gradient(90deg, ${lang.color} 0%, ${lang.color}dd 50%, ${lang.color}aa 100%)`,
+                      borderRadius: 5,
                       display: 'flex',
+                      boxShadow: `0 0 10px ${lang.color}40, inset 0 1px 0 rgba(255, 255, 255, 0.2)`,
                     }}
                   />
                 </div>
