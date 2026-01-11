@@ -76,21 +76,33 @@ function generateStatsImage(stats: CompactStats, theme: Theme): NextResponse {
           display: 'flex',
           flexDirection: 'column',
           fontFamily: 'system-ui',
-          border: `1px solid ${theme.borderColor}`,
+          border: `2px solid ${theme.borderColor}`,
           borderRadius: 16,
           padding: 24,
           position: 'relative',
           overflow: 'hidden',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
         }}
       >
-        {/* Subtle glow effect in corner */}
+        {/* Enhanced glow effects in corners */}
         <div
           style={{
             position: 'absolute',
             top: -50,
             right: -50,
-            width: 150,
-            height: 150,
+            width: 200,
+            height: 200,
+            background: `radial-gradient(circle, ${theme.accentColor}20 0%, ${theme.accentColor}10 40%, transparent 70%)`,
+            display: 'flex',
+          }}
+        />
+        <div
+          style={{
+            position: 'absolute',
+            bottom: -50,
+            left: -50,
+            width: 200,
+            height: 200,
             background: `radial-gradient(circle, ${theme.accentColor}15 0%, transparent 70%)`,
             display: 'flex',
           }}
@@ -151,35 +163,61 @@ function generateStatsImage(stats: CompactStats, theme: Theme): NextResponse {
             <div
               style={{
                 flex: 1,
-                background: theme.cardBg,
+                background: `linear-gradient(135deg, ${theme.cardBg} 0%, ${theme.bg} 100%)`,
                 borderRadius: 12,
                 padding: 16,
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'center',
                 border: `1px solid ${theme.borderColor}`,
+                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+                position: 'relative',
               }}
             >
+              {/* Gradient overlay */}
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  right: 0,
+                  width: 60,
+                  height: 60,
+                  background: `radial-gradient(circle at top right, ${theme.accentColor}10 0%, transparent 70%)`,
+                  display: 'flex',
+                }}
+              />
               <div
                 style={{
                   display: 'flex',
                   flexDirection: 'row',
                   alignItems: 'center',
-                  gap: 8,
+                  gap: 10,
                   marginBottom: 4,
+                  position: 'relative',
                 }}
               >
-                <div
-                  style={{
-                    fontSize: 18,
-                    display: 'flex',
-                  }}
+                {/* Custom Star SVG Icon */}
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  style={{ display: 'flex' }}
                 >
-                  <span>⭐</span>
-                </div>
+                  <defs>
+                    <linearGradient id="starGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" style={{ stopColor: theme.accentColor, stopOpacity: 1 }} />
+                      <stop offset="100%" style={{ stopColor: theme.accentColor, stopOpacity: 0.6 }} />
+                    </linearGradient>
+                  </defs>
+                  <path
+                    d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
+                    fill="url(#starGrad)"
+                  />
+                </svg>
                 <div
                   style={{
-                    fontSize: 28,
+                    fontSize: 32,
                     fontWeight: 700,
                     color: theme.primaryText,
                     display: 'flex',
@@ -194,9 +232,11 @@ function generateStatsImage(stats: CompactStats, theme: Theme): NextResponse {
                   color: theme.secondaryText,
                   opacity: 0.8,
                   display: 'flex',
+                  textTransform: 'uppercase',
+                  letterSpacing: 0.5,
                 }}
               >
-                <span>Total Stars Earned</span>
+                <span>Total Stars</span>
               </div>
             </div>
 
@@ -204,35 +244,65 @@ function generateStatsImage(stats: CompactStats, theme: Theme): NextResponse {
             <div
               style={{
                 flex: 1,
-                background: theme.cardBg,
+                background: `linear-gradient(135deg, ${theme.cardBg} 0%, ${theme.bg} 100%)`,
                 borderRadius: 12,
                 padding: 16,
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'center',
                 border: `1px solid ${theme.borderColor}`,
+                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+                position: 'relative',
               }}
             >
+              {/* Gradient overlay */}
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  right: 0,
+                  width: 60,
+                  height: 60,
+                  background: `radial-gradient(circle at top right, ${theme.accentColor}10 0%, transparent 70%)`,
+                  display: 'flex',
+                }}
+              />
               <div
                 style={{
                   display: 'flex',
                   flexDirection: 'row',
                   alignItems: 'center',
-                  gap: 8,
+                  gap: 10,
                   marginBottom: 4,
+                  position: 'relative',
                 }}
               >
-                <div
-                  style={{
-                    fontSize: 18,
-                    display: 'flex',
-                  }}
+                {/* Custom Activity SVG Icon */}
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  style={{ display: 'flex' }}
                 >
-                  <span>🔥</span>
-                </div>
+                  <defs>
+                    <linearGradient id="activityGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" style={{ stopColor: theme.accentColor, stopOpacity: 1 }} />
+                      <stop offset="100%" style={{ stopColor: theme.accentColor, stopOpacity: 0.6 }} />
+                    </linearGradient>
+                  </defs>
+                  <path
+                    d="M3 12L7 8L11 12L16 7L21 12M3 20H21V4H3V20Z"
+                    stroke="url(#activityGrad)"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    fill="none"
+                  />
+                </svg>
                 <div
                   style={{
-                    fontSize: 28,
+                    fontSize: 32,
                     fontWeight: 700,
                     color: theme.primaryText,
                     display: 'flex',
@@ -247,9 +317,11 @@ function generateStatsImage(stats: CompactStats, theme: Theme): NextResponse {
                   color: theme.secondaryText,
                   opacity: 0.8,
                   display: 'flex',
+                  textTransform: 'uppercase',
+                  letterSpacing: 0.5,
                 }}
               >
-                <span>Contributions This Year</span>
+                <span>Contributions</span>
               </div>
             </div>
           </div>
@@ -267,35 +339,61 @@ function generateStatsImage(stats: CompactStats, theme: Theme): NextResponse {
             <div
               style={{
                 flex: 1,
-                background: theme.cardBg,
+                background: `linear-gradient(135deg, ${theme.cardBg} 0%, ${theme.bg} 100%)`,
                 borderRadius: 12,
                 padding: 16,
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'center',
                 border: `1px solid ${theme.borderColor}`,
+                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+                position: 'relative',
               }}
             >
+              {/* Gradient overlay */}
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  right: 0,
+                  width: 60,
+                  height: 60,
+                  background: `radial-gradient(circle at top right, ${theme.accentColor}10 0%, transparent 70%)`,
+                  display: 'flex',
+                }}
+              />
               <div
                 style={{
                   display: 'flex',
                   flexDirection: 'row',
                   alignItems: 'center',
-                  gap: 8,
+                  gap: 10,
                   marginBottom: 4,
+                  position: 'relative',
                 }}
               >
-                <div
-                  style={{
-                    fontSize: 18,
-                    display: 'flex',
-                  }}
+                {/* Custom Folder SVG Icon */}
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  style={{ display: 'flex' }}
                 >
-                  <span>📦</span>
-                </div>
+                  <defs>
+                    <linearGradient id="folderGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" style={{ stopColor: theme.accentColor, stopOpacity: 1 }} />
+                      <stop offset="100%" style={{ stopColor: theme.accentColor, stopOpacity: 0.6 }} />
+                    </linearGradient>
+                  </defs>
+                  <path
+                    d="M3 7V17C3 18.1046 3.89543 19 5 19H19C20.1046 19 21 18.1046 21 17V9C21 7.89543 20.1046 7 19 7H12L10 5H5C3.89543 5 3 5.89543 3 7Z"
+                    fill="url(#folderGrad)"
+                  />
+                </svg>
                 <div
                   style={{
-                    fontSize: 28,
+                    fontSize: 32,
                     fontWeight: 700,
                     color: theme.primaryText,
                     display: 'flex',
@@ -310,9 +408,11 @@ function generateStatsImage(stats: CompactStats, theme: Theme): NextResponse {
                   color: theme.secondaryText,
                   opacity: 0.8,
                   display: 'flex',
+                  textTransform: 'uppercase',
+                  letterSpacing: 0.5,
                 }}
               >
-                <span>Public Repositories</span>
+                <span>Repositories</span>
               </div>
             </div>
 
@@ -320,35 +420,70 @@ function generateStatsImage(stats: CompactStats, theme: Theme): NextResponse {
             <div
               style={{
                 flex: 1,
-                background: theme.cardBg,
+                background: `linear-gradient(135deg, ${theme.cardBg} 0%, ${theme.bg} 100%)`,
                 borderRadius: 12,
                 padding: 16,
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'center',
                 border: `1px solid ${theme.borderColor}`,
+                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+                position: 'relative',
               }}
             >
+              {/* Gradient overlay */}
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  right: 0,
+                  width: 60,
+                  height: 60,
+                  background: `radial-gradient(circle at top right, ${theme.accentColor}10 0%, transparent 70%)`,
+                  display: 'flex',
+                }}
+              />
               <div
                 style={{
                   display: 'flex',
                   flexDirection: 'row',
                   alignItems: 'center',
-                  gap: 8,
+                  gap: 10,
                   marginBottom: 4,
+                  position: 'relative',
                 }}
               >
-                <div
-                  style={{
-                    fontSize: 18,
-                    display: 'flex',
-                  }}
+                {/* Custom Users SVG Icon */}
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  style={{ display: 'flex' }}
                 >
-                  <span>👥</span>
-                </div>
+                  <defs>
+                    <linearGradient id="usersGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" style={{ stopColor: theme.accentColor, stopOpacity: 1 }} />
+                      <stop offset="100%" style={{ stopColor: theme.accentColor, stopOpacity: 0.6 }} />
+                    </linearGradient>
+                  </defs>
+                  <circle cx="9" cy="7" r="4" fill="url(#usersGrad)" />
+                  <path
+                    d="M3 21C3 17.134 6.134 14 10 14H8C11.866 14 15 17.134 15 21"
+                    fill="url(#usersGrad)"
+                  />
+                  <circle cx="16" cy="8" r="3" fill="url(#usersGrad)" opacity="0.7" />
+                  <path
+                    d="M18 21C18 18.239 19.239 17 22 17"
+                    stroke="url(#usersGrad)"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    opacity="0.7"
+                  />
+                </svg>
                 <div
                   style={{
-                    fontSize: 28,
+                    fontSize: 32,
                     fontWeight: 700,
                     color: theme.primaryText,
                     display: 'flex',
@@ -363,6 +498,8 @@ function generateStatsImage(stats: CompactStats, theme: Theme): NextResponse {
                   color: theme.secondaryText,
                   opacity: 0.8,
                   display: 'flex',
+                  textTransform: 'uppercase',
+                  letterSpacing: 0.5,
                 }}
               >
                 <span>Followers</span>
