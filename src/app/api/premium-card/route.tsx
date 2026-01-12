@@ -13,6 +13,7 @@ import { getPremiumTheme } from '@/registry/themes/premium-registry';
 import { getFireColor, truncateBio } from '@/lib/image-generator';
 import { imageConfig, apiConfig, siteConfig } from '@/config/site';
 import { getPremiumBackgroundPattern } from '@/lib/premium-patterns';
+import { trackCardGeneration } from '@/lib/analytics';
 import type { GitHubData } from '@/types';
 import type { PremiumThemeName } from '@/types/premium-theme';
 
@@ -410,12 +411,25 @@ async function generatePremiumCardImage(
  * Generate premium GitHub profile card image
  */
 export async function GET(request: NextRequest) {
+  const startTime = Date.now();
+  let username = 'unknown';
+  let theme: string | undefined;
+
   try {
     const searchParams = request.nextUrl.searchParams;
     const usernameParam = searchParams.get('username');
     const themeParam = searchParams.get('theme');
+    theme = themeParam || 'satan';
 
     if (!usernameParam || usernameParam.trim() === '') {
+      trackCardGeneration({
+        cardType: 'premium',
+        theme,
+        username: 'missing',
+        success: false,
+        errorType: 'missing_username',
+        duration: Date.now() - startTime,
+      });
       return generateErrorImage('Missing Username', 'Add ?username=yourname');
     }
 
@@ -429,13 +443,31 @@ export async function GET(request: NextRequest) {
       validatedParams = validateCardQuery(rawParams);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Invalid parameters';
+      trackCardGeneration({
+        cardType: 'premium',
+        theme,
+        username: usernameParam,
+        success: false,
+        errorType: 'validation_error',
+        duration: Date.now() - startTime,
+      });
       return generateErrorImage('Validation Error', errorMessage);
     }
 
     // Double-check username
     if (!validatedParams.username) {
+      trackCardGeneration({
+        cardType: 'premium',
+        theme,
+        username: 'missing',
+        success: false,
+        errorType: 'missing_username',
+        duration: Date.now() - startTime,
+      });
       return generateErrorImage('Missing Username', 'Add ?username=yourname');
     }
+
+    username = validatedParams.username;
 
     // Fetch GitHub data
     let data;
@@ -443,12 +475,37 @@ export async function GET(request: NextRequest) {
       data = await fetchGitHubData(validatedParams.username);
     } catch (error) {
       console.error('GitHub API error:', error);
+      trackCardGeneration({
+        cardType: 'premium',
+        theme,
+        username,
+        success: false,
+        errorType: 'github_api_error',
+        duration: Date.now() - startTime,
+      });
       return generateErrorImage('GitHub API Error', 'Unable to fetch user data');
     }
 
     if (!data) {
+      trackCardGeneration({
+        cardType: 'premium',
+        theme,
+        username,
+        success: false,
+        errorType: 'user_not_found',
+        duration: Date.now() - startTime,
+      });
       return generateErrorImage('User Not Found', `@${validatedParams.username}`);
     }
+
+    // Track successful generation
+    trackCardGeneration({
+      cardType: 'premium',
+      theme,
+      username,
+      success: true,
+      duration: Date.now() - startTime,
+    });
 
     // Generate premium card
     return await generatePremiumCardImage(
@@ -459,6 +516,14 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Unexpected error:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    trackCardGeneration({
+      cardType: 'premium',
+      theme,
+      username,
+      success: false,
+      errorType: 'unexpected_error',
+      duration: Date.now() - startTime,
+    });
     return generateErrorImage('Error', errorMessage);
   }
 }

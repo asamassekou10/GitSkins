@@ -1,4 +1,7 @@
 import type { Metadata } from 'next';
+import { Analytics } from '@vercel/analytics/next';
+import { SpeedInsights } from '@vercel/speed-insights/next';
+import { PostHogProvider } from '@/components/providers/posthog-provider';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -45,7 +48,13 @@ export default function RootLayout({
           }
         `}</style>
       </head>
-      <body>{children}</body>
+      <body>
+        <PostHogProvider>
+          {children}
+          <Analytics />
+          <SpeedInsights />
+        </PostHogProvider>
+      </body>
     </html>
   );
 }
