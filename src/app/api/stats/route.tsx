@@ -72,16 +72,16 @@ function generateStatsImage(stats: CompactStats, theme: Theme): NextResponse {
         style={{
           width,
           height,
-          background: `linear-gradient(135deg, ${theme.bg} 0%, ${theme.cardBg} 100%)`,
+          background: `linear-gradient(165deg, ${theme.cardBg}dd 0%, ${theme.bg}dd 50%, ${theme.cardBg}aa 100%)`,
           display: 'flex',
           flexDirection: 'column',
           fontFamily: 'system-ui',
-          border: `2px solid ${theme.borderColor}`,
-          borderRadius: 16,
-          padding: 24,
+          border: `1px solid ${theme.borderColor}`,
+          borderRadius: 20,
+          padding: 28,
           position: 'relative',
           overflow: 'hidden',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+          boxShadow: '0 16px 48px rgba(0, 0, 0, 0.5), 0 8px 16px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.15)',
         }}
       >
         {/* Enhanced glow effects in corners */}
@@ -108,31 +108,32 @@ function generateStatsImage(stats: CompactStats, theme: Theme): NextResponse {
           }}
         />
 
-        {/* Title */}
+        {/* Title with accent bar */}
         <div
           style={{
             display: 'flex',
             flexDirection: 'row',
             alignItems: 'center',
-            marginBottom: 20,
-            gap: 8,
+            marginBottom: 24,
+            gap: 12,
           }}
         >
           <div
             style={{
-              width: 4,
-              height: 20,
-              background: theme.accentColor,
-              borderRadius: 2,
+              width: 3,
+              height: 22,
+              background: `linear-gradient(180deg, ${theme.accentColor} 0%, ${theme.accentColor}60 100%)`,
+              borderRadius: 3,
               display: 'flex',
+              boxShadow: `0 0 10px ${theme.accentColor}40`,
             }}
           />
           <div
             style={{
-              fontSize: 14,
-              fontWeight: 600,
-              color: theme.secondaryText,
-              letterSpacing: 1,
+              fontSize: 13,
+              fontWeight: 700,
+              color: theme.primaryText,
+              letterSpacing: 1.5,
               textTransform: 'uppercase',
               display: 'flex',
             }}
@@ -163,14 +164,14 @@ function generateStatsImage(stats: CompactStats, theme: Theme): NextResponse {
             <div
               style={{
                 flex: 1,
-                background: `linear-gradient(135deg, ${theme.cardBg} 0%, ${theme.bg} 100%)`,
-                borderRadius: 12,
-                padding: 16,
+                background: `linear-gradient(135deg, ${theme.accentColor}12 0%, ${theme.bg}80 100%)`,
+                borderRadius: 14,
+                padding: 18,
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'center',
-                border: `1px solid ${theme.borderColor}`,
-                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+                border: `1px solid ${theme.accentColor}25`,
+                boxShadow: `0 6px 20px rgba(0, 0, 0, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.1)`,
                 position: 'relative',
               }}
             >
@@ -244,14 +245,14 @@ function generateStatsImage(stats: CompactStats, theme: Theme): NextResponse {
             <div
               style={{
                 flex: 1,
-                background: `linear-gradient(135deg, ${theme.cardBg} 0%, ${theme.bg} 100%)`,
-                borderRadius: 12,
-                padding: 16,
+                background: `linear-gradient(135deg, ${theme.accentColor}12 0%, ${theme.bg}80 100%)`,
+                borderRadius: 14,
+                padding: 18,
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'center',
-                border: `1px solid ${theme.borderColor}`,
-                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+                border: `1px solid ${theme.accentColor}25`,
+                boxShadow: `0 6px 20px rgba(0, 0, 0, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.1)`,
                 position: 'relative',
               }}
             >
@@ -339,14 +340,14 @@ function generateStatsImage(stats: CompactStats, theme: Theme): NextResponse {
             <div
               style={{
                 flex: 1,
-                background: `linear-gradient(135deg, ${theme.cardBg} 0%, ${theme.bg} 100%)`,
-                borderRadius: 12,
-                padding: 16,
+                background: `linear-gradient(135deg, ${theme.accentColor}12 0%, ${theme.bg}80 100%)`,
+                borderRadius: 14,
+                padding: 18,
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'center',
-                border: `1px solid ${theme.borderColor}`,
-                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+                border: `1px solid ${theme.accentColor}25`,
+                boxShadow: `0 6px 20px rgba(0, 0, 0, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.1)`,
                 position: 'relative',
               }}
             >
@@ -420,14 +421,14 @@ function generateStatsImage(stats: CompactStats, theme: Theme): NextResponse {
             <div
               style={{
                 flex: 1,
-                background: `linear-gradient(135deg, ${theme.cardBg} 0%, ${theme.bg} 100%)`,
-                borderRadius: 12,
-                padding: 16,
+                background: `linear-gradient(135deg, ${theme.accentColor}12 0%, ${theme.bg}80 100%)`,
+                borderRadius: 14,
+                padding: 18,
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'center',
-                border: `1px solid ${theme.borderColor}`,
-                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+                border: `1px solid ${theme.accentColor}25`,
+                boxShadow: `0 6px 20px rgba(0, 0, 0, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.1)`,
                 position: 'relative',
               }}
             >

@@ -93,12 +93,13 @@ async function generatePremiumCardImage(
           fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
           position: 'relative',
           overflow: 'hidden',
+          padding: 24,
         }}
       >
         {/* Background Pattern Layer */}
         {getPremiumBackgroundPattern(theme)}
 
-        {/* Main Content Layer (z-index 10) with glassmorphism */}
+        {/* Main Card Container with premium styling */}
         <div
           style={{
             position: 'relative',
@@ -107,152 +108,188 @@ async function generatePremiumCardImage(
             flexDirection: 'column',
             width: '100%',
             height: '100%',
-            border: `2px solid ${theme.colors.border}`,
-            borderRadius: 20,
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+            background: `linear-gradient(165deg, ${theme.colors.cardBg}dd 0%, ${theme.colors.cardBg}aa 50%, ${theme.colors.bg}dd 100%)`,
+            border: `1px solid ${theme.colors.border}`,
+            borderRadius: 24,
+            boxShadow: `0 20px 60px rgba(0, 0, 0, 0.5), 0 8px 24px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.1)`,
+            overflow: 'hidden',
           }}
         >
-          {/* Header Section with glassmorphism */}
+          {/* Accent Bar at Top */}
+          <div
+            style={{
+              width: '100%',
+              height: 4,
+              background: `linear-gradient(90deg, ${theme.colors.accent} 0%, ${theme.colors.primary} 50%, ${theme.colors.accent} 100%)`,
+              display: 'flex',
+              boxShadow: `0 2px 12px ${theme.colors.accent}40`,
+            }}
+          />
+
+          {/* Header Section - Redesigned */}
           <div
             style={{
               display: 'flex',
-              flexDirection: 'row',
-              alignItems: 'center',
-              padding: '28px 40px',
-              borderBottom: `1px solid ${theme.colors.border}`,
-              background: 'rgba(255, 255, 255, 0.03)',
+              flexDirection: 'column',
+              padding: '32px 40px 24px 40px',
+              background: `linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%)`,
+              position: 'relative',
             }}
           >
-            {/* Avatar with enhanced glow */}
-            <img
-              src={data.avatarUrl}
-              alt={username}
-              width="80"
-              height="80"
-              style={{
-                borderRadius: '50%',
-                border: `3px solid ${theme.colors.accent}`,
-                marginRight: 24,
-                boxShadow: `0 0 20px ${theme.colors.accent}80, 0 0 40px ${theme.colors.accent}40`,
-              }}
-            />
+            {/* Profile Row */}
+            <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-start', marginBottom: 24 }}>
+              {/* Avatar with premium glow */}
+              <div
+                style={{
+                  position: 'relative',
+                  marginRight: 28,
+                  display: 'flex',
+                }}
+              >
+                <img
+                  src={data.avatarUrl}
+                  alt={username}
+                  width="96"
+                  height="96"
+                  style={{
+                    borderRadius: 24,
+                    border: `2px solid ${theme.colors.accent}`,
+                    boxShadow: `0 8px 32px ${theme.colors.accent}50, 0 0 40px ${theme.colors.accent}30, inset 0 1px 0 rgba(255, 255, 255, 0.2)`,
+                  }}
+                />
+              </div>
 
-            {/* User Info */}
-            <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
-              <div
-                style={{
-                  fontSize: 32,
-                  fontWeight: 700,
-                  color: theme.colors.primary,
-                  marginBottom: 6,
-                  display: 'flex',
-                  textShadow: theme.effects.textGlow || 'none',
-                }}
-              >
-                <span>{data.name || username}</span>
-              </div>
-              <div
-                style={{
-                  fontSize: 18,
-                  color: theme.colors.secondary,
-                  marginBottom: 6,
-                  display: 'flex',
-                }}
-              >
-                <span>@{username}</span>
-              </div>
-              {data.bio && (
+              {/* User Info */}
+              <div style={{ display: 'flex', flexDirection: 'column', flex: 1, justifyContent: 'center' }}>
                 <div
                   style={{
-                    fontSize: 14,
-                    color: theme.colors.secondary,
-                    opacity: 0.75,
+                    fontSize: 36,
+                    fontWeight: 800,
+                    color: theme.colors.primary,
+                    marginBottom: 8,
                     display: 'flex',
+                    letterSpacing: -0.5,
+                    textShadow: `${theme.effects.textGlow || 'none'}, 0 2px 8px rgba(0, 0, 0, 0.3)`,
                   }}
                 >
-                  <span>{truncateBio(data.bio)}</span>
+                  <span>{data.name || username}</span>
                 </div>
-              )}
+                <div
+                  style={{
+                    fontSize: 16,
+                    color: theme.colors.accent,
+                    marginBottom: 12,
+                    display: 'flex',
+                    fontWeight: 600,
+                    opacity: 0.9,
+                  }}
+                >
+                  <span>@{username}</span>
+                </div>
+                {data.bio && (
+                  <div
+                    style={{
+                      fontSize: 14,
+                      color: theme.colors.secondary,
+                      opacity: 0.85,
+                      display: 'flex',
+                      lineHeight: 1.5,
+                      maxWidth: '500px',
+                    }}
+                  >
+                    <span>{truncateBio(data.bio)}</span>
+                  </div>
+                )}
+              </div>
             </div>
 
-            {/* Stats Cards with enhanced glassmorphism */}
+            {/* Stats Row - Horizontal */}
             <div style={{ display: 'flex', flexDirection: 'row', gap: 16 }}>
+              {/* Stars Stat */}
               <div
                 style={{
                   display: 'flex',
-                  flexDirection: 'column',
+                  flexDirection: 'row',
                   alignItems: 'center',
-                  background: `linear-gradient(135deg, ${theme.colors.cardBg} 0%, ${theme.colors.bg} 100%)`,
-                  padding: '12px 20px',
-                  borderRadius: 12,
-                  border: `1px solid ${theme.colors.border}`,
-                  boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
-                  position: 'relative',
+                  background: `linear-gradient(135deg, ${theme.colors.accent}15 0%, ${theme.colors.accent}08 100%)`,
+                  padding: '16px 32px',
+                  borderRadius: 16,
+                  border: `1px solid ${theme.colors.accent}30`,
+                  boxShadow: `0 4px 16px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1)`,
+                  flex: 1,
                 }}
               >
-                <div style={{ fontSize: 24, fontWeight: 700, color: theme.colors.primary, display: 'flex' }}>
-                  <span>{data.totalStars.toLocaleString()}</span>
-                </div>
-                <div style={{ fontSize: 11, color: theme.colors.secondary, opacity: 0.8, display: 'flex', textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                  <span>stars</span>
+                <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+                  <div style={{ fontSize: 11, color: theme.colors.secondary, opacity: 0.7, display: 'flex', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6, fontWeight: 600 }}>
+                    <span>Total Stars</span>
+                  </div>
+                  <div style={{ fontSize: 32, fontWeight: 800, color: theme.colors.primary, display: 'flex', letterSpacing: -0.5 }}>
+                    <span>{data.totalStars.toLocaleString()}</span>
+                  </div>
                 </div>
               </div>
+
+              {/* Contributions Stat */}
               <div
                 style={{
                   display: 'flex',
-                  flexDirection: 'column',
+                  flexDirection: 'row',
                   alignItems: 'center',
-                  background: `linear-gradient(135deg, ${theme.colors.cardBg} 0%, ${theme.colors.bg} 100%)`,
-                  padding: '12px 20px',
-                  borderRadius: 12,
-                  border: `1px solid ${theme.colors.border}`,
-                  boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
-                  position: 'relative',
+                  background: `linear-gradient(135deg, ${theme.colors.accent}15 0%, ${theme.colors.accent}08 100%)`,
+                  padding: '16px 32px',
+                  borderRadius: 16,
+                  border: `1px solid ${theme.colors.accent}30`,
+                  boxShadow: `0 4px 16px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1)`,
+                  flex: 1,
                 }}
               >
-                <div style={{ fontSize: 24, fontWeight: 700, color: theme.colors.primary, display: 'flex' }}>
-                  <span>{data.totalContributions.toLocaleString()}</span>
-                </div>
-                <div style={{ fontSize: 11, color: theme.colors.secondary, opacity: 0.8, display: 'flex', textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                  <span>contributions</span>
+                <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+                  <div style={{ fontSize: 11, color: theme.colors.secondary, opacity: 0.7, display: 'flex', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6, fontWeight: 600 }}>
+                    <span>Contributions</span>
+                  </div>
+                  <div style={{ fontSize: 32, fontWeight: 800, color: theme.colors.primary, display: 'flex', letterSpacing: -0.5 }}>
+                    <span>{data.totalContributions.toLocaleString()}</span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Contribution Graph */}
+          {/* Contribution Graph Section */}
           <div
             style={{
-              padding: '24px 40px',
+              padding: '28px 40px 32px 40px',
               display: 'flex',
               flexDirection: 'column',
               flex: 1,
             }}
           >
+            {/* Section Header */}
             <div
               style={{
                 display: 'flex',
                 flexDirection: 'row',
                 alignItems: 'center',
-                marginBottom: 16,
-                gap: 8,
+                marginBottom: 20,
+                gap: 12,
               }}
             >
               <div
                 style={{
-                  width: 4,
-                  height: 18,
-                  background: theme.colors.accent,
-                  borderRadius: 2,
+                  width: 3,
+                  height: 20,
+                  background: `linear-gradient(180deg, ${theme.colors.accent} 0%, ${theme.colors.primary} 100%)`,
+                  borderRadius: 3,
                   display: 'flex',
+                  boxShadow: `0 0 8px ${theme.colors.accent}40`,
                 }}
               />
               <div
                 style={{
-                  fontSize: 14,
-                  color: theme.colors.secondary,
-                  fontWeight: 600,
-                  letterSpacing: 0.5,
+                  fontSize: 13,
+                  color: theme.colors.primary,
+                  fontWeight: 700,
+                  letterSpacing: 1.2,
                   textTransform: 'uppercase',
                   display: 'flex',
                 }}
@@ -260,16 +297,18 @@ async function generatePremiumCardImage(
                 <span>Contribution Activity</span>
               </div>
             </div>
+
+            {/* Graph Container */}
             <div
               style={{
                 display: 'flex',
                 flexDirection: 'row',
                 gap: imageConfig.squareGap,
-                background: `linear-gradient(135deg, ${theme.colors.cardBg} 0%, ${theme.colors.bg} 100%)`,
-                padding: 16,
-                borderRadius: 12,
+                background: `linear-gradient(165deg, ${theme.colors.cardBg}40 0%, ${theme.colors.bg}60 100%)`,
+                padding: 20,
+                borderRadius: 16,
                 border: `1px solid ${theme.colors.border}`,
-                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+                boxShadow: `0 8px 24px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.05)`,
               }}
             >
               {data.contributionCalendar.weeks.map((week, weekIndex) => (
@@ -282,18 +321,23 @@ async function generatePremiumCardImage(
                   }}
                 >
                   {week.contributionDays.map((day, dayIndex) => {
-                    // Map contribution count to theme graph colors
+                    // Map contribution count to theme graph colors with better progression
                     const colorIndex = Math.min(
-                      Math.floor((day.contributionCount / 20) * (theme.graphColors.length - 1)),
+                      Math.floor((day.contributionCount / 15) * (theme.graphColors.length - 1)),
                       theme.graphColors.length - 1
                     );
                     const color = day.contributionCount === 0 ? theme.colors.cardBg : theme.graphColors[colorIndex];
 
-                    // Add glow for high-activity days
+                    // Enhanced glow for active days
                     const isHighActivity = day.contributionCount > 10;
-                    const glowShadow = isHighActivity
-                      ? `0 0 8px ${theme.colors.accent}60, 0 0 4px ${theme.colors.accent}40`
-                      : 'none';
+                    const isMediumActivity = day.contributionCount > 5 && day.contributionCount <= 10;
+
+                    let glowShadow = 'none';
+                    if (isHighActivity) {
+                      glowShadow = `0 0 10px ${theme.colors.accent}70, 0 0 5px ${theme.colors.accent}50`;
+                    } else if (isMediumActivity) {
+                      glowShadow = `0 0 6px ${theme.colors.accent}40`;
+                    }
 
                     return (
                       <div
@@ -302,8 +346,9 @@ async function generatePremiumCardImage(
                           width: imageConfig.squareSize,
                           height: imageConfig.squareSize,
                           background: color,
-                          borderRadius: 3,
+                          borderRadius: 4,
                           boxShadow: glowShadow,
+                          border: day.contributionCount > 0 ? `0.5px solid ${theme.colors.accent}20` : 'none',
                         }}
                       />
                     );
@@ -313,16 +358,18 @@ async function generatePremiumCardImage(
             </div>
           </div>
 
-          {/* Footer */}
+          {/* Footer with improved styling */}
           <div
             style={{
               position: 'absolute',
-              bottom: 16,
-              right: 24,
-              fontSize: 12,
+              bottom: 20,
+              right: 28,
+              fontSize: 11,
               color: theme.colors.secondary,
-              opacity: 0.5,
+              opacity: 0.6,
               display: 'flex',
+              fontWeight: 500,
+              letterSpacing: 0.5,
             }}
           >
             <span>{siteConfig.footerText}</span>

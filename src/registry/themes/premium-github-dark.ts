@@ -13,14 +13,14 @@ export const githubDarkPremiumTheme: PremiumTheme = {
   label: 'GitHub Dark',
 
   colors: {
-    // Subtle gradient maintaining GitHub's aesthetic
-    bg: 'linear-gradient(180deg, #0d1117 0%, #0d1117 50%, #010409 100%)',
-    cardBg: 'rgba(22, 27, 34, 0.8)', // Semi-transparent for modern feel
-    border: 'rgba(48, 54, 61, 0.8)', // GitHub border with slight transparency
-    primary: '#c9d1d9', // Silver text
-    secondary: '#8b949e', // Medium gray
-    accent: '#58a6ff', // GitHub blue accent
-    ring: 'rgba(88, 166, 255, 0.6)', // Blue glow
+    // GitHub dark gradient - Deep navy blacks
+    bg: 'linear-gradient(165deg, #0d1117 0%, #161b22 30%, #0d1117 70%, #010409 100%)',
+    cardBg: 'rgba(22, 27, 34, 0.7)', // Authentic GitHub card background
+    border: 'rgba(88, 166, 255, 0.3)', // Subtle blue border
+    primary: '#e6edf3', // Brighter white for better contrast
+    secondary: '#8b949e', // GitHub gray
+    accent: '#58a6ff', // Signature GitHub blue
+    ring: 'rgba(88, 166, 255, 0.7)', // Blue glow
   },
 
   font: {

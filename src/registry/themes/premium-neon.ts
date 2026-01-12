@@ -13,14 +13,14 @@ export const neonPremiumTheme: PremiumTheme = {
   label: 'Neon (Cyberpunk)',
 
   colors: {
-    // Linear gradient with deep blacks and electric blue accents
-    bg: 'linear-gradient(180deg, #0a0a12 0%, #09090b 50%, #000000 100%)',
-    cardBg: 'rgba(24, 24, 27, 0.6)', // Semi-transparent for glassmorphism
-    border: 'rgba(0, 255, 255, 0.5)', // Semi-transparent cyan border
-    primary: '#00ffff', // Electric cyan
-    secondary: '#00d9ff', // Bright cyan
-    accent: '#ff00ff', // Hot pink/magenta
-    ring: 'rgba(0, 255, 255, 0.8)', // Cyan glow
+    // Cyberpunk gradient - Deep purples to electric blues
+    bg: 'linear-gradient(165deg, #0a0014 0%, #1a0033 30%, #09090b 70%, #000000 100%)',
+    cardBg: 'rgba(26, 0, 51, 0.5)', // Deep purple semi-transparent
+    border: 'rgba(0, 217, 255, 0.5)', // Bright cyan border
+    primary: '#00d9ff', // Bright electric cyan
+    secondary: '#5bf0ff', // Lighter cyan
+    accent: '#ff00ff', // Vivid magenta
+    ring: 'rgba(0, 217, 255, 0.9)', // Cyan glow
   },
 
   font: {

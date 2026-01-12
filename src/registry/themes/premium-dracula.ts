@@ -13,14 +13,14 @@ export const draculaPremiumTheme: PremiumTheme = {
   label: 'Dracula',
 
   colors: {
-    // Deeper gradient for modern look
-    bg: 'linear-gradient(180deg, #282a36 0%, #21222c 50%, #191a21 100%)',
-    cardBg: 'rgba(33, 34, 44, 0.7)', // Semi-transparent for glassmorphism
-    border: 'rgba(68, 71, 90, 0.6)', // Dracula current line with transparency
-    primary: '#f8f8f2', // Dracula foreground (white)
-    secondary: '#6272a4', // Dracula comment (blue-gray)
-    accent: '#bd93f9', // Dracula purple
-    ring: 'rgba(255, 121, 198, 0.8)', // Dracula pink with glow
+    // Dracula gradient - Deep purples and grays
+    bg: 'linear-gradient(165deg, #282a36 0%, #21222c 30%, #191a21 70%, #15161d 100%)',
+    cardBg: 'rgba(40, 42, 54, 0.6)', // Classic Dracula background
+    border: 'rgba(189, 147, 249, 0.4)', // Purple border glow
+    primary: '#f8f8f2', // Dracula white
+    secondary: '#a0a6bb', // Lighter comment color
+    accent: '#ff79c6', // Dracula hot pink
+    ring: 'rgba(255, 121, 198, 0.8)', // Pink glow
   },
 
   font: {

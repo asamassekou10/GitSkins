@@ -13,14 +13,14 @@ export const satanPremiumTheme: PremiumTheme = {
   label: 'Satan (Hellfire)',
 
   colors: {
-    // Modern linear gradient with deeper blacks and vibrant reds
-    bg: 'linear-gradient(180deg, #0a0000 0%, #1a0000 50%, #000000 100%)',
-    cardBg: 'rgba(26, 0, 0, 0.6)', // Semi-transparent for glassmorphism
-    border: 'rgba(255, 0, 0, 0.5)', // Semi-transparent border
-    primary: '#ff4500', // Bright flame orange
-    secondary: '#ff6b35', // Softer orange
-    accent: '#ff0000', // Pure red
-    ring: 'rgba(255, 0, 0, 0.8)', // Red glow with transparency
+    // Hellfire gradient - Deep blacks to blood red
+    bg: 'linear-gradient(165deg, #000000 0%, #1a0000 30%, #0d0000 70%, #000000 100%)',
+    cardBg: 'rgba(40, 0, 0, 0.5)', // Darker semi-transparent for better depth
+    border: 'rgba(255, 69, 0, 0.4)', // Orange-red border glow
+    primary: '#ff6b35', // Vibrant flame orange
+    secondary: '#ff8c61', // Lighter coral orange
+    accent: '#ff4500', // Bright orange-red
+    ring: 'rgba(255, 69, 0, 0.8)', // Orange-red glow
   },
 
   font: {

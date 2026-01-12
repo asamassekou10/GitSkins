@@ -13,14 +13,14 @@ export const zenPremiumTheme: PremiumTheme = {
   label: 'Zen (Japanese Garden)',
 
   colors: {
-    // Subtle gradient from warm paper to natural beige
-    bg: 'linear-gradient(180deg, #fdfbf7 0%, #f5f1e8 50%, #ebe6d9 100%)',
-    cardBg: 'rgba(250, 250, 230, 0.7)', // Semi-transparent for layering
-    border: 'rgba(212, 197, 169, 0.6)', // Soft tan border
-    primary: '#2b2d42', // Charcoal text
-    secondary: '#6c757d', // Warm gray
-    accent: '#84a59d', // Sage green
-    ring: 'rgba(132, 165, 157, 0.6)', // Sage green with transparency
+    // Organic paper gradient - Warm ivory to soft beige
+    bg: 'linear-gradient(165deg, #fffef9 0%, #f5f1e8 30%, #ebe6d9 70%, #e8e3d6 100%)',
+    cardBg: 'rgba(250, 248, 240, 0.8)', // Lighter ivory for better layering
+    border: 'rgba(132, 165, 157, 0.4)', // Soft sage border
+    primary: '#1a1c28', // Deeper charcoal for contrast
+    secondary: '#557c6a', // Muted forest green
+    accent: '#66bb6a', // Fresh matcha green
+    ring: 'rgba(102, 187, 106, 0.5)', // Matcha green glow
   },
 
   font: {
