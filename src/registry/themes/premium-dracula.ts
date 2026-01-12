@@ -13,14 +13,14 @@ export const draculaPremiumTheme: PremiumTheme = {
   label: 'Dracula',
 
   colors: {
-    // Dracula gradient - Deep purples and grays
-    bg: 'linear-gradient(165deg, #282a36 0%, #21222c 30%, #191a21 70%, #15161d 100%)',
-    cardBg: 'rgba(40, 42, 54, 0.6)', // Classic Dracula background
-    border: 'rgba(189, 147, 249, 0.4)', // Purple border glow
-    primary: '#f8f8f2', // Dracula white
-    secondary: '#a0a6bb', // Lighter comment color
-    accent: '#ff79c6', // Dracula hot pink
-    ring: 'rgba(255, 121, 198, 0.8)', // Pink glow
+    // Dracula gradient - Deep blues and teals
+    bg: 'linear-gradient(165deg, #1a1d2e 0%, #16192a 30%, #121420 70%, #0d0f1a 100%)',
+    cardBg: 'rgba(26, 29, 46, 0.6)', // Deep blue background
+    border: 'rgba(56, 189, 248, 0.4)', // Cyan border glow
+    primary: '#f8f8f2', // Crisp white
+    secondary: '#94a3b8', // Slate gray
+    accent: '#38bdf8', // Sky blue
+    ring: 'rgba(56, 189, 248, 0.8)', // Cyan glow
   },
 
   font: {
@@ -30,12 +30,12 @@ export const draculaPremiumTheme: PremiumTheme = {
   },
 
   effects: {
-    // Enhanced purple/pink glow
-    textGlow: '0 0 20px rgba(189, 147, 249, 0.4), 0 0 40px rgba(255, 121, 198, 0.3)',
-    cardShadow: '0 8px 32px rgba(189, 147, 249, 0.3), 0 4px 16px rgba(0, 0, 0, 0.6)',
+    // Enhanced cyan/blue glow
+    textGlow: '0 0 20px rgba(56, 189, 248, 0.5), 0 0 40px rgba(14, 165, 233, 0.3)',
+    cardShadow: '0 8px 32px rgba(56, 189, 248, 0.3), 0 4px 16px rgba(0, 0, 0, 0.6)',
     backgroundPattern: 'dots',
   },
 
-  // Enhanced Dracula spectrum: Gray-Blue -> Blue -> Purple -> Pink -> Green -> Yellow
-  graphColors: ['#44475a', '#6272a4', '#bd93f9', '#ff79c6', '#50fa7b', '#f1fa8c'],
+  // Modern blue spectrum: Dark Slate -> Blue Gray -> Sky Blue -> Cyan -> Teal -> Emerald
+  graphColors: ['#1e293b', '#475569', '#38bdf8', '#22d3ee', '#14b8a6', '#10b981'],
 };

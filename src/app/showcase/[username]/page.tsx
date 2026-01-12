@@ -33,21 +33,23 @@ export default function ShowcasePage() {
     return () => clearTimeout(timer);
   }, []);
 
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://gitskins.com';
+
   const copyMarkdown = async () => {
-    const markdown = `![GitSkins Card](https://gitskins.com/api/premium-card?username=${username}&theme=${selectedTheme})`;
+    const markdown = `![GitSkins Card](${baseUrl}/api/premium-card?username=${username}&theme=${selectedTheme})`;
     await navigator.clipboard.writeText(markdown);
     setShowCopied(true);
     setTimeout(() => setShowCopied(false), 2000);
   };
 
-  const shareUrl = `https://gitskins.com/showcase/${username}?theme=${selectedTheme}`;
+  const shareUrl = `${baseUrl}/showcase/${username}?theme=${selectedTheme}`;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-black text-white overflow-hidden relative">
       {/* Animated Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
-          className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-full blur-3xl"
+          className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-amber-500/10 to-orange-500/10 rounded-full blur-3xl"
           animate={{
             scale: [1, 1.2, 1],
             rotate: [0, 90, 0],
@@ -82,7 +84,7 @@ export default function ShowcasePage() {
           className="text-center mb-12"
         >
           <motion.h1
-            className="text-6xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-pink-500 to-red-500"
+            className="text-6xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-amber-400 via-orange-500 to-red-500"
             animate={{
               backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
             }}
@@ -125,7 +127,7 @@ export default function ShowcasePage() {
               onClick={() => setSelectedTheme(theme)}
               className={`px-6 py-3 rounded-xl font-semibold transition-all ${
                 selectedTheme === theme
-                  ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/50'
+                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/50'
                   : 'bg-gray-800/50 text-gray-300 hover:bg-gray-700/50 border border-gray-700'
               }`}
             >
@@ -150,7 +152,7 @@ export default function ShowcasePage() {
             >
               {/* Glow effect */}
               <motion.div
-                className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl blur-xl opacity-75 group-hover:opacity-100 transition duration-1000"
+                className="absolute -inset-1 bg-gradient-to-r from-amber-600 to-orange-600 rounded-2xl blur-xl opacity-75 group-hover:opacity-100 transition duration-1000"
                 animate={{
                   scale: [1, 1.02, 1],
                 }}
@@ -168,7 +170,7 @@ export default function ShowcasePage() {
                     <motion.div
                       animate={{ rotate: 360 }}
                       transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                      className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full"
+                      className="w-16 h-16 border-4 border-amber-500 border-t-transparent rounded-full"
                     />
                   </div>
                 ) : (
@@ -176,9 +178,13 @@ export default function ShowcasePage() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.6 }}
-                    src={`https://gitskins.com/api/premium-card?username=${username}&theme=${selectedTheme}&v=1`}
+                    src={`${baseUrl}/api/premium-card?username=${username}&theme=${selectedTheme}&v=${Date.now()}`}
                     alt={`${username}'s GitSkins card`}
                     className="w-full h-auto rounded-xl"
+                    onError={(e) => {
+                      console.error('Image failed to load:', e);
+                      e.currentTarget.src = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='800' height='400'><rect fill='%23111' width='800' height='400'/><text x='50%' y='50%' text-anchor='middle' fill='%23666' font-size='20'>Failed to load card</text></svg>`;
+                    }}
                   />
                 )}
               </div>
@@ -197,7 +203,7 @@ export default function ShowcasePage() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={copyMarkdown}
-            className="px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl font-semibold shadow-lg shadow-purple-500/50 hover:shadow-xl hover:shadow-purple-500/70 transition-all flex items-center gap-2"
+            className="px-8 py-4 bg-gradient-to-r from-amber-500 to-orange-500 rounded-xl font-semibold shadow-lg shadow-amber-500/50 hover:shadow-xl hover:shadow-amber-500/70 transition-all flex items-center gap-2"
           >
             {showCopied ? (
               <>
@@ -265,7 +271,7 @@ export default function ShowcasePage() {
                 </svg>
               </motion.button>
             </div>
-            <code className="text-purple-400 text-sm break-all block">
+            <code className="text-amber-400 text-sm break-all block">
               ![GitSkins Card](https://gitskins.com/api/premium-card?username={username}&theme={selectedTheme})
             </code>
           </div>
@@ -278,7 +284,7 @@ export default function ShowcasePage() {
           transition={{ delay: 1.2, duration: 0.6 }}
           className="text-center mt-16 text-gray-500"
         >
-          <p>Made with 🔥 by <a href="https://gitskins.com" className="text-purple-400 hover:text-purple-300 transition-colors">GitSkins</a></p>
+          <p>Made with 🔥 by <a href="https://gitskins.com" className="text-amber-400 hover:text-amber-300 transition-colors">GitSkins</a></p>
         </motion.div>
       </div>
     </div>

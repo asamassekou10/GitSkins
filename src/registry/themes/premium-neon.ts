@@ -13,14 +13,14 @@ export const neonPremiumTheme: PremiumTheme = {
   label: 'Neon (Cyberpunk)',
 
   colors: {
-    // Cyberpunk gradient - Deep purples to electric blues
-    bg: 'linear-gradient(165deg, #0a0014 0%, #1a0033 30%, #09090b 70%, #000000 100%)',
-    cardBg: 'rgba(26, 0, 51, 0.5)', // Deep purple semi-transparent
-    border: 'rgba(0, 217, 255, 0.5)', // Bright cyan border
-    primary: '#00d9ff', // Bright electric cyan
-    secondary: '#5bf0ff', // Lighter cyan
-    accent: '#ff00ff', // Vivid magenta
-    ring: 'rgba(0, 217, 255, 0.9)', // Cyan glow
+    // Cyberpunk gradient - Deep navy to electric blues
+    bg: 'linear-gradient(165deg, #0a0e1a 0%, #0f1629 30%, #09090b 70%, #000000 100%)',
+    cardBg: 'rgba(15, 22, 41, 0.5)', // Deep navy semi-transparent
+    border: 'rgba(56, 189, 248, 0.6)', // Sky blue border
+    primary: '#38bdf8', // Sky blue
+    secondary: '#7dd3fc', // Lighter sky blue
+    accent: '#0ea5e9', // Vibrant blue
+    ring: 'rgba(14, 165, 233, 0.9)', // Blue glow
   },
 
   font: {
@@ -30,12 +30,12 @@ export const neonPremiumTheme: PremiumTheme = {
   },
 
   effects: {
-    // Enhanced multi-layered glow with cyan and magenta
-    textGlow: '0 0 20px rgba(0, 255, 255, 0.8), 0 0 40px rgba(255, 0, 255, 0.4)',
-    cardShadow: '0 8px 32px rgba(0, 255, 255, 0.4), 0 4px 16px rgba(0, 0, 0, 0.6)',
+    // Enhanced multi-layered blue glow
+    textGlow: '0 0 20px rgba(56, 189, 248, 0.7), 0 0 40px rgba(14, 165, 233, 0.4)',
+    cardShadow: '0 8px 32px rgba(56, 189, 248, 0.4), 0 4px 16px rgba(0, 0, 0, 0.6)',
     backgroundPattern: 'grid',
   },
 
-  // Enhanced progression: Deep Purple -> Purple -> Blue -> Cyan -> Magenta -> Electric Blue
-  graphColors: ['#1a0033', '#4a148c', '#6b46c1', '#00ffff', '#ff00ff', '#00d9ff'],
+  // Modern blue spectrum: Deep Navy -> Steel Blue -> Sky Blue -> Bright Cyan -> Electric Blue -> Ice Blue
+  graphColors: ['#1e3a8a', '#3b82f6', '#38bdf8', '#22d3ee', '#0ea5e9', '#bae6fd'],
 };
