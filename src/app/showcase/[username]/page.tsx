@@ -33,10 +33,12 @@ export default function ShowcasePage() {
     return () => clearTimeout(timer);
   }, []);
 
-  const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://gitskins.com';
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+  const productionUrl = 'https://gitskins.com';
 
   const copyMarkdown = async () => {
-    const markdown = `![GitSkins Card](${baseUrl}/api/premium-card?username=${username}&theme=${selectedTheme})`;
+    // Always use production URL for markdown
+    const markdown = `![GitSkins Card](${productionUrl}/api/premium-card?username=${username}&theme=${selectedTheme})`;
     await navigator.clipboard.writeText(markdown);
     setShowCopied(true);
     setTimeout(() => setShowCopied(false), 2000);
@@ -178,12 +180,13 @@ export default function ShowcasePage() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.6 }}
-                    src={`${baseUrl}/api/premium-card?username=${username}&theme=${selectedTheme}&v=${Date.now()}`}
+                    src={`/api/premium-card?username=${username}&theme=${selectedTheme}`}
                     alt={`${username}'s GitSkins card`}
                     className="w-full h-auto rounded-xl"
                     onError={(e) => {
-                      console.error('Image failed to load:', e);
-                      e.currentTarget.src = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='800' height='400'><rect fill='%23111' width='800' height='400'/><text x='50%' y='50%' text-anchor='middle' fill='%23666' font-size='20'>Failed to load card</text></svg>`;
+                      const target = e.currentTarget;
+                      console.error('Image failed to load for:', username, selectedTheme);
+                      target.src = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='800' height='400'><rect fill='%23111' width='800' height='400'/><text x='50%' y='50%' text-anchor='middle' fill='%23888' font-size='18' font-family='system-ui'>Card generation failed</text><text x='50%' y='55%' text-anchor='middle' fill='%23666' font-size='14' font-family='system-ui'>Try: ${username}</text></svg>`;
                     }}
                   />
                 )}
@@ -272,7 +275,7 @@ export default function ShowcasePage() {
               </motion.button>
             </div>
             <code className="text-amber-400 text-sm break-all block">
-              ![GitSkins Card](https://gitskins.com/api/premium-card?username={username}&theme={selectedTheme})
+              ![GitSkins Card]({productionUrl}/api/premium-card?username={username}&theme={selectedTheme})
             </code>
           </div>
         </motion.div>

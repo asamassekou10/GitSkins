@@ -1,19 +1,13 @@
 /**
  * Analytics and Event Tracking Utilities
  *
- * Server-side event tracking for API routes
+ * Edge-compatible server-side event tracking for API routes
+ * Uses fetch API instead of posthog-node for Edge Runtime compatibility
  */
 
-import { PostHog } from 'posthog-node';
-
-// Initialize PostHog client for server-side tracking
-let posthogClient: PostHog | null = null;
-
-if (process.env.NEXT_PUBLIC_POSTHOG_KEY) {
-  posthogClient = new PostHog(process.env.NEXT_PUBLIC_POSTHOG_KEY, {
-    host: process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://app.posthog.com',
-  });
-}
+// PostHog configuration
+const POSTHOG_API_KEY = process.env.NEXT_PUBLIC_POSTHOG_KEY;
+const POSTHOG_HOST = process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://app.posthog.com';
 
 export interface CardGenerationEvent {
   cardType: 'premium' | 'stats' | 'languages' | 'streak' | 'repos' | 'card' | 'card-animated';
@@ -25,23 +19,33 @@ export interface CardGenerationEvent {
 }
 
 /**
- * Track card generation event
+ * Track card generation event using fetch API (Edge-compatible)
  */
-export function trackCardGeneration(event: CardGenerationEvent) {
-  if (!posthogClient) return;
+export async function trackCardGeneration(event: CardGenerationEvent) {
+  if (!POSTHOG_API_KEY) return;
 
   try {
-    posthogClient.capture({
-      distinctId: event.username,
-      event: 'card_generated',
-      properties: {
-        card_type: event.cardType,
-        theme: event.theme || 'default',
-        success: event.success,
-        error_type: event.errorType,
-        duration_ms: event.duration,
-        timestamp: new Date().toISOString(),
+    // Use PostHog's capture API directly with fetch
+    await fetch(`${POSTHOG_HOST}/capture/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
       },
+      body: JSON.stringify({
+        api_key: POSTHOG_API_KEY,
+        event: 'card_generated',
+        properties: {
+          distinct_id: event.username,
+          card_type: event.cardType,
+          theme: event.theme || 'default',
+          success: event.success,
+          error_type: event.errorType,
+          duration_ms: event.duration,
+          timestamp: new Date().toISOString(),
+        },
+      }),
+    }).catch(() => {
+      // Silently fail - don't break card generation
     });
   } catch (error) {
     // Silently fail - don't break card generation
@@ -50,37 +54,33 @@ export function trackCardGeneration(event: CardGenerationEvent) {
 }
 
 /**
- * Track API error
+ * Track API error using fetch API (Edge-compatible)
  */
-export function trackApiError(route: string, error: Error, context?: Record<string, unknown>) {
-  if (!posthogClient) return;
+export async function trackApiError(route: string, error: Error, context?: Record<string, unknown>) {
+  if (!POSTHOG_API_KEY) return;
 
   try {
-    posthogClient.capture({
-      distinctId: 'system',
-      event: 'api_error',
-      properties: {
-        route,
-        error_message: error.message,
-        error_stack: error.stack,
-        ...context,
-        timestamp: new Date().toISOString(),
+    await fetch(`${POSTHOG_HOST}/capture/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
       },
+      body: JSON.stringify({
+        api_key: POSTHOG_API_KEY,
+        event: 'api_error',
+        properties: {
+          distinct_id: 'system',
+          route,
+          error_message: error.message,
+          error_stack: error.stack,
+          ...context,
+          timestamp: new Date().toISOString(),
+        },
+      }),
+    }).catch(() => {
+      // Silently fail
     });
   } catch (err) {
     console.error('[Analytics] Failed to track error:', err);
-  }
-}
-
-/**
- * Flush PostHog events (call before serverless function ends)
- */
-export async function flushAnalytics() {
-  if (!posthogClient) return;
-
-  try {
-    await posthogClient.shutdown();
-  } catch (error) {
-    console.error('[Analytics] Failed to flush:', error);
   }
 }
