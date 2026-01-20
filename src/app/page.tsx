@@ -1,6 +1,12 @@
 'use client';
 
 import { useState } from 'react';
+import { analytics } from '@/components/AnalyticsProvider';
+import { HeroSection } from '@/components/landing/HeroSection';
+import { StatsCounter } from '@/components/landing/StatsCounter';
+import { SocialProof } from '@/components/landing/SocialProof';
+import { BenefitsSection } from '@/components/landing/BenefitsSection';
+import { ThemeShowcase } from '@/components/landing/ThemeShowcase';
 
 /**
  * GitSkins - Premium Landing Page
@@ -29,6 +35,12 @@ export default function Home() {
   const [selectedTheme, setSelectedTheme] = useState('satan');
   const [copied, setCopied] = useState<string | null>(null);
 
+  // Track theme selection
+  const handleThemeChange = (theme: string) => {
+    setSelectedTheme(theme);
+    analytics.trackThemeSelection(theme, 'landing', username);
+  };
+
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://gitskins.com';
 
   const copyToClipboard = async (widget: typeof widgets[0]) => {
@@ -38,6 +50,10 @@ export default function Home() {
       await navigator.clipboard.writeText(markdown);
       setCopied(widget.id);
       setTimeout(() => setCopied(null), 2000);
+      
+      // Track markdown copy event
+      analytics.trackMarkdownCopy(widget.id, selectedTheme, username, 'landing');
+      analytics.trackConversion('markdown_copied', { widget_type: widget.id, theme: selectedTheme });
     } catch (error) {
       console.error('Failed to copy to clipboard:', error);
       // Fallback for older browsers
@@ -61,101 +77,83 @@ export default function Home() {
   };
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        background: 'linear-gradient(180deg, #0a0a0a 0%, #111111 50%, #0a0a0a 100%)',
-        color: '#ffffff',
-        fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
-      }}
-    >
-      {/* Hero Section */}
-      <section
+    <>
+      {/* Structured Data (JSON-LD) for SEO */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'SoftwareApplication',
+            name: 'GitSkins',
+            applicationCategory: 'DeveloperApplication',
+            operatingSystem: 'Web',
+            description: 'Generate dynamic, custom-themed widgets for your GitHub profile. Stats, languages, streaks, and more.',
+            url: 'https://gitskins.com',
+            author: {
+              '@type': 'Organization',
+              name: 'GitSkins',
+            },
+            offers: {
+              '@type': 'Offer',
+              price: '0',
+              priceCurrency: 'USD',
+            },
+            aggregateRating: {
+              '@type': 'AggregateRating',
+              ratingValue: '5',
+              ratingCount: '1',
+            },
+            featureList: [
+              'GitHub Profile Cards',
+              'Contribution Graphs',
+              'Language Statistics',
+              'Streak Tracking',
+              'Multiple Themes',
+              'Customizable Widgets',
+            ],
+          }),
+        }}
+      />
+      <div
         style={{
-          position: 'relative',
-          padding: '100px 20px 80px',
-          overflow: 'hidden',
+          minHeight: '100vh',
+          background: 'linear-gradient(180deg, #0a0a0a 0%, #111111 50%, #0a0a0a 100%)',
+          color: '#ffffff',
+          fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
         }}
       >
-        {/* Gradient orb background */}
-        <div
-          style={{
-            position: 'absolute',
-            top: '-200px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            width: '800px',
-            height: '600px',
-            background: 'radial-gradient(ellipse, rgba(255, 69, 0, 0.15) 0%, transparent 70%)',
-            pointerEvents: 'none',
-          }}
-        />
+      {/* Hero Section */}
+      <HeroSection
+        username={username}
+        selectedTheme={selectedTheme}
+        onUsernameChange={setUsername}
+        onThemeChange={handleThemeChange}
+      />
 
-        <div
-          style={{
-            maxWidth: '1200px',
-            margin: '0 auto',
-            position: 'relative',
-            textAlign: 'center',
-          }}
-        >
-          {/* Logo */}
-          <h1
-            style={{
-              fontSize: 'clamp(48px, 10vw, 80px)',
-              fontWeight: 800,
-              margin: 0,
-              marginBottom: '16px',
-              letterSpacing: '-2px',
-              background: 'linear-gradient(135deg, #ff4500 0%, #ff6b35 50%, #ff8c00 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-            }}
-          >
-            GitSkins
-          </h1>
+      {/* Stats Counter */}
+      <StatsCounter
+        stats={[
+          { label: 'Cards Generated', value: 12500, suffix: '+' },
+          { label: 'Active Users', value: 3200, suffix: '+' },
+          { label: 'Themes Available', value: 5 },
+          { label: 'Widget Types', value: 6 },
+        ]}
+      />
 
-          <p
-            style={{
-              fontSize: 'clamp(18px, 3vw, 24px)',
-              color: '#888888',
-              margin: 0,
-              marginBottom: '48px',
-              maxWidth: '600px',
-              marginLeft: 'auto',
-              marginRight: 'auto',
-            }}
-          >
-            Beautiful, themed widgets for your GitHub README.
-            <br />
-            Stand out with premium profile cards.
-          </p>
+      {/* Benefits Section */}
+      <BenefitsSection />
 
-          {/* Quick Preview */}
-          <div
-            style={{
-              background: '#161616',
-              borderRadius: '20px',
-              border: '1px solid #2a2a2a',
-              padding: '32px',
-              maxWidth: '800px',
-              margin: '0 auto',
-            }}
-          >
-            <img
-              key={`preview-${username}-${selectedTheme}`}
-              src={`/api/premium-card?username=${username}&theme=${selectedTheme}`}
-              alt="GitSkins Preview"
-              style={{
-                width: '100%',
-                height: 'auto',
-                borderRadius: '12px',
-              }}
-            />
-          </div>
-        </div>
-      </section>
+      {/* Theme Showcase */}
+      <ThemeShowcase
+        themes={themes}
+        selectedTheme={selectedTheme}
+        onThemeSelect={handleThemeChange}
+        username={username}
+      />
+
+      {/* Social Proof */}
+      <SocialProof />
 
       {/* Interactive Showcase Section */}
       <section
@@ -441,7 +439,7 @@ export default function Home() {
                   <button
                     key={theme.id}
                     type="button"
-                    onClick={() => setSelectedTheme(theme.id)}
+                    onClick={() => handleThemeChange(theme.id)}
                     style={{
                       padding: '12px 20px',
                       fontSize: '14px',
@@ -777,5 +775,6 @@ export default function Home() {
         </p>
       </footer>
     </div>
+    </>
   );
 }
