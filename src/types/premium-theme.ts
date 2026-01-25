@@ -50,7 +50,12 @@ export interface PremiumTheme {
     /** CSS box-shadow for cards */
     cardShadow?: string;
     /** Background pattern identifier */
-    backgroundPattern?: 'flames' | 'grid' | 'enso' | 'dots' | 'none';
+    backgroundPattern?:
+      | 'flames' | 'grid' | 'enso' | 'dots' | 'none'
+      | 'snowflakes' | 'blossoms' | 'sunrays' | 'leaves'
+      | 'christmas' | 'pumpkins'
+      | 'waves' | 'trees' | 'clouds' | 'stars' | 'northern-lights'
+      | 'synthwave' | 'minimal-dots' | 'bubbles' | 'rain';
   };
 
   /** Data visualization colors (3-5 colors for contribution graph) */
@@ -60,4 +65,14 @@ export interface PremiumTheme {
 /**
  * Premium theme name identifier
  */
-export type PremiumThemeName = 'satan' | 'neon' | 'zen' | 'github-dark' | 'dracula';
+export type PremiumThemeName =
+  // Original themes
+  | 'satan' | 'neon' | 'zen' | 'github-dark' | 'dracula'
+  // Seasonal themes
+  | 'winter' | 'spring' | 'summer' | 'autumn'
+  // Holiday themes
+  | 'christmas' | 'halloween'
+  // Developer themes
+  | 'ocean' | 'forest' | 'sunset' | 'midnight' | 'aurora'
+  // Aesthetic themes
+  | 'retro' | 'minimal' | 'pastel' | 'matrix';

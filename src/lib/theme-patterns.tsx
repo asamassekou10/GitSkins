@@ -8,12 +8,11 @@
 import type { Theme } from '@/types';
 
 /**
- * Satan Theme - Animated flames and fire particles
+ * Satan Theme - Flames and fire particles
  */
 export function SatanBackground({ theme }: { theme: Theme }) {
   return (
     <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex' }}>
-      {/* Flame particles - layered for depth */}
       <div
         style={{
           position: 'absolute',
@@ -24,14 +23,11 @@ export function SatanBackground({ theme }: { theme: Theme }) {
           background: `
             radial-gradient(circle at 15% 85%, ${theme.fireColors[2]}25 0%, transparent 35%),
             radial-gradient(circle at 45% 90%, ${theme.accentColor}20 0%, transparent 30%),
-            radial-gradient(circle at 75% 88%, ${theme.fireColors[1]}22 0%, transparent 32%),
-            radial-gradient(circle at 88% 82%, ${theme.fireColors[2]}18 0%, transparent 28%)
+            radial-gradient(circle at 75% 88%, ${theme.fireColors[1]}22 0%, transparent 32%)
           `,
           display: 'flex',
         }}
       />
-
-      {/* Ember glow spots */}
       <div
         style={{
           position: 'absolute',
@@ -44,20 +40,6 @@ export function SatanBackground({ theme }: { theme: Theme }) {
           display: 'flex',
         }}
       />
-      <div
-        style={{
-          position: 'absolute',
-          top: '70%',
-          right: '15%',
-          width: 90,
-          height: 90,
-          background: `radial-gradient(circle, ${theme.fireColors[2]}30 0%, ${theme.accentColor}15 40%, transparent 70%)`,
-          borderRadius: '50%',
-          display: 'flex',
-        }}
-      />
-
-      {/* Heat wave lines */}
       <div
         style={{
           position: 'absolute',
@@ -74,12 +56,11 @@ export function SatanBackground({ theme }: { theme: Theme }) {
 }
 
 /**
- * Neon Theme - Cyberpunk grid and scan lines
+ * Neon Theme - Cyberpunk grid
  */
 export function NeonBackground({ theme }: { theme: Theme }) {
   return (
     <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex' }}>
-      {/* Cyberpunk grid */}
       <div
         style={{
           position: 'absolute',
@@ -96,26 +77,6 @@ export function NeonBackground({ theme }: { theme: Theme }) {
           display: 'flex',
         }}
       />
-
-      {/* Diagonal scan lines */}
-      <div
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundImage: `repeating-linear-gradient(
-            0deg,
-            ${theme.accentColor}08 0px,
-            transparent 1px,
-            transparent 4px
-          )`,
-          display: 'flex',
-        }}
-      />
-
-      {/* Glowing orbs */}
       <div
         style={{
           position: 'absolute',
@@ -131,20 +92,6 @@ export function NeonBackground({ theme }: { theme: Theme }) {
       <div
         style={{
           position: 'absolute',
-          bottom: '15%',
-          left: '8%',
-          width: 150,
-          height: 150,
-          background: `radial-gradient(circle, #ff00ff20 0%, transparent 70%)`,
-          borderRadius: '50%',
-          display: 'flex',
-        }}
-      />
-
-      {/* Corner accents */}
-      <div
-        style={{
-          position: 'absolute',
           top: 0,
           left: 0,
           width: 100,
@@ -154,29 +101,16 @@ export function NeonBackground({ theme }: { theme: Theme }) {
           display: 'flex',
         }}
       />
-      <div
-        style={{
-          position: 'absolute',
-          bottom: 0,
-          right: 0,
-          width: 100,
-          height: 100,
-          borderBottom: `3px solid ${theme.accentColor}40`,
-          borderRight: `3px solid ${theme.accentColor}40`,
-          display: 'flex',
-        }}
-      />
     </div>
   );
 }
 
 /**
- * Dracula Theme - Gothic moon, bats, and mystical elements
+ * Dracula Theme - Gothic moon
  */
 export function DraculaBackground({ theme }: { theme: Theme }) {
   return (
     <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex' }}>
-      {/* Moon glow */}
       <div
         style={{
           position: 'absolute',
@@ -189,8 +123,6 @@ export function DraculaBackground({ theme }: { theme: Theme }) {
           display: 'flex',
         }}
       />
-
-      {/* Purple mist layers */}
       <div
         style={{
           position: 'absolute',
@@ -202,47 +134,6 @@ export function DraculaBackground({ theme }: { theme: Theme }) {
           display: 'flex',
         }}
       />
-      <div
-        style={{
-          position: 'absolute',
-          bottom: '20%',
-          left: 0,
-          right: 0,
-          height: 120,
-          background: `radial-gradient(ellipse at 70% 50%, #ff79c615 0%, transparent 60%)`,
-          display: 'flex',
-        }}
-      />
-
-      {/* Bat silhouettes (simple triangular shapes) */}
-      <div
-        style={{
-          position: 'absolute',
-          top: '15%',
-          left: '20%',
-          width: 0,
-          height: 0,
-          borderLeft: '8px solid transparent',
-          borderRight: '8px solid transparent',
-          borderBottom: `12px solid ${theme.accentColor}40`,
-          display: 'flex',
-        }}
-      />
-      <div
-        style={{
-          position: 'absolute',
-          top: '25%',
-          right: '30%',
-          width: 0,
-          height: 0,
-          borderLeft: '6px solid transparent',
-          borderRight: '6px solid transparent',
-          borderBottom: `9px solid ${theme.accentColor}30`,
-          display: 'flex',
-        }}
-      />
-
-      {/* Gothic vignette */}
       <div
         style={{
           position: 'absolute',
@@ -259,12 +150,11 @@ export function DraculaBackground({ theme }: { theme: Theme }) {
 }
 
 /**
- * Zen Theme - Bamboo stems and minimalist nature elements
+ * Zen Theme - Bamboo stems
  */
 export function ZenBackground({ theme }: { theme: Theme }) {
   return (
     <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex' }}>
-      {/* Bamboo stems */}
       <div
         style={{
           position: 'absolute',
@@ -292,58 +182,6 @@ export function ZenBackground({ theme }: { theme: Theme }) {
       <div
         style={{
           position: 'absolute',
-          right: 50,
-          top: 100,
-          width: 6,
-          height: 280,
-          background: `linear-gradient(to bottom, ${theme.accentColor}28 0%, ${theme.accentColor}48 50%, ${theme.accentColor}28 100%)`,
-          borderRadius: 3,
-          display: 'flex',
-        }}
-      />
-
-      {/* Bamboo nodes (horizontal lines) */}
-      <div
-        style={{
-          position: 'absolute',
-          left: 35,
-          top: 200,
-          width: 16,
-          height: 2,
-          background: theme.accentColor,
-          opacity: 0.4,
-          display: 'flex',
-        }}
-      />
-      <div
-        style={{
-          position: 'absolute',
-          left: 65,
-          top: 250,
-          width: 15,
-          height: 2,
-          background: theme.accentColor,
-          opacity: 0.35,
-          display: 'flex',
-        }}
-      />
-      <div
-        style={{
-          position: 'absolute',
-          right: 45,
-          top: 220,
-          width: 16,
-          height: 2,
-          background: theme.accentColor,
-          opacity: 0.38,
-          display: 'flex',
-        }}
-      />
-
-      {/* Gentle circular ripples */}
-      <div
-        style={{
-          position: 'absolute',
           bottom: 100,
           left: '40%',
           width: 180,
@@ -353,43 +191,16 @@ export function ZenBackground({ theme }: { theme: Theme }) {
           display: 'flex',
         }}
       />
-      <div
-        style={{
-          position: 'absolute',
-          bottom: 110,
-          left: '42%',
-          width: 160,
-          height: 160,
-          border: `1px solid ${theme.accentColor}15`,
-          borderRadius: '50%',
-          display: 'flex',
-        }}
-      />
-
-      {/* Subtle leaves/petals */}
-      <div
-        style={{
-          position: 'absolute',
-          top: '30%',
-          right: '20%',
-          width: 20,
-          height: 30,
-          background: `linear-gradient(135deg, ${theme.accentColor}25 0%, transparent 100%)`,
-          borderRadius: '50% 0',
-          display: 'flex',
-        }}
-      />
     </div>
   );
 }
 
 /**
- * GitHub Dark Theme - Code elements and Octocat silhouette
+ * GitHub Dark Theme - Code grid
  */
 export function GitHubDarkBackground({ theme }: { theme: Theme }) {
   return (
     <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex' }}>
-      {/* Code-like grid pattern */}
       <div
         style={{
           position: 'absolute',
@@ -406,23 +217,6 @@ export function GitHubDarkBackground({ theme }: { theme: Theme }) {
           display: 'flex',
         }}
       />
-
-      {/* Octagon shapes (simplified Octocat reference) - using rounded square instead of clipPath */}
-      <div
-        style={{
-          position: 'absolute',
-          top: 50,
-          right: 80,
-          width: 80,
-          height: 80,
-          background: `${theme.accentColor}15`,
-          borderRadius: 12,
-          transform: 'rotate(45deg)',
-          display: 'flex',
-        }}
-      />
-
-      {/* Glowing blue accent orbs */}
       <div
         style={{
           position: 'absolute',
@@ -435,55 +229,39 @@ export function GitHubDarkBackground({ theme }: { theme: Theme }) {
           display: 'flex',
         }}
       />
+    </div>
+  );
+}
 
-      {/* Diagonal code lines */}
+/**
+ * Winter Theme - Snowflakes
+ */
+export function WinterBackground({ theme }: { theme: Theme }) {
+  return (
+    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex' }}>
+      {[...Array(8)].map((_, i) => (
+        <div
+          key={i}
+          style={{
+            position: 'absolute',
+            top: `${10 + (i * 12) % 80}%`,
+            left: `${5 + (i * 13) % 90}%`,
+            width: 8 + (i % 3) * 4,
+            height: 8 + (i % 3) * 4,
+            background: `radial-gradient(circle, ${theme.accentColor}40 0%, transparent 70%)`,
+            borderRadius: '50%',
+            display: 'flex',
+          }}
+        />
+      ))}
       <div
         style={{
           position: 'absolute',
-          top: '40%',
-          left: '15%',
-          width: 200,
-          height: 2,
-          background: `linear-gradient(to right, transparent 0%, ${theme.accentColor}30 50%, transparent 100%)`,
-          transform: 'rotate(-15deg)',
-          display: 'flex',
-        }}
-      />
-      <div
-        style={{
-          position: 'absolute',
-          top: '55%',
-          right: '20%',
-          width: 180,
-          height: 2,
-          background: `linear-gradient(to right, transparent 0%, ${theme.accentColor}25 50%, transparent 100%)`,
-          transform: 'rotate(12deg)',
-          display: 'flex',
-        }}
-      />
-
-      {/* Corner brackets (like code blocks) */}
-      <div
-        style={{
-          position: 'absolute',
-          top: 20,
-          left: 20,
-          width: 60,
-          height: 60,
-          borderTop: `2px solid ${theme.accentColor}40`,
-          borderLeft: `2px solid ${theme.accentColor}40`,
-          display: 'flex',
-        }}
-      />
-      <div
-        style={{
-          position: 'absolute',
-          bottom: 20,
-          right: 20,
-          width: 60,
-          height: 60,
-          borderBottom: `2px solid ${theme.accentColor}40`,
-          borderRight: `2px solid ${theme.accentColor}40`,
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: 150,
+          background: `linear-gradient(to top, ${theme.accentColor}15 0%, transparent 100%)`,
           display: 'flex',
         }}
       />
@@ -492,31 +270,497 @@ export function GitHubDarkBackground({ theme }: { theme: Theme }) {
 }
 
 /**
+ * Spring Theme - Cherry blossoms
+ */
+export function SpringBackground({ theme }: { theme: Theme }) {
+  return (
+    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex' }}>
+      {[...Array(6)].map((_, i) => (
+        <div
+          key={i}
+          style={{
+            position: 'absolute',
+            top: `${15 + (i * 14) % 70}%`,
+            left: `${8 + (i * 16) % 85}%`,
+            width: 12 + (i % 2) * 6,
+            height: 12 + (i % 2) * 6,
+            background: `radial-gradient(circle, ${theme.accentColor}35 0%, transparent 70%)`,
+            borderRadius: '50%',
+            display: 'flex',
+          }}
+        />
+      ))}
+      <div
+        style={{
+          position: 'absolute',
+          top: '10%',
+          right: '5%',
+          width: 200,
+          height: 200,
+          background: `radial-gradient(circle, ${theme.accentColor}20 0%, transparent 60%)`,
+          borderRadius: '50%',
+          display: 'flex',
+        }}
+      />
+    </div>
+  );
+}
+
+/**
+ * Summer Theme - Sun rays
+ */
+export function SummerBackground({ theme }: { theme: Theme }) {
+  return (
+    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex' }}>
+      <div
+        style={{
+          position: 'absolute',
+          top: -100,
+          right: -100,
+          width: 400,
+          height: 400,
+          background: `radial-gradient(circle, ${theme.accentColor}30 0%, transparent 60%)`,
+          borderRadius: '50%',
+          display: 'flex',
+        }}
+      />
+      <div
+        style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: 200,
+          background: `linear-gradient(to top, ${theme.accentColor}20 0%, transparent 100%)`,
+          display: 'flex',
+        }}
+      />
+    </div>
+  );
+}
+
+/**
+ * Autumn Theme - Falling leaves
+ */
+export function AutumnBackground({ theme }: { theme: Theme }) {
+  return (
+    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex' }}>
+      {[...Array(5)].map((_, i) => (
+        <div
+          key={i}
+          style={{
+            position: 'absolute',
+            top: `${20 + (i * 15) % 60}%`,
+            left: `${10 + (i * 18) % 80}%`,
+            width: 16,
+            height: 20,
+            background: `linear-gradient(135deg, ${theme.accentColor}40 0%, transparent 100%)`,
+            borderRadius: '50% 0',
+            transform: `rotate(${45 + i * 30}deg)`,
+            display: 'flex',
+          }}
+        />
+      ))}
+      <div
+        style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: 120,
+          background: `linear-gradient(to top, ${theme.accentColor}15 0%, transparent 100%)`,
+          display: 'flex',
+        }}
+      />
+    </div>
+  );
+}
+
+/**
+ * Christmas Theme - Festive ornaments
+ */
+export function ChristmasBackground({ theme }: { theme: Theme }) {
+  return (
+    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex' }}>
+      {[...Array(6)].map((_, i) => (
+        <div
+          key={i}
+          style={{
+            position: 'absolute',
+            top: `${10 + (i * 12) % 50}%`,
+            left: `${5 + (i * 17) % 90}%`,
+            width: 14,
+            height: 14,
+            background: i % 2 === 0 ? '#ef444460' : '#22c55e60',
+            borderRadius: '50%',
+            display: 'flex',
+          }}
+        />
+      ))}
+      <div
+        style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: 100,
+          background: `linear-gradient(to top, #ffffff15 0%, transparent 100%)`,
+          display: 'flex',
+        }}
+      />
+    </div>
+  );
+}
+
+/**
+ * Halloween Theme - Spooky elements
+ */
+export function HalloweenBackground({ theme }: { theme: Theme }) {
+  return (
+    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex' }}>
+      <div
+        style={{
+          position: 'absolute',
+          top: -60,
+          right: 80,
+          width: 180,
+          height: 180,
+          background: `radial-gradient(circle, #fbbf2440 0%, transparent 60%)`,
+          borderRadius: '50%',
+          display: 'flex',
+        }}
+      />
+      {[...Array(4)].map((_, i) => (
+        <div
+          key={i}
+          style={{
+            position: 'absolute',
+            top: `${25 + (i * 18) % 50}%`,
+            left: `${15 + (i * 22) % 70}%`,
+            width: 20,
+            height: 16,
+            background: `${theme.accentColor}30`,
+            borderRadius: '50% 50% 0 0',
+            display: 'flex',
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+/**
+ * Ocean Theme - Waves
+ */
+export function OceanBackground({ theme }: { theme: Theme }) {
+  return (
+    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex' }}>
+      <div
+        style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: 200,
+          background: `linear-gradient(to top, ${theme.accentColor}25 0%, transparent 100%)`,
+          display: 'flex',
+        }}
+      />
+      <div
+        style={{
+          position: 'absolute',
+          top: '30%',
+          left: '20%',
+          width: 300,
+          height: 150,
+          background: `radial-gradient(ellipse, ${theme.accentColor}15 0%, transparent 70%)`,
+          display: 'flex',
+        }}
+      />
+    </div>
+  );
+}
+
+/**
+ * Forest Theme - Trees
+ */
+export function ForestBackground({ theme }: { theme: Theme }) {
+  return (
+    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex' }}>
+      {[...Array(4)].map((_, i) => (
+        <div
+          key={i}
+          style={{
+            position: 'absolute',
+            bottom: 0,
+            left: `${10 + i * 25}%`,
+            width: 8,
+            height: 200 + i * 30,
+            background: `linear-gradient(to top, ${theme.accentColor}40 0%, ${theme.accentColor}20 100%)`,
+            borderRadius: '4px 4px 0 0',
+            display: 'flex',
+          }}
+        />
+      ))}
+      <div
+        style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: 80,
+          background: `linear-gradient(to top, ${theme.accentColor}20 0%, transparent 100%)`,
+          display: 'flex',
+        }}
+      />
+    </div>
+  );
+}
+
+/**
+ * Sunset Theme - Clouds
+ */
+export function SunsetBackground({ theme }: { theme: Theme }) {
+  return (
+    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex' }}>
+      {[...Array(3)].map((_, i) => (
+        <div
+          key={i}
+          style={{
+            position: 'absolute',
+            top: `${20 + i * 25}%`,
+            left: `${10 + i * 30}%`,
+            width: 120 + i * 20,
+            height: 40,
+            background: `radial-gradient(ellipse, ${theme.accentColor}25 0%, transparent 70%)`,
+            borderRadius: '50%',
+            display: 'flex',
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+/**
+ * Midnight Theme - Stars
+ */
+export function MidnightBackground({ theme }: { theme: Theme }) {
+  return (
+    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex' }}>
+      {[...Array(12)].map((_, i) => (
+        <div
+          key={i}
+          style={{
+            position: 'absolute',
+            top: `${5 + (i * 8) % 90}%`,
+            left: `${3 + (i * 9) % 94}%`,
+            width: 3 + (i % 3),
+            height: 3 + (i % 3),
+            background: theme.accentColor,
+            borderRadius: '50%',
+            opacity: 0.4 + (i % 5) * 0.1,
+            display: 'flex',
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+/**
+ * Aurora Theme - Northern lights
+ */
+export function AuroraBackground({ theme }: { theme: Theme }) {
+  return (
+    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex' }}>
+      <div
+        style={{
+          position: 'absolute',
+          top: '10%',
+          left: '10%',
+          width: '80%',
+          height: 150,
+          background: `linear-gradient(90deg, transparent 0%, ${theme.accentColor}30 30%, #22d3ee30 70%, transparent 100%)`,
+          borderRadius: '50%',
+          transform: 'skewY(-5deg)',
+          display: 'flex',
+        }}
+      />
+      <div
+        style={{
+          position: 'absolute',
+          top: '30%',
+          left: '5%',
+          width: '90%',
+          height: 100,
+          background: `linear-gradient(90deg, transparent 0%, #a78bfa25 40%, ${theme.accentColor}25 60%, transparent 100%)`,
+          borderRadius: '50%',
+          transform: 'skewY(3deg)',
+          display: 'flex',
+        }}
+      />
+    </div>
+  );
+}
+
+/**
+ * Retro Theme - Synthwave grid
+ */
+export function RetroBackground({ theme }: { theme: Theme }) {
+  return (
+    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex' }}>
+      <div
+        style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: '60%',
+          backgroundImage: `
+            linear-gradient(${theme.accentColor}30 1px, transparent 1px),
+            linear-gradient(90deg, ${theme.accentColor}30 1px, transparent 1px)
+          `,
+          backgroundSize: '40px 40px',
+          transform: 'perspective(500px) rotateX(60deg)',
+          transformOrigin: 'bottom',
+          display: 'flex',
+        }}
+      />
+      <div
+        style={{
+          position: 'absolute',
+          top: '10%',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: 200,
+          height: 200,
+          background: `radial-gradient(circle, #22d3ee40 0%, ${theme.accentColor}20 50%, transparent 70%)`,
+          borderRadius: '50%',
+          display: 'flex',
+        }}
+      />
+    </div>
+  );
+}
+
+/**
+ * Minimal Theme - Subtle dots
+ */
+export function MinimalBackground({ theme }: { theme: Theme }) {
+  return (
+    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex' }}>
+      <div
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundImage: `radial-gradient(${theme.accentColor}20 1px, transparent 1px)`,
+          backgroundSize: '20px 20px',
+          display: 'flex',
+        }}
+      />
+    </div>
+  );
+}
+
+/**
+ * Pastel Theme - Soft bubbles
+ */
+export function PastelBackground({ theme }: { theme: Theme }) {
+  return (
+    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex' }}>
+      {[...Array(6)].map((_, i) => (
+        <div
+          key={i}
+          style={{
+            position: 'absolute',
+            top: `${15 + (i * 14) % 70}%`,
+            left: `${8 + (i * 16) % 85}%`,
+            width: 60 + (i % 3) * 30,
+            height: 60 + (i % 3) * 30,
+            background: `radial-gradient(circle, ${theme.accentColor}20 0%, transparent 70%)`,
+            borderRadius: '50%',
+            display: 'flex',
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+/**
+ * Matrix Theme - Code rain
+ */
+export function MatrixBackground({ theme }: { theme: Theme }) {
+  return (
+    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex' }}>
+      {[...Array(15)].map((_, i) => (
+        <div
+          key={i}
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: `${3 + i * 7}%`,
+            width: 2,
+            height: `${30 + (i * 17) % 70}%`,
+            background: `linear-gradient(to bottom, transparent 0%, ${theme.accentColor}40 50%, transparent 100%)`,
+            display: 'flex',
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+/**
  * Get theme-specific background pattern component
- * Returns a wrapper div to ensure Satori compatibility
  */
 export function getThemeBackground(themeName: string, theme: Theme): JSX.Element {
-  let BackgroundComponent: JSX.Element;
-
   switch (themeName) {
     case 'satan':
-      BackgroundComponent = <SatanBackground theme={theme} />;
-      break;
+      return <SatanBackground theme={theme} />;
     case 'neon':
-      BackgroundComponent = <NeonBackground theme={theme} />;
-      break;
+      return <NeonBackground theme={theme} />;
     case 'dracula':
-      BackgroundComponent = <DraculaBackground theme={theme} />;
-      break;
+      return <DraculaBackground theme={theme} />;
     case 'zen':
-      BackgroundComponent = <ZenBackground theme={theme} />;
-      break;
+      return <ZenBackground theme={theme} />;
     case 'github-dark':
-      BackgroundComponent = <GitHubDarkBackground theme={theme} />;
-      break;
+      return <GitHubDarkBackground theme={theme} />;
+    case 'winter':
+      return <WinterBackground theme={theme} />;
+    case 'spring':
+      return <SpringBackground theme={theme} />;
+    case 'summer':
+      return <SummerBackground theme={theme} />;
+    case 'autumn':
+      return <AutumnBackground theme={theme} />;
+    case 'christmas':
+      return <ChristmasBackground theme={theme} />;
+    case 'halloween':
+      return <HalloweenBackground theme={theme} />;
+    case 'ocean':
+      return <OceanBackground theme={theme} />;
+    case 'forest':
+      return <ForestBackground theme={theme} />;
+    case 'sunset':
+      return <SunsetBackground theme={theme} />;
+    case 'midnight':
+      return <MidnightBackground theme={theme} />;
+    case 'aurora':
+      return <AuroraBackground theme={theme} />;
+    case 'retro':
+      return <RetroBackground theme={theme} />;
+    case 'minimal':
+      return <MinimalBackground theme={theme} />;
+    case 'pastel':
+      return <PastelBackground theme={theme} />;
+    case 'matrix':
+      return <MatrixBackground theme={theme} />;
     default:
-      BackgroundComponent = <div style={{ display: 'flex' }} />;
+      return <div style={{ display: 'flex' }} />;
   }
-
-  return BackgroundComponent;
 }

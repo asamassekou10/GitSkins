@@ -39,9 +39,19 @@ export interface Theme {
 }
 
 /**
- * Theme name identifier (must match registry keys)
+ * Theme name identifier (must match premium registry keys - all 20 themes)
  */
-export type ThemeName = 'satan' | 'neon' | 'zen' | 'github-dark' | 'dracula';
+export type ThemeName =
+  // Original themes
+  | 'satan' | 'neon' | 'zen' | 'github-dark' | 'dracula'
+  // Seasonal themes
+  | 'winter' | 'spring' | 'summer' | 'autumn'
+  // Holiday themes
+  | 'christmas' | 'halloween'
+  // Developer themes
+  | 'ocean' | 'forest' | 'sunset' | 'midnight' | 'aurora'
+  // Aesthetic themes
+  | 'retro' | 'minimal' | 'pastel' | 'matrix';
 
 /**
  * Single day contribution data from GitHub API

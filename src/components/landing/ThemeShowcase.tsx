@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { analytics } from '@/components/AnalyticsProvider';
 
 interface Theme {
@@ -7,6 +8,8 @@ interface Theme {
   name: string;
   color: string;
   description: string;
+  category?: string;
+  free?: boolean;
 }
 
 interface ThemeShowcaseProps {
@@ -16,9 +19,35 @@ interface ThemeShowcaseProps {
   username: string;
 }
 
+const categoryLabels: Record<string, string> = {
+  original: 'Original',
+  seasonal: 'Seasonal',
+  holiday: 'Holiday',
+  developer: 'Developer',
+  aesthetic: 'Aesthetic',
+};
+
+const categoryOrder = ['original', 'seasonal', 'holiday', 'developer', 'aesthetic'];
+
 export function ThemeShowcase({ themes, selectedTheme, onThemeSelect, username }: ThemeShowcaseProps) {
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+
+  // Group themes by category
+  const groupedThemes = themes.reduce((acc, theme) => {
+    const category = theme.category || 'original';
+    if (!acc[category]) acc[category] = [];
+    acc[category].push(theme);
+    return acc;
+  }, {} as Record<string, Theme[]>);
+
+  // Filter themes based on active category
+  const displayThemes = activeCategory
+    ? themes.filter((t) => t.category === activeCategory)
+    : themes;
+
   return (
     <section
+      id="themes"
       style={{
         padding: '80px 20px',
         background: 'linear-gradient(180deg, #0a0a0a 0%, #0d0d0d 100%)',
@@ -36,37 +65,89 @@ export function ThemeShowcase({ themes, selectedTheme, onThemeSelect, username }
             fontWeight: 800,
             textAlign: 'center',
             marginBottom: '16px',
-            background: 'linear-gradient(135deg, #a855f7 0%, #ec4899 50%, #f97316 100%)',
+            background: 'linear-gradient(135deg, #22c55e 0%, #4ade80 50%, #86efac 100%)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text',
           }}
         >
-          Choose Your Theme
+          20 Premium Themes
         </h2>
         <p
           style={{
             textAlign: 'center',
             color: '#888888',
             fontSize: '18px',
-            marginBottom: '48px',
+            marginBottom: '32px',
             maxWidth: '600px',
             marginLeft: 'auto',
             marginRight: 'auto',
           }}
         >
-          Preview all available themes and find your perfect match
+          From seasonal to aesthetic, find your perfect match
         </p>
+
+        {/* Category Filter */}
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            gap: '12px',
+            marginBottom: '48px',
+            flexWrap: 'wrap',
+          }}
+        >
+          <button
+            onClick={() => setActiveCategory(null)}
+            style={{
+              padding: '10px 20px',
+              background: activeCategory === null ? '#22c55e' : '#1a1a1a',
+              border: '1px solid',
+              borderColor: activeCategory === null ? '#22c55e' : '#2a2a2a',
+              borderRadius: '24px',
+              color: activeCategory === null ? '#000' : '#888',
+              fontSize: '14px',
+              fontWeight: 600,
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+            }}
+          >
+            All ({themes.length})
+          </button>
+          {categoryOrder.map((category) => {
+            const count = groupedThemes[category]?.length || 0;
+            if (count === 0) return null;
+            return (
+              <button
+                key={category}
+                onClick={() => setActiveCategory(category)}
+                style={{
+                  padding: '10px 20px',
+                  background: activeCategory === category ? '#22c55e' : '#1a1a1a',
+                  border: '1px solid',
+                  borderColor: activeCategory === category ? '#22c55e' : '#2a2a2a',
+                  borderRadius: '24px',
+                  color: activeCategory === category ? '#000' : '#888',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                }}
+              >
+                {categoryLabels[category]} ({count})
+              </button>
+            );
+          })}
+        </div>
 
         <div
           style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
             gap: '24px',
-            marginTop: '48px',
           }}
         >
-          {themes.map((theme) => (
+          {displayThemes.map((theme) => (
             <div
               key={theme.id}
               onClick={() => {
@@ -97,23 +178,46 @@ export function ThemeShowcase({ themes, selectedTheme, onThemeSelect, username }
                 }
               }}
             >
-              {selectedTheme === theme.id && (
-                <div
-                  style={{
-                    position: 'absolute',
-                    top: '12px',
-                    right: '12px',
-                    background: theme.color,
-                    color: '#ffffff',
-                    padding: '4px 12px',
-                    borderRadius: '12px',
-                    fontSize: '12px',
-                    fontWeight: 600,
-                  }}
-                >
-                  Selected
-                </div>
-              )}
+              {/* Badges */}
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '12px',
+                  right: '12px',
+                  display: 'flex',
+                  gap: '8px',
+                }}
+              >
+                {theme.free && (
+                  <span
+                    style={{
+                      background: '#22c55e20',
+                      color: '#22c55e',
+                      padding: '4px 10px',
+                      borderRadius: '12px',
+                      fontSize: '11px',
+                      fontWeight: 600,
+                    }}
+                  >
+                    FREE
+                  </span>
+                )}
+                {selectedTheme === theme.id && (
+                  <span
+                    style={{
+                      background: theme.color,
+                      color: '#ffffff',
+                      padding: '4px 12px',
+                      borderRadius: '12px',
+                      fontSize: '11px',
+                      fontWeight: 600,
+                    }}
+                  >
+                    Selected
+                  </span>
+                )}
+              </div>
+
               <div
                 style={{
                   width: '100%',
@@ -136,16 +240,26 @@ export function ThemeShowcase({ themes, selectedTheme, onThemeSelect, username }
                   loading="lazy"
                 />
               </div>
-              <h3
-                style={{
-                  fontSize: '20px',
-                  fontWeight: 700,
-                  color: '#ffffff',
-                  marginBottom: '8px',
-                }}
-              >
-                {theme.name}
-              </h3>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                <div
+                  style={{
+                    width: '12px',
+                    height: '12px',
+                    borderRadius: '50%',
+                    background: theme.color,
+                  }}
+                />
+                <h3
+                  style={{
+                    fontSize: '18px',
+                    fontWeight: 700,
+                    color: '#ffffff',
+                    margin: 0,
+                  }}
+                >
+                  {theme.name}
+                </h3>
+              </div>
               <p
                 style={{
                   color: '#888888',

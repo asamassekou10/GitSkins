@@ -59,7 +59,7 @@ export function BenefitsSection() {
             fontWeight: 800,
             textAlign: 'center',
             marginBottom: '16px',
-            background: 'linear-gradient(135deg, #ff4500 0%, #ff6b35 100%)',
+            background: 'linear-gradient(135deg, #22c55e 0%, #4ade80 100%)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text',
@@ -102,7 +102,7 @@ export function BenefitsSection() {
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = 'translateY(-4px)';
-                e.currentTarget.style.borderColor = '#ff4500';
+                e.currentTarget.style.borderColor = '#22c55e';
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.transform = 'translateY(0)';

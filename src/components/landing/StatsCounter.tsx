@@ -66,7 +66,7 @@ export function StatsCounter({ stats }: StatsCounterProps) {
             style={{
               fontSize: 'clamp(32px, 5vw, 48px)',
               fontWeight: 800,
-              background: 'linear-gradient(135deg, #ff4500 0%, #ff6b35 50%, #ff8c00 100%)',
+              background: 'linear-gradient(135deg, #22c55e 0%, #4ade80 50%, #86efac 100%)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',

@@ -1,5 +1,68 @@
 @import "tailwindcss";
 
+/* CSS Custom Properties - Color Scheme */
+:root {
+  --accent: #22c55e;
+  --accent-light: #4ade80;
+  --accent-dark: #16a34a;
+  --accent-muted: rgba(34, 197, 94, 0.15);
+  --accent-glow: rgba(34, 197, 94, 0.4);
+
+  --bg-primary: #0a0a0a;
+  --bg-secondary: #0d0d0d;
+  --bg-card: #161616;
+  --bg-elevated: #1a1a1a;
+
+  --border: #2a2a2a;
+  --border-hover: #22c55e;
+
+  --text-primary: #ffffff;
+  --text-secondary: #888888;
+  --text-muted: #666666;
+}
+
+/* Aurora/Glow Background Animations */
+@keyframes aurora-pulse {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.05);
+    opacity: 0.7;
+  }
+}
+
+@keyframes aurora-float {
+  0%, 100% {
+    transform: translate(-50%, -50%) translateY(0);
+  }
+  50% {
+    transform: translate(-50%, -50%) translateY(-20px);
+  }
+}
+
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 20px var(--accent-glow);
+  }
+  50% {
+    box-shadow: 0 0 40px var(--accent-glow), 0 0 60px var(--accent-muted);
+  }
+}
+
 /* Loading animations */
 @keyframes pulse {
   0%, 100% {
@@ -14,4 +77,53 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .aurora-sphere,
+  .aurora-glow {
+    animation: none !important;
+  }
+}
+
+/* Aurora sphere styles */
+.aurora-sphere {
+  position: absolute;
+  top: 15%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 800px;
+  height: 600px;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(34, 197, 94, 0.25) 0%,
+    rgba(34, 197, 94, 0.15) 25%,
+    rgba(34, 197, 94, 0.05) 50%,
+    transparent 70%
+  );
+  border-radius: 50%;
+  filter: blur(60px);
+  animation: aurora-pulse 8s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
 }

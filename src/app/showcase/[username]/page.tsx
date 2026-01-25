@@ -6,14 +6,45 @@ import { useParams, useSearchParams } from 'next/navigation';
 import type { PremiumThemeName } from '@/types/premium-theme';
 import { analytics } from '@/components/AnalyticsProvider';
 
-const themes: PremiumThemeName[] = ['satan', 'neon', 'zen', 'github-dark', 'dracula'];
+const themes: PremiumThemeName[] = [
+  // Original
+  'satan', 'neon', 'zen', 'github-dark', 'dracula',
+  // Seasonal
+  'winter', 'spring', 'summer', 'autumn',
+  // Holiday
+  'christmas', 'halloween',
+  // Developer
+  'ocean', 'forest', 'sunset', 'midnight', 'aurora',
+  // Aesthetic
+  'retro', 'minimal', 'pastel', 'matrix',
+];
 
 const themeLabels: Record<PremiumThemeName, string> = {
+  // Original
   'satan': '🔥 Satan',
   'neon': '⚡ Neon',
   'zen': '🍃 Zen',
   'github-dark': '💼 GitHub Dark',
   'dracula': '🦇 Dracula',
+  // Seasonal
+  'winter': '❄️ Winter',
+  'spring': '🌸 Spring',
+  'summer': '☀️ Summer',
+  'autumn': '🍂 Autumn',
+  // Holiday
+  'christmas': '🎄 Christmas',
+  'halloween': '🎃 Halloween',
+  // Developer
+  'ocean': '🌊 Ocean',
+  'forest': '🌲 Forest',
+  'sunset': '🌅 Sunset',
+  'midnight': '🌙 Midnight',
+  'aurora': '✨ Aurora',
+  // Aesthetic
+  'retro': '📼 Retro',
+  'minimal': '⬜ Minimal',
+  'pastel': '🎨 Pastel',
+  'matrix': '💚 Matrix',
 };
 
 export default function ShowcasePage() {

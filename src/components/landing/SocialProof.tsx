@@ -96,7 +96,7 @@ export function SocialProof({ testimonials = defaultTestimonials }: SocialProofP
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = 'translateY(-4px)';
-                e.currentTarget.style.borderColor = '#ff4500';
+                e.currentTarget.style.borderColor = '#22c55e';
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.transform = 'translateY(0)';
@@ -137,7 +137,7 @@ export function SocialProof({ testimonials = defaultTestimonials }: SocialProofP
                       width: '48px',
                       height: '48px',
                       borderRadius: '50%',
-                      background: 'linear-gradient(135deg, #ff4500 0%, #ff6b35 100%)',
+                      background: 'linear-gradient(135deg, #22c55e 0%, #4ade80 100%)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',

@@ -40,12 +40,12 @@ export function FeedbackWidget() {
           width: '56px',
           height: '56px',
           borderRadius: '50%',
-          background: 'linear-gradient(135deg, #ff4500 0%, #ff6b35 100%)',
+          background: 'linear-gradient(135deg, #22c55e 0%, #4ade80 100%)',
           border: 'none',
-          color: '#ffffff',
+          color: '#000000',
           fontSize: '24px',
           cursor: 'pointer',
-          boxShadow: '0 4px 12px rgba(255, 69, 0, 0.4)',
+          boxShadow: '0 4px 12px rgba(34, 197, 94, 0.4)',
           zIndex: 1000,
           display: 'flex',
           alignItems: 'center',
@@ -54,11 +54,11 @@ export function FeedbackWidget() {
         }}
         onMouseEnter={(e) => {
           e.currentTarget.style.transform = 'scale(1.1)';
-          e.currentTarget.style.boxShadow = '0 6px 16px rgba(255, 69, 0, 0.6)';
+          e.currentTarget.style.boxShadow = '0 6px 16px rgba(34, 197, 94, 0.6)';
         }}
         onMouseLeave={(e) => {
           e.currentTarget.style.transform = 'scale(1)';
-          e.currentTarget.style.boxShadow = '0 4px 12px rgba(255, 69, 0, 0.4)';
+          e.currentTarget.style.boxShadow = '0 4px 12px rgba(34, 197, 94, 0.4)';
         }}
         aria-label="Feedback"
       >
@@ -223,7 +223,7 @@ export function FeedbackWidget() {
             style={{
               width: '100%',
               padding: '12px',
-              background: 'linear-gradient(135deg, #ff4500 0%, #ff6b35 100%)',
+              background: 'linear-gradient(135deg, #22c55e 0%, #4ade80 100%)',
               border: 'none',
               borderRadius: '8px',
               color: '#ffffff',

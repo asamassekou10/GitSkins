@@ -451,6 +451,271 @@ export async function fetchExtendedGitHubData(
 }
 
 /**
+ * Extended GraphQL query for README generation
+ * Includes social links, location, company, etc.
+ */
+const README_GENERATOR_QUERY = `
+  query($username: String!) {
+    user(login: $username) {
+      name
+      bio
+      avatarUrl
+      location
+      company
+      websiteUrl
+      twitterUsername
+      followers {
+        totalCount
+      }
+      following {
+        totalCount
+      }
+      repositories(first: 100, ownerAffiliations: OWNER, isFork: false, orderBy: {field: STARGAZERS, direction: DESC}) {
+        totalCount
+        nodes {
+          stargazers {
+            totalCount
+          }
+          languages(first: 10, orderBy: {field: SIZE, direction: DESC}) {
+            edges {
+              size
+              node {
+                name
+                color
+              }
+            }
+          }
+        }
+      }
+      pinnedItems(first: 6, types: REPOSITORY) {
+        nodes {
+          ... on Repository {
+            name
+            description
+            url
+            stargazerCount
+            forkCount
+            primaryLanguage {
+              name
+              color
+            }
+          }
+        }
+      }
+      contributionsCollection {
+        contributionCalendar {
+          totalContributions
+          weeks {
+            contributionDays {
+              contributionCount
+              date
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
+/**
+ * README Generator GraphQL response type
+ */
+interface ReadmeGeneratorResponse {
+  user: {
+    name: string | null;
+    bio: string | null;
+    avatarUrl: string;
+    location: string | null;
+    company: string | null;
+    websiteUrl: string | null;
+    twitterUsername: string | null;
+    followers: { totalCount: number };
+    following: { totalCount: number };
+    repositories: {
+      totalCount: number;
+      nodes: Array<{
+        stargazers: { totalCount: number };
+        languages: {
+          edges: Array<{
+            size: number;
+            node: { name: string; color: string | null };
+          }>;
+        };
+      }>;
+    };
+    pinnedItems: {
+      nodes: Array<{
+        name: string;
+        description: string | null;
+        url: string;
+        stargazerCount: number;
+        forkCount: number;
+        primaryLanguage: { name: string; color: string } | null;
+      }>;
+    };
+    contributionsCollection: {
+      contributionCalendar: {
+        totalContributions: number;
+        weeks: Array<{
+          contributionDays: Array<{
+            contributionCount: number;
+            date: string;
+          }>;
+        }>;
+      };
+    };
+  } | null;
+}
+
+/**
+ * Extended profile data type for README generator
+ */
+export interface ExtendedProfileData {
+  name: string | null;
+  bio: string | null;
+  avatarUrl: string;
+  location: string | null;
+  company: string | null;
+  websiteUrl: string | null;
+  twitterUsername: string | null;
+  followers: number;
+  following: number;
+  totalContributions: number;
+  totalStars: number;
+  totalRepos: number;
+  languages: Array<{ name: string; color: string; percentage: number }>;
+  pinnedRepos: Array<{
+    name: string;
+    description: string | null;
+    stars: number;
+    forks: number;
+    language: string | null;
+    url: string;
+  }>;
+  streak: { current: number; longest: number; totalDays: number };
+}
+
+/**
+ * Fetch extended profile data for README generation
+ */
+export async function fetchProfileForReadme(
+  username: string
+): Promise<ExtendedProfileData | null> {
+  try {
+    const response = await octokit.graphql<ReadmeGeneratorResponse>(
+      README_GENERATOR_QUERY,
+      { username }
+    );
+
+    if (!response.user) {
+      return null;
+    }
+
+    const { user } = response;
+    const weeks = user.contributionsCollection.contributionCalendar.weeks;
+
+    // Calculate total stars
+    const totalStars = user.repositories.nodes.reduce(
+      (sum, repo) => sum + repo.stargazers.totalCount,
+      0
+    );
+
+    // Aggregate languages
+    const langTotals = new Map<string, { bytes: number; color: string }>();
+    for (const repo of user.repositories.nodes) {
+      for (const edge of repo.languages.edges) {
+        const existing = langTotals.get(edge.node.name) || {
+          bytes: 0,
+          color: edge.node.color || '#808080',
+        };
+        existing.bytes += edge.size;
+        langTotals.set(edge.node.name, existing);
+      }
+    }
+
+    const totalBytes = Array.from(langTotals.values()).reduce(
+      (sum, lang) => sum + lang.bytes,
+      0
+    );
+
+    const languages = totalBytes > 0
+      ? Array.from(langTotals.entries())
+          .map(([name, data]) => ({
+            name,
+            color: data.color,
+            percentage: Math.round((data.bytes / totalBytes) * 100),
+          }))
+          .sort((a, b) => b.percentage - a.percentage)
+          .slice(0, 8)
+      : [];
+
+    // Calculate streaks
+    const streak = calculateStreaks(weeks);
+
+    // Transform pinned repos
+    const pinnedRepos = user.pinnedItems.nodes.map((repo) => ({
+      name: repo.name,
+      description: repo.description,
+      stars: repo.stargazerCount,
+      forks: repo.forkCount,
+      language: repo.primaryLanguage?.name || null,
+      url: repo.url,
+    }));
+
+    return {
+      name: user.name,
+      bio: user.bio,
+      avatarUrl: user.avatarUrl,
+      location: user.location,
+      company: user.company,
+      websiteUrl: user.websiteUrl,
+      twitterUsername: user.twitterUsername,
+      followers: user.followers.totalCount,
+      following: user.following.totalCount,
+      totalContributions: user.contributionsCollection.contributionCalendar.totalContributions,
+      totalStars,
+      totalRepos: user.repositories.totalCount,
+      languages,
+      pinnedRepos,
+      streak: {
+        current: streak.currentStreak,
+        longest: streak.longestStreak,
+        totalDays: streak.totalActiveDays,
+      },
+    };
+  } catch (error: unknown) {
+    if (
+      error &&
+      typeof error === 'object' &&
+      'errors' in error &&
+      Array.isArray(error.errors)
+    ) {
+      const firstError = error.errors[0];
+      if (
+        typeof firstError === 'object' &&
+        firstError !== null &&
+        'type' in firstError &&
+        firstError.type === 'NOT_FOUND'
+      ) {
+        return null;
+      }
+    }
+
+    if (
+      error &&
+      typeof error === 'object' &&
+      'message' in error &&
+      typeof error.message === 'string' &&
+      error.message.includes('Could not resolve')
+    ) {
+      return null;
+    }
+
+    throw error;
+  }
+}
+
+/**
  * Fetch a specific repository's data
  *
  * @param username - GitHub username

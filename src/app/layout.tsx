@@ -81,10 +81,10 @@ export default function RootLayout({
             -moz-osx-font-smoothing: grayscale;
           }
           ::selection {
-            background: #ff450040;
+            background: #22c55e40;
           }
           input:focus {
-            border-color: #ff4500 !important;
+            border-color: #22c55e !important;
           }
           button:hover {
             opacity: 0.9;

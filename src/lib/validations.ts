@@ -7,12 +7,13 @@
 
 import { z } from 'zod';
 import type { ThemeName } from '@/types';
-import { getThemeRegistry } from '@/registry/themes';
+import type { PremiumThemeName } from '@/types/premium-theme';
+import { getPremiumThemeNames } from '@/registry/themes/premium-registry';
 
 /**
- * Valid theme names from the registry
+ * Valid theme names from the premium registry (all 20 themes)
  */
-const validThemeNames = Object.keys(getThemeRegistry()) as ThemeName[];
+const validThemeNames = getPremiumThemeNames() as string[];
 
 /**
  * Username validation schema
@@ -41,20 +42,20 @@ export const usernameSchema = z
 
 /**
  * Theme name validation schema
- * - Must be a valid theme from the registry
+ * - Must be a valid theme from the premium registry (all 20 themes)
  * - Case-insensitive
- * - Defaults to 'satan' if not provided
+ * - Defaults to 'github-dark' if not provided
  */
 export const themeSchema = z
   .string()
   .optional()
-  .default('satan')
+  .default('github-dark')
   .transform((val) => {
-    const normalized = val?.toLowerCase() as ThemeName;
+    const normalized = val?.toLowerCase();
     if (validThemeNames.includes(normalized)) {
-      return normalized;
+      return normalized as ThemeName;
     }
-    return 'satan' as ThemeName; // Fallback to default
+    return 'github-dark' as ThemeName; // Fallback to default
   });
 
 /**
