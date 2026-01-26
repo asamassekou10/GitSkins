@@ -383,7 +383,7 @@ export default function Home() {
                   >
                     <img
                       key={`${widget.id}-${username}-${selectedTheme}`}
-                      src={`${widget.path}?username=${username}&theme=${selectedTheme}`}
+                      src={`${widget.path}?username=${username}&theme=${selectedTheme}&_t=${Date.now()}`}
                       alt={`${widget.name} preview`}
                       style={{
                         width: '100%',
