@@ -3,6 +3,7 @@ import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { Suspense } from 'react';
 import { PostHogProvider } from '@/components/providers/posthog-provider';
+import { SessionProvider } from '@/components/providers/session-provider';
 import { AnalyticsProvider } from '@/components/AnalyticsProvider';
 import { FeedbackWidget } from '@/components/FeedbackWidget';
 import { siteConfig } from '@/config/site';
@@ -95,16 +96,18 @@ export default function RootLayout({
         `}</style>
       </head>
       <body>
-        <PostHogProvider>
-          <Suspense fallback={null}>
-            <AnalyticsProvider>
-              {children}
-              <FeedbackWidget />
-            </AnalyticsProvider>
-          </Suspense>
-          <Analytics />
-          <SpeedInsights />
-        </PostHogProvider>
+        <SessionProvider>
+          <PostHogProvider>
+            <Suspense fallback={null}>
+              <AnalyticsProvider>
+                {children}
+                <FeedbackWidget />
+              </AnalyticsProvider>
+            </Suspense>
+            <Analytics />
+            <SpeedInsights />
+          </PostHogProvider>
+        </SessionProvider>
       </body>
     </html>
   );

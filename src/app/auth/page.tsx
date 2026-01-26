@@ -10,7 +10,7 @@ export default function AuthPage() {
   const handleGitHubSignIn = async () => {
     setIsLoading(true);
     try {
-      await signIn('github', { callbackUrl: '/readme-generator' });
+      await signIn('github', { callbackUrl: '/' });
     } catch {
       setIsLoading(false);
     }
