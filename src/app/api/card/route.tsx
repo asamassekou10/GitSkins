@@ -17,7 +17,7 @@ import {
 import { imageConfig, apiConfig, siteConfig } from '@/config/site';
 import { getThemeIcons } from '@/lib/theme-icons';
 import { getThemeBackground } from '@/lib/theme-patterns';
-import type { GitHubData, ThemeName } from '@/types';
+import type { GitHubData, ThemeName, Theme } from '@/types';
 
 export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
@@ -89,7 +89,7 @@ function generateErrorImage(
 /**
  * Generate "missing username" prompt image
  */
-function generateMissingUsernameImage(theme: ReturnType<typeof getTheme>): NextResponse {
+function generateMissingUsernameImage(theme: Theme): NextResponse {
   const imageResponse = new ImageResponse(
     (
       <div
@@ -135,7 +135,7 @@ function generateMissingUsernameImage(theme: ReturnType<typeof getTheme>): NextR
  */
 function generateUserNotFoundImage(
   username: string,
-  theme: ReturnType<typeof getTheme>
+  theme: Theme
 ): NextResponse {
   const imageResponse = new ImageResponse(
     (
@@ -196,7 +196,7 @@ function generateUserNotFoundImage(
 function generateCardImage(
   data: GitHubData,
   username: string,
-  theme: ReturnType<typeof getTheme>,
+  theme: Theme,
   themeName: ThemeName
 ): NextResponse {
   const themeIcons = getThemeIcons(themeName);
