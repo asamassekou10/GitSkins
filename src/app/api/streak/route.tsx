@@ -8,7 +8,7 @@ import { ImageResponse } from '@vercel/og';
 import { NextRequest, NextResponse } from 'next/server';
 import { validateWidgetQuery } from '@/lib/validations';
 import { fetchExtendedGitHubData } from '@/lib/github';
-import { getTheme } from '@/registry/themes';
+import { getThemeUniversal } from '@/lib/theme-converter';
 import { widgetConfig, apiConfig } from '@/config/site';
 import type { Theme, StreakData } from '@/types';
 
@@ -350,7 +350,7 @@ export async function GET(request: NextRequest) {
   const usernameParam = searchParams.get('username');
   const themeParam = searchParams.get('theme');
 
-  const theme = getTheme(themeParam || undefined);
+  const theme = getThemeUniversal(themeParam || undefined);
 
   // Validate parameters
   let validatedParams;

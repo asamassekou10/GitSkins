@@ -9,7 +9,7 @@ import { ImageResponse } from '@vercel/og';
 import { NextRequest, NextResponse } from 'next/server';
 import { validateCardQuery } from '@/lib/validations';
 import { fetchGitHubData } from '@/lib/github';
-import { getTheme } from '@/registry/themes';
+import { getThemeUniversal } from '@/lib/theme-converter';
 import {
   getFireColor,
   truncateBio,
@@ -504,7 +504,7 @@ export async function GET(request: NextRequest) {
     
     // Handle missing username early
     if (!usernameParam || usernameParam.trim() === '') {
-      const theme = getTheme(themeParam || undefined);
+      const theme = getThemeUniversal(themeParam || undefined);
       return generateMissingUsernameImage(theme);
     }
 
@@ -526,12 +526,12 @@ export async function GET(request: NextRequest) {
 
     // Double-check username (shouldn't be needed, but safety check)
     if (!validatedParams.username) {
-      const theme = getTheme(validatedParams.theme);
+      const theme = getThemeUniversal(validatedParams.theme);
       return generateMissingUsernameImage(theme);
     }
 
     // Get theme
-    const theme = getTheme(validatedParams.theme);
+    const theme = getThemeUniversal(validatedParams.theme);
 
     // Fetch GitHub data
     let data;

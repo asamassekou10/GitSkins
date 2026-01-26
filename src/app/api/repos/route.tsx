@@ -8,7 +8,7 @@ import { ImageResponse } from '@vercel/og';
 import { NextRequest, NextResponse } from 'next/server';
 import { validateRepoQuery } from '@/lib/validations';
 import { fetchRepoData } from '@/lib/github';
-import { getTheme } from '@/registry/themes';
+import { getThemeUniversal } from '@/lib/theme-converter';
 import { widgetConfig, apiConfig } from '@/config/site';
 import type { Theme, RepoData } from '@/types';
 
@@ -290,7 +290,7 @@ export async function GET(request: NextRequest) {
   const repoParam = searchParams.get('repo');
   const themeParam = searchParams.get('theme');
 
-  const theme = getTheme(themeParam || undefined);
+  const theme = getThemeUniversal(themeParam || undefined);
 
   // Validate parameters
   let validatedParams;
