@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import { siteConfig } from '@/config/site';
 
 type Props = {
-  params: { username: string };
+  params: Promise<{ username: string }>;
 };
 
 /**
@@ -10,9 +10,10 @@ type Props = {
  * Generates SEO-friendly metadata with dynamic OG images
  */
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const username = params.username.startsWith('@') 
-    ? params.username.slice(1) 
-    : params.username;
+  const { username: rawUsername } = await params;
+  const username = rawUsername.startsWith('@')
+    ? rawUsername.slice(1)
+    : rawUsername;
 
   const title = `${username}'s GitHub Profile | GitSkins`;
   const description = `View ${username}'s beautiful GitHub profile card with custom themes. Generate your own at GitSkins.`;

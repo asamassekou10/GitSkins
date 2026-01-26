@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useParams, useSearchParams } from 'next/navigation';
 import type { PremiumThemeName } from '@/types/premium-theme';
@@ -47,7 +47,7 @@ const themeLabels: Record<PremiumThemeName, string> = {
   'matrix': '💚 Matrix',
 };
 
-export default function ShowcasePage() {
+function ShowcaseContent() {
   const params = useParams();
   const searchParams = useSearchParams();
   // Remove @ symbol if present (e.g., @octocat -> octocat)
@@ -365,5 +365,22 @@ export default function ShowcasePage() {
         </motion.div>
       </div>
     </div>
+  );
+}
+
+// Loading fallback for Suspense
+function ShowcaseLoading() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-black flex items-center justify-center">
+      <div className="w-16 h-16 border-4 border-amber-500 border-t-transparent rounded-full animate-spin" />
+    </div>
+  );
+}
+
+export default function ShowcasePage() {
+  return (
+    <Suspense fallback={<ShowcaseLoading />}>
+      <ShowcaseContent />
+    </Suspense>
   );
 }

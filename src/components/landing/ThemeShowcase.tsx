@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { analytics } from '@/components/AnalyticsProvider';
 
 interface Theme {
@@ -17,6 +17,233 @@ interface ThemeShowcaseProps {
   selectedTheme: string;
   onThemeSelect: (theme: string) => void;
   username: string;
+}
+
+// Lazy loading card component with intersection observer
+function ThemeCard({
+  theme,
+  username,
+  isSelected,
+  onSelect,
+}: {
+  theme: Theme;
+  username: string;
+  isSelected: boolean;
+  onSelect: () => void;
+}) {
+  const [isVisible, setIsVisible] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '100px', threshold: 0.1 }
+    );
+
+    if (cardRef.current) {
+      observer.observe(cardRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div
+      ref={cardRef}
+      onClick={onSelect}
+      style={{
+        background: '#161616',
+        border: isSelected ? '2px solid' : '1px solid',
+        borderColor: isSelected ? theme.color : '#2a2a2a',
+        borderRadius: '16px',
+        padding: '24px',
+        cursor: 'pointer',
+        transition: 'transform 0.2s, border-color 0.2s',
+        position: 'relative',
+        overflow: 'hidden',
+      }}
+      onMouseEnter={(e) => {
+        if (!isSelected) {
+          e.currentTarget.style.transform = 'translateY(-4px)';
+          e.currentTarget.style.borderColor = theme.color;
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (!isSelected) {
+          e.currentTarget.style.transform = 'translateY(0)';
+          e.currentTarget.style.borderColor = '#2a2a2a';
+        }
+      }}
+    >
+      {/* Badges */}
+      <div
+        style={{
+          position: 'absolute',
+          top: '12px',
+          right: '12px',
+          display: 'flex',
+          gap: '8px',
+          zIndex: 10,
+        }}
+      >
+        {theme.free && (
+          <span
+            style={{
+              background: '#22c55e20',
+              color: '#22c55e',
+              padding: '4px 10px',
+              borderRadius: '12px',
+              fontSize: '11px',
+              fontWeight: 600,
+            }}
+          >
+            FREE
+          </span>
+        )}
+        {isSelected && (
+          <span
+            style={{
+              background: theme.color,
+              color: '#ffffff',
+              padding: '4px 12px',
+              borderRadius: '12px',
+              fontSize: '11px',
+              fontWeight: 600,
+            }}
+          >
+            Selected
+          </span>
+        )}
+      </div>
+
+      <div
+        style={{
+          width: '100%',
+          aspectRatio: '800/400',
+          background: '#0a0a0a',
+          borderRadius: '12px',
+          marginBottom: '16px',
+          overflow: 'hidden',
+          border: `2px solid ${theme.color}20`,
+          position: 'relative',
+        }}
+      >
+        {/* Placeholder skeleton */}
+        {(!isVisible || !imageLoaded) && !imageError && (
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: `linear-gradient(135deg, ${theme.color}10 0%, #1a1a1a 50%, ${theme.color}10 100%)`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexDirection: 'column',
+              gap: '12px',
+            }}
+          >
+            <div
+              style={{
+                width: '48px',
+                height: '48px',
+                borderRadius: '50%',
+                border: `3px solid ${theme.color}30`,
+                borderTopColor: theme.color,
+                animation: 'spin 1s linear infinite',
+              }}
+            />
+            <span style={{ color: '#666', fontSize: '12px' }}>Loading preview...</span>
+          </div>
+        )}
+
+        {/* Error state */}
+        {imageError && (
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: `linear-gradient(135deg, ${theme.color}15 0%, #0a0a0a 100%)`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexDirection: 'column',
+              gap: '8px',
+            }}
+          >
+            <div
+              style={{
+                width: '64px',
+                height: '64px',
+                borderRadius: '16px',
+                background: `${theme.color}20`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <span style={{ fontSize: '24px' }}>{theme.name.split(' ')[0]}</span>
+            </div>
+            <span style={{ color: theme.color, fontSize: '14px', fontWeight: 600 }}>{theme.name}</span>
+          </div>
+        )}
+
+        {/* Actual image - only loads when visible */}
+        {isVisible && !imageError && (
+          <img
+            src={`/api/premium-card?username=${username}&theme=${theme.id}`}
+            alt={`${theme.name} theme preview`}
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              opacity: imageLoaded ? 1 : 0,
+              transition: 'opacity 0.3s ease-in-out',
+            }}
+            loading="lazy"
+            onLoad={() => setImageLoaded(true)}
+            onError={() => setImageError(true)}
+          />
+        )}
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+        <div
+          style={{
+            width: '12px',
+            height: '12px',
+            borderRadius: '50%',
+            background: theme.color,
+          }}
+        />
+        <h3
+          style={{
+            fontSize: '18px',
+            fontWeight: 700,
+            color: '#ffffff',
+            margin: 0,
+          }}
+        >
+          {theme.name}
+        </h3>
+      </div>
+      <p
+        style={{
+          color: '#888888',
+          fontSize: '14px',
+          margin: 0,
+        }}
+      >
+        {theme.description}
+      </p>
+    </div>
+  );
 }
 
 const categoryLabels: Record<string, string> = {
@@ -148,130 +375,25 @@ export function ThemeShowcase({ themes, selectedTheme, onThemeSelect, username }
           }}
         >
           {displayThemes.map((theme) => (
-            <div
+            <ThemeCard
               key={theme.id}
-              onClick={() => {
+              theme={theme}
+              username={username}
+              isSelected={selectedTheme === theme.id}
+              onSelect={() => {
                 onThemeSelect(theme.id);
                 analytics.trackThemeSelection(theme.id, 'landing', username);
               }}
-              style={{
-                background: '#161616',
-                border: selectedTheme === theme.id ? '2px solid' : '1px solid',
-                borderColor: selectedTheme === theme.id ? theme.color : '#2a2a2a',
-                borderRadius: '16px',
-                padding: '24px',
-                cursor: 'pointer',
-                transition: 'transform 0.2s, border-color 0.2s',
-                position: 'relative',
-                overflow: 'hidden',
-              }}
-              onMouseEnter={(e) => {
-                if (selectedTheme !== theme.id) {
-                  e.currentTarget.style.transform = 'translateY(-4px)';
-                  e.currentTarget.style.borderColor = theme.color;
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (selectedTheme !== theme.id) {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.borderColor = '#2a2a2a';
-                }
-              }}
-            >
-              {/* Badges */}
-              <div
-                style={{
-                  position: 'absolute',
-                  top: '12px',
-                  right: '12px',
-                  display: 'flex',
-                  gap: '8px',
-                }}
-              >
-                {theme.free && (
-                  <span
-                    style={{
-                      background: '#22c55e20',
-                      color: '#22c55e',
-                      padding: '4px 10px',
-                      borderRadius: '12px',
-                      fontSize: '11px',
-                      fontWeight: 600,
-                    }}
-                  >
-                    FREE
-                  </span>
-                )}
-                {selectedTheme === theme.id && (
-                  <span
-                    style={{
-                      background: theme.color,
-                      color: '#ffffff',
-                      padding: '4px 12px',
-                      borderRadius: '12px',
-                      fontSize: '11px',
-                      fontWeight: 600,
-                    }}
-                  >
-                    Selected
-                  </span>
-                )}
-              </div>
-
-              <div
-                style={{
-                  width: '100%',
-                  aspectRatio: '800/400',
-                  background: '#0a0a0a',
-                  borderRadius: '12px',
-                  marginBottom: '16px',
-                  overflow: 'hidden',
-                  border: `2px solid ${theme.color}20`,
-                }}
-              >
-                <img
-                  src={`/api/premium-card?username=${username}&theme=${theme.id}`}
-                  alt={`${theme.name} theme preview`}
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover',
-                  }}
-                  loading="lazy"
-                />
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-                <div
-                  style={{
-                    width: '12px',
-                    height: '12px',
-                    borderRadius: '50%',
-                    background: theme.color,
-                  }}
-                />
-                <h3
-                  style={{
-                    fontSize: '18px',
-                    fontWeight: 700,
-                    color: '#ffffff',
-                    margin: 0,
-                  }}
-                >
-                  {theme.name}
-                </h3>
-              </div>
-              <p
-                style={{
-                  color: '#888888',
-                  fontSize: '14px',
-                  margin: 0,
-                }}
-              >
-                {theme.description}
-              </p>
-            </div>
+            />
           ))}
         </div>
+
+        {/* CSS for loading spinner animation */}
+        <style>{`
+          @keyframes spin {
+            to { transform: rotate(360deg); }
+          }
+        `}</style>
       </div>
     </section>
   );
