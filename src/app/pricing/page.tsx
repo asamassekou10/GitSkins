@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Navigation } from '@/components/landing/Navigation';
 import { AuroraBackground } from '@/components/landing/AuroraBackground';
 import { PLANS, CREDIT_PACKS } from '@/config/subscription';
-import { getUserPlan, checkGenerationAllowed, formatResetDate, getDaysUntilReset } from '@/lib/usage-tracker';
+import { getUserPlan, checkGenerationAllowed, formatResetDate, getDaysUntilReset, setUserPlan, addBonusCredits } from '@/lib/usage-tracker';
 import type { PlanType } from '@/types/subscription';
 
 export default function PricingPage() {
@@ -23,6 +23,23 @@ export default function PricingPage() {
     const params = new URLSearchParams(window.location.search);
     if (params.get('success') === 'true') {
       setShowSuccess(true);
+
+      // Check what was purchased and update subscription
+      const sessionId = params.get('session_id');
+      const product = params.get('product'); // For mock purchases
+
+      // For real Stripe purchases, we'd verify with the server
+      // For now, assume Pro upgrade on success (can be improved with session verification)
+      if (product === 'pro_lifetime' || !product) {
+        // Upgrade to Pro
+        setUserPlan('pro', sessionId || undefined);
+        setCurrentPlan('pro');
+      } else if (product?.startsWith('credits-')) {
+        // Add credits
+        const credits = product === 'credits-50' ? 50 : 150;
+        addBonusCredits(credits);
+      }
+
       // Clear the URL params
       window.history.replaceState({}, '', '/pricing');
     }

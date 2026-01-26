@@ -27,10 +27,10 @@ export const siteConfig = {
 export const apiConfig = {
   /** Default theme when none specified */
   defaultTheme: 'github-dark' as const,
-  /** Cache duration in seconds (5 minutes for testing, increase later) */
-  cacheMaxAge: 300,
-  /** Shared cache duration in seconds (5 minutes for testing) */
-  cacheSMaxAge: 300,
+  /** Cache duration in seconds (1 hour) */
+  cacheMaxAge: 3600,
+  /** Shared cache duration in seconds (1 hour) */
+  cacheSMaxAge: 3600,
 } as const;
 
 /**

@@ -1,7 +1,10 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import Link from 'next/link';
 import { analytics } from '@/components/AnalyticsProvider';
+import { isPro } from '@/lib/usage-tracker';
+import { isFreeTierTheme } from '@/config/subscription';
 
 interface Theme {
   id: string;
@@ -25,11 +28,15 @@ function ThemeCard({
   username,
   isSelected,
   onSelect,
+  isLocked,
+  onLockedClick,
 }: {
   theme: Theme;
   username: string;
   isSelected: boolean;
   onSelect: () => void;
+  isLocked: boolean;
+  onLockedClick: () => void;
 }) {
   const [isVisible, setIsVisible] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -54,10 +61,18 @@ function ThemeCard({
     return () => observer.disconnect();
   }, []);
 
+  const handleClick = () => {
+    if (isLocked) {
+      onLockedClick();
+    } else {
+      onSelect();
+    }
+  };
+
   return (
     <div
       ref={cardRef}
-      onClick={onSelect}
+      onClick={handleClick}
       style={{
         background: '#161616',
         border: isSelected ? '2px solid' : '1px solid',
@@ -68,6 +83,7 @@ function ThemeCard({
         transition: 'transform 0.2s, border-color 0.2s',
         position: 'relative',
         overflow: 'hidden',
+        opacity: isLocked ? 0.7 : 1,
       }}
       onMouseEnter={(e) => {
         if (!isSelected) {
@@ -82,6 +98,49 @@ function ThemeCard({
         }
       }}
     >
+      {/* Lock overlay for premium themes */}
+      {isLocked && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.4)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 15,
+            borderRadius: '16px',
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '8px',
+            }}
+          >
+            <svg
+              width="32"
+              height="32"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#fbbf24"
+              strokeWidth="2"
+            >
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+            </svg>
+            <span style={{ color: '#fbbf24', fontSize: '12px', fontWeight: 600 }}>
+              PRO
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* Badges */}
       <div
         style={{
@@ -105,6 +164,20 @@ function ThemeCard({
             }}
           >
             FREE
+          </span>
+        )}
+        {!theme.free && !isLocked && (
+          <span
+            style={{
+              background: '#fbbf2420',
+              color: '#fbbf24',
+              padding: '4px 10px',
+              borderRadius: '12px',
+              fontSize: '11px',
+              fontWeight: 600,
+            }}
+          >
+            PRO
           </span>
         )}
         {isSelected && (
@@ -258,6 +331,13 @@ const categoryOrder = ['original', 'seasonal', 'holiday', 'developer', 'aestheti
 
 export function ThemeShowcase({ themes, selectedTheme, onThemeSelect, username }: ThemeShowcaseProps) {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [userIsPro, setUserIsPro] = useState(false);
+
+  // Check pro status on mount
+  useEffect(() => {
+    setUserIsPro(isPro());
+  }, []);
 
   // Group themes by category
   const groupedThemes = themes.reduce((acc, theme) => {
@@ -271,6 +351,12 @@ export function ThemeShowcase({ themes, selectedTheme, onThemeSelect, username }
   const displayThemes = activeCategory
     ? themes.filter((t) => t.category === activeCategory)
     : themes;
+
+  // Check if a theme is locked for the current user
+  const isThemeLocked = (themeId: string) => {
+    if (userIsPro) return false;
+    return !isFreeTierTheme(themeId);
+  };
 
   return (
     <section
@@ -380,10 +466,12 @@ export function ThemeShowcase({ themes, selectedTheme, onThemeSelect, username }
               theme={theme}
               username={username}
               isSelected={selectedTheme === theme.id}
+              isLocked={isThemeLocked(theme.id)}
               onSelect={() => {
                 onThemeSelect(theme.id);
                 analytics.trackThemeSelection(theme.id, 'landing', username);
               }}
+              onLockedClick={() => setShowUpgradeModal(true)}
             />
           ))}
         </div>
@@ -394,6 +482,129 @@ export function ThemeShowcase({ themes, selectedTheme, onThemeSelect, username }
             to { transform: rotate(360deg); }
           }
         `}</style>
+
+        {/* Upgrade Modal */}
+        {showUpgradeModal && (
+          <div
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(0, 0, 0, 0.8)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 1000,
+              padding: '20px',
+            }}
+            onClick={() => setShowUpgradeModal(false)}
+          >
+            <div
+              style={{
+                background: '#161616',
+                borderRadius: '20px',
+                padding: '32px',
+                maxWidth: '400px',
+                width: '100%',
+                border: '1px solid #2a2a2a',
+                textAlign: 'center',
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div
+                style={{
+                  width: '64px',
+                  height: '64px',
+                  background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
+                  borderRadius: '16px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  margin: '0 auto 20px',
+                }}
+              >
+                <svg
+                  width="32"
+                  height="32"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#000"
+                  strokeWidth="2"
+                >
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg>
+              </div>
+
+              <h3
+                style={{
+                  fontSize: '24px',
+                  fontWeight: 700,
+                  marginBottom: '12px',
+                  color: '#fff',
+                }}
+              >
+                Unlock Premium Themes
+              </h3>
+
+              <p
+                style={{
+                  fontSize: '14px',
+                  color: '#888',
+                  marginBottom: '24px',
+                  lineHeight: 1.6,
+                }}
+              >
+                Get access to all 20 premium themes, watermark-free widgets, and more with Pro.
+              </p>
+
+              <div
+                style={{
+                  display: 'flex',
+                  gap: '12px',
+                }}
+              >
+                <button
+                  onClick={() => setShowUpgradeModal(false)}
+                  style={{
+                    flex: 1,
+                    padding: '12px 20px',
+                    background: 'transparent',
+                    border: '1px solid #2a2a2a',
+                    borderRadius: '10px',
+                    color: '#888',
+                    fontSize: '14px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                  }}
+                >
+                  Maybe Later
+                </button>
+                <Link
+                  href="/pricing"
+                  style={{
+                    flex: 1,
+                    padding: '12px 20px',
+                    background: 'linear-gradient(135deg, #22c55e 0%, #4ade80 100%)',
+                    border: 'none',
+                    borderRadius: '10px',
+                    color: '#000',
+                    fontSize: '14px',
+                    fontWeight: 600,
+                    textDecoration: 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  Upgrade to Pro
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );
