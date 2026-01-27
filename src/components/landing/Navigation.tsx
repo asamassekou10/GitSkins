@@ -13,6 +13,7 @@ interface NavLink {
 const navLinks: NavLink[] = [
   { label: 'Features', href: '#features', isHashLink: true },
   { label: 'Themes', href: '#themes', isHashLink: true },
+  { label: 'AI Features', href: '/ai', isHashLink: false },
   { label: 'README Generator', href: '/readme-generator', isHashLink: false },
   { label: 'Pricing', href: '/pricing', isHashLink: false },
 ];
@@ -210,6 +211,37 @@ export function Navigation() {
                     <div style={{ color: '#fff', fontSize: '14px', fontWeight: 600 }}>{displayName}</div>
                     <div style={{ color: '#666', fontSize: '12px' }}>@{user?.username}</div>
                   </div>
+                  <Link
+                    href="/dashboard"
+                    onClick={() => setUserMenuOpen(false)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '10px',
+                      padding: '10px 12px',
+                      color: '#888',
+                      textDecoration: 'none',
+                      borderRadius: '8px',
+                      fontSize: '14px',
+                      transition: 'all 0.2s',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = '#1a1a1a';
+                      e.currentTarget.style.color = '#fff';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = 'transparent';
+                      e.currentTarget.style.color = '#888';
+                    }}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <rect x="3" y="3" width="7" height="7" />
+                      <rect x="14" y="3" width="7" height="7" />
+                      <rect x="14" y="14" width="7" height="7" />
+                      <rect x="3" y="14" width="7" height="7" />
+                    </svg>
+                    Dashboard
+                  </Link>
                   <Link
                     href={`/showcase/${user?.username}`}
                     onClick={() => setUserMenuOpen(false)}
@@ -482,6 +514,21 @@ export function Navigation() {
 
           {session ? (
             <>
+              <Link
+                href="/dashboard"
+                onClick={() => setMobileMenuOpen(false)}
+                style={{
+                  display: 'block',
+                  color: '#888',
+                  textDecoration: 'none',
+                  fontSize: '16px',
+                  fontWeight: 500,
+                  padding: '12px 0',
+                  borderBottom: '1px solid #1a1a1a',
+                }}
+              >
+                Dashboard
+              </Link>
               <Link
                 href={`/showcase/${user?.username}`}
                 onClick={() => setMobileMenuOpen(false)}

@@ -50,21 +50,52 @@ export function HeroSection({ username, selectedTheme, onUsernameChange, onTheme
           zIndex: 1,
         }}
       >
-        {/* Trust Badge */}
+        {/* Trust Badges */}
         <div
           style={{
-            display: 'inline-block',
-            padding: '8px 20px',
-            background: 'rgba(34, 197, 94, 0.1)',
-            border: '1px solid rgba(34, 197, 94, 0.3)',
-            borderRadius: '24px',
-            fontSize: '13px',
-            fontWeight: 500,
-            color: '#22c55e',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '12px',
             marginBottom: '32px',
+            flexWrap: 'wrap',
           }}
         >
-          Trusted by 5,000+ developers
+          <div
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '8px 16px',
+              background: 'rgba(34, 197, 94, 0.1)',
+              border: '1px solid rgba(34, 197, 94, 0.3)',
+              borderRadius: '24px',
+              fontSize: '13px',
+              fontWeight: 500,
+              color: '#22c55e',
+            }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M12 2L2 7l10 5 10-5-10-5z" />
+              <path d="M2 17l10 5 10-5" />
+              <path d="M2 12l10 5 10-5" />
+            </svg>
+            Powered by Google Gemini
+          </div>
+          <div
+            style={{
+              display: 'inline-block',
+              padding: '8px 16px',
+              background: 'rgba(255, 255, 255, 0.05)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              borderRadius: '24px',
+              fontSize: '13px',
+              fontWeight: 500,
+              color: '#888',
+            }}
+          >
+            Open Source
+          </div>
         </div>
 
         {/* Main Headline */}

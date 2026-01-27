@@ -71,7 +71,18 @@ export default function TermsPage() {
 
           <section style={{ marginBottom: '32px' }}>
             <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#fff', marginBottom: '16px' }}>
-              3. User Accounts
+              3. AI Features and Output
+            </h2>
+            <p style={{ marginBottom: '12px' }}>
+              GitSkins uses Google Gemini to generate README content and provide profile insights. AI output may be
+              inaccurate or incomplete and should be reviewed before use. You are responsible for ensuring generated
+              content is appropriate for your profile and complies with applicable policies.
+            </p>
+          </section>
+
+          <section style={{ marginBottom: '32px' }}>
+            <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#fff', marginBottom: '16px' }}>
+              4. User Accounts
             </h2>
             <p style={{ marginBottom: '12px' }}>
               To access certain features, you may need to authenticate with your GitHub account. You are responsible for:
@@ -85,7 +96,7 @@ export default function TermsPage() {
 
           <section style={{ marginBottom: '32px' }}>
             <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#fff', marginBottom: '16px' }}>
-              4. Acceptable Use
+              5. Acceptable Use
             </h2>
             <p style={{ marginBottom: '12px' }}>You agree not to:</p>
             <ul style={{ paddingLeft: '24px', marginTop: '12px' }}>
@@ -99,7 +110,7 @@ export default function TermsPage() {
 
           <section style={{ marginBottom: '32px' }}>
             <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#fff', marginBottom: '16px' }}>
-              5. Payment and Subscriptions
+              6. Payment and Subscriptions
             </h2>
             <p>
               GitSkins offers both free and paid tiers. Paid features are accessible through one-time purchases
@@ -110,7 +121,7 @@ export default function TermsPage() {
 
           <section style={{ marginBottom: '32px' }}>
             <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#fff', marginBottom: '16px' }}>
-              6. Intellectual Property
+              7. Intellectual Property
             </h2>
             <p>
               The Service, including its original content, features, and functionality, is owned by GitSkins
@@ -121,7 +132,7 @@ export default function TermsPage() {
 
           <section style={{ marginBottom: '32px' }}>
             <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#fff', marginBottom: '16px' }}>
-              7. Limitation of Liability
+              8. Limitation of Liability
             </h2>
             <p>
               GitSkins shall not be liable for any indirect, incidental, special, consequential, or punitive damages
@@ -132,7 +143,7 @@ export default function TermsPage() {
 
           <section style={{ marginBottom: '32px' }}>
             <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#fff', marginBottom: '16px' }}>
-              8. Changes to Terms
+              9. Changes to Terms
             </h2>
             <p>
               We reserve the right to modify these terms at any time. We will notify users of significant changes
@@ -143,7 +154,7 @@ export default function TermsPage() {
 
           <section style={{ marginBottom: '32px' }}>
             <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#fff', marginBottom: '16px' }}>
-              9. Contact Us
+              10. Contact Us
             </h2>
             <p>
               If you have any questions about these Terms of Service, please contact us at{' '}

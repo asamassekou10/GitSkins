@@ -5,7 +5,6 @@ import { analytics } from '@/components/AnalyticsProvider';
 import { Navigation } from '@/components/landing/Navigation';
 import { HeroSection } from '@/components/landing/HeroSection';
 import { StatsCounter } from '@/components/landing/StatsCounter';
-import { SocialProof } from '@/components/landing/SocialProof';
 import { BenefitsSection } from '@/components/landing/BenefitsSection';
 import { ThemeShowcase } from '@/components/landing/ThemeShowcase';
 
@@ -109,11 +108,6 @@ export default function Home() {
               price: '0',
               priceCurrency: 'USD',
             },
-            aggregateRating: {
-              '@type': 'AggregateRating',
-              ratingValue: '5',
-              ratingCount: '1',
-            },
             featureList: [
               'GitHub Profile Cards',
               'Contribution Graphs',
@@ -148,10 +142,9 @@ export default function Home() {
         {/* Stats Counter */}
         <StatsCounter
           stats={[
-            { label: 'Cards Generated', value: 12500, suffix: '+' },
-            { label: 'Active Users', value: 3200, suffix: '+' },
-            { label: 'Themes Available', value: 5 },
-            { label: 'Widget Types', value: 6 },
+            { label: 'Themes Available', value: 20 },
+            { label: 'Widget Types', value: 4 },
+            { label: 'Free to Use', value: 100, suffix: '%' },
           ]}
         />
 
@@ -170,8 +163,6 @@ export default function Home() {
           />
         </section>
 
-        {/* Social Proof */}
-        <SocialProof />
 
         {/* Generator Section */}
         <section

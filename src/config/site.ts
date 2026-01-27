@@ -94,8 +94,8 @@ export const rateLimitConfig = {
   requestsPerWindow: 100,
   /** Window duration in seconds */
   windowSeconds: 60,
-  /** Enable rate limiting (set to false to disable) */
-  enabled: process.env.ENABLE_RATE_LIMITING === 'true',
+  /** Enable rate limiting (enabled by default, set DISABLE_RATE_LIMITING=true to disable) */
+  enabled: process.env.DISABLE_RATE_LIMITING !== 'true',
 } as const;
 
 /**

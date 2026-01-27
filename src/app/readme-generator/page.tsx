@@ -42,7 +42,7 @@ const styleOptions: { id: ReadmeStyle; label: string; description: string }[] = 
 ];
 
 export default function ReadmeGeneratorPage() {
-  const [username, setUsername] = useState('');
+  const [username, setUsername] = useState('octocat');
   const [style, setStyle] = useState<ReadmeStyle>('detailed');
   const [theme, setTheme] = useState('satan');
   const [sections, setSections] = useState<SectionType[]>([
@@ -52,6 +52,7 @@ export default function ReadmeGeneratorPage() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [generatedReadme, setGeneratedReadme] = useState<string | null>(null);
+  const [aiProvider, setAiProvider] = useState<'gemini' | 'openai' | 'template' | null>(null);
   const [profileData, setProfileData] = useState<{
     name: string | null;
     avatarUrl: string;
@@ -105,6 +106,7 @@ export default function ReadmeGeneratorPage() {
     setIsLoading(true);
     setError(null);
     setGeneratedReadme(null);
+    setAiProvider(null);
 
     try {
       const response = await fetch('/api/generate-readme', {
@@ -130,6 +132,7 @@ export default function ReadmeGeneratorPage() {
       refreshUsageInfo();
 
       setGeneratedReadme(data.readme);
+      setAiProvider(data.aiProvider || null);
       setProfileData(data.profile);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
@@ -369,6 +372,24 @@ export default function ReadmeGeneratorPage() {
                     }}
                   />
                 )}
+              </div>
+              <div style={{ marginTop: '10px' }}>
+                <button
+                  type="button"
+                  onClick={() => setUsername('octocat')}
+                  style={{
+                    padding: '6px 12px',
+                    background: 'rgba(34, 197, 94, 0.15)',
+                    border: '1px solid rgba(34, 197, 94, 0.3)',
+                    borderRadius: '999px',
+                    color: '#22c55e',
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                  }}
+                >
+                  Use demo username
+                </button>
               </div>
             </div>
 
@@ -722,6 +743,21 @@ export default function ReadmeGeneratorPage() {
                     <span style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#27ca40' }} />
                   </div>
                   <span style={{ color: '#888', fontSize: '14px' }}>README.md</span>
+                  {aiProvider && (
+                    <span
+                      style={{
+                        padding: '4px 8px',
+                        background: 'rgba(34, 197, 94, 0.15)',
+                        border: '1px solid rgba(34, 197, 94, 0.3)',
+                        borderRadius: '999px',
+                        color: '#22c55e',
+                        fontSize: '11px',
+                        fontWeight: 600,
+                      }}
+                    >
+                      Generated with {aiProvider}
+                    </span>
+                  )}
                 </div>
 
                 <div style={{ display: 'flex', gap: '8px' }}>

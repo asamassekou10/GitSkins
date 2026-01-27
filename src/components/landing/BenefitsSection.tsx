@@ -35,7 +35,7 @@ const benefits: Benefit[] = [
   {
     icon: '🚀',
     title: 'Always Available',
-    description: '99.9% uptime with global CDN for fast delivery worldwide',
+    description: 'Reliable hosting with global CDN for fast delivery worldwide',
   },
 ];
 

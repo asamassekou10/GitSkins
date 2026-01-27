@@ -2,7 +2,7 @@
  * README Generator API Route
  *
  * POST /api/generate-readme
- * Generates a professional GitHub profile README using AI or templates.
+ * Generates a professional GitHub profile README using Gemini AI or templates.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -10,9 +10,9 @@ import { z } from 'zod';
 import { fetchProfileForReadme } from '@/lib/github';
 import {
   generateReadmeTemplate,
-  buildReadmePrompt,
   parseGeneratedReadme,
 } from '@/lib/readme-generator';
+import { generateReadmeWithGemini, isGeminiConfigured } from '@/lib/gemini';
 import type { ReadmeConfig, ReadmeSectionType, ReadmeStyle } from '@/types/readme';
 
 export const runtime = 'nodejs';
@@ -55,10 +55,38 @@ export async function POST(request: NextRequest) {
     };
 
     let result;
+    let aiProvider: 'gemini' | 'openai' | 'template' = 'template';
 
-    // Try AI generation if enabled and API key is available
-    if (useAI && process.env.OPENAI_API_KEY) {
+    // Try Gemini AI generation first (primary provider)
+    if (useAI && isGeminiConfigured()) {
       try {
+        const generatedMarkdown = await generateReadmeWithGemini(profileData, {
+          username,
+          sections,
+          style: style as 'minimal' | 'detailed' | 'creative',
+          theme,
+        });
+
+        if (generatedMarkdown) {
+          result = parseGeneratedReadme(generatedMarkdown, config);
+          result.metadata = {
+            ...result.metadata,
+            username,
+            languages: profileData.languages.map((l) => l.name),
+            repoCount: profileData.totalRepos,
+            totalStars: profileData.totalStars,
+          };
+          aiProvider = 'gemini';
+        }
+      } catch (geminiError) {
+        console.error('Gemini generation failed:', geminiError);
+      }
+    }
+
+    // Fallback to OpenAI if Gemini fails
+    if (!result && useAI && process.env.OPENAI_API_KEY) {
+      try {
+        const { buildReadmePrompt } = await import('@/lib/readme-generator');
         const prompt = buildReadmePrompt(profileData, config);
 
         const aiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -97,10 +125,11 @@ export async function POST(request: NextRequest) {
               repoCount: profileData.totalRepos,
               totalStars: profileData.totalStars,
             };
+            aiProvider = 'openai';
           }
         }
       } catch (aiError) {
-        console.error('AI generation failed, falling back to template:', aiError);
+        console.error('OpenAI generation failed, falling back to template:', aiError);
       }
     }
 
@@ -114,6 +143,7 @@ export async function POST(request: NextRequest) {
       readme: result.markdown,
       sections: result.sections,
       metadata: result.metadata,
+      aiProvider,
       profile: {
         name: profileData.name,
         avatarUrl: profileData.avatarUrl,

@@ -112,7 +112,7 @@ export default function PrivacyPage() {
                 <strong style={{ color: '#fff' }}>Stripe:</strong> For secure payment processing
               </li>
               <li style={{ marginBottom: '8px' }}>
-                <strong style={{ color: '#fff' }}>OpenAI:</strong> For AI-powered README generation
+                <strong style={{ color: '#fff' }}>Google Gemini:</strong> For AI-powered features including README generation, profile analysis, and theme recommendations
               </li>
               <li style={{ marginBottom: '8px' }}>
                 <strong style={{ color: '#fff' }}>Vercel:</strong> For hosting and analytics
