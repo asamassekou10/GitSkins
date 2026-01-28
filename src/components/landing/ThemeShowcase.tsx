@@ -1,10 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import Link from 'next/link';
 import { analytics } from '@/components/AnalyticsProvider';
-import { isPro } from '@/lib/usage-tracker';
-import { isFreeTierTheme } from '@/config/subscription';
 
 interface Theme {
   id: string;
@@ -22,25 +19,19 @@ interface ThemeShowcaseProps {
   username: string;
 }
 
-// Lazy loading card component with intersection observer
 function ThemeCard({
   theme,
   username,
   isSelected,
   onSelect,
-  isLocked,
-  onLockedClick,
 }: {
   theme: Theme;
   username: string;
   isSelected: boolean;
   onSelect: () => void;
-  isLocked: boolean;
-  onLockedClick: () => void;
 }) {
   const [isVisible, setIsVisible] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
-  const [imageError, setImageError] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -61,429 +52,291 @@ function ThemeCard({
     return () => observer.disconnect();
   }, []);
 
-  const handleClick = () => {
-    if (isLocked) {
-      onLockedClick();
-    } else {
-      onSelect();
-    }
-  };
-
   return (
     <div
       ref={cardRef}
-      onClick={handleClick}
+      onClick={onSelect}
       style={{
-        background: '#161616',
+        background: '#111',
         border: isSelected ? '2px solid' : '1px solid',
-        borderColor: isSelected ? theme.color : '#2a2a2a',
-        borderRadius: '16px',
-        padding: '24px',
+        borderColor: isSelected ? theme.color : '#1a1a1a',
+        borderRadius: '12px',
+        padding: '16px',
         cursor: 'pointer',
-        transition: 'transform 0.2s, border-color 0.2s',
+        transition: 'all 0.2s ease',
         position: 'relative',
         overflow: 'hidden',
-        opacity: isLocked ? 0.7 : 1,
       }}
       onMouseEnter={(e) => {
         if (!isSelected) {
-          e.currentTarget.style.transform = 'translateY(-4px)';
-          e.currentTarget.style.borderColor = theme.color;
+          e.currentTarget.style.transform = 'translateY(-2px)';
+          e.currentTarget.style.borderColor = '#2a2a2a';
         }
       }}
       onMouseLeave={(e) => {
         if (!isSelected) {
           e.currentTarget.style.transform = 'translateY(0)';
-          e.currentTarget.style.borderColor = '#2a2a2a';
+          e.currentTarget.style.borderColor = '#1a1a1a';
         }
       }}
     >
-      {/* Lock overlay for premium themes */}
-      {isLocked && (
-        <div
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'rgba(0, 0, 0, 0.4)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 15,
-            borderRadius: '16px',
-          }}
-        >
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '8px',
-            }}
-          >
-            <svg
-              width="32"
-              height="32"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#fbbf24"
-              strokeWidth="2"
-            >
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-            </svg>
-            <span style={{ color: '#fbbf24', fontSize: '12px', fontWeight: 600 }}>
-              PRO
-            </span>
-          </div>
-        </div>
-      )}
-
-      {/* Badges */}
+      {/* Theme Header */}
       <div
         style={{
-          position: 'absolute',
-          top: '12px',
-          right: '12px',
           display: 'flex',
-          gap: '8px',
-          zIndex: 10,
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginBottom: '12px',
         }}
       >
-        {theme.free && (
-          <span
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div
             style={{
-              background: '#22c55e20',
-              color: '#22c55e',
-              padding: '4px 10px',
-              borderRadius: '12px',
-              fontSize: '11px',
-              fontWeight: 600,
-            }}
-          >
-            FREE
-          </span>
-        )}
-        {!theme.free && !isLocked && (
-          <span
-            style={{
-              background: '#fbbf2420',
-              color: '#fbbf24',
-              padding: '4px 10px',
-              borderRadius: '12px',
-              fontSize: '11px',
-              fontWeight: 600,
-            }}
-          >
-            PRO
-          </span>
-        )}
-        {isSelected && (
-          <span
-            style={{
+              width: '12px',
+              height: '12px',
+              borderRadius: '4px',
               background: theme.color,
-              color: '#ffffff',
-              padding: '4px 12px',
-              borderRadius: '12px',
-              fontSize: '11px',
-              fontWeight: 600,
             }}
-          >
-            Selected
+          />
+          <span style={{ fontSize: '14px', fontWeight: 600, color: '#fafafa' }}>
+            {theme.name}
           </span>
+        </div>
+        {isSelected && (
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={theme.color} strokeWidth="2.5">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
         )}
       </div>
 
+      {/* Preview Image */}
       <div
         style={{
-          width: '100%',
-          aspectRatio: '800/400',
           background: '#0a0a0a',
-          borderRadius: '12px',
-          marginBottom: '16px',
+          borderRadius: '8px',
           overflow: 'hidden',
-          border: `2px solid ${theme.color}20`,
+          minHeight: '80px',
           position: 'relative',
         }}
       >
-        {/* Placeholder skeleton */}
-        {(!isVisible || !imageLoaded) && !imageError && (
+        {!imageLoaded && (
           <div
             style={{
               position: 'absolute',
               inset: 0,
-              background: `linear-gradient(135deg, ${theme.color}10 0%, #1a1a1a 50%, ${theme.color}10 100%)`,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexDirection: 'column',
-              gap: '12px',
+              background: 'linear-gradient(90deg, #111 25%, #161616 50%, #111 75%)',
+              backgroundSize: '200% 100%',
+              animation: 'shimmer 1.5s infinite',
             }}
-          >
-            <div
-              style={{
-                width: '48px',
-                height: '48px',
-                borderRadius: '50%',
-                border: `3px solid ${theme.color}30`,
-                borderTopColor: theme.color,
-                animation: 'spin 1s linear infinite',
-              }}
-            />
-            <span style={{ color: '#666', fontSize: '12px' }}>Loading preview...</span>
-          </div>
+          />
         )}
-
-        {/* Error state */}
-        {imageError && (
-          <div
-            style={{
-              position: 'absolute',
-              inset: 0,
-              background: `linear-gradient(135deg, ${theme.color}15 0%, #0a0a0a 100%)`,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexDirection: 'column',
-              gap: '8px',
-            }}
-          >
-            <div
-              style={{
-                width: '64px',
-                height: '64px',
-                borderRadius: '16px',
-                background: `${theme.color}20`,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <span style={{ fontSize: '24px' }}>{theme.name.split(' ')[0]}</span>
-            </div>
-            <span style={{ color: theme.color, fontSize: '14px', fontWeight: 600 }}>{theme.name}</span>
-          </div>
-        )}
-
-        {/* Actual image - only loads when visible */}
-        {isVisible && !imageError && (
+        {isVisible && (
           <img
-            src={`/api/premium-card?username=${username}&theme=${theme.id}`}
+            src={`/api/stats?username=${username}&theme=${theme.id}`}
             alt={`${theme.name} theme preview`}
             style={{
               width: '100%',
-              height: '100%',
-              objectFit: 'cover',
+              height: 'auto',
+              display: 'block',
               opacity: imageLoaded ? 1 : 0,
-              transition: 'opacity 0.3s ease-in-out',
+              transition: 'opacity 0.3s ease',
             }}
-            loading="lazy"
             onLoad={() => setImageLoaded(true)}
-            onError={() => setImageError(true)}
+            loading="lazy"
           />
         )}
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-        <div
-          style={{
-            width: '12px',
-            height: '12px',
-            borderRadius: '50%',
-            background: theme.color,
-          }}
-        />
-        <h3
-          style={{
-            fontSize: '18px',
-            fontWeight: 700,
-            color: '#ffffff',
-            margin: 0,
-          }}
-        >
-          {theme.name}
-        </h3>
-      </div>
+      {/* Description */}
       <p
         style={{
-          color: '#888888',
-          fontSize: '14px',
-          margin: 0,
+          fontSize: '12px',
+          color: '#666',
+          margin: '10px 0 0',
+          lineHeight: 1.4,
         }}
       >
         {theme.description}
       </p>
+
+      <style>{`
+        @keyframes shimmer {
+          0% { background-position: -200% 0; }
+          100% { background-position: 200% 0; }
+        }
+      `}</style>
     </div>
   );
 }
 
-const categoryLabels: Record<string, string> = {
-  original: 'Original',
-  seasonal: 'Seasonal',
-  holiday: 'Holiday',
-  developer: 'Developer',
-  aesthetic: 'Aesthetic',
-};
-
-const categoryOrder = ['original', 'seasonal', 'holiday', 'developer', 'aesthetic'];
+const categories = [
+  { id: null, label: 'All' },
+  { id: 'original', label: 'Original' },
+  { id: 'developer', label: 'Developer' },
+  { id: 'seasonal', label: 'Seasonal' },
+  { id: 'aesthetic', label: 'Aesthetic' },
+  { id: 'holiday', label: 'Holiday' },
+];
 
 export function ThemeShowcase({ themes, selectedTheme, onThemeSelect, username }: ThemeShowcaseProps) {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
-  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-  const [userIsPro, setUserIsPro] = useState(false);
 
-  // Check pro status on mount
-  useEffect(() => {
-    setUserIsPro(isPro());
-  }, []);
-
-  // Group themes by category
-  const groupedThemes = themes.reduce((acc, theme) => {
-    const category = theme.category || 'original';
-    if (!acc[category]) acc[category] = [];
-    acc[category].push(theme);
-    return acc;
-  }, {} as Record<string, Theme[]>);
-
-  // Filter themes based on active category
-  const displayThemes = activeCategory
+  const filteredThemes = activeCategory
     ? themes.filter((t) => t.category === activeCategory)
     : themes;
 
-  // Check if a theme is locked for the current user
-  const isThemeLocked = (themeId: string) => {
-    if (userIsPro) return false;
-    return !isFreeTierTheme(themeId);
+  const handleThemeSelect = (themeId: string) => {
+    onThemeSelect(themeId);
+    analytics.trackThemeSelection(themeId, 'showcase', username);
   };
 
   return (
     <section
-      id="themes"
       style={{
-        padding: '80px 20px',
-        background: 'linear-gradient(180deg, #0a0a0a 0%, #0d0d0d 100%)',
+        padding: '100px 24px',
+        background: '#050505',
       }}
     >
-      <div
-        style={{
-          maxWidth: '1200px',
-          margin: '0 auto',
-        }}
-      >
-        <h2
-          style={{
-            fontSize: 'clamp(32px, 6vw, 48px)',
-            fontWeight: 800,
-            textAlign: 'center',
-            marginBottom: '16px',
-            background: 'linear-gradient(135deg, #22c55e 0%, #4ade80 50%, #86efac 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
-          }}
-        >
-          20 Premium Themes
-        </h2>
-        <p
-          style={{
-            textAlign: 'center',
-            color: '#888888',
-            fontSize: '18px',
-            marginBottom: '32px',
-            maxWidth: '600px',
-            marginLeft: 'auto',
-            marginRight: 'auto',
-          }}
-        >
-          From seasonal to aesthetic, find your perfect match
-        </p>
+      <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
+        {/* Header */}
+        <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+          <h2
+            style={{
+              fontSize: 'clamp(28px, 4vw, 40px)',
+              fontWeight: 700,
+              marginBottom: '16px',
+              letterSpacing: '-0.02em',
+              color: '#fafafa',
+            }}
+          >
+            Choose Your Theme
+          </h2>
+          <p style={{ fontSize: '16px', color: '#666', maxWidth: '500px', margin: '0 auto' }}>
+            20 carefully crafted themes to match your style.
+          </p>
+        </div>
 
         {/* Category Filter */}
         <div
           style={{
             display: 'flex',
+            gap: '8px',
+            marginBottom: '32px',
             justifyContent: 'center',
-            gap: '12px',
-            marginBottom: '48px',
             flexWrap: 'wrap',
           }}
         >
-          <button
-            onClick={() => setActiveCategory(null)}
-            style={{
-              padding: '10px 20px',
-              background: activeCategory === null ? '#22c55e' : '#1a1a1a',
-              border: '1px solid',
-              borderColor: activeCategory === null ? '#22c55e' : '#2a2a2a',
-              borderRadius: '24px',
-              color: activeCategory === null ? '#000' : '#888',
-              fontSize: '14px',
-              fontWeight: 600,
-              cursor: 'pointer',
-              transition: 'all 0.2s',
-            }}
-          >
-            All ({themes.length})
-          </button>
-          {categoryOrder.map((category) => {
-            const count = groupedThemes[category]?.length || 0;
-            if (count === 0) return null;
-            return (
-              <button
-                key={category}
-                onClick={() => setActiveCategory(category)}
-                style={{
-                  padding: '10px 20px',
-                  background: activeCategory === category ? '#22c55e' : '#1a1a1a',
-                  border: '1px solid',
-                  borderColor: activeCategory === category ? '#22c55e' : '#2a2a2a',
-                  borderRadius: '24px',
-                  color: activeCategory === category ? '#000' : '#888',
-                  fontSize: '14px',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                }}
-              >
-                {categoryLabels[category]} ({count})
-              </button>
-            );
-          })}
+          {categories.map((cat) => (
+            <button
+              key={cat.id || 'all'}
+              onClick={() => setActiveCategory(cat.id)}
+              style={{
+                padding: '8px 16px',
+                fontSize: '13px',
+                fontWeight: 500,
+                background: activeCategory === cat.id ? '#22c55e' : '#111',
+                border: '1px solid',
+                borderColor: activeCategory === cat.id ? '#22c55e' : '#1f1f1f',
+                borderRadius: '8px',
+                color: activeCategory === cat.id ? '#050505' : '#a1a1a1',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+              }}
+              onMouseEnter={(e) => {
+                if (activeCategory !== cat.id) {
+                  e.currentTarget.style.borderColor = '#2a2a2a';
+                  e.currentTarget.style.color = '#fafafa';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (activeCategory !== cat.id) {
+                  e.currentTarget.style.borderColor = '#1f1f1f';
+                  e.currentTarget.style.color = '#a1a1a1';
+                }
+              }}
+            >
+              {cat.label}
+            </button>
+          ))}
         </div>
 
+        {/* Theme Grid */}
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-            gap: '24px',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
+            gap: '16px',
           }}
         >
-          {displayThemes.map((theme) => (
+          {filteredThemes.map((theme) => (
             <ThemeCard
               key={theme.id}
               theme={theme}
               username={username}
               isSelected={selectedTheme === theme.id}
-              isLocked={isThemeLocked(theme.id)}
-              onSelect={() => {
-                onThemeSelect(theme.id);
-                analytics.trackThemeSelection(theme.id, 'landing', username);
-              }}
-              onLockedClick={() => setShowUpgradeModal(true)}
+              onSelect={() => handleThemeSelect(theme.id)}
             />
           ))}
         </div>
 
-        {/* CSS for loading spinner animation */}
-        <style>{`
-          @keyframes spin {
-            to { transform: rotate(360deg); }
-          }
-        `}</style>
-
-        {/* Upgrade modal removed - all themes free for hackathon */}
+        {/* Selected Theme Info */}
+        {selectedTheme && (
+          <div
+            style={{
+              marginTop: '40px',
+              padding: '20px 24px',
+              background: '#0a0a0a',
+              border: '1px solid #161616',
+              borderRadius: '12px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: '16px',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div
+                style={{
+                  width: '16px',
+                  height: '16px',
+                  borderRadius: '4px',
+                  background: themes.find((t) => t.id === selectedTheme)?.color || '#22c55e',
+                }}
+              />
+              <span style={{ fontSize: '15px', fontWeight: 600, color: '#fafafa' }}>
+                {themes.find((t) => t.id === selectedTheme)?.name} selected
+              </span>
+            </div>
+            <a
+              href="#create"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '10px 20px',
+                background: '#22c55e',
+                borderRadius: '8px',
+                color: '#050505',
+                fontSize: '14px',
+                fontWeight: 600,
+                textDecoration: 'none',
+                transition: 'all 0.15s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = '#4ade80';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = '#22c55e';
+              }}
+            >
+              Create Widget
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <path d="M5 12h14M12 5l7 7-7 7" />
+              </svg>
+            </a>
+          </div>
+        )}
       </div>
     </section>
   );

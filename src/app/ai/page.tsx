@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { Navigation } from '@/components/landing/Navigation';
-import { AuroraBackground } from '@/components/landing/AuroraBackground';
 
 interface ProfileAnalysis {
   developerType: string;
@@ -316,12 +315,11 @@ export default function AIFeaturesPage() {
     <div
       style={{
         minHeight: '100vh',
-        background: 'linear-gradient(180deg, #0a0a0a 0%, #111 100%)',
-        color: '#e5e5e5',
+        background: '#050505',
+        color: '#fafafa',
       }}
     >
       <Navigation />
-      <AuroraBackground />
 
       <div
         style={{
@@ -454,28 +452,29 @@ export default function AIFeaturesPage() {
           }}
         >
           {[
-            { id: 'analyze', label: 'Profile Analysis', icon: '🧠' },
-            { id: 'themes', label: 'Theme Recommendations', icon: '🎨' },
-            { id: 'intel', label: 'Profile Intelligence', icon: '📈' },
-            { id: 'portfolio', label: 'Portfolio Builder', icon: '🗂️' },
-            { id: 'chat', label: 'AI Assistant', icon: '💬' },
+            { id: 'analyze', label: 'Profile Analysis' },
+            { id: 'themes', label: 'Theme Recommendations' },
+            { id: 'intel', label: 'Profile Intelligence' },
+            { id: 'portfolio', label: 'Portfolio Builder' },
+            { id: 'chat', label: 'AI Assistant' },
           ].map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
               style={{
-                padding: '12px 24px',
-                background: activeTab === tab.id ? '#22c55e' : '#161616',
-                border: activeTab === tab.id ? 'none' : '1px solid #2a2a2a',
-                borderRadius: '12px',
-                color: activeTab === tab.id ? '#000' : '#888',
+                padding: '10px 20px',
+                background: activeTab === tab.id ? '#22c55e' : '#111',
+                border: '1px solid',
+                borderColor: activeTab === tab.id ? '#22c55e' : '#1f1f1f',
+                borderRadius: '8px',
+                color: activeTab === tab.id ? '#050505' : '#a1a1a1',
                 fontSize: '14px',
-                fontWeight: 600,
+                fontWeight: 500,
                 cursor: 'pointer',
-                transition: 'all 0.2s',
+                transition: 'all 0.15s ease',
               }}
             >
-              {tab.icon} {tab.label}
+              {tab.label}
             </button>
           ))}
         </div>
@@ -622,9 +621,12 @@ export default function AIFeaturesPage() {
                 </div>
 
                 {/* Fun Fact */}
-                <div style={{ background: '#1a1a1a', borderRadius: '12px', padding: '16px' }}>
-                  <span style={{ fontSize: '20px', marginRight: '8px' }}>💡</span>
-                  <span style={{ color: '#e5e5e5' }}>{analysis.funFact}</span>
+                <div style={{ background: '#1a1a1a', borderRadius: '12px', padding: '16px', display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2" style={{ flexShrink: 0, marginTop: '2px' }}>
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M12 16v-4M12 8h.01" />
+                  </svg>
+                  <span style={{ color: '#a1a1a1' }}>{analysis.funFact}</span>
                 </div>
 
                 {/* CTA */}

@@ -13,7 +13,6 @@ interface NavLink {
 const navLinks: NavLink[] = [
   { label: 'Features', href: '#features', isHashLink: true },
   { label: 'Themes', href: '#themes', isHashLink: true },
-  { label: 'Career Mode', href: '#ai', isHashLink: true },
   { label: 'AI Features', href: '/ai', isHashLink: false },
   { label: 'README Generator', href: '/readme-generator', isHashLink: false },
 ];
@@ -33,7 +32,6 @@ export function Navigation() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Close user menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
@@ -43,14 +41,6 @@ export function Navigation() {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-
-  const linkStyle = {
-    color: '#888',
-    textDecoration: 'none' as const,
-    fontSize: '15px',
-    fontWeight: 500,
-    transition: 'color 0.2s',
-  };
 
   const user = session?.user as { name?: string; email?: string; image?: string; username?: string; avatar?: string } | undefined;
   const avatarUrl = user?.avatar || user?.image || `https://github.com/${user?.username || 'ghost'}.png`;
@@ -64,11 +54,12 @@ export function Navigation() {
         left: 0,
         right: 0,
         zIndex: 1000,
-        padding: '16px 24px',
-        background: scrolled ? 'rgba(10, 10, 10, 0.8)' : 'transparent',
-        backdropFilter: scrolled ? 'blur(12px)' : 'none',
-        borderBottom: scrolled ? '1px solid rgba(42, 42, 42, 0.5)' : 'none',
-        transition: 'all 0.3s ease',
+        padding: scrolled ? '12px 24px' : '16px 24px',
+        background: scrolled ? 'rgba(5, 5, 5, 0.85)' : 'transparent',
+        backdropFilter: scrolled ? 'blur(16px)' : 'none',
+        WebkitBackdropFilter: scrolled ? 'blur(16px)' : 'none',
+        borderBottom: scrolled ? '1px solid rgba(255, 255, 255, 0.06)' : 'none',
+        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
       }}
     >
       <div
@@ -84,16 +75,20 @@ export function Navigation() {
         <Link
           href="/"
           style={{
-            fontSize: '24px',
-            fontWeight: 800,
-            background: 'linear-gradient(135deg, #22c55e 0%, #4ade80 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            fontSize: '20px',
+            fontWeight: 700,
+            color: '#fafafa',
             textDecoration: 'none',
             letterSpacing: '-0.5px',
           }}
         >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <rect x="2" y="2" width="20" height="20" rx="4" fill="#22c55e" />
+            <path d="M7 12h10M12 7v10" stroke="#050505" strokeWidth="2.5" strokeLinecap="round" />
+          </svg>
           GitSkins
         </Link>
 
@@ -102,7 +97,7 @@ export function Navigation() {
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '32px',
+            gap: '8px',
           }}
           className="desktop-nav"
         >
@@ -111,12 +106,22 @@ export function Navigation() {
               <a
                 key={link.label}
                 href={link.href}
-                style={linkStyle}
+                style={{
+                  color: '#a1a1a1',
+                  textDecoration: 'none',
+                  fontSize: '14px',
+                  fontWeight: 500,
+                  padding: '8px 14px',
+                  borderRadius: '8px',
+                  transition: 'all 0.15s ease',
+                }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.color = '#fff';
+                  e.currentTarget.style.color = '#fafafa';
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.06)';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.color = '#888';
+                  e.currentTarget.style.color = '#a1a1a1';
+                  e.currentTarget.style.background = 'transparent';
                 }}
               >
                 {link.label}
@@ -125,12 +130,22 @@ export function Navigation() {
               <Link
                 key={link.label}
                 href={link.href}
-                style={linkStyle}
+                style={{
+                  color: '#a1a1a1',
+                  textDecoration: 'none',
+                  fontSize: '14px',
+                  fontWeight: 500,
+                  padding: '8px 14px',
+                  borderRadius: '8px',
+                  transition: 'all 0.15s ease',
+                }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.color = '#fff';
+                  e.currentTarget.style.color = '#fafafa';
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.06)';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.color = '#888';
+                  e.currentTarget.style.color = '#a1a1a1';
+                  e.currentTarget.style.background = 'transparent';
                 }}
               >
                 {link.label}
@@ -138,43 +153,43 @@ export function Navigation() {
             )
           )}
 
+          <div style={{ width: '1px', height: '20px', background: '#1f1f1f', margin: '0 8px' }} />
+
           {/* Auth Section */}
           {status === 'loading' ? (
-            <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#1a1a1a' }} />
+            <div style={{ width: 32, height: 32, borderRadius: '8px', background: '#111' }} />
           ) : session ? (
-            /* User Menu */
             <div ref={userMenuRef} style={{ position: 'relative' }}>
               <button
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '10px',
-                  padding: '6px 12px 6px 6px',
-                  background: '#161616',
-                  border: '1px solid #2a2a2a',
-                  borderRadius: '24px',
+                  gap: '8px',
+                  padding: '6px 10px 6px 6px',
+                  background: '#111',
+                  border: '1px solid #1f1f1f',
+                  borderRadius: '10px',
                   cursor: 'pointer',
-                  transition: 'all 0.2s',
+                  transition: 'all 0.15s ease',
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = '#3a3a3a';
+                  e.currentTarget.style.borderColor = '#2a2a2a';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = '#2a2a2a';
+                  e.currentTarget.style.borderColor = '#1f1f1f';
                 }}
               >
                 <img
                   src={avatarUrl}
                   alt={displayName}
                   style={{
-                    width: 28,
-                    height: 28,
-                    borderRadius: '50%',
-                    border: '2px solid #22c55e',
+                    width: 26,
+                    height: 26,
+                    borderRadius: '6px',
                   }}
                 />
-                <span style={{ color: '#fff', fontSize: '14px', fontWeight: 500 }}>
+                <span style={{ color: '#fafafa', fontSize: '13px', fontWeight: 500 }}>
                   {displayName}
                 </span>
                 <svg
@@ -184,10 +199,10 @@ export function Navigation() {
                   fill="none"
                   style={{
                     transform: userMenuOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-                    transition: 'transform 0.2s',
+                    transition: 'transform 0.2s ease',
                   }}
                 >
-                  <path d="M3 4.5L6 7.5L9 4.5" stroke="#888" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M3 4.5L6 7.5L9 4.5" stroke="#666" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </button>
 
@@ -199,18 +214,20 @@ export function Navigation() {
                     top: '100%',
                     right: 0,
                     marginTop: '8px',
-                    background: '#161616',
-                    border: '1px solid #2a2a2a',
+                    background: '#111',
+                    border: '1px solid #1f1f1f',
                     borderRadius: '12px',
-                    padding: '8px',
-                    minWidth: '180px',
-                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
+                    padding: '6px',
+                    minWidth: '200px',
+                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5)',
+                    animation: 'scaleIn 0.15s ease-out',
                   }}
                 >
-                  <div style={{ padding: '8px 12px', borderBottom: '1px solid #2a2a2a', marginBottom: '8px' }}>
-                    <div style={{ color: '#fff', fontSize: '14px', fontWeight: 600 }}>{displayName}</div>
+                  <div style={{ padding: '10px 12px', borderBottom: '1px solid #1f1f1f', marginBottom: '6px' }}>
+                    <div style={{ color: '#fafafa', fontSize: '14px', fontWeight: 600 }}>{displayName}</div>
                     <div style={{ color: '#666', fontSize: '12px' }}>@{user?.username}</div>
                   </div>
+                  
                   <Link
                     href="/dashboard"
                     onClick={() => setUserMenuOpen(false)}
@@ -219,29 +236,30 @@ export function Navigation() {
                       alignItems: 'center',
                       gap: '10px',
                       padding: '10px 12px',
-                      color: '#888',
+                      color: '#a1a1a1',
                       textDecoration: 'none',
                       borderRadius: '8px',
                       fontSize: '14px',
-                      transition: 'all 0.2s',
+                      transition: 'all 0.15s ease',
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.background = '#1a1a1a';
-                      e.currentTarget.style.color = '#fff';
+                      e.currentTarget.style.background = '#161616';
+                      e.currentTarget.style.color = '#fafafa';
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.background = 'transparent';
-                      e.currentTarget.style.color = '#888';
+                      e.currentTarget.style.color = '#a1a1a1';
                     }}
                   >
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <rect x="3" y="3" width="7" height="7" />
-                      <rect x="14" y="3" width="7" height="7" />
-                      <rect x="14" y="14" width="7" height="7" />
-                      <rect x="3" y="14" width="7" height="7" />
+                      <rect x="3" y="3" width="7" height="7" rx="1" />
+                      <rect x="14" y="3" width="7" height="7" rx="1" />
+                      <rect x="14" y="14" width="7" height="7" rx="1" />
+                      <rect x="3" y="14" width="7" height="7" rx="1" />
                     </svg>
                     Dashboard
                   </Link>
+                  
                   <Link
                     href={`/showcase/${user?.username}`}
                     onClick={() => setUserMenuOpen(false)}
@@ -250,57 +268,30 @@ export function Navigation() {
                       alignItems: 'center',
                       gap: '10px',
                       padding: '10px 12px',
-                      color: '#888',
+                      color: '#a1a1a1',
                       textDecoration: 'none',
                       borderRadius: '8px',
                       fontSize: '14px',
-                      transition: 'all 0.2s',
+                      transition: 'all 0.15s ease',
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.background = '#1a1a1a';
-                      e.currentTarget.style.color = '#fff';
+                      e.currentTarget.style.background = '#161616';
+                      e.currentTarget.style.color = '#fafafa';
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.background = 'transparent';
-                      e.currentTarget.style.color = '#888';
+                      e.currentTarget.style.color = '#a1a1a1';
                     }}
                   >
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                      <circle cx="12" cy="7" r="4" />
+                      <circle cx="12" cy="8" r="4" />
+                      <path d="M4 20c0-4 4-6 8-6s8 2 8 6" />
                     </svg>
                     My Showcase
                   </Link>
-                  <Link
-                    href="/readme-generator"
-                    onClick={() => setUserMenuOpen(false)}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '10px',
-                      padding: '10px 12px',
-                      color: '#888',
-                      textDecoration: 'none',
-                      borderRadius: '8px',
-                      fontSize: '14px',
-                      transition: 'all 0.2s',
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = '#1a1a1a';
-                      e.currentTarget.style.color = '#fff';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = 'transparent';
-                      e.currentTarget.style.color = '#888';
-                    }}
-                  >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
-                      <polyline points="14 2 14 8 20 8" />
-                    </svg>
-                    README Generator
-                  </Link>
-                  <div style={{ height: '1px', background: '#2a2a2a', margin: '8px 0' }} />
+                  
+                  <div style={{ height: '1px', background: '#1f1f1f', margin: '6px 0' }} />
+                  
                   <button
                     onClick={() => signOut({ callbackUrl: '/' })}
                     style={{
@@ -315,11 +306,11 @@ export function Navigation() {
                       borderRadius: '8px',
                       fontSize: '14px',
                       cursor: 'pointer',
-                      transition: 'all 0.2s',
+                      transition: 'all 0.15s ease',
                       textAlign: 'left',
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.background = '#1a1a1a';
+                      e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)';
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.background = 'transparent';
@@ -336,55 +327,52 @@ export function Navigation() {
               )}
             </div>
           ) : (
-            /* Sign In Button */
             <Link
               href="/auth"
               style={{
-                padding: '10px 20px',
+                padding: '8px 16px',
                 background: 'transparent',
-                border: '1px solid #2a2a2a',
-                borderRadius: '24px',
-                color: '#888',
+                border: '1px solid #1f1f1f',
+                borderRadius: '8px',
+                color: '#a1a1a1',
                 fontSize: '14px',
                 fontWeight: 500,
                 textDecoration: 'none',
-                transition: 'all 0.2s',
+                transition: 'all 0.15s ease',
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = '#3a3a3a';
-                e.currentTarget.style.color = '#fff';
+                e.currentTarget.style.borderColor = '#2a2a2a';
+                e.currentTarget.style.color = '#fafafa';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = '#2a2a2a';
-                e.currentTarget.style.color = '#888';
+                e.currentTarget.style.borderColor = '#1f1f1f';
+                e.currentTarget.style.color = '#a1a1a1';
               }}
             >
               Sign In
             </Link>
           )}
 
-          {/* CTA Button */}
+          {/* Primary CTA */}
           <Link
             href="/readme-generator"
             style={{
-              padding: '10px 24px',
+              padding: '8px 18px',
               background: '#22c55e',
-              borderRadius: '24px',
-              color: '#000',
+              borderRadius: '8px',
+              color: '#050505',
               fontSize: '14px',
               fontWeight: 600,
               textDecoration: 'none',
-              transition: 'all 0.2s',
+              transition: 'all 0.15s ease',
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.background = '#4ade80';
               e.currentTarget.style.transform = 'translateY(-1px)';
-              e.currentTarget.style.boxShadow = '0 4px 20px rgba(34, 197, 94, 0.4)';
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.background = '#22c55e';
               e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = 'none';
             }}
           >
             Get Started
@@ -398,7 +386,7 @@ export function Navigation() {
             display: 'none',
             background: 'transparent',
             border: 'none',
-            color: '#fff',
+            color: '#fafafa',
             cursor: 'pointer',
             padding: '8px',
           }}
@@ -422,9 +410,8 @@ export function Navigation() {
               </>
             ) : (
               <>
-                <line x1="3" y1="12" x2="21" y2="12" />
-                <line x1="3" y1="6" x2="21" y2="6" />
-                <line x1="3" y1="18" x2="21" y2="18" />
+                <line x1="4" y1="8" x2="20" y2="8" />
+                <line x1="4" y1="16" x2="20" y2="16" />
               </>
             )}
           </svg>
@@ -439,13 +426,14 @@ export function Navigation() {
             top: '100%',
             left: 0,
             right: 0,
-            background: 'rgba(10, 10, 10, 0.95)',
-            backdropFilter: 'blur(12px)',
-            borderBottom: '1px solid #2a2a2a',
-            padding: '20px 24px',
+            background: 'rgba(5, 5, 5, 0.98)',
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
+            borderBottom: '1px solid #1f1f1f',
+            padding: '16px 24px 24px',
+            animation: 'slideUp 0.2s ease-out',
           }}
         >
-          {/* User Info (Mobile) */}
           {session && (
             <div
               style={{
@@ -454,7 +442,7 @@ export function Navigation() {
                 gap: '12px',
                 padding: '12px 0',
                 marginBottom: '12px',
-                borderBottom: '1px solid #1a1a1a',
+                borderBottom: '1px solid #1f1f1f',
               }}
             >
               <img
@@ -463,12 +451,11 @@ export function Navigation() {
                 style={{
                   width: 40,
                   height: 40,
-                  borderRadius: '50%',
-                  border: '2px solid #22c55e',
+                  borderRadius: '8px',
                 }}
               />
               <div>
-                <div style={{ color: '#fff', fontSize: '15px', fontWeight: 600 }}>{displayName}</div>
+                <div style={{ color: '#fafafa', fontSize: '15px', fontWeight: 600 }}>{displayName}</div>
                 <div style={{ color: '#666', fontSize: '13px' }}>@{user?.username}</div>
               </div>
             </div>
@@ -482,12 +469,12 @@ export function Navigation() {
                 onClick={() => setMobileMenuOpen(false)}
                 style={{
                   display: 'block',
-                  color: '#888',
+                  color: '#a1a1a1',
                   textDecoration: 'none',
-                  fontSize: '16px',
+                  fontSize: '15px',
                   fontWeight: 500,
-                  padding: '12px 0',
-                  borderBottom: '1px solid #1a1a1a',
+                  padding: '14px 0',
+                  borderBottom: '1px solid #1f1f1f',
                 }}
               >
                 {link.label}
@@ -499,12 +486,12 @@ export function Navigation() {
                 onClick={() => setMobileMenuOpen(false)}
                 style={{
                   display: 'block',
-                  color: '#888',
+                  color: '#a1a1a1',
                   textDecoration: 'none',
-                  fontSize: '16px',
+                  fontSize: '15px',
                   fontWeight: 500,
-                  padding: '12px 0',
-                  borderBottom: '1px solid #1a1a1a',
+                  padding: '14px 0',
+                  borderBottom: '1px solid #1f1f1f',
                 }}
               >
                 {link.label}
@@ -519,30 +506,15 @@ export function Navigation() {
                 onClick={() => setMobileMenuOpen(false)}
                 style={{
                   display: 'block',
-                  color: '#888',
+                  color: '#a1a1a1',
                   textDecoration: 'none',
-                  fontSize: '16px',
+                  fontSize: '15px',
                   fontWeight: 500,
-                  padding: '12px 0',
-                  borderBottom: '1px solid #1a1a1a',
+                  padding: '14px 0',
+                  borderBottom: '1px solid #1f1f1f',
                 }}
               >
                 Dashboard
-              </Link>
-              <Link
-                href={`/showcase/${user?.username}`}
-                onClick={() => setMobileMenuOpen(false)}
-                style={{
-                  display: 'block',
-                  color: '#888',
-                  textDecoration: 'none',
-                  fontSize: '16px',
-                  fontWeight: 500,
-                  padding: '12px 0',
-                  borderBottom: '1px solid #1a1a1a',
-                }}
-              >
-                My Showcase
               </Link>
               <button
                 onClick={() => {
@@ -553,10 +525,10 @@ export function Navigation() {
                   display: 'block',
                   width: '100%',
                   marginTop: '16px',
-                  padding: '14px 24px',
+                  padding: '14px',
                   background: 'transparent',
-                  border: '1px solid #ef4444',
-                  borderRadius: '12px',
+                  border: '1px solid rgba(239, 68, 68, 0.3)',
+                  borderRadius: '10px',
                   color: '#ef4444',
                   fontSize: '15px',
                   fontWeight: 500,
@@ -574,11 +546,11 @@ export function Navigation() {
               style={{
                 display: 'block',
                 marginTop: '16px',
-                padding: '14px 24px',
+                padding: '14px',
                 background: 'transparent',
-                border: '1px solid #2a2a2a',
-                borderRadius: '12px',
-                color: '#888',
+                border: '1px solid #1f1f1f',
+                borderRadius: '10px',
+                color: '#a1a1a1',
                 fontSize: '15px',
                 fontWeight: 500,
                 textDecoration: 'none',
@@ -595,10 +567,10 @@ export function Navigation() {
             style={{
               display: 'block',
               marginTop: '12px',
-              padding: '14px 24px',
+              padding: '14px',
               background: '#22c55e',
-              borderRadius: '12px',
-              color: '#000',
+              borderRadius: '10px',
+              color: '#050505',
               fontSize: '15px',
               fontWeight: 600,
               textDecoration: 'none',
@@ -611,7 +583,29 @@ export function Navigation() {
       )}
 
       <style>{`
-        @media (max-width: 768px) {
+        @keyframes scaleIn {
+          from {
+            opacity: 0;
+            transform: scale(0.95) translateY(-4px);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+          }
+        }
+        
+        @keyframes slideUp {
+          from {
+            opacity: 0;
+            transform: translateY(-8px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        
+        @media (max-width: 900px) {
           .desktop-nav {
             display: none !important;
           }

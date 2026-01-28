@@ -1,13 +1,18 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { Suspense } from 'react';
 import { PostHogProvider } from '@/components/providers/posthog-provider';
 import { SessionProvider } from '@/components/providers/session-provider';
 import { AnalyticsProvider } from '@/components/AnalyticsProvider';
-import { FeedbackWidget } from '@/components/FeedbackWidget';
 import { siteConfig } from '@/config/site';
 import './globals.css';
+
+export const viewport: Viewport = {
+  themeColor: '#050505',
+  width: 'device-width',
+  initialScale: 1,
+};
 
 export const metadata: Metadata = {
   title: {
@@ -68,40 +73,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
-        <style>{`
-          * {
-            box-sizing: border-box;
-          }
-          body {
-            margin: 0;
-            padding: 0;
-            background: #0a0a0a;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-          }
-          ::selection {
-            background: #22c55e40;
-          }
-          input:focus {
-            border-color: #22c55e !important;
-          }
-          button:hover {
-            opacity: 0.9;
-          }
-          img {
-            max-width: 100%;
-          }
-        `}</style>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
       <body>
         <SessionProvider>
           <PostHogProvider>
             <Suspense fallback={null}>
               <AnalyticsProvider>
-                {children}
-                <FeedbackWidget />
+                <main className="animate-fade-in">
+                  {children}
+                </main>
               </AnalyticsProvider>
             </Suspense>
             <Analytics />
