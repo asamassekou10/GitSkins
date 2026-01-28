@@ -16,10 +16,10 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: {
-    default: 'GitSkins - Beautiful GitHub README Widgets',
+    default: 'GitSkins - AI-Powered GitHub Profile Tools',
     template: '%s | GitSkins',
   },
-  description: 'Generate dynamic, custom-themed widgets for your GitHub profile. Stats, languages, streaks, and more. Free, open-source, and beautiful.',
+  description: 'Transform your GitHub profile with AI. Dynamic widgets, AI-generated READMEs, profile intelligence, and portfolio case studies. Powered by Google Gemini.',
   keywords: ['GitHub', 'README', 'widgets', 'profile', 'stats', 'themes', 'developer', 'open source', 'GitHub profile', 'contribution graph'],
   authors: [{ name: 'GitSkins' }],
   creator: 'GitSkins',
@@ -33,8 +33,8 @@ export const metadata: Metadata = {
     locale: 'en_US',
     url: siteConfig.url,
     siteName: 'GitSkins',
-    title: 'GitSkins - Beautiful GitHub README Widgets',
-    description: 'Generate dynamic, custom-themed widgets for your GitHub profile. Stats, languages, streaks, and more.',
+    title: 'GitSkins - AI-Powered GitHub Profile Tools',
+    description: 'Transform your GitHub profile with AI. Dynamic widgets, AI-generated READMEs, profile intelligence, and portfolio case studies.',
     images: [
       {
         url: '/og-image.png',
@@ -46,8 +46,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'GitSkins - Beautiful GitHub README Widgets',
-    description: 'Generate dynamic, custom-themed widgets for your GitHub profile.',
+    title: 'GitSkins - AI-Powered GitHub Profile Tools',
+    description: 'Transform your GitHub profile with AI. Widgets, READMEs, profile intelligence, and portfolio case studies.',
     images: ['/og-image.png'],
     creator: '@gitskins',
   },

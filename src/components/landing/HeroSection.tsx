@@ -95,7 +95,7 @@ export function HeroSection({ username, onUsernameChange }: HeroSectionProps) {
             color: '#fafafa',
           }}
         >
-          Beautiful widgets for your
+          Your GitHub profile,
           <br />
           <span
             style={{
@@ -105,7 +105,7 @@ export function HeroSection({ username, onUsernameChange }: HeroSectionProps) {
               backgroundClip: 'text',
             }}
           >
-            GitHub profile
+            powered by AI
           </span>
         </h1>
 
@@ -116,12 +116,12 @@ export function HeroSection({ username, onUsernameChange }: HeroSectionProps) {
             color: '#a1a1a1',
             margin: '0 auto',
             marginBottom: '40px',
-            maxWidth: '520px',
+            maxWidth: '540px',
             lineHeight: 1.7,
           }}
         >
-          Generate dynamic stats, language charts, and streak widgets.
-          AI-powered README generator included. Completely free.
+          Dynamic widgets, AI-generated READMEs, profile intelligence, 
+          and portfolio case studies. All in one place, completely free.
         </p>
 
         {/* CTA Buttons */}
