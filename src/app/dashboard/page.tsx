@@ -207,31 +207,7 @@ export default function DashboardPage() {
                 ? 'All premium themes and unlimited README generations'
                 : `${FREE_THEMES.length} free themes and ${PLANS.free.limits.readmeGenerations} README generations/month`}
             </p>
-            {!isPro && (
-              <Link
-                href="/pricing"
-                style={{
-                  display: 'inline-block',
-                  marginTop: '16px',
-                  padding: '10px 20px',
-                  background: '#22c55e',
-                  borderRadius: '8px',
-                  color: '#000',
-                  fontSize: '14px',
-                  fontWeight: 600,
-                  textDecoration: 'none',
-                  transition: 'all 0.2s',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = '#4ade80';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = '#22c55e';
-                }}
-              >
-                Upgrade to Pro
-              </Link>
-            )}
+            {/* All features free for hackathon */}
           </div>
 
           {/* Usage Card */}
@@ -284,24 +260,7 @@ export default function DashboardPage() {
                 )}
               </p>
             )}
-            {!isPro && generationCheck.remaining < 3 && (
-              <Link
-                href="/pricing#credits"
-                style={{
-                  display: 'inline-block',
-                  marginTop: '12px',
-                  padding: '8px 16px',
-                  background: 'transparent',
-                  border: '1px solid #2a2a2a',
-                  borderRadius: '6px',
-                  color: '#888',
-                  fontSize: '13px',
-                  textDecoration: 'none',
-                }}
-              >
-                Buy more credits
-              </Link>
-            )}
+            {/* Credits purchase removed for hackathon */}
           </div>
         </div>
 
@@ -464,7 +423,7 @@ export default function DashboardPage() {
             </Link>
 
             <Link
-              href="/pricing"
+              href="/ai"
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -487,14 +446,16 @@ export default function DashboardPage() {
               }}
             >
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2">
-                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                <path d="M12 2a10 10 0 1 0 10 10H12V2z" />
+                <path d="M12 2a10 10 0 0 1 10 10" />
+                <circle cx="12" cy="12" r="6" />
               </svg>
               <div>
                 <div style={{ fontWeight: 600, fontSize: '15px' }}>
-                  {isPro ? 'View Pricing' : 'Upgrade to Pro'}
+                  AI Features
                 </div>
                 <div style={{ color: '#666', fontSize: '13px' }}>
-                  {isPro ? 'See plans & credits' : 'Unlock all features'}
+                  Profile analysis & more
                 </div>
               </div>
             </Link>

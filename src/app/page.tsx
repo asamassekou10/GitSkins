@@ -723,7 +723,7 @@ export default function Home() {
                   <a href="#features" style={{ color: '#666', fontSize: '14px', textDecoration: 'none' }}>Features</a>
                   <a href="#themes" style={{ color: '#666', fontSize: '14px', textDecoration: 'none' }}>Themes</a>
                   <a href="/readme-generator" style={{ color: '#666', fontSize: '14px', textDecoration: 'none' }}>README Generator</a>
-                  <a href="/pricing" style={{ color: '#666', fontSize: '14px', textDecoration: 'none' }}>Pricing</a>
+                  <a href="/ai" style={{ color: '#666', fontSize: '14px', textDecoration: 'none' }}>AI Features</a>
                 </div>
               </div>
 

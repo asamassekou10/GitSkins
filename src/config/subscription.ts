@@ -18,9 +18,15 @@ export const ALL_THEMES = {
 } as const;
 
 /**
- * Free tier themes (5 themes)
+ * Free tier themes (all themes - hackathon edition)
  */
-export const FREE_THEMES = ['github-dark', 'minimal', 'ocean', 'forest', 'midnight'] as const;
+export const FREE_THEMES = [
+  ...ALL_THEMES.original,
+  ...ALL_THEMES.seasonal,
+  ...ALL_THEMES.holiday,
+  ...ALL_THEMES.developer,
+  ...ALL_THEMES.aesthetic,
+] as const;
 
 /**
  * Pro tier themes (all 20 themes)
@@ -35,6 +41,7 @@ export const PRO_THEMES = [
 
 /**
  * Plan definitions
+ * NOTE: All features are free for hackathon testing
  */
 export const PLANS: Record<'free' | 'pro', Plan> = {
   free: {
@@ -42,38 +49,39 @@ export const PLANS: Record<'free' | 'pro', Plan> = {
     name: 'Free',
     price: 0,
     priceLabel: 'Free forever',
-    description: 'Perfect for getting started',
+    description: 'Full access - Hackathon Edition',
     features: [
-      'All basic widgets (card, stats, languages, streak)',
-      '5 themes (GitHub Dark, Minimal, Ocean, Forest, Midnight)',
-      '3 README generations per month',
-      'GitSkins watermark on widgets',
+      'All widgets (card, stats, languages, streak)',
+      'All 20 premium themes',
+      'Unlimited README generations',
+      'No watermark on widgets',
+      'Priority widget rendering',
+      'All AI features included',
     ],
     limits: {
-      readmeGenerations: 3,
-      themes: [...FREE_THEMES],
-      hasWatermark: true,
-      hasPriorityRendering: false,
-      hasCustomColors: false,
+      readmeGenerations: 9999,
+      themes: [...PRO_THEMES],
+      hasWatermark: false,
+      hasPriorityRendering: true,
+      hasCustomColors: true,
     },
   },
   pro: {
     id: 'pro',
     name: 'Pro',
-    price: 29,
-    priceLabel: '$29 one-time',
-    description: 'Lifetime access to everything',
+    price: 0,
+    priceLabel: 'Free (Hackathon)',
+    description: 'Full access - Hackathon Edition',
     features: [
-      'All basic widgets (card, stats, languages, streak)',
+      'All widgets (card, stats, languages, streak)',
       'All 20 premium themes',
-      '10 README generations per month',
+      'Unlimited README generations',
       'No watermark on widgets',
       'Priority widget rendering',
-      'Custom theme colors (coming soon)',
-      'Early access to new features',
+      'All AI features included',
     ],
     limits: {
-      readmeGenerations: 10,
+      readmeGenerations: 9999,
       themes: [...PRO_THEMES],
       hasWatermark: false,
       hasPriorityRendering: true,
@@ -103,17 +111,16 @@ export const CREDIT_PACKS: CreditPack[] = [
 ];
 
 /**
- * Stripe configuration
+ * Stripe configuration (disabled for hackathon - all features are free)
  */
 export const STRIPE_CONFIG = {
-  // These would be your actual Stripe price IDs
   priceIds: {
-    proLifetime: process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID || 'price_pro_lifetime',
-    credits50: process.env.NEXT_PUBLIC_STRIPE_CREDITS_50_PRICE_ID || 'price_credits_50',
-    credits150: process.env.NEXT_PUBLIC_STRIPE_CREDITS_150_PRICE_ID || 'price_credits_150',
+    proLifetime: '',
+    credits50: '',
+    credits150: '',
   },
-  successUrl: '/pricing?success=true',
-  cancelUrl: '/pricing?canceled=true',
+  successUrl: '/',
+  cancelUrl: '/',
 };
 
 /**

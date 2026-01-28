@@ -11,14 +11,6 @@
 import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from '@google/generative-ai';
 import type { ExtendedProfileData } from '@/types/readme';
 
-// Initialize Gemini
-const genAI = process.env.GEMINI_API_KEY
-  ? new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
-  : null;
-
-const GEMINI_MODEL_FAST = process.env.GEMINI_MODEL_FAST || process.env.GEMINI_MODEL || 'gemini-1.5-flash';
-const GEMINI_MODEL_PRO = process.env.GEMINI_MODEL_PRO || process.env.GEMINI_MODEL || 'gemini-1.5-pro';
-
 // Safety settings for content generation
 const safetySettings = [
   {
@@ -40,13 +32,34 @@ const safetySettings = [
 ];
 
 /**
+ * Lazy initialization of Gemini client to avoid build-time errors
+ */
+let _genAI: GoogleGenerativeAI | null = null;
+
+function getGenAI(): GoogleGenerativeAI {
+  if (!_genAI) {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      throw new Error('GEMINI_API_KEY environment variable is required');
+    }
+    _genAI = new GoogleGenerativeAI(apiKey);
+  }
+  return _genAI;
+}
+
+function getModelName(type: 'fast' | 'pro' = 'fast'): string {
+  if (type === 'pro') {
+    return process.env.GEMINI_MODEL_PRO || process.env.GEMINI_MODEL || 'gemini-1.5-pro';
+  }
+  return process.env.GEMINI_MODEL_FAST || process.env.GEMINI_MODEL || 'gemini-1.5-flash';
+}
+
+/**
  * Get the Gemini model instance
  */
-function getModel(modelName: string = GEMINI_MODEL_FAST) {
-  if (!genAI) {
-    throw new Error('Gemini API key not configured');
-  }
-  return genAI.getGenerativeModel({ model: modelName, safetySettings });
+function getModel(modelName?: string) {
+  const name = modelName || getModelName('fast');
+  return getGenAI().getGenerativeModel({ model: name, safetySettings });
 }
 
 /**
@@ -64,7 +77,7 @@ export async function generateReadmeWithGemini(
     agentLoop?: boolean;
   }
 ): Promise<{ markdown: string; refinementNotes?: string[] }> {
-  const model = getModel(GEMINI_MODEL_PRO);
+  const model = getModel(getModelName('pro'));
 
   const topLanguages = profileData.languages.slice(0, 5).map((l) => l.name).join(', ');
   const pinnedReposText = profileData.pinnedRepos
@@ -175,7 +188,7 @@ export async function analyzeProfileWithGemini(
   profileData: ExtendedProfileData,
   username: string
 ): Promise<ProfileAnalysis> {
-  const model = getModel(GEMINI_MODEL_FAST);
+  const model = getModel(getModelName('fast'));
 
   const topLanguages = profileData.languages.slice(0, 5).map((l) => `${l.name} (${l.percentage}%)`).join(', ');
   const pinnedReposText = profileData.pinnedRepos
@@ -268,7 +281,7 @@ export async function getThemeRecommendations(
   profileData: ExtendedProfileData,
   username: string
 ): Promise<ThemeRecommendation[]> {
-  const model = getModel(GEMINI_MODEL_FAST);
+  const model = getModel(getModelName('fast'));
 
   const topLanguages = profileData.languages.slice(0, 3).map((l) => l.name).join(', ');
 
@@ -342,7 +355,7 @@ export async function getProfileIntelligence(
   profileData: ExtendedProfileData,
   username: string
 ): Promise<ProfileIntel> {
-  const model = getModel(GEMINI_MODEL_FAST);
+  const model = getModel(getModelName('fast'));
   const topLanguages = profileData.languages.slice(0, 4).map((l) => l.name).join(', ');
   const prompt = `You are a career coach analyzing a GitHub profile. Produce a concise intelligence report.
 
@@ -405,7 +418,7 @@ export async function buildPortfolioCaseStudies(
   profileData: ExtendedProfileData,
   username: string
 ): Promise<PortfolioCaseStudy[]> {
-  const model = getModel(GEMINI_MODEL_PRO);
+  const model = getModel(getModelName('pro'));
   const repoList = profileData.pinnedRepos;
   const repoSummaries = repoList
     .map((repo) => `${repo.name}: ${repo.description || 'No description'} (${repo.stars} stars, ${repo.language || 'Unknown'})`)
@@ -472,7 +485,7 @@ export async function chatWithGemini(
     profileData?: Partial<ExtendedProfileData>;
   }
 ): Promise<string> {
-  const model = getModel(GEMINI_MODEL_FAST);
+  const model = getModel(getModelName('fast'));
 
   const systemContext = `You are GitSkins AI Assistant, helping developers customize their GitHub profile widgets.
 
@@ -526,7 +539,7 @@ export async function generateWidgetSuggestions(
   }>;
   embedCode: string;
 }> {
-  const model = getModel(GEMINI_MODEL_FAST);
+  const model = getModel(getModelName('fast'));
 
   const prompt = `Create an optimal widget layout suggestion for this GitHub profile.
 
@@ -592,4 +605,14 @@ Respond with ONLY a JSON object (no markdown):
  */
 export function isGeminiConfigured(): boolean {
   return !!process.env.GEMINI_API_KEY;
+}
+
+/**
+ * Get safe Gemini status for client-side display
+ */
+export function getGeminiStatus(): { configured: boolean; model: string } {
+  return {
+    configured: !!process.env.GEMINI_API_KEY,
+    model: getModelName('fast'),
+  };
 }

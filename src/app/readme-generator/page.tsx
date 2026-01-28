@@ -312,23 +312,7 @@ export default function ReadmeGeneratorPage() {
                 </span>
               </div>
 
-              {!userIsPro && (
-                <Link
-                  href="/pricing"
-                  style={{
-                    padding: '8px 16px',
-                    background: 'rgba(34, 197, 94, 0.15)',
-                    border: '1px solid rgba(34, 197, 94, 0.3)',
-                    borderRadius: '8px',
-                    color: '#22c55e',
-                    fontSize: '13px',
-                    fontWeight: 600,
-                    textDecoration: 'none',
-                  }}
-                >
-                  Upgrade to Pro - 10/month
-                </Link>
-              )}
+              {/* All features free for hackathon */}
 
               {userIsPro && (
                 <span
@@ -801,19 +785,6 @@ export default function ReadmeGeneratorPage() {
                 }}
               >
                 {error}
-                {error.includes('Upgrade') && (
-                  <Link
-                    href="/pricing"
-                    style={{
-                      display: 'inline-block',
-                      marginLeft: '8px',
-                      color: '#22c55e',
-                      textDecoration: 'underline',
-                    }}
-                  >
-                    View Plans
-                  </Link>
-                )}
               </div>
             )}
           </div>

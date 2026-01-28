@@ -16,7 +16,6 @@ const navLinks: NavLink[] = [
   { label: 'Career Mode', href: '#ai', isHashLink: true },
   { label: 'AI Features', href: '/ai', isHashLink: false },
   { label: 'README Generator', href: '/readme-generator', isHashLink: false },
-  { label: 'Pricing', href: '/pricing', isHashLink: false },
 ];
 
 export function Navigation() {
