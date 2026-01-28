@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Navigation } from '@/components/landing/Navigation';
 import { AuroraBackground } from '@/components/landing/AuroraBackground';
@@ -16,6 +17,7 @@ import type { GenerationCheckResult } from '@/types/subscription';
 
 type ReadmeStyle = 'minimal' | 'detailed' | 'creative';
 type SectionType = 'header' | 'about' | 'skills' | 'stats' | 'projects' | 'streak' | 'connect';
+type CareerRole = 'frontend' | 'backend' | 'fullstack' | 'data' | 'mobile' | 'devops' | 'product';
 
 const themes = [
   { id: 'satan', name: 'Satan', color: '#ff4500', free: true },
@@ -41,18 +43,32 @@ const styleOptions: { id: ReadmeStyle; label: string; description: string }[] = 
   { id: 'creative', label: 'Creative', description: 'Fun with animations' },
 ];
 
+const careerRoles: { id: CareerRole; label: string; description: string }[] = [
+  { id: 'frontend', label: 'Frontend Engineer', description: 'UI/UX, performance, design systems' },
+  { id: 'backend', label: 'Backend Engineer', description: 'APIs, scalability, data reliability' },
+  { id: 'fullstack', label: 'Full-Stack Engineer', description: 'End-to-end delivery and ownership' },
+  { id: 'data', label: 'Data/ML Engineer', description: 'Pipelines, analytics, ML systems' },
+  { id: 'mobile', label: 'Mobile Engineer', description: 'iOS/Android and cross-platform' },
+  { id: 'devops', label: 'DevOps/SRE', description: 'Infra, CI/CD, reliability' },
+  { id: 'product', label: 'Product Engineer', description: 'Impact, experiments, growth' },
+];
+
 export default function ReadmeGeneratorPage() {
+  const searchParams = useSearchParams();
   const [username, setUsername] = useState('octocat');
   const [style, setStyle] = useState<ReadmeStyle>('detailed');
   const [theme, setTheme] = useState('satan');
   const [sections, setSections] = useState<SectionType[]>([
     'header', 'about', 'skills', 'stats', 'projects', 'connect',
   ]);
+  const [careerMode, setCareerMode] = useState(true);
+  const [careerRole, setCareerRole] = useState<CareerRole>('fullstack');
+  const [agentLoop, setAgentLoop] = useState(true);
   const [useAI, setUseAI] = useState(true);
 
   const [isLoading, setIsLoading] = useState(false);
   const [generatedReadme, setGeneratedReadme] = useState<string | null>(null);
-  const [aiProvider, setAiProvider] = useState<'gemini' | 'openai' | 'template' | null>(null);
+  const [aiProvider, setAiProvider] = useState<'gemini' | 'gemini_refined' | 'openai' | 'template' | null>(null);
   const [profileData, setProfileData] = useState<{
     name: string | null;
     avatarUrl: string;
@@ -71,6 +87,17 @@ export default function ReadmeGeneratorPage() {
     setUsageInfo(info);
     setUserIsPro(isPro());
   }, []);
+
+  useEffect(() => {
+    const careerParam = searchParams.get('careerMode');
+    const roleParam = searchParams.get('role') as CareerRole | null;
+    if (careerParam === '1') {
+      setCareerMode(true);
+      if (roleParam) {
+        setCareerRole(roleParam);
+      }
+    }
+  }, [searchParams]);
 
   const refreshUsageInfo = () => {
     const info = checkGenerationAllowed();
@@ -117,6 +144,9 @@ export default function ReadmeGeneratorPage() {
           sections,
           style,
           theme,
+          careerMode,
+          careerRole,
+          agentLoop,
           useAI,
         }),
       });
@@ -139,7 +169,7 @@ export default function ReadmeGeneratorPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [username, sections, style, theme, useAI]);
+  }, [username, sections, style, theme, careerMode, careerRole, agentLoop, useAI]);
 
   const copyToClipboard = async () => {
     if (!generatedReadme) return;
@@ -495,6 +525,78 @@ export default function ReadmeGeneratorPage() {
               </div>
             </div>
 
+            {/* Career Mode */}
+            <div style={{ marginBottom: '32px' }}>
+              <label
+                style={{
+                  display: 'block',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  color: '#fff',
+                  marginBottom: '12px',
+                }}
+              >
+                Career Mode
+              </label>
+              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '12px' }}>
+                <button
+                  onClick={() => setCareerMode(!careerMode)}
+                  style={{
+                    padding: '12px 20px',
+                    background: careerMode ? 'rgba(34, 197, 94, 0.15)' : '#0d0d0d',
+                    border: `1px solid ${careerMode ? '#22c55e' : '#2a2a2a'}`,
+                    borderRadius: '10px',
+                    color: careerMode ? '#22c55e' : '#888',
+                    fontSize: '14px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {careerMode ? 'Enabled' : 'Disabled'}
+                </button>
+                <button
+                  onClick={() => setAgentLoop(!agentLoop)}
+                  style={{
+                    padding: '12px 20px',
+                    background: agentLoop ? 'rgba(34, 197, 94, 0.15)' : '#0d0d0d',
+                    border: `1px solid ${agentLoop ? '#22c55e' : '#2a2a2a'}`,
+                    borderRadius: '10px',
+                    color: agentLoop ? '#22c55e' : '#888',
+                    fontSize: '14px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {agentLoop ? 'Agent Refinement On' : 'Agent Refinement Off'}
+                </button>
+              </div>
+              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                {careerRoles.map((role) => (
+                  <button
+                    key={role.id}
+                    onClick={() => setCareerRole(role.id)}
+                    disabled={!careerMode}
+                    style={{
+                      padding: '10px 16px',
+                      background: careerRole === role.id ? 'rgba(34, 197, 94, 0.15)' : '#0d0d0d',
+                      border: `1px solid ${careerRole === role.id ? '#22c55e' : '#2a2a2a'}`,
+                      borderRadius: '10px',
+                      color: careerRole === role.id ? '#22c55e' : '#888',
+                      fontSize: '13px',
+                      fontWeight: 600,
+                      cursor: careerMode ? 'pointer' : 'not-allowed',
+                      opacity: careerMode ? 1 : 0.6,
+                    }}
+                  >
+                    {role.label}
+                    <span style={{ display: 'block', fontSize: '11px', fontWeight: 400, color: '#666', marginTop: '4px' }}>
+                      {role.description}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* Sections Selection */}
             <div style={{ marginBottom: '32px' }}>
               <label
@@ -755,7 +857,7 @@ export default function ReadmeGeneratorPage() {
                         fontWeight: 600,
                       }}
                     >
-                      Generated with {aiProvider}
+                      Generated with {aiProvider === 'gemini_refined' ? 'gemini (refined)' : aiProvider}
                     </span>
                   )}
                 </div>

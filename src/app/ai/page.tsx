@@ -23,6 +23,29 @@ interface ThemeRecommendation {
   reason: string;
 }
 
+interface ProfileIntel {
+  summary: string;
+  benchmarks: Array<{
+    label: string;
+    value: string;
+    context: string;
+  }>;
+  strengths: string[];
+  gaps: string[];
+  recommendations: string[];
+}
+
+interface PortfolioCaseStudy {
+  title: string;
+  repo: string;
+  problem: string;
+  approach: string;
+  impact: string;
+  stack: string[];
+  highlights: string[];
+  repoUrl?: string;
+}
+
 interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
@@ -31,7 +54,7 @@ interface ChatMessage {
 
 export default function AIFeaturesPage() {
   const [username, setUsername] = useState('octocat');
-  const [activeTab, setActiveTab] = useState<'analyze' | 'themes' | 'chat'>('analyze');
+  const [activeTab, setActiveTab] = useState<'analyze' | 'themes' | 'intel' | 'portfolio' | 'chat'>('analyze');
 
   // Analysis state
   const [analysis, setAnalysis] = useState<ProfileAnalysis | null>(null);
@@ -41,6 +64,14 @@ export default function AIFeaturesPage() {
   // Theme recommendations state
   const [recommendations, setRecommendations] = useState<ThemeRecommendation[]>([]);
   const [loadingThemes, setLoadingThemes] = useState(false);
+
+  // Profile intelligence state
+  const [profileIntel, setProfileIntel] = useState<ProfileIntel | null>(null);
+  const [loadingIntel, setLoadingIntel] = useState(false);
+
+  // Portfolio state
+  const [portfolio, setPortfolio] = useState<PortfolioCaseStudy[]>([]);
+  const [loadingPortfolio, setLoadingPortfolio] = useState(false);
 
   // Chat state
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
@@ -122,6 +153,77 @@ export default function AIFeaturesPage() {
       setProfileData(data.profile);
     } catch (err: any) {
       setError(err.message || 'Failed to get theme recommendations');
+    } finally {
+      setLoadingThemes(false);
+    }
+  };
+
+  const handleGetIntel = async (overrideUsername?: string) => {
+    const targetUsername = (overrideUsername ?? username).trim();
+    if (!targetUsername) {
+      setError('Please enter a GitHub username');
+      return;
+    }
+
+    setError('');
+    setLoadingIntel(true);
+    setProfileIntel(null);
+
+    try {
+      const response = await fetch('/api/ai/profile-intel', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: targetUsername }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to get profile intelligence');
+      }
+
+      setProfileIntel(data.intel);
+      setProfileData(data.profile);
+    } catch (err: any) {
+      setError(err.message || 'Failed to get profile intelligence');
+    } finally {
+      setLoadingIntel(false);
+    }
+  };
+
+  const handleGetPortfolio = async (overrideUsername?: string) => {
+    const targetUsername = (overrideUsername ?? username).trim();
+    if (!targetUsername) {
+      setError('Please enter a GitHub username');
+      return;
+    }
+
+    setError('');
+    setLoadingPortfolio(true);
+    setPortfolio([]);
+
+    try {
+      const response = await fetch('/api/ai/portfolio', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: targetUsername }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to build portfolio');
+      }
+
+      setPortfolio(data.caseStudies || []);
+      setProfileData(data.profile);
+    } catch (err: any) {
+      setError(err.message || 'Failed to build portfolio');
+    } finally {
+      setLoadingPortfolio(false);
+    }
+  };
+
   const runDemo = () => {
     const demoUsername = 'octocat';
     setUsername(demoUsername);
@@ -129,10 +231,10 @@ export default function AIFeaturesPage() {
       void handleAnalyze(demoUsername);
     } else if (activeTab === 'themes') {
       void handleGetThemes(demoUsername);
-    }
-  };
-    } finally {
-      setLoadingThemes(false);
+    } else if (activeTab === 'intel') {
+      void handleGetIntel(demoUsername);
+    } else if (activeTab === 'portfolio') {
+      void handleGetPortfolio(demoUsername);
     }
   };
 
@@ -307,7 +409,18 @@ export default function AIFeaturesPage() {
                 color: '#fff',
                 fontSize: '16px',
               }}
-              onKeyPress={(e) => e.key === 'Enter' && (activeTab === 'analyze' ? handleAnalyze() : handleGetThemes())}
+              onKeyPress={(e) => {
+                if (e.key !== 'Enter') return;
+                if (activeTab === 'analyze') {
+                  void handleAnalyze();
+                } else if (activeTab === 'themes') {
+                  void handleGetThemes();
+                } else if (activeTab === 'intel') {
+                  void handleGetIntel();
+                } else if (activeTab === 'portfolio') {
+                  void handleGetPortfolio();
+                }
+              }}
             />
           </div>
         </div>
@@ -343,6 +456,8 @@ export default function AIFeaturesPage() {
           {[
             { id: 'analyze', label: 'Profile Analysis', icon: '🧠' },
             { id: 'themes', label: 'Theme Recommendations', icon: '🎨' },
+            { id: 'intel', label: 'Profile Intelligence', icon: '📈' },
+            { id: 'portfolio', label: 'Portfolio Builder', icon: '🗂️' },
             { id: 'chat', label: 'AI Assistant', icon: '💬' },
           ].map((tab) => (
             <button
@@ -387,7 +502,7 @@ export default function AIFeaturesPage() {
         {activeTab === 'analyze' && (
           <div style={{ maxWidth: '800px', margin: '0 auto' }}>
             <button
-              onClick={handleAnalyze}
+              onClick={() => handleAnalyze()}
               disabled={analyzing || !username.trim()}
               style={{
                 display: 'block',
@@ -538,7 +653,7 @@ export default function AIFeaturesPage() {
         {activeTab === 'themes' && (
           <div style={{ maxWidth: '800px', margin: '0 auto' }}>
             <button
-              onClick={handleGetThemes}
+              onClick={() => handleGetThemes()}
               disabled={loadingThemes || !username.trim()}
               style={{
                 display: 'block',
@@ -626,6 +741,168 @@ export default function AIFeaturesPage() {
                     >
                       Preview
                     </Link>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Profile Intelligence Tab */}
+        {activeTab === 'intel' && (
+          <div style={{ maxWidth: '850px', margin: '0 auto' }}>
+            <button
+              onClick={() => handleGetIntel()}
+              disabled={loadingIntel || !username.trim()}
+              style={{
+                display: 'block',
+                width: '100%',
+                maxWidth: '320px',
+                margin: '0 auto 32px',
+                padding: '14px 28px',
+                background: loadingIntel ? '#1a1a1a' : '#22c55e',
+                border: 'none',
+                borderRadius: '12px',
+                color: loadingIntel ? '#888' : '#000',
+                fontSize: '16px',
+                fontWeight: 600,
+                cursor: loadingIntel ? 'not-allowed' : 'pointer',
+              }}
+            >
+              {loadingIntel ? 'Building Intelligence...' : 'Run Profile Intelligence'}
+            </button>
+
+            {profileIntel && (
+              <div
+                style={{
+                  background: '#161616',
+                  border: '1px solid #2a2a2a',
+                  borderRadius: '20px',
+                  padding: '28px',
+                }}
+              >
+                <h3 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '12px', color: '#fff' }}>
+                  Profile Intelligence Summary
+                </h3>
+                <p style={{ color: '#cfcfcf', lineHeight: 1.6, marginBottom: '24px' }}>{profileIntel.summary}</p>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+                  {profileIntel.benchmarks.map((benchmark, index) => (
+                    <div key={`${benchmark.label}-${index}`} style={{ background: '#1a1a1a', borderRadius: '12px', padding: '16px' }}>
+                      <div style={{ color: '#888', fontSize: '12px', marginBottom: '6px' }}>{benchmark.label}</div>
+                      <div style={{ color: '#fff', fontWeight: 700, fontSize: '18px' }}>{benchmark.value}</div>
+                      <div style={{ color: '#666', fontSize: '12px', marginTop: '6px' }}>{benchmark.context}</div>
+                    </div>
+                  ))}
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
+                  <div style={{ background: '#1a1a1a', borderRadius: '12px', padding: '16px' }}>
+                    <div style={{ color: '#22c55e', fontWeight: 600, marginBottom: '8px' }}>Strengths</div>
+                    <ul style={{ color: '#cfcfcf', paddingLeft: '18px', margin: 0 }}>
+                      {profileIntel.strengths.map((item, index) => (
+                        <li key={`strength-${index}`} style={{ marginBottom: '6px' }}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div style={{ background: '#1a1a1a', borderRadius: '12px', padding: '16px' }}>
+                    <div style={{ color: '#fbbf24', fontWeight: 600, marginBottom: '8px' }}>Gaps to Close</div>
+                    <ul style={{ color: '#cfcfcf', paddingLeft: '18px', margin: 0 }}>
+                      {profileIntel.gaps.map((item, index) => (
+                        <li key={`gap-${index}`} style={{ marginBottom: '6px' }}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div style={{ background: '#1a1a1a', borderRadius: '12px', padding: '16px' }}>
+                    <div style={{ color: '#60a5fa', fontWeight: 600, marginBottom: '8px' }}>Next Actions</div>
+                    <ul style={{ color: '#cfcfcf', paddingLeft: '18px', margin: 0 }}>
+                      {profileIntel.recommendations.map((item, index) => (
+                        <li key={`rec-${index}`} style={{ marginBottom: '6px' }}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Portfolio Builder Tab */}
+        {activeTab === 'portfolio' && (
+          <div style={{ maxWidth: '900px', margin: '0 auto' }}>
+            <button
+              onClick={() => handleGetPortfolio()}
+              disabled={loadingPortfolio || !username.trim()}
+              style={{
+                display: 'block',
+                width: '100%',
+                maxWidth: '320px',
+                margin: '0 auto 32px',
+                padding: '14px 28px',
+                background: loadingPortfolio ? '#1a1a1a' : '#22c55e',
+                border: 'none',
+                borderRadius: '12px',
+                color: loadingPortfolio ? '#888' : '#000',
+                fontSize: '16px',
+                fontWeight: 600,
+                cursor: loadingPortfolio ? 'not-allowed' : 'pointer',
+              }}
+            >
+              {loadingPortfolio ? 'Generating Portfolio...' : 'Generate Portfolio'}
+            </button>
+
+            {portfolio.length > 0 && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                {portfolio.map((caseStudy, index) => (
+                  <div key={`${caseStudy.repo}-${index}`} style={{ background: '#161616', border: '1px solid #2a2a2a', borderRadius: '18px', padding: '24px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+                      <div>
+                        <div style={{ color: '#fff', fontSize: '20px', fontWeight: 700 }}>{caseStudy.title}</div>
+                        <div style={{ color: '#888', fontSize: '14px' }}>{caseStudy.repo}</div>
+                      </div>
+                      {caseStudy.repoUrl && (
+                        <Link
+                          href={caseStudy.repoUrl}
+                          style={{
+                            padding: '8px 14px',
+                            background: '#1a1a1a',
+                            border: '1px solid #2a2a2a',
+                            borderRadius: '8px',
+                            color: '#888',
+                            textDecoration: 'none',
+                            fontSize: '13px',
+                          }}
+                        >
+                          View Repo
+                        </Link>
+                      )}
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px', marginTop: '16px' }}>
+                      <div>
+                        <div style={{ color: '#22c55e', fontWeight: 600, marginBottom: '6px' }}>Problem</div>
+                        <p style={{ color: '#cfcfcf', margin: 0 }}>{caseStudy.problem}</p>
+                      </div>
+                      <div>
+                        <div style={{ color: '#60a5fa', fontWeight: 600, marginBottom: '6px' }}>Approach</div>
+                        <p style={{ color: '#cfcfcf', margin: 0 }}>{caseStudy.approach}</p>
+                      </div>
+                      <div>
+                        <div style={{ color: '#fbbf24', fontWeight: 600, marginBottom: '6px' }}>Impact</div>
+                        <p style={{ color: '#cfcfcf', margin: 0 }}>{caseStudy.impact}</p>
+                      </div>
+                    </div>
+                    <div style={{ marginTop: '14px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                      {caseStudy.stack.map((tech) => (
+                        <span key={`${caseStudy.repo}-${tech}`} style={{ padding: '4px 10px', background: '#1a1a1a', borderRadius: '999px', fontSize: '12px', color: '#888' }}>
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
+                    <ul style={{ marginTop: '12px', color: '#cfcfcf', paddingLeft: '18px' }}>
+                      {caseStudy.highlights.map((highlight, idx) => (
+                        <li key={`${caseStudy.repo}-h-${idx}`} style={{ marginBottom: '6px' }}>{highlight}</li>
+                      ))}
+                    </ul>
                   </div>
                 ))}
               </div>

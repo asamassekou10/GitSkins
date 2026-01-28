@@ -59,8 +59,11 @@ export async function generateReadmeWithGemini(
     sections: string[];
     style: 'minimal' | 'detailed' | 'creative';
     theme: string;
+    careerMode?: boolean;
+    careerRole?: string;
+    agentLoop?: boolean;
   }
-): Promise<string> {
+): Promise<{ markdown: string; refinementNotes?: string[] }> {
   const model = getModel(GEMINI_MODEL_PRO);
 
   const topLanguages = profileData.languages.slice(0, 5).map((l) => l.name).join(', ');
@@ -68,7 +71,11 @@ export async function generateReadmeWithGemini(
     .map((r) => `- ${r.name}: ${r.description || 'No description'} (${r.stars} stars, ${r.language || 'Unknown'})`)
     .join('\n');
 
-  const prompt = `You are a professional GitHub profile README generator. Create an outstanding, well-structured README.md that will impress recruiters and fellow developers.
+  const roleContext = config.careerMode
+    ? `\n**Target Role:** ${config.careerRole || 'fullstack'} (tailor narrative, highlights, and skills for this role)\n`
+    : '';
+
+  const prompt = `You are a professional GitHub profile README generator. Create an outstanding, well-structured README.md that will impress recruiters and fellow developers.${roleContext}
 
 **Developer Profile:**
 - Username: ${config.username}
@@ -124,7 +131,29 @@ Output ONLY the markdown content. No explanations or code blocks around it.`;
 
   const result = await model.generateContent(prompt);
   const response = await result.response;
-  return response.text();
+  let markdown = response.text();
+
+  if (config.careerMode && config.agentLoop) {
+    const critiquePrompt = `You are a senior technical recruiter and README editor. Review the README below and list up to 5 concrete improvements to better position the candidate for a ${config.careerRole || 'fullstack'} role.\n\nREADME:\n${markdown}\n\nReturn ONLY a JSON array of short improvement notes.`;
+    const critiqueResult = await model.generateContent(critiquePrompt);
+    const critiqueText = critiqueResult.response.text();
+    const cleanedCritique = critiqueText.replace(/```json\n?|\n?```/g, '').trim();
+    let refinementNotes: string[] | undefined;
+    try {
+      refinementNotes = JSON.parse(cleanedCritique);
+    } catch {
+      refinementNotes = undefined;
+    }
+
+    if (refinementNotes && refinementNotes.length > 0) {
+      const refinePrompt = `You are refining a GitHub profile README. Apply these improvement notes while preserving the original structure and widgets. Improvement notes:\n- ${refinementNotes.join('\n- ')}\n\nOriginal README:\n${markdown}\n\nReturn ONLY the improved markdown.`;
+      const refineResult = await model.generateContent(refinePrompt);
+      markdown = refineResult.response.text();
+      return { markdown, refinementNotes };
+    }
+  }
+
+  return { markdown };
 }
 
 /**
@@ -298,6 +327,137 @@ Respond with ONLY a JSON array (no markdown):
       { theme: 'neon', score: 75, reason: 'Bold and eye-catching' },
       { theme: 'minimal', score: 70, reason: 'Simple and effective' },
     ];
+  }
+}
+
+export interface ProfileIntel {
+  summary: string;
+  benchmarks: Array<{ label: string; value: string; context: string }>;
+  strengths: string[];
+  gaps: string[];
+  recommendations: string[];
+}
+
+export async function getProfileIntelligence(
+  profileData: ExtendedProfileData,
+  username: string
+): Promise<ProfileIntel> {
+  const model = getModel(GEMINI_MODEL_FAST);
+  const topLanguages = profileData.languages.slice(0, 4).map((l) => l.name).join(', ');
+  const prompt = `You are a career coach analyzing a GitHub profile. Produce a concise intelligence report.
+
+Profile:
+- Username: ${username}
+- Bio: ${profileData.bio || 'None'}
+- Followers: ${profileData.followers}
+- Total Repos: ${profileData.totalRepos}
+- Total Stars: ${profileData.totalStars}
+- Contributions This Year: ${profileData.totalContributions}
+- Current Streak: ${profileData.streak.current} days
+- Top Languages: ${topLanguages || 'None'}
+
+Return ONLY JSON:
+{
+  "summary": "2-3 sentence summary",
+  "benchmarks": [
+    {"label": "Activity level", "value": "Top 20%", "context": "Compared to active OSS devs"}
+  ],
+  "strengths": ["strength1", "strength2", "strength3"],
+  "gaps": ["gap1", "gap2"],
+  "recommendations": ["action1", "action2", "action3"]
+}`;
+
+  const result = await model.generateContent(prompt);
+  const text = result.response.text();
+  try {
+    const cleaned = text.replace(/```json\n?|\n?```/g, '').trim();
+    return JSON.parse(cleaned);
+  } catch {
+    return {
+      summary: 'A consistent contributor with growing momentum and solid project breadth.',
+      benchmarks: [
+        { label: 'Activity level', value: 'High', context: 'Regular recent contributions' },
+        { label: 'Project breadth', value: 'Moderate', context: 'Balanced repo variety' },
+      ],
+      strengths: ['Consistent commits', 'Clear focus areas', 'Healthy repo mix'],
+      gaps: ['Add more impact metrics', 'Highlight deployment/demo links'],
+      recommendations: [
+        'Pin your most impactful repos with demos',
+        'Add project impact metrics to READMEs',
+        'Showcase one flagship project with a case study',
+      ],
+    };
+  }
+}
+
+export interface PortfolioCaseStudy {
+  title: string;
+  repo: string;
+  problem: string;
+  approach: string;
+  impact: string;
+  stack: string[];
+  highlights: string[];
+  repoUrl?: string;
+}
+
+export async function buildPortfolioCaseStudies(
+  profileData: ExtendedProfileData,
+  username: string
+): Promise<PortfolioCaseStudy[]> {
+  const model = getModel(GEMINI_MODEL_PRO);
+  const repoList = profileData.pinnedRepos;
+  const repoSummaries = repoList
+    .map((repo) => `${repo.name}: ${repo.description || 'No description'} (${repo.stars} stars, ${repo.language || 'Unknown'})`)
+    .join('\n');
+  const prompt = `Create 2-3 portfolio case studies from these repositories.
+
+Repos:
+${repoSummaries}
+
+Return ONLY JSON array:
+[
+  {
+    "title": "Case study title",
+    "repo": "repo-name",
+    "problem": "What problem it solved",
+    "approach": "How it was built",
+    "impact": "Outcome or measurable impact",
+    "stack": ["Tech1", "Tech2"],
+    "highlights": ["Highlight 1", "Highlight 2"],
+    "repoUrl": "https://github.com/${username}/repo-name"
+  }
+]`;
+
+  const result = await model.generateContent(prompt);
+  const text = result.response.text();
+  try {
+    const cleaned = text.replace(/```json\n?|\n?```/g, '').trim();
+    return JSON.parse(cleaned);
+  } catch {
+    if (repoList.length === 0) {
+      return [
+        {
+          title: 'Flagship Project Case Study',
+          repo: 'Your top repository',
+          problem: 'Summarize the core problem this project solves.',
+          approach: 'Describe the architecture, tools, and decisions made.',
+          impact: 'Quantify results, usage, or user outcomes.',
+          stack: ['TypeScript', 'Next.js'],
+          highlights: ['Clear scope', 'User-facing impact'],
+        },
+      ];
+    }
+    return repoList.slice(0, 2).map((repo) => ({
+      title: `${repo.name} Case Study`,
+      repo: repo.name,
+      problem: repo.description || 'A project that solves a real developer pain point.',
+      approach: 'Built with a focus on reliability, usability, and clarity.',
+      impact: `${repo.stars} stars and growing adoption.`,
+      stack: [repo.language || 'TypeScript'],
+      highlights: ['Clear architecture', 'User-focused experience'],
+      repoUrl: repo.url,
+    }));
   }
 }
 

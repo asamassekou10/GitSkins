@@ -53,6 +53,9 @@ export interface ReadmeGeneratorRequest {
   style?: ReadmeStyle;
   theme?: string;
   useAI?: boolean;
+  careerMode?: boolean;
+  careerRole?: string;
+  agentLoop?: boolean;
 }
 
 export interface ExtendedProfileData {

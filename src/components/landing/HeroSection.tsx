@@ -242,6 +242,47 @@ export function HeroSection({ username, selectedTheme, onUsernameChange, onTheme
             </svg>
             AI README Generator
           </a>
+
+          <a
+            href="/readme-generator?careerMode=1&role=fullstack"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '10px',
+              padding: '16px 32px',
+              fontSize: '16px',
+              fontWeight: 600,
+              background: 'transparent',
+              border: '1px solid #2a2a2a',
+              borderRadius: '12px',
+              color: '#fff',
+              textDecoration: 'none',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = '#22c55e';
+              e.currentTarget.style.background = 'rgba(34, 197, 94, 0.1)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = '#2a2a2a';
+              e.currentTarget.style.background = 'transparent';
+            }}
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z" />
+            </svg>
+            Career Mode
+          </a>
         </div>
 
         {/* Dashboard Mockup */}

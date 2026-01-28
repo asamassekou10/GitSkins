@@ -11,17 +11,21 @@ GitSkins is a Gemini-powered toolkit for building GitHub profile widgets and AI-
 
 - Dynamic GitHub profile widgets (cards, stats, languages, streaks)
 - 20 curated themes with live previews
-- AI README Generator powered by Gemini
-- AI profile analysis and theme recommendations
+- AI README Generator with Career Mode and agent refinement
+- Profile Intelligence (benchmarks, strengths, gaps, next actions)
+- Portfolio Builder with AI-generated case studies
+- AI profile analysis, theme recommendations, and chat assistant
 - Shareable showcase pages and markdown snippets
 
 ## Gemini Integration
 
 GitSkins uses the Gemini API for core experiences:
 
-- README generation (structured prompt + profile data)
+- README generation with Career Mode + agent refinement loop
 - Profile analysis and persona insights
 - Theme recommendations based on profile signals
+- Portfolio case studies derived from repo context
+- Profile intelligence report (benchmarks + recommendations)
 - Chat assistant for guidance and customization
 
 The Gemini model is configurable via environment variables so deployments can target Gemini 3 models.
@@ -70,9 +74,14 @@ npm run dev
 ## Testing Instructions (Demo Flow)
 
 1. Open `/` and verify widgets load for `octocat`.
-2. Go to `/readme-generator`, click "Generate README".
-3. Go to `/ai` and run Profile Analysis or Theme Recommendations.
-4. Visit `/showcase/octocat` and copy the markdown snippet.
+2. Go to `/readme-generator`, enable Career Mode, and click "Generate README".
+3. Go to `/ai` and run Profile Intelligence and Portfolio Builder.
+4. Visit `/portfolio/octocat` to review case studies.
+5. Visit `/showcase/octocat` and copy the markdown snippet.
+
+## Architecture
+
+See `docs/architecture.md` for the Gemini data flow and agent loop overview.
 
 ## Third-Party Services
 

@@ -20,17 +20,20 @@ import { githubConfig } from '@/config/site';
 import { calculateStreaks } from './streak-calculator';
 
 /**
- * Initialize Octokit client
+ * Initialize Octokit client lazily to avoid build-time errors
  */
-const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+let _octokit: Octokit | null = null;
 
-if (!GITHUB_TOKEN) {
-  throw new Error('GITHUB_TOKEN environment variable is required');
+function getOctokit(): Octokit {
+  if (!_octokit) {
+    const token = process.env.GITHUB_TOKEN;
+    if (!token) {
+      throw new Error('GITHUB_TOKEN environment variable is required');
+    }
+    _octokit = new Octokit({ auth: token });
+  }
+  return _octokit;
 }
-
-const octokit = new Octokit({
-  auth: GITHUB_TOKEN,
-});
 
 /**
  * GitHub GraphQL query for user contribution data
@@ -147,7 +150,7 @@ export async function fetchGitHubData(
   username: string
 ): Promise<GitHubData | null> {
   try {
-    const response = await octokit.graphql<GitHubGraphQLResponse>(
+    const response = await getOctokit().graphql<GitHubGraphQLResponse>(
       GITHUB_GRAPHQL_QUERY,
       {
         username,
@@ -356,7 +359,7 @@ export async function fetchExtendedGitHubData(
   username: string
 ): Promise<ExtendedGitHubData | null> {
   try {
-    const response = await octokit.graphql<ExtendedGraphQLResponse>(
+    const response = await getOctokit().graphql<ExtendedGraphQLResponse>(
       EXTENDED_GRAPHQL_QUERY,
       {
         username,
@@ -602,7 +605,7 @@ export async function fetchProfileForReadme(
   username: string
 ): Promise<ExtendedProfileData | null> {
   try {
-    const response = await octokit.graphql<ReadmeGeneratorResponse>(
+    const response = await getOctokit().graphql<ReadmeGeneratorResponse>(
       README_GENERATOR_QUERY,
       { username }
     );
@@ -742,7 +745,7 @@ export async function fetchRepoData(
   `;
 
   try {
-    const response = await octokit.graphql<{
+    const response = await getOctokit().graphql<{
       repository: {
         name: string;
         description: string | null;

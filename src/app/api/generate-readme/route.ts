@@ -26,6 +26,9 @@ const requestSchema = z.object({
     .default(['header', 'about', 'skills', 'stats', 'projects', 'connect']),
   style: z.enum(['minimal', 'detailed', 'creative']).optional().default('detailed'),
   theme: z.string().optional().default('satan'),
+  careerMode: z.boolean().optional().default(false),
+  careerRole: z.string().optional().default('fullstack'),
+  agentLoop: z.boolean().optional().default(false),
   useAI: z.boolean().optional().default(true),
 });
 
@@ -34,7 +37,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const validatedData = requestSchema.parse(body);
 
-    const { username, sections, style, theme, useAI } = validatedData;
+    const { username, sections, style, theme, careerMode, careerRole, agentLoop, useAI } = validatedData;
 
     // Fetch GitHub profile data
     const profileData = await fetchProfileForReadme(username);
@@ -55,20 +58,23 @@ export async function POST(request: NextRequest) {
     };
 
     let result;
-    let aiProvider: 'gemini' | 'openai' | 'template' = 'template';
+    let aiProvider: 'gemini' | 'gemini_refined' | 'openai' | 'template' = 'template';
 
     // Try Gemini AI generation first (primary provider)
     if (useAI && isGeminiConfigured()) {
       try {
-        const generatedMarkdown = await generateReadmeWithGemini(profileData, {
+        const geminiResult = await generateReadmeWithGemini(profileData, {
           username,
           sections,
           style: style as 'minimal' | 'detailed' | 'creative',
           theme,
+          careerMode,
+          careerRole,
+          agentLoop,
         });
 
-        if (generatedMarkdown) {
-          result = parseGeneratedReadme(generatedMarkdown, config);
+        if (geminiResult?.markdown) {
+          result = parseGeneratedReadme(geminiResult.markdown, config);
           result.metadata = {
             ...result.metadata,
             username,
@@ -76,7 +82,7 @@ export async function POST(request: NextRequest) {
             repoCount: profileData.totalRepos,
             totalStars: profileData.totalStars,
           };
-          aiProvider = 'gemini';
+          aiProvider = geminiResult.refinementNotes ? 'gemini_refined' : 'gemini';
         }
       } catch (geminiError) {
         console.error('Gemini generation failed:', geminiError);
