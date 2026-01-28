@@ -2,9 +2,8 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
-import Link from 'next/link';
+import ReactMarkdown from 'react-markdown';
 import { Navigation } from '@/components/landing/Navigation';
-import { AuroraBackground } from '@/components/landing/AuroraBackground';
 import {
   checkGenerationAllowed,
   incrementGenerationUsage,
@@ -76,6 +75,7 @@ export default function ReadmeGeneratorPage() {
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [viewMode, setViewMode] = useState<'code' | 'preview'>('preview');
 
   // Usage tracking
   const [usageInfo, setUsageInfo] = useState<GenerationCheckResult | null>(null);
@@ -208,48 +208,48 @@ export default function ReadmeGeneratorPage() {
     <div
       style={{
         minHeight: '100vh',
-        background: 'linear-gradient(180deg, #0a0a0a 0%, #111111 50%, #0a0a0a 100%)',
-        color: '#ffffff',
-        fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
+        background: '#050505',
+        color: '#fafafa',
       }}
     >
       <Navigation />
 
-      <main style={{ paddingTop: '100px', paddingBottom: '80px' }}>
+      <main style={{ paddingTop: '120px', paddingBottom: '80px' }}>
         {/* Hero Section */}
         <section
           style={{
-            position: 'relative',
-            padding: '40px 20px 60px',
+            padding: '20px 24px 48px',
             textAlign: 'center',
-            overflow: 'hidden',
           }}
         >
-          <AuroraBackground intensity="medium" position="top" />
-
-          <div style={{ position: 'relative', zIndex: 1, maxWidth: '800px', margin: '0 auto' }}>
+          <div style={{ maxWidth: '700px', margin: '0 auto' }}>
             <div
               style={{
-                display: 'inline-block',
-                padding: '6px 16px',
-                background: 'rgba(34, 197, 94, 0.1)',
-                border: '1px solid rgba(34, 197, 94, 0.3)',
-                borderRadius: '20px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '6px 14px',
+                background: 'rgba(34, 197, 94, 0.08)',
+                border: '1px solid rgba(34, 197, 94, 0.2)',
+                borderRadius: '100px',
                 fontSize: '13px',
                 color: '#22c55e',
                 marginBottom: '24px',
               }}
             >
-              AI-Powered
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+              </svg>
+              Powered by Gemini
             </div>
 
             <h1
               style={{
-                fontSize: 'clamp(32px, 6vw, 52px)',
-                fontWeight: 800,
+                fontSize: 'clamp(32px, 5vw, 48px)',
+                fontWeight: 700,
                 margin: 0,
                 marginBottom: '16px',
-                letterSpacing: '-1px',
+                letterSpacing: '-0.02em',
               }}
             >
               README{' '}
@@ -267,14 +267,14 @@ export default function ReadmeGeneratorPage() {
 
             <p
               style={{
-                fontSize: '18px',
-                color: '#888',
+                fontSize: '17px',
+                color: '#a1a1a1',
                 margin: '0 auto',
-                maxWidth: '500px',
+                maxWidth: '460px',
                 lineHeight: 1.6,
               }}
             >
-              Create a stunning GitHub profile README in seconds with AI assistance.
+              Create a professional GitHub profile README in seconds with AI assistance.
             </p>
           </div>
         </section>
@@ -793,9 +793,9 @@ export default function ReadmeGeneratorPage() {
           {generatedReadme && (
             <div
               style={{
-                background: '#161616',
-                borderRadius: '20px',
-                border: '1px solid #2a2a2a',
+                background: '#111',
+                borderRadius: '16px',
+                border: '1px solid #1f1f1f',
                 overflow: 'hidden',
               }}
             >
@@ -805,30 +805,70 @@ export default function ReadmeGeneratorPage() {
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
-                  padding: '16px 24px',
-                  borderBottom: '1px solid #2a2a2a',
+                  padding: '12px 20px',
+                  borderBottom: '1px solid #1f1f1f',
+                  background: '#0a0a0a',
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <div style={{ display: 'flex', gap: '6px' }}>
-                    <span style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#ff5f56' }} />
-                    <span style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#ffbd2e' }} />
-                    <span style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#27ca40' }} />
+                  {/* View Mode Toggle */}
+                  <div
+                    style={{
+                      display: 'flex',
+                      background: '#161616',
+                      borderRadius: '8px',
+                      padding: '4px',
+                    }}
+                  >
+                    <button
+                      onClick={() => setViewMode('preview')}
+                      style={{
+                        padding: '6px 14px',
+                        background: viewMode === 'preview' ? '#22c55e' : 'transparent',
+                        border: 'none',
+                        borderRadius: '6px',
+                        color: viewMode === 'preview' ? '#050505' : '#888',
+                        fontSize: '13px',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        transition: 'all 0.15s ease',
+                      }}
+                    >
+                      Preview
+                    </button>
+                    <button
+                      onClick={() => setViewMode('code')}
+                      style={{
+                        padding: '6px 14px',
+                        background: viewMode === 'code' ? '#22c55e' : 'transparent',
+                        border: 'none',
+                        borderRadius: '6px',
+                        color: viewMode === 'code' ? '#050505' : '#888',
+                        fontSize: '13px',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        transition: 'all 0.15s ease',
+                      }}
+                    >
+                      Code
+                    </button>
                   </div>
-                  <span style={{ color: '#888', fontSize: '14px' }}>README.md</span>
+                  
+                  <span style={{ color: '#666', fontSize: '13px' }}>README.md</span>
+                  
                   {aiProvider && (
                     <span
                       style={{
-                        padding: '4px 8px',
-                        background: 'rgba(34, 197, 94, 0.15)',
-                        border: '1px solid rgba(34, 197, 94, 0.3)',
-                        borderRadius: '999px',
+                        padding: '4px 10px',
+                        background: 'rgba(34, 197, 94, 0.1)',
+                        border: '1px solid rgba(34, 197, 94, 0.2)',
+                        borderRadius: '100px',
                         color: '#22c55e',
                         fontSize: '11px',
-                        fontWeight: 600,
+                        fontWeight: 500,
                       }}
                     >
-                      Generated with {aiProvider === 'gemini_refined' ? 'gemini (refined)' : aiProvider}
+                      {aiProvider === 'gemini_refined' ? 'Gemini (refined)' : aiProvider}
                     </span>
                   )}
                 </div>
@@ -838,14 +878,14 @@ export default function ReadmeGeneratorPage() {
                     onClick={copyToClipboard}
                     style={{
                       padding: '8px 16px',
-                      background: copied ? '#22c55e' : '#0d0d0d',
-                      border: '1px solid #2a2a2a',
+                      background: copied ? '#22c55e' : '#161616',
+                      border: '1px solid #1f1f1f',
                       borderRadius: '8px',
-                      color: copied ? '#000' : '#fff',
+                      color: copied ? '#050505' : '#fafafa',
                       fontSize: '13px',
                       fontWeight: 600,
                       cursor: 'pointer',
-                      transition: 'all 0.2s',
+                      transition: 'all 0.15s ease',
                     }}
                   >
                     {copied ? 'Copied!' : 'Copy'}
@@ -854,14 +894,14 @@ export default function ReadmeGeneratorPage() {
                     onClick={downloadReadme}
                     style={{
                       padding: '8px 16px',
-                      background: '#0d0d0d',
-                      border: '1px solid #2a2a2a',
+                      background: '#161616',
+                      border: '1px solid #1f1f1f',
                       borderRadius: '8px',
-                      color: '#fff',
+                      color: '#fafafa',
                       fontSize: '13px',
                       fontWeight: 600,
                       cursor: 'pointer',
-                      transition: 'all 0.2s',
+                      transition: 'all 0.15s ease',
                     }}
                   >
                     Download
@@ -869,24 +909,129 @@ export default function ReadmeGeneratorPage() {
                 </div>
               </div>
 
-              {/* Markdown Content */}
-              <pre
-                style={{
-                  margin: 0,
-                  padding: '24px',
-                  background: '#0d0d0d',
-                  fontSize: '14px',
-                  fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
-                  lineHeight: 1.6,
-                  color: '#ccc',
-                  overflow: 'auto',
-                  maxHeight: '600px',
-                  whiteSpace: 'pre-wrap',
-                  wordBreak: 'break-word',
-                }}
-              >
-                {generatedReadme}
-              </pre>
+              {/* Preview Mode */}
+              {viewMode === 'preview' && (
+                <div
+                  className="markdown-preview"
+                  style={{
+                    padding: '32px',
+                    background: '#0d1117',
+                    maxHeight: '700px',
+                    overflow: 'auto',
+                  }}
+                >
+                  <ReactMarkdown
+                    components={{
+                      h1: ({ children }) => (
+                        <h1 style={{ fontSize: '28px', fontWeight: 700, borderBottom: '1px solid #21262d', paddingBottom: '12px', marginBottom: '16px', color: '#e6edf3' }}>
+                          {children}
+                        </h1>
+                      ),
+                      h2: ({ children }) => (
+                        <h2 style={{ fontSize: '22px', fontWeight: 600, borderBottom: '1px solid #21262d', paddingBottom: '8px', marginTop: '24px', marginBottom: '16px', color: '#e6edf3' }}>
+                          {children}
+                        </h2>
+                      ),
+                      h3: ({ children }) => (
+                        <h3 style={{ fontSize: '18px', fontWeight: 600, marginTop: '20px', marginBottom: '12px', color: '#e6edf3' }}>
+                          {children}
+                        </h3>
+                      ),
+                      p: ({ children }) => (
+                        <p style={{ marginBottom: '16px', lineHeight: 1.7, color: '#8b949e' }}>
+                          {children}
+                        </p>
+                      ),
+                      a: ({ href, children }) => (
+                        <a href={href} style={{ color: '#58a6ff', textDecoration: 'none' }} target="_blank" rel="noopener noreferrer">
+                          {children}
+                        </a>
+                      ),
+                      img: ({ src, alt }) => (
+                        <img src={src} alt={alt || ''} style={{ maxWidth: '100%', borderRadius: '8px', margin: '8px 0' }} />
+                      ),
+                      ul: ({ children }) => (
+                        <ul style={{ paddingLeft: '24px', marginBottom: '16px', color: '#8b949e' }}>
+                          {children}
+                        </ul>
+                      ),
+                      ol: ({ children }) => (
+                        <ol style={{ paddingLeft: '24px', marginBottom: '16px', color: '#8b949e' }}>
+                          {children}
+                        </ol>
+                      ),
+                      li: ({ children }) => (
+                        <li style={{ marginBottom: '6px', lineHeight: 1.6 }}>
+                          {children}
+                        </li>
+                      ),
+                      code: ({ children, className }) => {
+                        const isInline = !className;
+                        return isInline ? (
+                          <code style={{ background: '#161b22', padding: '2px 6px', borderRadius: '4px', fontSize: '13px', color: '#e6edf3' }}>
+                            {children}
+                          </code>
+                        ) : (
+                          <code style={{ display: 'block', background: '#161b22', padding: '16px', borderRadius: '8px', fontSize: '13px', overflow: 'auto', color: '#e6edf3' }}>
+                            {children}
+                          </code>
+                        );
+                      },
+                      pre: ({ children }) => (
+                        <pre style={{ background: '#161b22', padding: '16px', borderRadius: '8px', overflow: 'auto', marginBottom: '16px' }}>
+                          {children}
+                        </pre>
+                      ),
+                      blockquote: ({ children }) => (
+                        <blockquote style={{ borderLeft: '4px solid #3b434b', paddingLeft: '16px', margin: '16px 0', color: '#8b949e' }}>
+                          {children}
+                        </blockquote>
+                      ),
+                      hr: () => (
+                        <hr style={{ border: 'none', borderTop: '1px solid #21262d', margin: '24px 0' }} />
+                      ),
+                      table: ({ children }) => (
+                        <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '16px' }}>
+                          {children}
+                        </table>
+                      ),
+                      th: ({ children }) => (
+                        <th style={{ border: '1px solid #30363d', padding: '8px 12px', background: '#161b22', color: '#e6edf3', textAlign: 'left' }}>
+                          {children}
+                        </th>
+                      ),
+                      td: ({ children }) => (
+                        <td style={{ border: '1px solid #30363d', padding: '8px 12px', color: '#8b949e' }}>
+                          {children}
+                        </td>
+                      ),
+                    }}
+                  >
+                    {generatedReadme}
+                  </ReactMarkdown>
+                </div>
+              )}
+
+              {/* Code Mode */}
+              {viewMode === 'code' && (
+                <pre
+                  style={{
+                    margin: 0,
+                    padding: '24px',
+                    background: '#0a0a0a',
+                    fontSize: '13px',
+                    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+                    lineHeight: 1.6,
+                    color: '#a1a1a1',
+                    overflow: 'auto',
+                    maxHeight: '700px',
+                    whiteSpace: 'pre-wrap',
+                    wordBreak: 'break-word',
+                  }}
+                >
+                  {generatedReadme}
+                </pre>
+              )}
             </div>
           )}
         </section>

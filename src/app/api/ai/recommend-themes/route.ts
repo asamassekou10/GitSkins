@@ -20,8 +20,9 @@ const requestSchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     if (!isGeminiConfigured()) {
+      console.error('Gemini API key not configured');
       return NextResponse.json(
-        { error: 'AI features not available', code: 'AI_NOT_CONFIGURED' },
+        { error: 'AI features not available. Please ensure GEMINI_API_KEY is configured.', code: 'AI_NOT_CONFIGURED' },
         { status: 503 }
       );
     }
@@ -34,7 +35,7 @@ export async function POST(request: NextRequest) {
 
     if (!profileData) {
       return NextResponse.json(
-        { error: 'User not found', code: 'USER_NOT_FOUND' },
+        { error: `GitHub user "${username}" not found`, code: 'USER_NOT_FOUND' },
         { status: 404 }
       );
     }
@@ -60,9 +61,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.error('Theme recommendation error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('Theme recommendation error:', errorMessage, error);
+    
     return NextResponse.json(
-      { error: 'Failed to get recommendations', code: 'RECOMMENDATION_ERROR' },
+      { error: `Failed to get recommendations: ${errorMessage}`, code: 'RECOMMENDATION_ERROR' },
       { status: 500 }
     );
   }

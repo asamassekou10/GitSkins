@@ -28,8 +28,9 @@ const requestSchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     if (!isGeminiConfigured()) {
+      console.error('Gemini API key not configured');
       return NextResponse.json(
-        { error: 'AI features not available', code: 'AI_NOT_CONFIGURED' },
+        { error: 'AI features not available. Please ensure GEMINI_API_KEY is configured.', code: 'AI_NOT_CONFIGURED' },
         { status: 503 }
       );
     }
@@ -53,9 +54,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.error('Chat error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('Chat error:', errorMessage, error);
+    
     return NextResponse.json(
-      { error: 'Failed to process message', code: 'CHAT_ERROR' },
+      { error: `Failed to process message: ${errorMessage}`, code: 'CHAT_ERROR' },
       { status: 500 }
     );
   }
