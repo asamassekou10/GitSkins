@@ -278,6 +278,19 @@ export default function Home() {
                     </svg>
                   ),
                 },
+                {
+                  title: 'Portfolio Website Builder',
+                  description: 'Build a full portfolio website with AI chat editing & download.',
+                  href: `/portfolio/${username}/build`,
+                  featured: true,
+                  icon: (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <rect x="3" y="3" width="18" height="18" rx="2" />
+                      <path d="M3 9h18" />
+                      <path d="M9 21V9" />
+                    </svg>
+                  ),
+                },
               ].map((card) => (
                 <Link
                   key={card.title}
@@ -287,20 +300,21 @@ export default function Home() {
                     alignItems: 'flex-start',
                     gap: '16px',
                     padding: '24px',
-                    background: '#111',
-                    border: '1px solid #1a1a1a',
+                    background: card.featured ? 'linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0.05) 100%)' : '#111',
+                    border: card.featured ? '1px solid rgba(34, 197, 94, 0.4)' : '1px solid #1a1a1a',
                     borderRadius: '12px',
                     textDecoration: 'none',
                     color: '#fafafa',
                     transition: 'all 0.2s ease',
+                    boxShadow: card.featured ? '0 0 30px rgba(34, 197, 94, 0.15)' : 'none',
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.borderColor = '#22c55e';
-                    e.currentTarget.style.background = '#121212';
+                    e.currentTarget.style.background = card.featured ? 'linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(34, 197, 94, 0.08) 100%)' : '#121212';
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = '#1a1a1a';
-                    e.currentTarget.style.background = '#111';
+                    e.currentTarget.style.borderColor = card.featured ? 'rgba(34, 197, 94, 0.4)' : '#1a1a1a';
+                    e.currentTarget.style.background = card.featured ? 'linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0.05) 100%)' : '#111';
                   }}
                 >
                   <div
@@ -308,7 +322,7 @@ export default function Home() {
                       width: '40px',
                       height: '40px',
                       borderRadius: '8px',
-                      background: 'rgba(34, 197, 94, 0.1)',
+                      background: card.featured ? 'rgba(34, 197, 94, 0.2)' : 'rgba(34, 197, 94, 0.1)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -319,9 +333,24 @@ export default function Home() {
                     {card.icon}
                   </div>
                   <div>
-                    <h3 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '4px' }}>
-                      {card.title}
-                    </h3>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                      <h3 style={{ fontSize: '16px', fontWeight: 600, margin: 0 }}>
+                        {card.title}
+                      </h3>
+                      {card.featured && (
+                        <span style={{
+                          fontSize: '10px',
+                          fontWeight: 600,
+                          padding: '2px 6px',
+                          background: '#22c55e',
+                          color: '#000',
+                          borderRadius: '4px',
+                          textTransform: 'uppercase',
+                        }}>
+                          New
+                        </span>
+                      )}
+                    </div>
                     <p style={{ fontSize: '14px', color: '#666', margin: 0, lineHeight: 1.5 }}>
                       {card.description}
                     </p>

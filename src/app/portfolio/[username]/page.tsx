@@ -88,16 +88,16 @@ export default function PortfolioPage() {
                 href={`/portfolio/${username}/build`}
                 style={{
                   padding: '10px 20px',
-                  background: '#1a1a1a',
-                  border: '1px solid #2a2a2a',
+                  background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
                   borderRadius: '10px',
-                  color: '#888',
+                  color: '#000',
                   textDecoration: 'none',
                   fontSize: '14px',
                   fontWeight: 600,
+                  boxShadow: '0 0 20px rgba(34, 197, 94, 0.3)',
                 }}
               >
-                Build website
+                Build Portfolio Website
               </Link>
               <Link
                 href="/readme-generator"
