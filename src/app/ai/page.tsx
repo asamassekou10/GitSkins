@@ -72,6 +72,10 @@ export default function AIFeaturesPage() {
   const [portfolio, setPortfolio] = useState<PortfolioCaseStudy[]>([]);
   const [loadingPortfolio, setLoadingPortfolio] = useState(false);
 
+  // Explain profile state
+  const [explainSummary, setExplainSummary] = useState<string | null>(null);
+  const [loadingExplain, setLoadingExplain] = useState(false);
+
   // Chat state
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
     {
@@ -223,6 +227,31 @@ export default function AIFeaturesPage() {
     }
   };
 
+  const handleExplainProfile = async (overrideUsername?: string) => {
+    const targetUsername = (overrideUsername ?? username).trim();
+    if (!targetUsername) {
+      setError('Please enter a GitHub username');
+      return;
+    }
+    setError('');
+    setLoadingExplain(true);
+    setExplainSummary(null);
+    try {
+      const response = await fetch('/api/ai/explain-profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: targetUsername }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Failed to explain profile');
+      setExplainSummary(data.summary);
+    } catch (err: any) {
+      setError(err.message || 'Failed to explain profile');
+    } finally {
+      setLoadingExplain(false);
+    }
+  };
+
   const runDemo = () => {
     const demoUsername = 'octocat';
     setUsername(demoUsername);
@@ -349,7 +378,7 @@ export default function AIFeaturesPage() {
               <path d="M2 17l10 5 10-5" />
               <path d="M2 12l10 5 10-5" />
             </svg>
-            <span style={{ color: '#22c55e', fontSize: '14px', fontWeight: 500 }}>Powered by Google Gemini</span>
+            <span style={{ color: '#22c55e', fontSize: '14px', fontWeight: 500 }}>Profile Agent · Powered by Google Gemini</span>
           </div>
 
           <h1
@@ -366,7 +395,7 @@ export default function AIFeaturesPage() {
             AI-Powered Features
           </h1>
           <p style={{ color: '#888', fontSize: '18px', maxWidth: '600px', margin: '0 auto' }}>
-            Discover your coding personality, get personalized theme recommendations, and chat with our AI assistant.
+            The Profile Agent discovers your coding personality, recommends themes, and powers the AI assistant.
           </p>
         </div>
 
@@ -422,7 +451,24 @@ export default function AIFeaturesPage() {
             />
           </div>
         </div>
-        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+        <div style={{ textAlign: 'center', marginBottom: '24px', display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+          <button
+            type="button"
+            onClick={() => handleExplainProfile()}
+            disabled={loadingExplain || !username.trim()}
+            style={{
+              padding: '8px 16px',
+              background: loadingExplain ? '#1a1a1a' : 'rgba(34, 197, 94, 0.15)',
+              border: '1px solid rgba(34, 197, 94, 0.3)',
+              borderRadius: '999px',
+              color: loadingExplain ? '#666' : '#22c55e',
+              fontSize: '13px',
+              fontWeight: 600,
+              cursor: loadingExplain ? 'not-allowed' : 'pointer',
+            }}
+          >
+            {loadingExplain ? 'Explaining...' : 'Explain this profile'}
+          </button>
           <button
             type="button"
             onClick={runDemo}
@@ -440,6 +486,25 @@ export default function AIFeaturesPage() {
             Run demo with octocat
           </button>
         </div>
+
+        {/* Explain profile summary card */}
+        {explainSummary && (
+          <div
+            style={{
+              maxWidth: '600px',
+              margin: '0 auto 24px',
+              padding: '16px 20px',
+              background: '#161616',
+              border: '1px solid #2a2a2a',
+              borderRadius: '12px',
+            }}
+          >
+            <div style={{ fontSize: '12px', color: '#22c55e', fontWeight: 600, marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              Profile summary
+            </div>
+            <p style={{ color: '#e5e5e5', lineHeight: 1.6, margin: 0 }}>{explainSummary}</p>
+          </div>
+        )}
 
         {/* Tab Navigation */}
         <div

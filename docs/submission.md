@@ -1,5 +1,7 @@
 # Gemini 3 Hackathon Submission
 
+**Demo video:** [Record per Demo Script below and add YouTube/Vimeo link] — watch first for judges.
+
 ## Project Summary
 
 GitSkins is a Gemini-powered toolkit for GitHub profile presentation. It generates dynamic profile widgets (cards, stats, languages, streaks) and uses Gemini to craft role-specific README files, analyze developer profiles, produce portfolio case studies, and recommend visual themes. The goal is to help developers build recruiter-ready profiles with minimal setup.
@@ -13,8 +15,8 @@ These capabilities are not cosmetic; they define the product's primary value. Th
 ## Public Links
 
 - Live demo: https://gitskins.com
-- Public repo: (add GitHub URL)
-- Demo video (<= 3 min): (add YouTube/Vimeo link)
+- Public repo: https://github.com/asamassekou10/GitSkins
+- Demo video (<= 3 min): Record per Demo Script below and add YouTube/Vimeo link.
 
 ## Testing Instructions
 
@@ -23,6 +25,8 @@ These capabilities are not cosmetic; they define the product's primary value. Th
 3. Go to `/ai`, run Profile Intelligence and Portfolio Builder.
 4. Visit `/portfolio/octocat` to view case studies.
 5. Visit `/showcase/octocat` and copy the markdown snippet.
+
+For AI features, ensure `GEMINI_API_KEY` and `GITHUB_TOKEN` are set (e.g. in Vercel env vars or `.env.local`).
 
 ## Demo Script (<= 3 minutes)
 

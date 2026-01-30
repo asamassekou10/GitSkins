@@ -76,6 +76,10 @@ export default function ReadmeGeneratorPage() {
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [viewMode, setViewMode] = useState<'code' | 'preview'>('preview');
+  const [currentStep, setCurrentStep] = useState(0);
+  const [refinementNotes, setRefinementNotes] = useState<string[] | null>(null);
+  const [agentReasoning, setAgentReasoning] = useState<string | null>(null);
+  const [agentLogExpanded, setAgentLogExpanded] = useState(false);
 
   // Usage tracking
   const [usageInfo, setUsageInfo] = useState<GenerationCheckResult | null>(null);
@@ -98,6 +102,16 @@ export default function ReadmeGeneratorPage() {
       }
     }
   }, [searchParams]);
+
+  // Step progress timer during README generation
+  const maxStepIndex = careerMode && agentLoop ? 2 : 1;
+  useEffect(() => {
+    if (!isLoading) return;
+    const interval = setInterval(() => {
+      setCurrentStep((prev) => (prev < maxStepIndex ? prev + 1 : prev));
+    }, 1200);
+    return () => clearInterval(interval);
+  }, [isLoading, maxStepIndex]);
 
   const refreshUsageInfo = () => {
     const info = checkGenerationAllowed();
@@ -134,6 +148,9 @@ export default function ReadmeGeneratorPage() {
     setError(null);
     setGeneratedReadme(null);
     setAiProvider(null);
+    setRefinementNotes(null);
+    setAgentReasoning(null);
+    setCurrentStep(0);
 
     try {
       const response = await fetch('/api/generate-readme', {
@@ -161,13 +178,17 @@ export default function ReadmeGeneratorPage() {
       incrementGenerationUsage();
       refreshUsageInfo();
 
+      setRefinementNotes(Array.isArray(data.refinementNotes) ? data.refinementNotes : null);
+      setAgentReasoning(typeof data.reasoning === 'string' ? data.reasoning : null);
       setGeneratedReadme(data.readme);
       setAiProvider(data.aiProvider || null);
       setProfileData(data.profile);
+      setCurrentStep(3);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
     } finally {
       setIsLoading(false);
+      setCurrentStep(0);
     }
   }, [username, sections, style, theme, careerMode, careerRole, agentLoop, useAI]);
 
@@ -240,7 +261,7 @@ export default function ReadmeGeneratorPage() {
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
               </svg>
-              Powered by Gemini
+              Profile Agent · Powered by Gemini
             </div>
 
             <h1
@@ -274,7 +295,7 @@ export default function ReadmeGeneratorPage() {
                 lineHeight: 1.6,
               }}
             >
-              Create a professional GitHub profile README in seconds with AI assistance.
+              The Profile Agent creates a professional GitHub profile README in seconds with AI assistance.
             </p>
           </div>
         </section>
@@ -711,6 +732,39 @@ export default function ReadmeGeneratorPage() {
               </button>
             </div>
 
+            {/* Step progress (when loading) */}
+            {isLoading && (
+              <div
+                style={{
+                  marginBottom: '16px',
+                  padding: '12px 16px',
+                  background: 'rgba(34, 197, 94, 0.08)',
+                  border: '1px solid rgba(34, 197, 94, 0.2)',
+                  borderRadius: '10px',
+                  fontSize: '14px',
+                  color: '#22c55e',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                }}
+              >
+                <span
+                  style={{
+                    width: '18px',
+                    height: '18px',
+                    border: '2px solid currentColor',
+                    borderTopColor: 'transparent',
+                    borderRadius: '50%',
+                    animation: 'spin 1s linear infinite',
+                  }}
+                />
+                {currentStep === 0 && 'Fetching GitHub profile...'}
+                {currentStep === 1 && 'Generating README with Gemini...'}
+                {currentStep === 2 && `Refining for ${careerRole}...`}
+                {currentStep === 3 && 'Done.'}
+              </div>
+            )}
+
             {/* Generate Button */}
             <button
               onClick={generateReadme}
@@ -745,7 +799,10 @@ export default function ReadmeGeneratorPage() {
                       animation: 'spin 1s linear infinite',
                     }}
                   />
-                  Generating...
+                  {currentStep === 0 && 'Fetching GitHub profile...'}
+                  {currentStep === 1 && 'Generating README with Gemini...'}
+                  {currentStep === 2 && `Refining for ${careerRole}...`}
+                  {currentStep === 3 && 'Done.'}
                 </>
               ) : usageInfo && !usageInfo.allowed ? (
                 <>
@@ -909,6 +966,42 @@ export default function ReadmeGeneratorPage() {
                 </div>
               </div>
 
+              {/* Profile Agent focus (Career Mode reasoning) */}
+              {agentReasoning && (
+                <div
+                  style={{
+                    padding: '16px 20px',
+                    borderBottom: '1px solid #1f1f1f',
+                    background: 'rgba(34, 197, 94, 0.06)',
+                  }}
+                >
+                  <div style={{ fontSize: '13px', fontWeight: 600, color: '#22c55e', marginBottom: '6px' }}>
+                    Profile Agent focus
+                  </div>
+                  <p style={{ margin: 0, color: '#a1a1a1', fontSize: '13px', lineHeight: 1.5 }}>{agentReasoning}</p>
+                </div>
+              )}
+
+              {/* Agent refinements (when Career Mode + agent loop ran) */}
+              {refinementNotes && refinementNotes.length > 0 && (
+                <div
+                  style={{
+                    padding: '16px 20px',
+                    borderBottom: '1px solid #1f1f1f',
+                    background: 'rgba(34, 197, 94, 0.06)',
+                  }}
+                >
+                  <div style={{ fontSize: '13px', fontWeight: 600, color: '#22c55e', marginBottom: '8px' }}>
+                    Profile Agent applied {refinementNotes.length} improvement{refinementNotes.length !== 1 ? 's' : ''}:
+                  </div>
+                  <ul style={{ margin: 0, paddingLeft: '20px', color: '#a1a1a1', fontSize: '13px', lineHeight: 1.6 }}>
+                    {refinementNotes.map((note, i) => (
+                      <li key={i}>{note}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
               {/* Preview Mode */}
               {viewMode === 'preview' && (
                 <div
@@ -1032,6 +1125,65 @@ export default function ReadmeGeneratorPage() {
                   {generatedReadme}
                 </pre>
               )}
+
+              {/* Collapsible Agent log */}
+              <div style={{ borderTop: '1px solid #1f1f1f' }}>
+                <button
+                  type="button"
+                  onClick={() => setAgentLogExpanded(!agentLogExpanded)}
+                  style={{
+                    width: '100%',
+                    padding: '12px 20px',
+                    background: 'transparent',
+                    border: 'none',
+                    color: '#666',
+                    fontSize: '13px',
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    textAlign: 'left',
+                  }}
+                >
+                  Agent log
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    style={{
+                      transform: agentLogExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+                      transition: 'transform 0.2s',
+                    }}
+                  >
+                    <path d="M6 9l6 6 6-6" />
+                  </svg>
+                </button>
+                {agentLogExpanded && (
+                  <div
+                    style={{
+                      padding: '12px 20px 16px',
+                      background: '#0a0a0a',
+                      fontSize: '13px',
+                      color: '#a1a1a1',
+                      lineHeight: 1.8,
+                    }}
+                  >
+                    <div>1. Fetched GitHub profile.</div>
+                    <div>2. Generated README with Gemini.</div>
+                    {aiProvider === 'gemini_refined' && refinementNotes && refinementNotes.length > 0 && (
+                      <>
+                        <div>3. Critiqued for {careerRole}.</div>
+                        <div>4. Refined README.</div>
+                      </>
+                    )}
+                    {aiProvider !== 'gemini_refined' && <div>3. Done.</div>}
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </section>

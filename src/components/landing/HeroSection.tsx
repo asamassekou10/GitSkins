@@ -115,13 +115,23 @@ export function HeroSection({ username, onUsernameChange }: HeroSectionProps) {
             fontSize: 'clamp(16px, 2vw, 18px)',
             color: '#a1a1a1',
             margin: '0 auto',
-            marginBottom: '40px',
+            marginBottom: '12px',
             maxWidth: '540px',
             lineHeight: 1.7,
           }}
         >
           Dynamic widgets, AI-generated READMEs, profile intelligence, 
           and portfolio case studies. All in one place, completely free.
+        </p>
+        <p
+          style={{
+            fontSize: '14px',
+            color: '#737373',
+            margin: '0 auto 40px',
+            maxWidth: '400px',
+          }}
+        >
+          Enter your username → get a README and widgets.
         </p>
 
         {/* CTA Buttons */}

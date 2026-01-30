@@ -49,9 +49,9 @@ function getGenAI(): GoogleGenerativeAI {
 
 function getModelName(type: 'fast' | 'pro' = 'fast'): string {
   if (type === 'pro') {
-    return process.env.GEMINI_MODEL_PRO || process.env.GEMINI_MODEL || 'gemini-1.5-pro';
+    return process.env.GEMINI_MODEL_PRO || process.env.GEMINI_MODEL || 'gemini-2.5-pro';
   }
-  return process.env.GEMINI_MODEL_FAST || process.env.GEMINI_MODEL || 'gemini-1.5-flash';
+  return process.env.GEMINI_MODEL_FAST || process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 }
 
 /**
@@ -76,13 +76,21 @@ export async function generateReadmeWithGemini(
     careerRole?: string;
     agentLoop?: boolean;
   }
-): Promise<{ markdown: string; refinementNotes?: string[] }> {
+): Promise<{ markdown: string; refinementNotes?: string[]; reasoning?: string }> {
   const model = getModel(getModelName('pro'));
 
   const topLanguages = profileData.languages.slice(0, 5).map((l) => l.name).join(', ');
   const pinnedReposText = profileData.pinnedRepos
     .map((r) => `- ${r.name}: ${r.description || 'No description'} (${r.stars} stars, ${r.language || 'Unknown'})`)
     .join('\n');
+
+  let reasoning: string | undefined;
+  if (config.careerMode) {
+    const reasoningModel = getModel(getModelName('fast'));
+    const reasoningPrompt = `You are tailoring a GitHub profile README for a ${config.careerRole || 'fullstack'} role. Profile: ${config.username}, top languages: ${topLanguages || 'unknown'}. In 1–2 short sentences, state how you will focus the README for this role (e.g. "Focusing on backend: emphasizing APIs, data pipelines, and reliability."). Be specific to the role. Reply with ONLY that reasoning, no heading.`;
+    const reasoningResult = await reasoningModel.generateContent(reasoningPrompt);
+    reasoning = reasoningResult.response.text().trim();
+  }
 
   const roleContext = config.careerMode
     ? `\n**Target Role:** ${config.careerRole || 'fullstack'} (tailor narrative, highlights, and skills for this role)\n`
@@ -162,11 +170,11 @@ Output ONLY the markdown content. No explanations or code blocks around it.`;
       const refinePrompt = `You are refining a GitHub profile README. Apply these improvement notes while preserving the original structure and widgets. Improvement notes:\n- ${refinementNotes.join('\n- ')}\n\nOriginal README:\n${markdown}\n\nReturn ONLY the improved markdown.`;
       const refineResult = await model.generateContent(refinePrompt);
       markdown = refineResult.response.text();
-      return { markdown, refinementNotes };
+      return { markdown, refinementNotes, reasoning };
     }
   }
 
-  return { markdown };
+  return { markdown, reasoning };
 }
 
 /**
@@ -598,6 +606,43 @@ Respond with ONLY a JSON object (no markdown):
       embedCode: `![Profile](https://gitskins.com/api/premium-card?username=${username}&theme=github-dark)\n![Languages](https://gitskins.com/api/languages?username=${username}&theme=github-dark)\n![Streak](https://gitskins.com/api/streak?username=${username}&theme=github-dark)`,
     };
   }
+}
+
+/**
+ * Explain a GitHub profile in 2–3 sentences (summary only).
+ */
+export async function explainProfileWithGemini(
+  profileData: ExtendedProfileData,
+  username: string
+): Promise<string> {
+  const model = getModel(getModelName('fast'));
+  const topLanguages = profileData.languages.slice(0, 5).map((l) => l.name).join(', ');
+  const pinnedReposText = profileData.pinnedRepos
+    .map((r) => `- ${r.name}: ${r.description || 'No description'} (${r.stars} stars)`)
+    .join('\n');
+
+  const prompt = `Summarize this GitHub profile in 2–3 short sentences for a recruiter or visitor. Focus on: type of developer, main tech/languages, and standout traits (e.g. open-source presence, consistency, focus areas). Be concise and factual.
+
+**Profile:**
+- Username: ${username}
+- Name: ${profileData.name || username}
+- Bio: ${profileData.bio || 'None'}
+- Location: ${profileData.location || 'Not specified'}
+- Company: ${profileData.company || 'Not specified'}
+- Followers: ${profileData.followers} | Following: ${profileData.following}
+- Total Repos: ${profileData.totalRepos} | Total Stars: ${profileData.totalStars}
+- Contributions This Year: ${profileData.totalContributions}
+- Current Streak: ${profileData.streak.current} days
+- Top Languages: ${topLanguages || 'None'}
+
+**Pinned Repos:**
+${pinnedReposText || 'None'}
+
+Reply with ONLY the 2–3 sentence summary, no heading or bullet points.`;
+
+  const result = await model.generateContent(prompt);
+  const response = await result.response;
+  return response.text().trim();
 }
 
 /**

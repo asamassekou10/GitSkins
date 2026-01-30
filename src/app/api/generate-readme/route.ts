@@ -59,6 +59,8 @@ export async function POST(request: NextRequest) {
 
     let result;
     let aiProvider: 'gemini' | 'gemini_refined' | 'openai' | 'template' = 'template';
+    let refinementNotes: string[] | undefined;
+    let reasoning: string | undefined;
 
     // Try Gemini AI generation first (primary provider)
     if (useAI && isGeminiConfigured()) {
@@ -83,6 +85,8 @@ export async function POST(request: NextRequest) {
             totalStars: profileData.totalStars,
           };
           aiProvider = geminiResult.refinementNotes ? 'gemini_refined' : 'gemini';
+          refinementNotes = geminiResult.refinementNotes ?? undefined;
+          reasoning = geminiResult.reasoning ?? undefined;
         }
       } catch (geminiError) {
         console.error('Gemini generation failed:', geminiError);
@@ -150,6 +154,8 @@ export async function POST(request: NextRequest) {
       sections: result.sections,
       metadata: result.metadata,
       aiProvider,
+      refinementNotes,
+      reasoning,
       profile: {
         name: profileData.name,
         avatarUrl: profileData.avatarUrl,
