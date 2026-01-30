@@ -6,6 +6,7 @@ import { useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import type { PremiumThemeName } from '@/types/premium-theme';
 import { analytics } from '@/components/AnalyticsProvider';
+import { Navigation } from '@/components/landing/Navigation';
 
 const themes: PremiumThemeName[] = [
   'satan', 'neon', 'zen', 'github-dark', 'dracula',
@@ -125,6 +126,7 @@ function ShowcaseContent() {
         position: 'relative',
       }}
     >
+      <Navigation />
       {/* Background */}
       <div
         style={{
@@ -140,7 +142,7 @@ function ShowcaseContent() {
         }}
       />
 
-      <div style={{ position: 'relative', zIndex: 1, maxWidth: 900, margin: '0 auto', padding: '48px 24px 64px' }}>
+      <div style={{ position: 'relative', zIndex: 1, maxWidth: 900, margin: '0 auto', padding: '100px 24px 64px' }}>
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -12 }}
@@ -250,10 +252,14 @@ function ShowcaseContent() {
                 gap: 16,
                 background: bgElevated,
                 borderRadius: 12,
+                padding: 24,
+                textAlign: 'center',
               }}
             >
               <p style={{ color: textSecondary, fontSize: 16, margin: 0 }}>Card could not be loaded.</p>
-              <p style={{ color: textMuted, fontSize: 14, margin: 0 }}>Check that the username exists and try again.</p>
+              <p style={{ color: textMuted, fontSize: 14, margin: 0 }}>
+                Check that the username exists. If you run this site, add GITHUB_TOKEN in Vercel (or .env.local).
+              </p>
               <button
                 type="button"
                 onClick={retryCard}

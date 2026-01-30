@@ -3,6 +3,7 @@
 import { signIn } from 'next-auth/react';
 import Link from 'next/link';
 import { useState } from 'react';
+import { Navigation } from '@/components/landing/Navigation';
 
 export default function AuthPage() {
   const [isLoading, setIsLoading] = useState(false);
@@ -24,12 +25,22 @@ export default function AuthPage() {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'center',
-        padding: '20px',
         position: 'relative',
         overflow: 'hidden',
       }}
     >
+      <Navigation />
+      <div
+        style={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '20px',
+          width: '100%',
+        }}
+      >
       {/* Aurora Background */}
       <div
         style={{
@@ -240,6 +251,7 @@ export default function AuthPage() {
             <span>{feature.text}</span>
           </div>
         ))}
+      </div>
       </div>
 
       <style>{`

@@ -11,8 +11,8 @@ interface NavLink {
 }
 
 const navLinks: NavLink[] = [
-  { label: 'Features', href: '#features', isHashLink: true },
-  { label: 'Themes', href: '#themes', isHashLink: true },
+  { label: 'Features', href: '/#features', isHashLink: true },
+  { label: 'Themes', href: '/#themes', isHashLink: true },
   { label: 'AI Features', href: '/ai', isHashLink: false },
   { label: 'README Generator', href: '/readme-generator', isHashLink: false },
 ];

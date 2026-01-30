@@ -85,6 +85,21 @@ export default function PortfolioPage() {
                 View Showcase
               </Link>
               <Link
+                href={`/portfolio/${username}/build`}
+                style={{
+                  padding: '10px 20px',
+                  background: '#1a1a1a',
+                  border: '1px solid #2a2a2a',
+                  borderRadius: '10px',
+                  color: '#888',
+                  textDecoration: 'none',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                }}
+              >
+                Build website
+              </Link>
+              <Link
                 href="/readme-generator"
                 style={{
                   padding: '10px 20px',

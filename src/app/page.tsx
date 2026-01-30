@@ -152,17 +152,17 @@ export default function Home() {
                   letterSpacing: '-0.02em',
                 }}
               >
-                Everything you need
+                All features in one place
               </h2>
-              <p style={{ fontSize: '16px', color: '#666', maxWidth: '500px', margin: '0 auto' }}>
-                Professional tools to make your GitHub profile stand out.
+              <p style={{ fontSize: '16px', color: '#666', maxWidth: '560px', margin: '0 auto' }}>
+                Widgets, 20 themes, README generator, portfolio case studies, website builder with AI edit, profile intelligence, and AI chat.
               </p>
             </div>
 
             <div
               style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
                 gap: '20px',
               }}
             >
@@ -240,7 +240,7 @@ export default function Home() {
             <div
               style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
                 gap: '16px',
               }}
             >

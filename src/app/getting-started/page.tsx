@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { analytics } from '@/components/AnalyticsProvider';
+import { Navigation } from '@/components/landing/Navigation';
 
 const steps = [
   {
@@ -80,9 +81,14 @@ export default function GettingStartedPage() {
         background: 'linear-gradient(180deg, #0a0a0a 0%, #111111 50%, #0a0a0a 100%)',
         color: '#ffffff',
         fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
-        padding: '40px 20px',
       }}
     >
+      <Navigation />
+      <div
+        style={{
+          padding: '100px 20px 60px',
+        }}
+      >
       <div
         style={{
           maxWidth: '1000px',
@@ -375,6 +381,7 @@ export default function GettingStartedPage() {
             Try It Now
           </Link>
         </div>
+      </div>
       </div>
     </div>
   );

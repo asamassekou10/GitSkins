@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { Navigation } from '@/components/landing/Navigation';
 
 export default function TermsPage() {
   return (
@@ -9,10 +10,10 @@ export default function TermsPage() {
         minHeight: '100vh',
         background: 'linear-gradient(180deg, #0a0a0a 0%, #111 100%)',
         color: '#e5e5e5',
-        padding: '80px 20px 60px',
       }}
     >
-      <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+      <Navigation />
+      <div style={{ maxWidth: '800px', margin: '0 auto', padding: '100px 20px 60px' }}>
         {/* Header */}
         <Link
           href="/"

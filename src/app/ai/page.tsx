@@ -354,9 +354,10 @@ export default function AIFeaturesPage() {
         style={{
           maxWidth: '1100px',
           margin: '0 auto',
-          padding: '100px 20px 60px',
+          padding: '100px clamp(16px, 4vw, 24px) 60px',
           position: 'relative',
           zIndex: 1,
+          width: '100%',
         }}
       >
         {/* Header */}
@@ -983,6 +984,7 @@ export default function AIFeaturesPage() {
             style={{
               maxWidth: '700px',
               margin: '0 auto',
+              width: '100%',
               background: '#161616',
               border: '1px solid #2a2a2a',
               borderRadius: '20px',
@@ -992,9 +994,11 @@ export default function AIFeaturesPage() {
             {/* Chat Messages */}
             <div
               style={{
-                height: '400px',
+                minHeight: 'clamp(280px, 50vh, 400px)',
+                maxHeight: '400px',
                 overflowY: 'auto',
                 padding: '20px',
+                WebkitOverflowScrolling: 'touch',
               }}
             >
               {chatMessages.map((msg, index) => (
@@ -1008,11 +1012,13 @@ export default function AIFeaturesPage() {
                 >
                   <div
                     style={{
-                      maxWidth: '80%',
+                      maxWidth: 'min(85%, 520px)',
                       padding: '12px 16px',
                       background: msg.role === 'user' ? '#22c55e' : '#1a1a1a',
                       borderRadius: msg.role === 'user' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
                       color: msg.role === 'user' ? '#000' : '#e5e5e5',
+                      fontSize: '15px',
+                      lineHeight: 1.5,
                     }}
                   >
                     {msg.content}
@@ -1043,6 +1049,8 @@ export default function AIFeaturesPage() {
                 borderTop: '1px solid #2a2a2a',
                 display: 'flex',
                 gap: '12px',
+                flexWrap: 'wrap',
+                alignItems: 'center',
               }}
             >
               <input
@@ -1051,8 +1059,9 @@ export default function AIFeaturesPage() {
                 onChange={(e) => setChatInput(e.target.value)}
                 placeholder="Ask me anything about GitSkins..."
                 style={{
-                  flex: 1,
-                  padding: '12px 16px',
+                  flex: '1 1 200px',
+                  minWidth: 0,
+                  padding: '14px 16px',
                   background: '#1a1a1a',
                   border: '1px solid #2a2a2a',
                   borderRadius: '12px',
@@ -1060,19 +1069,21 @@ export default function AIFeaturesPage() {
                   fontSize: '15px',
                   outline: 'none',
                 }}
-                onKeyPress={(e) => e.key === 'Enter' && handleSendChat()}
+                onKeyDown={(e) => e.key === 'Enter' && handleSendChat()}
               />
               <button
                 onClick={handleSendChat}
                 disabled={chatLoading || !chatInput.trim()}
                 style={{
-                  padding: '12px 20px',
+                  padding: '14px 24px',
+                  minHeight: '48px',
                   background: chatLoading || !chatInput.trim() ? '#1a1a1a' : '#22c55e',
                   border: 'none',
                   borderRadius: '12px',
                   color: chatLoading || !chatInput.trim() ? '#888' : '#000',
                   fontWeight: 600,
                   cursor: chatLoading || !chatInput.trim() ? 'not-allowed' : 'pointer',
+                  flexShrink: 0,
                 }}
               >
                 Send

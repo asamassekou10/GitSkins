@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { Navigation } from '@/components/landing/Navigation';
 
 const faqs = [
   {
@@ -45,13 +46,14 @@ export default function SupportPage() {
         background: 'linear-gradient(180deg, #0a0a0a 0%, #111111 50%, #0a0a0a 100%)',
         color: '#ffffff',
         fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
-        padding: '40px 20px',
       }}
     >
+      <Navigation />
       <div
         style={{
           maxWidth: '900px',
           margin: '0 auto',
+          padding: '100px 20px 60px',
         }}
       >
         {/* Header */}

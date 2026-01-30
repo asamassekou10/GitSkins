@@ -483,6 +483,101 @@ Return ONLY JSON array:
 }
 
 /**
+ * Generate a full portfolio website (HTML + CSS) from profile and case studies.
+ * Returns a single-page, self-contained portfolio; CSS can be embedded in HTML or separate.
+ */
+export async function generatePortfolioWebsite(
+  profileData: ExtendedProfileData,
+  username: string,
+  caseStudies: PortfolioCaseStudy[]
+): Promise<{ html: string; css: string }> {
+  const model = getModel(getModelName('pro'));
+  const caseStudiesJson = JSON.stringify(caseStudies, null, 2);
+  const topLangs = profileData.languages.slice(0, 5).map((l) => l.name).join(', ');
+
+  const prompt = `You are a professional web designer. Generate a single-page portfolio website for a developer.
+
+**Profile:**
+- Username: ${username}
+- Name: ${profileData.name || username}
+- Bio: ${profileData.bio || 'Not provided'}
+- Avatar URL: ${profileData.avatarUrl}
+- Followers: ${profileData.followers} | Repos: ${profileData.totalRepos} | Stars: ${profileData.totalStars}
+- Top languages: ${topLangs}
+
+**Case studies (use this exact data):**
+${caseStudiesJson}
+
+**Requirements:**
+1. Output TWO code blocks only. First block: \`\`\`html\\n...\\n\`\`\` (full HTML from <!DOCTYPE> to </html>, semantic: header, hero, section per case study, optional contact/footer). Second block: \`\`\`css\\n...\\n\`\`\` (all styles). No other text.
+2. Single page, responsive, no external CDN or fonts (use system fonts). Green (#22c55e) and black/dark theme to match GitSkins.
+3. Include the avatar, name, bio, and each case study with title, repo, problem, approach, impact, stack, highlights. Link repo names to repoUrl when present.
+4. Professional, minimal, developer portfolio style. No placeholder lorem.
+
+Return ONLY the two code blocks (html then css).`;
+
+  const result = await model.generateContent(prompt);
+  const text = result.response.text();
+
+  const htmlMatch = text.match(/```html\s*([\s\S]*?)```/);
+  const cssMatch = text.match(/```css\s*([\s\S]*?)```/);
+  let html = htmlMatch ? htmlMatch[1].trim() : '';
+  let css = cssMatch ? cssMatch[1].trim() : '';
+
+  if (!html) {
+    html = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>${username} - Portfolio</title></head><body><h1>${username}</h1><p>Portfolio</p></body></html>`;
+  }
+  if (!css) {
+    css = 'body { font-family: system-ui; background: #050505; color: #fafafa; margin: 0; padding: 20px; }';
+  }
+
+  return { html, css };
+}
+
+/**
+ * Edit portfolio website via natural language. Returns updated html and css.
+ */
+export async function editPortfolioWebsite(
+  html: string,
+  css: string,
+  userMessage: string
+): Promise<{ html: string; css: string }> {
+  const model = getModel(getModelName('pro'));
+  const truncatedHtml = html.length > 12000 ? html.slice(0, 12000) + '\n<!-- ... truncated -->' : html;
+  const truncatedCss = css.length > 8000 ? css.slice(0, 8000) + '\n/* ... truncated */' : css;
+
+  const prompt = `You are a web designer. The user wants to change their portfolio page.
+
+**Current HTML (excerpt):**
+\`\`\`html
+${truncatedHtml}
+\`\`\`
+
+**Current CSS (excerpt):**
+\`\`\`css
+${truncatedCss}
+\`\`\`
+
+**User request:** ${userMessage}
+
+**Instructions:**
+1. Apply the requested change. Return the FULL updated HTML and FULL updated CSS.
+2. Output ONLY two code blocks. First: \`\`\`html\\n...\\n\`\`\` (complete HTML). Second: \`\`\`css\\n...\\n\`\`\` (complete CSS). No other text.
+3. Keep the same structure and green/black theme unless the user asks to change it.
+4. If HTML or CSS was truncated above, extend from what you see and keep the rest consistent.`;
+
+  const result = await model.generateContent(prompt);
+  const text = result.response.text();
+
+  const htmlMatch = text.match(/```html\s*([\s\S]*?)```/);
+  const cssMatch = text.match(/```css\s*([\s\S]*?)```/);
+  const outHtml = htmlMatch ? htmlMatch[1].trim() : html;
+  const outCss = cssMatch ? cssMatch[1].trim() : css;
+
+  return { html: outHtml, css: outCss };
+}
+
+/**
  * AI Chat for widget customization assistance
  */
 export async function chatWithGemini(

@@ -20,51 +20,85 @@ import type { PremiumThemeName } from '@/types/premium-theme';
 export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
 
-/**
- * Generate error image response
- */
-function generateErrorImage(message: string, subtitle?: string): NextResponse {
-  const imageResponse = new ImageResponse(
-    (
-      <div
-        style={{
-          width: imageConfig.width,
-          height: imageConfig.height,
-          background: '#0d1117',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: '#ff4500',
-          fontFamily: 'system-ui',
-          border: '4px solid #30363d',
-        }}
-      >
-        <div style={{ fontSize: 48, marginBottom: 20, fontWeight: 'bold', display: 'flex' }}>
-          <span>{message}</span>
-        </div>
-        {subtitle && (
-          <div style={{ fontSize: 24, marginTop: 20, color: '#ff6b35', display: 'flex' }}>
-            <span>{subtitle}</span>
-          </div>
-        )}
-      </div>
-    ),
-    {
-      width: imageConfig.width,
-      height: imageConfig.height,
-    }
-  );
+const IMAGE_HEADERS = {
+  'Cache-Control': `public, max-age=${apiConfig.cacheMaxAge}, s-maxage=${apiConfig.cacheSMaxAge}, stale-while-revalidate=86400`,
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+};
 
-  return new NextResponse(imageResponse.body, {
+/**
+ * Fallback: return a simple SVG when ImageResponse fails (e.g. in Edge).
+ * Ensures we always return 200 + image so the client img never fails to load.
+ */
+function minimalErrorSvg(message: string, subtitle?: string): NextResponse {
+  const safeMessage = String(message).slice(0, 60).replace(/[<>"&]/g, '');
+  const safeSubtitle = subtitle ? String(subtitle).slice(0, 80).replace(/[<>"&]/g, '') : '';
+  const w = imageConfig.width;
+  const h = imageConfig.height;
+  const svg = `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
+  <rect width="100%" height="100%" fill="#0d1117"/>
+  <text x="50%" y="45%" text-anchor="middle" fill="#22c55e" font-size="32" font-family="system-ui,sans-serif">${safeMessage}</text>
+  ${safeSubtitle ? `<text x="50%" y="55%" text-anchor="middle" fill="#888" font-size="20" font-family="system-ui,sans-serif">${safeSubtitle}</text>` : ''}
+</svg>`;
+  return new NextResponse(svg, {
     headers: {
-      'Content-Type': 'image/png',
-      'Cache-Control': `public, max-age=${apiConfig.cacheMaxAge}, s-maxage=${apiConfig.cacheSMaxAge}, stale-while-revalidate=86400`,
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
+      'Content-Type': 'image/svg+xml',
+      ...IMAGE_HEADERS,
     },
   });
+}
+
+/**
+ * Generate error image response (PNG via ImageResponse).
+ * On failure (e.g. Edge runtime issue), falls back to SVG.
+ */
+function generateErrorImage(message: string, subtitle?: string): NextResponse {
+  const safeMessage = String(message).slice(0, 60);
+  const safeSubtitle = subtitle ? String(subtitle).slice(0, 80) : undefined;
+  try {
+    const imageResponse = new ImageResponse(
+      (
+        <div
+          style={{
+            width: imageConfig.width,
+            height: imageConfig.height,
+            background: '#0d1117',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#22c55e',
+            fontFamily: 'system-ui',
+            border: '4px solid #30363d',
+          }}
+        >
+          <div style={{ fontSize: 48, marginBottom: 20, fontWeight: 'bold', display: 'flex' }}>
+            <span>{safeMessage}</span>
+          </div>
+          {safeSubtitle && (
+            <div style={{ fontSize: 24, marginTop: 20, color: '#888', display: 'flex' }}>
+              <span>{safeSubtitle}</span>
+            </div>
+          )}
+        </div>
+      ),
+      {
+        width: imageConfig.width,
+        height: imageConfig.height,
+      }
+    );
+
+    return new NextResponse(imageResponse.body, {
+      headers: {
+        'Content-Type': 'image/png',
+        ...IMAGE_HEADERS,
+      },
+    });
+  } catch {
+    return minimalErrorSvg(safeMessage, safeSubtitle);
+  }
 }
 
 /**
@@ -415,7 +449,22 @@ export async function GET(request: NextRequest) {
   let username = 'unknown';
   let theme: string | undefined;
 
+  const safeReturnErrorImage = (msg: string, sub?: string): NextResponse => {
+    try {
+      return generateErrorImage(msg, sub);
+    } catch {
+      return minimalErrorSvg(msg, sub);
+    }
+  };
+
   try {
+    if (!process.env.GITHUB_TOKEN?.trim()) {
+      return safeReturnErrorImage(
+        'Server configuration',
+        'GITHUB_TOKEN not set. Add it in Vercel env vars.'
+      );
+    }
+
     const searchParams = request.nextUrl.searchParams;
     const usernameParam = searchParams.get('username');
     const themeParam = searchParams.get('theme');
@@ -430,7 +479,7 @@ export async function GET(request: NextRequest) {
         errorType: 'missing_username',
         duration: Date.now() - startTime,
       });
-      return generateErrorImage('Missing Username', 'Add ?username=yourname');
+      return safeReturnErrorImage('Missing Username', 'Add ?username=yourname');
     }
 
     const rawParams = {
@@ -451,7 +500,7 @@ export async function GET(request: NextRequest) {
         errorType: 'validation_error',
         duration: Date.now() - startTime,
       });
-      return generateErrorImage('Validation Error', errorMessage);
+      return safeReturnErrorImage('Validation Error', errorMessage);
     }
 
     // Double-check username
@@ -464,7 +513,7 @@ export async function GET(request: NextRequest) {
         errorType: 'missing_username',
         duration: Date.now() - startTime,
       });
-      return generateErrorImage('Missing Username', 'Add ?username=yourname');
+      return safeReturnErrorImage('Missing Username', 'Add ?username=yourname');
     }
 
     username = validatedParams.username;
@@ -483,7 +532,7 @@ export async function GET(request: NextRequest) {
         errorType: 'github_api_error',
         duration: Date.now() - startTime,
       });
-      return generateErrorImage('GitHub API Error', 'Unable to fetch user data');
+      return safeReturnErrorImage('GitHub API Error', 'Check username and try again.');
     }
 
     if (!data) {
@@ -495,7 +544,7 @@ export async function GET(request: NextRequest) {
         errorType: 'user_not_found',
         duration: Date.now() - startTime,
       });
-      return generateErrorImage('User Not Found', `@${validatedParams.username}`);
+      return safeReturnErrorImage('User Not Found', `@${validatedParams.username}`);
     }
 
     // Track successful generation
@@ -515,7 +564,6 @@ export async function GET(request: NextRequest) {
     );
   } catch (error) {
     console.error('Unexpected error:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     trackCardGeneration({
       cardType: 'premium',
       theme,
@@ -524,7 +572,8 @@ export async function GET(request: NextRequest) {
       errorType: 'unexpected_error',
       duration: Date.now() - startTime,
     });
-    return generateErrorImage('Error', errorMessage);
+    const shortMsg = error instanceof Error ? error.message.slice(0, 50) : 'Unknown error';
+    return safeReturnErrorImage('Error', shortMsg);
   }
 }
 
