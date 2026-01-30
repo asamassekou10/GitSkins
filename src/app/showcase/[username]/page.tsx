@@ -1,390 +1,484 @@
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useEffect, useState, Suspense, useCallback } from 'react';
+import { motion } from 'framer-motion';
 import { useParams, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import type { PremiumThemeName } from '@/types/premium-theme';
 import { analytics } from '@/components/AnalyticsProvider';
 
 const themes: PremiumThemeName[] = [
-  // Original
   'satan', 'neon', 'zen', 'github-dark', 'dracula',
-  // Seasonal
   'winter', 'spring', 'summer', 'autumn',
-  // Holiday
   'christmas', 'halloween',
-  // Developer
   'ocean', 'forest', 'sunset', 'midnight', 'aurora',
-  // Aesthetic
   'retro', 'minimal', 'pastel', 'matrix',
 ];
 
 const themeLabels: Record<PremiumThemeName, string> = {
-  // Original
-  'satan': '🔥 Satan',
-  'neon': '⚡ Neon',
-  'zen': '🍃 Zen',
-  'github-dark': '💼 GitHub Dark',
-  'dracula': '🦇 Dracula',
-  // Seasonal
-  'winter': '❄️ Winter',
-  'spring': '🌸 Spring',
-  'summer': '☀️ Summer',
-  'autumn': '🍂 Autumn',
-  // Holiday
-  'christmas': '🎄 Christmas',
-  'halloween': '🎃 Halloween',
-  // Developer
-  'ocean': '🌊 Ocean',
-  'forest': '🌲 Forest',
-  'sunset': '🌅 Sunset',
-  'midnight': '🌙 Midnight',
-  'aurora': '✨ Aurora',
-  // Aesthetic
-  'retro': '📼 Retro',
-  'minimal': '⬜ Minimal',
-  'pastel': '🎨 Pastel',
-  'matrix': '💚 Matrix',
+  'satan': 'Satan',
+  'neon': 'Neon',
+  'zen': 'Zen',
+  'github-dark': 'GitHub Dark',
+  'dracula': 'Dracula',
+  'winter': 'Winter',
+  'spring': 'Spring',
+  'summer': 'Summer',
+  'autumn': 'Autumn',
+  'christmas': 'Christmas',
+  'halloween': 'Halloween',
+  'ocean': 'Ocean',
+  'forest': 'Forest',
+  'sunset': 'Sunset',
+  'midnight': 'Midnight',
+  'aurora': 'Aurora',
+  'retro': 'Retro',
+  'minimal': 'Minimal',
+  'pastel': 'Pastel',
+  'matrix': 'Matrix',
 };
+
+const accent = '#22c55e';
+const accentLight = '#4ade80';
+const bgPrimary = '#050505';
+const bgCard = '#111111';
+const bgElevated = '#161616';
+const border = '#2a2a2a';
+const textPrimary = '#fafafa';
+const textSecondary = '#a1a1a1';
+const textMuted = '#737373';
 
 function ShowcaseContent() {
   const params = useParams();
   const searchParams = useSearchParams();
-  // Remove @ symbol if present (e.g., @octocat -> octocat)
   const rawUsername = params.username as string;
-  const username = rawUsername.startsWith('@') ? rawUsername.slice(1) : rawUsername;
+  const username = rawUsername?.startsWith('@') ? rawUsername.slice(1) : (rawUsername || '');
   const initialTheme = (searchParams.get('theme') || 'satan') as PremiumThemeName;
 
   const [selectedTheme, setSelectedTheme] = useState<PremiumThemeName>(initialTheme);
   const [isLoading, setIsLoading] = useState(true);
   const [showCopied, setShowCopied] = useState(false);
-
-  useEffect(() => {
-    // Simulate loading
-    const timer = setTimeout(() => setIsLoading(false), 800);
-    return () => clearTimeout(timer);
-  }, []);
+  const [cardError, setCardError] = useState(false);
+  const [cardKey, setCardKey] = useState(0);
 
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
   const productionUrl = 'https://gitskins.com';
+  const cardUrl = `${baseUrl}/api/premium-card?username=${encodeURIComponent(username)}&theme=${selectedTheme}`;
 
-  const copyMarkdown = async () => {
-    // Always use production URL for markdown
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 600);
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    setCardError(false);
+  }, [username, selectedTheme]);
+
+  const copyMarkdown = useCallback(async () => {
     const markdown = `![GitSkins Card](${productionUrl}/api/premium-card?username=${username}&theme=${selectedTheme})`;
     await navigator.clipboard.writeText(markdown);
     setShowCopied(true);
     setTimeout(() => setShowCopied(false), 2000);
-    
-    // Track markdown copy event
     analytics.trackMarkdownCopy('premium-card', selectedTheme, username, 'showcase');
-  };
+  }, [username, selectedTheme]);
 
   const shareUrl = `${baseUrl}/showcase/${username}?theme=${selectedTheme}`;
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-black text-white overflow-hidden relative">
-      {/* Animated Background */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <motion.div
-          className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-amber-500/10 to-orange-500/10 rounded-full blur-3xl"
-          animate={{
-            scale: [1, 1.2, 1],
-            rotate: [0, 90, 0],
-          }}
-          transition={{
-            duration: 20,
-            repeat: Infinity,
-            ease: "linear"
-          }}
-        />
-        <motion.div
-          className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-full blur-3xl"
-          animate={{
-            scale: [1.2, 1, 1.2],
-            rotate: [90, 0, 90],
-          }}
-          transition={{
-            duration: 20,
-            repeat: Infinity,
-            ease: "linear"
-          }}
-        />
-      </div>
+  const handleCardError = useCallback(() => {
+    setCardError(true);
+  }, []);
 
-      {/* Content */}
-      <div className="relative z-10 container mx-auto px-4 py-12">
+  const retryCard = useCallback(() => {
+    setCardError(false);
+    setCardKey((k) => k + 1);
+  }, []);
+
+  if (!username) {
+    return (
+      <div
+        style={{
+          minHeight: '100vh',
+          background: bgPrimary,
+          color: textPrimary,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: 24,
+        }}
+      >
+        <div style={{ textAlign: 'center' }}>
+          <h1 style={{ fontSize: 24, fontWeight: 600, marginBottom: 12 }}>Missing username</h1>
+          <p style={{ color: textSecondary, marginBottom: 24 }}>Use /showcase/yourname or /showcase/octocat</p>
+          <Link href="/" style={{ color: accent, fontWeight: 600 }}>Go home</Link>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      style={{
+        minHeight: '100vh',
+        background: bgPrimary,
+        color: textPrimary,
+        overflow: 'hidden',
+        position: 'relative',
+      }}
+    >
+      {/* Background */}
+      <div
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: '100%',
+          maxWidth: 1200,
+          height: 500,
+          background: `radial-gradient(ellipse at top, rgba(34, 197, 94, 0.08) 0%, transparent 60%)`,
+          pointerEvents: 'none',
+        }}
+      />
+
+      <div style={{ position: 'relative', zIndex: 1, maxWidth: 900, margin: '0 auto', padding: '48px 24px 64px' }}>
         {/* Header */}
         <motion.div
-          initial={{ opacity: 0, y: -20 }}
+          initial={{ opacity: 0, y: -12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-12"
+          transition={{ duration: 0.4 }}
+          style={{ textAlign: 'center', marginBottom: 32 }}
         >
-          <motion.h1
-            className="text-6xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-amber-400 via-orange-500 to-red-500"
-            animate={{
-              backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
-            }}
-            transition={{
-              duration: 5,
-              repeat: Infinity,
-              ease: "linear"
-            }}
+          <h1
             style={{
-              backgroundSize: '200% 200%',
+              fontSize: 'clamp(28px, 4vw, 40px)',
+              fontWeight: 700,
+              margin: 0,
+              marginBottom: 8,
+              background: `linear-gradient(135deg, ${textPrimary} 0%, ${accent} 100%)`,
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
             }}
           >
             GitSkins Showcase
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3, duration: 0.6 }}
-            className="text-xl text-gray-400"
-          >
-            @{username} • Interactive Profile Experience
-          </motion.p>
+          </h1>
+          <p style={{ color: textSecondary, fontSize: 16, margin: 0 }}>
+            @{username}
+          </p>
         </motion.div>
 
-        {/* Theme Selector */}
+        {/* Theme selector */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4, duration: 0.6 }}
-          className="flex flex-wrap justify-center gap-3 mb-12"
+          transition={{ delay: 0.1, duration: 0.4 }}
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            justifyContent: 'center',
+            gap: 8,
+            marginBottom: 32,
+          }}
         >
-          {themes.map((theme, index) => (
-            <motion.button
+          {themes.map((theme) => (
+            <button
               key={theme}
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.5 + index * 0.1 }}
-              whileHover={{ scale: 1.05, y: -2 }}
-              whileTap={{ scale: 0.95 }}
+              type="button"
               onClick={() => {
                 setSelectedTheme(theme);
                 analytics.trackThemeSelection(theme, 'showcase', username);
               }}
-              className={`px-6 py-3 rounded-xl font-semibold transition-all ${
-                selectedTheme === theme
-                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/50'
-                  : 'bg-gray-800/50 text-gray-300 hover:bg-gray-700/50 border border-gray-700'
-              }`}
+              style={{
+                padding: '10px 18px',
+                borderRadius: 10,
+                fontSize: 14,
+                fontWeight: 500,
+                border: `1px solid ${selectedTheme === theme ? accent : border}`,
+                background: selectedTheme === theme ? 'rgba(34, 197, 94, 0.15)' : bgElevated,
+                color: selectedTheme === theme ? accent : textSecondary,
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+              }}
             >
               {themeLabels[theme]}
-            </motion.button>
+            </button>
           ))}
         </motion.div>
 
-        {/* Card Display */}
+        {/* Card */}
         <motion.div
           layout
-          className="max-w-4xl mx-auto mb-12"
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.4 }}
+          style={{
+            background: bgCard,
+            border: `1px solid ${border}`,
+            borderRadius: 16,
+            padding: 16,
+            marginBottom: 32,
+          }}
         >
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={selectedTheme}
-              initial={{ opacity: 0, scale: 0.9, rotateY: 90 }}
-              animate={{ opacity: 1, scale: 1, rotateY: 0 }}
-              exit={{ opacity: 0, scale: 0.9, rotateY: -90 }}
-              transition={{ duration: 0.5 }}
-              className="relative group"
+          {isLoading ? (
+            <div
+              style={{
+                aspectRatio: '800 / 600',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
             >
-              {/* Glow effect */}
-              <motion.div
-                className="absolute -inset-1 bg-gradient-to-r from-amber-600 to-orange-600 rounded-2xl blur-xl opacity-75 group-hover:opacity-100 transition duration-1000"
-                animate={{
-                  scale: [1, 1.02, 1],
+            <div
+              className="animate-spin"
+              style={{
+                width: 40,
+                height: 40,
+                border: `3px solid ${border}`,
+                borderTopColor: accent,
+                borderRadius: '50%',
+              }}
+            />
+            </div>
+          ) : cardError ? (
+            <div
+              style={{
+                aspectRatio: '800 / 600',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 16,
+                background: bgElevated,
+                borderRadius: 12,
+              }}
+            >
+              <p style={{ color: textSecondary, fontSize: 16, margin: 0 }}>Card could not be loaded.</p>
+              <p style={{ color: textMuted, fontSize: 14, margin: 0 }}>Check that the username exists and try again.</p>
+              <button
+                type="button"
+                onClick={retryCard}
+                style={{
+                  padding: '10px 20px',
+                  background: accent,
+                  color: '#050505',
+                  border: 'none',
+                  borderRadius: 10,
+                  fontWeight: 600,
+                  cursor: 'pointer',
                 }}
-                transition={{
-                  duration: 3,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-              />
-
-              {/* Card */}
-              <div className="relative bg-gray-900/50 backdrop-blur-sm rounded-2xl p-4 border border-gray-800">
-                {isLoading ? (
-                  <div className="aspect-[800/600] flex items-center justify-center">
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                      className="w-16 h-16 border-4 border-amber-500 border-t-transparent rounded-full"
-                    />
-                  </div>
-                ) : (
-                  <motion.img
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.6 }}
-                    src={`/api/premium-card?username=${username}&theme=${selectedTheme}`}
-                    alt={`${username}'s GitSkins card`}
-                    className="w-full h-auto rounded-xl"
-                    loading="eager"
-                    fetchPriority="high"
-                    onError={(e) => {
-                      const target = e.currentTarget;
-                      console.error('Image failed to load for:', username, selectedTheme);
-                      target.src = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='800' height='400'><rect fill='%23111' width='800' height='400'/><text x='50%' y='50%' text-anchor='middle' fill='%23888' font-size='18' font-family='system-ui'>Card generation failed</text><text x='50%' y='55%' text-anchor='middle' fill='%23666' font-size='14' font-family='system-ui'>Try: ${username}</text></svg>`;
-                    }}
-                  />
-                )}
-              </div>
-            </motion.div>
-          </AnimatePresence>
+              >
+                Retry
+              </button>
+            </div>
+          ) : (
+            <img
+              key={cardKey}
+              src={cardUrl}
+              alt={`${username}'s GitSkins card`}
+              style={{
+                width: '100%',
+                height: 'auto',
+                borderRadius: 12,
+                display: 'block',
+              }}
+              loading="eager"
+              fetchPriority="high"
+              onError={handleCardError}
+            />
+          )}
         </motion.div>
 
-        {/* Action Buttons */}
+        {/* Actions */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.8, duration: 0.6 }}
-          className="flex flex-wrap justify-center gap-4 mb-12"
+          transition={{ delay: 0.3, duration: 0.4 }}
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            justifyContent: 'center',
+            gap: 12,
+            marginBottom: 40,
+          }}
         >
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+          <button
+            type="button"
             onClick={copyMarkdown}
-            className="px-8 py-4 bg-gradient-to-r from-amber-500 to-orange-500 rounded-xl font-semibold shadow-lg shadow-amber-500/50 hover:shadow-xl hover:shadow-amber-500/70 transition-all flex items-center gap-2"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 8,
+              padding: '12px 24px',
+              background: accent,
+              color: '#050505',
+              border: 'none',
+              borderRadius: 10,
+              fontWeight: 600,
+              cursor: 'pointer',
+            }}
           >
             {showCopied ? (
               <>
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M20 6L9 17l-5-5" />
                 </svg>
-                Copied!
+                Copied
               </>
             ) : (
               <>
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <rect x="9" y="9" width="13" height="13" rx="2" />
+                  <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
                 </svg>
                 Copy Markdown
               </>
             )}
-          </motion.button>
-
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+          </button>
+          <button
+            type="button"
             onClick={() => {
               navigator.clipboard.writeText(shareUrl);
               analytics.track('share_link_copied', { username, theme: selectedTheme });
             }}
-            className="px-8 py-4 bg-gray-800/80 border border-gray-700 rounded-xl font-semibold hover:bg-gray-700/80 transition-all flex items-center gap-2"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 8,
+              padding: '12px 24px',
+              background: bgElevated,
+              color: textPrimary,
+              border: `1px solid ${border}`,
+              borderRadius: 10,
+              fontWeight: 600,
+              cursor: 'pointer',
+            }}
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="18" cy="5" r="3" />
+              <circle cx="6" cy="12" r="3" />
+              <circle cx="18" cy="19" r="3" />
+              <path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98" />
             </svg>
             Share Link
-          </motion.button>
-
-          {/* Social Share Buttons */}
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => {
-              const twitterUrl = `https://twitter.com/intent/tweet?text=Check out my GitHub profile!&url=${encodeURIComponent(shareUrl)}`;
-              window.open(twitterUrl, '_blank');
-              analytics.track('share_twitter', { username, theme: selectedTheme });
-            }}
-            className="px-6 py-4 bg-[#1DA1F2]/20 border border-[#1DA1F2]/30 rounded-xl font-semibold hover:bg-[#1DA1F2]/30 transition-all flex items-center gap-2"
-          >
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
-            </svg>
-            Twitter
-          </motion.button>
-
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => {
-              const linkedInUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`;
-              window.open(linkedInUrl, '_blank');
-              analytics.track('share_linkedin', { username, theme: selectedTheme });
-            }}
-            className="px-6 py-4 bg-[#0077B5]/20 border border-[#0077B5]/30 rounded-xl font-semibold hover:bg-[#0077B5]/30 transition-all flex items-center gap-2"
-          >
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-            </svg>
-            LinkedIn
-          </motion.button>
-
-          <motion.a
+          </button>
+          <Link
             href={`/portfolio/${username}`}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="px-8 py-4 bg-gray-800/80 border border-gray-700 rounded-xl font-semibold hover:bg-gray-700/80 transition-all flex items-center gap-2"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 8,
+              padding: '12px 24px',
+              background: bgElevated,
+              color: textPrimary,
+              border: `1px solid ${border}`,
+              borderRadius: 10,
+              fontWeight: 600,
+              textDecoration: 'none',
+            }}
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7h18M3 12h18M3 17h18" />
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+              <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" />
             </svg>
-            View AI Portfolio
-          </motion.a>
-
-          <motion.a
+            AI Portfolio
+          </Link>
+          <Link
             href="https://gitskins.com"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="px-8 py-4 bg-gray-800/80 border border-gray-700 rounded-xl font-semibold hover:bg-gray-700/80 transition-all flex items-center gap-2"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 8,
+              padding: '12px 24px',
+              background: bgElevated,
+              color: textPrimary,
+              border: `1px solid ${border}`,
+              borderRadius: 10,
+              fontWeight: 600,
+              textDecoration: 'none',
+            }}
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+              <path d="M9 22V12h6v10" />
             </svg>
             Create Your Own
-          </motion.a>
+          </Link>
         </motion.div>
 
-        {/* Code Preview */}
+        {/* Code block */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1, duration: 0.6 }}
-          className="max-w-2xl mx-auto"
+          transition={{ delay: 0.4, duration: 0.4 }}
+          style={{ maxWidth: 560, margin: '0 auto' }}
         >
-          <h3 className="text-2xl font-bold mb-4 text-center">Use in Your README</h3>
-          <div className="bg-gray-900/80 backdrop-blur-sm rounded-xl p-6 border border-gray-800">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-sm text-gray-400">Markdown</span>
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={copyMarkdown}
-                className="text-gray-400 hover:text-white transition-colors"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                </svg>
-              </motion.button>
-            </div>
-            <code className="text-amber-400 text-sm break-all block">
-              ![GitSkins Card]({productionUrl}/api/premium-card?username={username}&theme={selectedTheme})
+          <h3 style={{ fontSize: 14, fontWeight: 600, color: textSecondary, marginBottom: 12, textAlign: 'center' }}>
+            Use in your README
+          </h3>
+          <div
+            style={{
+              background: bgCard,
+              border: `1px solid ${border}`,
+              borderRadius: 12,
+              padding: 16,
+            }}
+          >
+            <code
+              style={{
+                fontSize: 13,
+                color: accent,
+                wordBreak: 'break-all',
+                display: 'block',
+              }}
+            >
+              {`![GitSkins Card](${productionUrl}/api/premium-card?username=${username}&theme=${selectedTheme})`}
             </code>
           </div>
         </motion.div>
 
         {/* Footer */}
-        <motion.div
+        <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 1.2, duration: 0.6 }}
-          className="text-center mt-16 text-gray-500"
+          transition={{ delay: 0.5, duration: 0.4 }}
+          style={{
+            textAlign: 'center',
+            marginTop: 48,
+            color: textMuted,
+            fontSize: 14,
+          }}
         >
-          <p>Made with 🔥 by <a href="https://gitskins.com" className="text-amber-400 hover:text-amber-300 transition-colors">GitSkins</a></p>
-        </motion.div>
+          Made with GitSkins —{' '}
+          <a href="https://gitskins.com" style={{ color: accent, textDecoration: 'none' }}>
+            gitskins.com
+          </a>
+        </motion.p>
       </div>
     </div>
   );
 }
 
-// Loading fallback for Suspense
 function ShowcaseLoading() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-black flex items-center justify-center">
-      <div className="w-16 h-16 border-4 border-amber-500 border-t-transparent rounded-full animate-spin" />
+    <div
+      style={{
+        minHeight: '100vh',
+        background: '#050505',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <div
+        className="animate-spin"
+        style={{
+          width: 40,
+          height: 40,
+          border: '3px solid #2a2a2a',
+          borderTopColor: '#22c55e',
+          borderRadius: '50%',
+        }}
+      />
     </div>
   );
 }
