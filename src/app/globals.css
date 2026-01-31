@@ -377,6 +377,8 @@ img {
   -webkit-text-fill-color: transparent;
   background-clip: text;
   animation: gradient-shift 6s ease-in-out infinite;
+  padding-bottom: 0.15em;
+  margin-bottom: -0.15em;
 }
 
 /* Card Glow Hover */
@@ -405,8 +407,8 @@ img {
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(rgba(34, 197, 94, 0.08) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(34, 197, 94, 0.08) 1px, transparent 1px);
+    linear-gradient(rgba(34, 197, 94, 0.12) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(34, 197, 94, 0.12) 1px, transparent 1px);
   background-size: 64px 64px;
   mask-image: radial-gradient(ellipse 80% 60% at 50% 30%, black 30%, transparent 75%);
   -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 30%, black 30%, transparent 75%);
@@ -420,7 +422,7 @@ img {
   position: absolute;
   inset: 0;
   background-image:
-    radial-gradient(circle 1.5px at center, rgba(34, 197, 94, 0.25) 0%, transparent 100%);
+    radial-gradient(circle 1.5px at center, rgba(34, 197, 94, 0.35) 0%, transparent 100%);
   background-size: 64px 64px;
   mask-image: radial-gradient(ellipse 80% 60% at 50% 30%, black 30%, transparent 75%);
   -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 30%, black 30%, transparent 75%);
