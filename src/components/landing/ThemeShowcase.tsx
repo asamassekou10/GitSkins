@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { analytics } from '@/components/AnalyticsProvider';
+import { AnimatedSection, StaggerContainer, StaggerItem } from './AnimatedSection';
 
 interface Theme {
   id: string;
@@ -199,7 +200,7 @@ export function ThemeShowcase({ themes, selectedTheme, onThemeSelect, username }
     >
       <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
         {/* Header */}
-        <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+        <AnimatedSection style={{ textAlign: 'center', marginBottom: '48px' }}>
           <h2
             style={{
               fontSize: 'clamp(28px, 4vw, 40px)',
@@ -214,11 +215,10 @@ export function ThemeShowcase({ themes, selectedTheme, onThemeSelect, username }
           <p style={{ fontSize: '16px', color: '#666', maxWidth: '500px', margin: '0 auto' }}>
             20 carefully crafted themes to match your style.
           </p>
-        </div>
+        </AnimatedSection>
 
         {/* Category Filter */}
-        <div
-          style={{
+        <AnimatedSection delay={0.1} style={{
             display: 'flex',
             gap: '8px',
             marginBottom: '32px',
@@ -258,10 +258,11 @@ export function ThemeShowcase({ themes, selectedTheme, onThemeSelect, username }
               {cat.label}
             </button>
           ))}
-        </div>
+        </AnimatedSection>
 
         {/* Theme Grid */}
-        <div
+        <StaggerContainer
+          staggerDelay={0.06}
           style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
@@ -269,15 +270,16 @@ export function ThemeShowcase({ themes, selectedTheme, onThemeSelect, username }
           }}
         >
           {filteredThemes.map((theme) => (
-            <ThemeCard
-              key={theme.id}
-              theme={theme}
-              username={username}
-              isSelected={selectedTheme === theme.id}
-              onSelect={() => handleThemeSelect(theme.id)}
-            />
+            <StaggerItem key={theme.id}>
+              <ThemeCard
+                theme={theme}
+                username={username}
+                isSelected={selectedTheme === theme.id}
+                onSelect={() => handleThemeSelect(theme.id)}
+              />
+            </StaggerItem>
           ))}
-        </div>
+        </StaggerContainer>
 
         {/* Selected Theme Info */}
         {selectedTheme && (

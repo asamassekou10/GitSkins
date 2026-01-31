@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { motion, useReducedMotion } from 'framer-motion';
 import { analytics } from '@/components/AnalyticsProvider';
 
 interface HeroSectionProps {
@@ -13,18 +14,30 @@ interface HeroSectionProps {
 
 export function HeroSection({ username, onUsernameChange }: HeroSectionProps) {
   const [inputValue, setInputValue] = useState(username);
+  const prefersReducedMotion = useReducedMotion();
 
   const handleTryIt = () => {
     if (inputValue.trim()) {
       onUsernameChange(inputValue.trim());
       analytics.trackConversion('landing_view', { action: 'try_username', username: inputValue.trim() });
-      
+
       const element = document.getElementById('create');
       if (element) {
         element.scrollIntoView({ behavior: 'smooth' });
       }
     }
   };
+
+  const ease = [0.25, 0.1, 0.25, 1] as const;
+
+  const fadeUp = (delay: number) =>
+    prefersReducedMotion
+      ? {}
+      : {
+          initial: { opacity: 0, y: 20 },
+          animate: { opacity: 1, y: 0 },
+          transition: { duration: 0.6, delay, ease },
+        };
 
   return (
     <section
@@ -62,7 +75,12 @@ export function HeroSection({ username, onUsernameChange }: HeroSectionProps) {
         }}
       >
         {/* Badge */}
-        <div
+        <motion.div
+          {...(prefersReducedMotion ? {} : {
+            initial: { opacity: 0, y: -10 },
+            animate: { opacity: 1, y: 0 },
+            transition: { duration: 0.5, delay: 0.2, ease },
+          })}
           style={{
             display: 'inline-flex',
             alignItems: 'center',
@@ -81,7 +99,7 @@ export function HeroSection({ username, onUsernameChange }: HeroSectionProps) {
             <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
           </svg>
           Powered by Google Gemini
-        </div>
+        </motion.div>
 
         {/* Main Headline */}
         <h1
@@ -95,22 +113,24 @@ export function HeroSection({ username, onUsernameChange }: HeroSectionProps) {
             color: '#fafafa',
           }}
         >
-          Your GitHub profile,
-          <br />
-          <span
-            style={{
-              background: 'linear-gradient(135deg, #22c55e 0%, #4ade80 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-            }}
+          <motion.span
+            {...fadeUp(0.4)}
+            style={{ display: 'block' }}
+          >
+            Your GitHub profile,
+          </motion.span>
+          <motion.span
+            {...fadeUp(0.6)}
+            className="gradient-text-animated"
+            style={{ display: 'block' }}
           >
             powered by AI
-          </span>
+          </motion.span>
         </h1>
 
         {/* Subtitle */}
-        <p
+        <motion.p
+          {...fadeUp(0.8)}
           style={{
             fontSize: 'clamp(16px, 2vw, 18px)',
             color: '#a1a1a1',
@@ -122,8 +142,9 @@ export function HeroSection({ username, onUsernameChange }: HeroSectionProps) {
         >
           20 themes, 4 widgets. Dynamic widgets, AI-generated READMEs, profile intelligence,
           and portfolio case studies. All in one place, completely free.
-        </p>
-        <p
+        </motion.p>
+        <motion.p
+          {...fadeUp(0.9)}
           style={{
             fontSize: '14px',
             color: '#737373',
@@ -132,10 +153,11 @@ export function HeroSection({ username, onUsernameChange }: HeroSectionProps) {
           }}
         >
           Enter your username → get a README and widgets.
-        </p>
+        </motion.p>
 
         {/* CTA Buttons */}
-        <div
+        <motion.div
+          {...fadeUp(1.0)}
           style={{
             display: 'flex',
             gap: '12px',
@@ -144,75 +166,86 @@ export function HeroSection({ username, onUsernameChange }: HeroSectionProps) {
             marginBottom: '64px',
           }}
         >
-          <Link
-            href="/readme-generator"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '14px 28px',
-              fontSize: '15px',
-              fontWeight: 600,
-              background: '#22c55e',
-              border: 'none',
-              borderRadius: '10px',
-              color: '#050505',
-              textDecoration: 'none',
-              transition: 'all 0.2s ease',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = '#4ade80';
-              e.currentTarget.style.transform = 'translateY(-2px)';
-              e.currentTarget.style.boxShadow = '0 8px 24px rgba(34, 197, 94, 0.3)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = '#22c55e';
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = 'none';
-            }}
+          <motion.div
+            whileHover={prefersReducedMotion ? undefined : { scale: 1.03, y: -2 }}
+            whileTap={prefersReducedMotion ? undefined : { scale: 0.98 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 15 }}
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-              <polyline points="14 2 14 8 20 8" />
-            </svg>
-            Generate README
-          </Link>
+            <Link
+              href="/readme-generator"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '14px 28px',
+                fontSize: '15px',
+                fontWeight: 600,
+                background: '#22c55e',
+                border: 'none',
+                borderRadius: '10px',
+                color: '#050505',
+                textDecoration: 'none',
+                transition: 'background 0.2s ease, box-shadow 0.2s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = '#4ade80';
+                e.currentTarget.style.boxShadow = '0 8px 24px rgba(34, 197, 94, 0.3)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = '#22c55e';
+                e.currentTarget.style.boxShadow = 'none';
+              }}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+              </svg>
+              Generate README
+            </Link>
+          </motion.div>
 
-          <a
-            href="#create"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '14px 28px',
-              fontSize: '15px',
-              fontWeight: 600,
-              background: 'transparent',
-              border: '1px solid #2a2a2a',
-              borderRadius: '10px',
-              color: '#fafafa',
-              textDecoration: 'none',
-              transition: 'all 0.2s ease',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = '#404040';
-              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = '#2a2a2a';
-              e.currentTarget.style.background = 'transparent';
-            }}
+          <motion.div
+            whileHover={prefersReducedMotion ? undefined : { scale: 1.03, y: -2 }}
+            whileTap={prefersReducedMotion ? undefined : { scale: 0.98 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 15 }}
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <rect x="3" y="3" width="18" height="18" rx="2" />
-              <path d="M9 9h6v6H9z" />
-            </svg>
-            Browse Widgets
-          </a>
-        </div>
+            <a
+              href="#create"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '14px 28px',
+                fontSize: '15px',
+                fontWeight: 600,
+                background: 'transparent',
+                border: '1px solid #2a2a2a',
+                borderRadius: '10px',
+                color: '#fafafa',
+                textDecoration: 'none',
+                transition: 'border-color 0.2s ease, background 0.2s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = '#404040';
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = '#2a2a2a';
+                e.currentTarget.style.background = 'transparent';
+              }}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" />
+                <path d="M9 9h6v6H9z" />
+              </svg>
+              Browse Widgets
+            </a>
+          </motion.div>
+        </motion.div>
 
         {/* Quick Input */}
-        <div
+        <motion.div
+          {...fadeUp(1.2)}
           style={{
             maxWidth: '420px',
             margin: '0 auto',
@@ -284,7 +317,7 @@ export function HeroSection({ username, onUsernameChange }: HeroSectionProps) {
               Preview
             </button>
           </div>
-        </div>
+        </motion.div>
 
         {/* Stats Row */}
         <div
@@ -300,8 +333,16 @@ export function HeroSection({ username, onUsernameChange }: HeroSectionProps) {
             { value: '20', label: 'Themes' },
             { value: '4', label: 'Widget Types' },
             { value: '100%', label: 'Free' },
-          ].map((stat) => (
-            <div key={stat.label} style={{ textAlign: 'center' }}>
+          ].map((stat, i) => (
+            <motion.div
+              key={stat.label}
+              {...(prefersReducedMotion ? {} : {
+                initial: { opacity: 0, y: 15 },
+                animate: { opacity: 1, y: 0 },
+                transition: { duration: 0.5, delay: 1.3 + i * 0.1, ease },
+              })}
+              style={{ textAlign: 'center' }}
+            >
               <div
                 style={{
                   fontSize: '32px',
@@ -322,7 +363,7 @@ export function HeroSection({ username, onUsernameChange }: HeroSectionProps) {
               >
                 {stat.label}
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>

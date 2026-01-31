@@ -2,10 +2,12 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
 import { analytics } from '@/components/AnalyticsProvider';
 import { Navigation } from '@/components/landing/Navigation';
 import { HeroSection } from '@/components/landing/HeroSection';
 import { ThemeShowcase } from '@/components/landing/ThemeShowcase';
+import { AnimatedSection, StaggerContainer, StaggerItem } from '@/components/landing/AnimatedSection';
 import { landingThemes } from '@/lib/landing-themes';
 
 const themes = landingThemes;
@@ -103,10 +105,10 @@ export default function Home() {
           }),
         }}
       />
-      
+
       <div style={{ minHeight: '100vh', background: '#050505', color: '#fafafa' }}>
         <Navigation />
-        
+
         <HeroSection
           username={username}
           selectedTheme={selectedTheme}
@@ -123,7 +125,7 @@ export default function Home() {
           }}
         >
           <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
-            <div style={{ textAlign: 'center', marginBottom: '64px' }}>
+            <AnimatedSection style={{ textAlign: 'center', marginBottom: '64px' }}>
               <h2
                 style={{
                   fontSize: 'clamp(28px, 4vw, 40px)',
@@ -137,9 +139,9 @@ export default function Home() {
               <p style={{ fontSize: '16px', color: '#666', maxWidth: '560px', margin: '0 auto' }}>
                 Widgets, 20 themes, README generator, portfolio case studies, website builder with AI edit, profile intelligence, and AI chat.
               </p>
-            </div>
+            </AnimatedSection>
 
-            <div
+            <StaggerContainer
               style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
@@ -147,48 +149,46 @@ export default function Home() {
               }}
             >
               {features.map((feature) => (
-                <div
-                  key={feature.title}
-                  style={{
-                    padding: '28px',
-                    background: '#0a0a0a',
-                    border: '1px solid #161616',
-                    borderRadius: '14px',
-                    transition: 'all 0.2s ease',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = '#1f1f1f';
-                    e.currentTarget.style.transform = 'translateY(-2px)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = '#161616';
-                    e.currentTarget.style.transform = 'translateY(0)';
-                  }}
-                >
-                  <div
+                <StaggerItem key={feature.title}>
+                  <motion.div
+                    whileHover={{
+                      y: -4,
+                      borderColor: '#2a2a2a',
+                      boxShadow: '0 8px 30px rgba(34, 197, 94, 0.08)',
+                    }}
+                    transition={{ duration: 0.2 }}
                     style={{
-                      width: '44px',
-                      height: '44px',
-                      borderRadius: '10px',
-                      background: 'rgba(34, 197, 94, 0.1)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      marginBottom: '20px',
-                      color: '#22c55e',
+                      padding: '28px',
+                      background: '#0a0a0a',
+                      border: '1px solid #161616',
+                      borderRadius: '14px',
                     }}
                   >
-                    {feature.icon}
-                  </div>
-                  <h3 style={{ fontSize: '17px', fontWeight: 600, marginBottom: '8px' }}>
-                    {feature.title}
-                  </h3>
-                  <p style={{ fontSize: '14px', color: '#666', lineHeight: 1.6, margin: 0 }}>
-                    {feature.description}
-                  </p>
-                </div>
+                    <div
+                      style={{
+                        width: '44px',
+                        height: '44px',
+                        borderRadius: '10px',
+                        background: 'rgba(34, 197, 94, 0.1)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        marginBottom: '20px',
+                        color: '#22c55e',
+                      }}
+                    >
+                      {feature.icon}
+                    </div>
+                    <h3 style={{ fontSize: '17px', fontWeight: 600, marginBottom: '8px' }}>
+                      {feature.title}
+                    </h3>
+                    <p style={{ fontSize: '14px', color: '#666', lineHeight: 1.6, margin: 0 }}>
+                      {feature.description}
+                    </p>
+                  </motion.div>
+                </StaggerItem>
               ))}
-            </div>
+            </StaggerContainer>
           </div>
         </section>
 
@@ -201,7 +201,7 @@ export default function Home() {
           }}
         >
           <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
-            <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+            <AnimatedSection style={{ textAlign: 'center', marginBottom: '48px' }}>
               <h2
                 style={{
                   fontSize: 'clamp(28px, 4vw, 40px)',
@@ -215,9 +215,9 @@ export default function Home() {
               <p style={{ fontSize: '16px', color: '#666', maxWidth: '500px', margin: '0 auto' }}>
                 Let Gemini AI craft the perfect README for your profile.
               </p>
-            </div>
+            </AnimatedSection>
 
-            <div
+            <StaggerContainer
               style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
@@ -272,72 +272,75 @@ export default function Home() {
                   ),
                 },
               ].map((card) => (
-                <Link
-                  key={card.title}
-                  href={card.href}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    gap: '16px',
-                    padding: '24px',
-                    background: card.featured ? 'linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0.05) 100%)' : '#111',
-                    border: card.featured ? '1px solid rgba(34, 197, 94, 0.4)' : '1px solid #1a1a1a',
-                    borderRadius: '12px',
-                    textDecoration: 'none',
-                    color: '#fafafa',
-                    transition: 'all 0.2s ease',
-                    boxShadow: card.featured ? '0 0 30px rgba(34, 197, 94, 0.15)' : 'none',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = '#22c55e';
-                    e.currentTarget.style.background = card.featured ? 'linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(34, 197, 94, 0.08) 100%)' : '#121212';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = card.featured ? 'rgba(34, 197, 94, 0.4)' : '#1a1a1a';
-                    e.currentTarget.style.background = card.featured ? 'linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0.05) 100%)' : '#111';
-                  }}
-                >
-                  <div
-                    style={{
-                      width: '40px',
-                      height: '40px',
-                      borderRadius: '8px',
-                      background: card.featured ? 'rgba(34, 197, 94, 0.2)' : 'rgba(34, 197, 94, 0.1)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      color: '#22c55e',
-                      flexShrink: 0,
+                <StaggerItem key={card.title}>
+                  <motion.div
+                    whileHover={{
+                      borderColor: '#22c55e',
+                      y: -2,
                     }}
+                    transition={{ duration: 0.2 }}
+                    style={{ height: '100%' }}
                   >
-                    {card.icon}
-                  </div>
-                  <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                      <h3 style={{ fontSize: '16px', fontWeight: 600, margin: 0 }}>
-                        {card.title}
-                      </h3>
-                      {card.featured && (
-                        <span style={{
-                          fontSize: '10px',
-                          fontWeight: 600,
-                          padding: '2px 6px',
-                          background: '#22c55e',
-                          color: '#000',
-                          borderRadius: '4px',
-                          textTransform: 'uppercase',
-                        }}>
-                          New
-                        </span>
-                      )}
-                    </div>
-                    <p style={{ fontSize: '14px', color: '#666', margin: 0, lineHeight: 1.5 }}>
-                      {card.description}
-                    </p>
-                  </div>
-                </Link>
+                    <Link
+                      href={card.href}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        gap: '16px',
+                        padding: '24px',
+                        background: card.featured ? 'linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0.05) 100%)' : '#111',
+                        border: card.featured ? '1px solid rgba(34, 197, 94, 0.4)' : '1px solid #1a1a1a',
+                        borderRadius: '12px',
+                        textDecoration: 'none',
+                        color: '#fafafa',
+                        transition: 'all 0.2s ease',
+                        boxShadow: card.featured ? '0 0 30px rgba(34, 197, 94, 0.15)' : 'none',
+                        height: '100%',
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: '40px',
+                          height: '40px',
+                          borderRadius: '8px',
+                          background: card.featured ? 'rgba(34, 197, 94, 0.2)' : 'rgba(34, 197, 94, 0.1)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: '#22c55e',
+                          flexShrink: 0,
+                        }}
+                      >
+                        {card.icon}
+                      </div>
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                          <h3 style={{ fontSize: '16px', fontWeight: 600, margin: 0 }}>
+                            {card.title}
+                          </h3>
+                          {card.featured && (
+                            <span style={{
+                              fontSize: '10px',
+                              fontWeight: 600,
+                              padding: '2px 6px',
+                              background: '#22c55e',
+                              color: '#000',
+                              borderRadius: '4px',
+                              textTransform: 'uppercase',
+                            }}>
+                              New
+                            </span>
+                          )}
+                        </div>
+                        <p style={{ fontSize: '14px', color: '#666', margin: 0, lineHeight: 1.5 }}>
+                          {card.description}
+                        </p>
+                      </div>
+                    </Link>
+                  </motion.div>
+                </StaggerItem>
               ))}
-            </div>
+            </StaggerContainer>
           </div>
         </section>
 
@@ -360,7 +363,7 @@ export default function Home() {
           }}
         >
           <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
-            <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+            <AnimatedSection style={{ textAlign: 'center', marginBottom: '48px' }}>
               <h2
                 style={{
                   fontSize: 'clamp(28px, 4vw, 40px)',
@@ -374,58 +377,61 @@ export default function Home() {
               <p style={{ fontSize: '16px', color: '#666', maxWidth: '500px', margin: '0 auto' }}>
                 Preview and copy markdown for your GitHub profile.
               </p>
-            </div>
+            </AnimatedSection>
 
             {/* Controls */}
-            <div
-              style={{
-                display: 'flex',
-                gap: '12px',
-                marginBottom: '40px',
-                justifyContent: 'center',
-                flexWrap: 'wrap',
-              }}
-            >
-              <input
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="GitHub username"
+            <AnimatedSection delay={0.1}>
+              <div
                 style={{
-                  padding: '12px 18px',
-                  fontSize: '15px',
-                  background: '#111',
-                  border: '1px solid #1f1f1f',
-                  borderRadius: '10px',
-                  color: '#fafafa',
-                  width: '200px',
-                  outline: 'none',
-                }}
-              />
-              <select
-                value={selectedTheme}
-                onChange={(e) => handleThemeChange(e.target.value)}
-                style={{
-                  padding: '12px 18px',
-                  fontSize: '15px',
-                  background: '#111',
-                  border: '1px solid #1f1f1f',
-                  borderRadius: '10px',
-                  color: '#fafafa',
-                  cursor: 'pointer',
-                  outline: 'none',
+                  display: 'flex',
+                  gap: '12px',
+                  marginBottom: '40px',
+                  justifyContent: 'center',
+                  flexWrap: 'wrap',
                 }}
               >
-                {themes.map((theme) => (
-                  <option key={theme.id} value={theme.id}>
-                    {theme.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+                <input
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="GitHub username"
+                  style={{
+                    padding: '12px 18px',
+                    fontSize: '15px',
+                    background: '#111',
+                    border: '1px solid #1f1f1f',
+                    borderRadius: '10px',
+                    color: '#fafafa',
+                    width: '200px',
+                    outline: 'none',
+                  }}
+                />
+                <select
+                  value={selectedTheme}
+                  onChange={(e) => handleThemeChange(e.target.value)}
+                  style={{
+                    padding: '12px 18px',
+                    fontSize: '15px',
+                    background: '#111',
+                    border: '1px solid #1f1f1f',
+                    borderRadius: '10px',
+                    color: '#fafafa',
+                    cursor: 'pointer',
+                    outline: 'none',
+                  }}
+                >
+                  {themes.map((theme) => (
+                    <option key={theme.id} value={theme.id}>
+                      {theme.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </AnimatedSection>
 
             {/* Widget Grid */}
-            <div
+            <StaggerContainer
+              staggerDelay={0.1}
               style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
@@ -433,78 +439,77 @@ export default function Home() {
               }}
             >
               {widgets.map((widget) => (
-                <div
-                  key={widget.id}
-                  style={{
-                    background: '#111',
-                    borderRadius: '14px',
-                    border: '1px solid #1a1a1a',
-                    overflow: 'hidden',
-                    transition: 'all 0.2s ease',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = '#222';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = '#1a1a1a';
-                  }}
-                >
-                  {/* Widget Header */}
-                  <div
+                <StaggerItem key={widget.id}>
+                  <motion.div
+                    whileHover={{
+                      borderColor: '#2a2a2a',
+                      boxShadow: '0 4px 20px rgba(34, 197, 94, 0.06)',
+                    }}
+                    transition={{ duration: 0.2 }}
                     style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      padding: '16px 20px',
-                      borderBottom: '1px solid #1a1a1a',
+                      background: '#111',
+                      borderRadius: '14px',
+                      border: '1px solid #1a1a1a',
+                      overflow: 'hidden',
                     }}
                   >
-                    <div>
-                      <h3 style={{ fontSize: '15px', fontWeight: 600, margin: 0, marginBottom: '2px' }}>
-                        {widget.name}
-                      </h3>
-                      <p style={{ fontSize: '13px', color: '#666', margin: 0 }}>
-                        {widget.description}
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => copyToClipboard(widget)}
+                    {/* Widget Header */}
+                    <div
                       style={{
-                        padding: '8px 14px',
-                        fontSize: '13px',
-                        fontWeight: 600,
-                        background: copied === widget.id ? '#16a34a' : '#22c55e',
-                        border: 'none',
-                        borderRadius: '8px',
-                        color: '#050505',
-                        cursor: 'pointer',
-                        transition: 'all 0.15s ease',
-                        whiteSpace: 'nowrap',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        padding: '16px 20px',
+                        borderBottom: '1px solid #1a1a1a',
                       }}
                     >
-                      {copied === widget.id ? 'Copied' : 'Copy'}
-                    </button>
-                  </div>
+                      <div>
+                        <h3 style={{ fontSize: '15px', fontWeight: 600, margin: 0, marginBottom: '2px' }}>
+                          {widget.name}
+                        </h3>
+                        <p style={{ fontSize: '13px', color: '#666', margin: 0 }}>
+                          {widget.description}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => copyToClipboard(widget)}
+                        style={{
+                          padding: '8px 14px',
+                          fontSize: '13px',
+                          fontWeight: 600,
+                          background: copied === widget.id ? '#16a34a' : '#22c55e',
+                          border: 'none',
+                          borderRadius: '8px',
+                          color: '#050505',
+                          cursor: 'pointer',
+                          transition: 'all 0.15s ease',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {copied === widget.id ? 'Copied' : 'Copy'}
+                      </button>
+                    </div>
 
-                  {/* Widget Preview */}
-                  <div style={{ padding: '16px', background: '#0a0a0a' }}>
-                    <img
-                      key={`${widget.id}-${username}-${selectedTheme}`}
-                      src={`${widget.path}?username=${username}&theme=${selectedTheme}`}
-                      alt={`${widget.name} preview`}
-                      style={{ width: '100%', height: 'auto', display: 'block', borderRadius: '8px' }}
-                    />
-                  </div>
-                </div>
+                    {/* Widget Preview */}
+                    <div style={{ padding: '16px', background: '#0a0a0a' }}>
+                      <img
+                        key={`${widget.id}-${username}-${selectedTheme}`}
+                        src={`${widget.path}?username=${username}&theme=${selectedTheme}`}
+                        alt={`${widget.name} preview`}
+                        style={{ width: '100%', height: 'auto', display: 'block', borderRadius: '8px' }}
+                      />
+                    </div>
+                  </motion.div>
+                </StaggerItem>
               ))}
-            </div>
+            </StaggerContainer>
           </div>
         </section>
 
         {/* Quick Start Section */}
         <section style={{ padding: '100px 24px' }}>
           <div style={{ maxWidth: '700px', margin: '0 auto' }}>
-            <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+            <AnimatedSection style={{ textAlign: 'center', marginBottom: '48px' }}>
               <h2
                 style={{
                   fontSize: 'clamp(28px, 4vw, 40px)',
@@ -515,165 +520,168 @@ export default function Home() {
               >
                 Quick Start
               </h2>
-            </div>
+            </AnimatedSection>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <StaggerContainer staggerDelay={0.12} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               {[
                 { step: '1', title: 'Choose a widget', description: 'Profile card, stats, languages, or streak.' },
                 { step: '2', title: 'Select a theme', description: 'Pick from 20 carefully crafted themes.' },
                 { step: '3', title: 'Copy the markdown', description: 'Paste it into your README.md file.' },
               ].map((item) => (
-                <div
-                  key={item.step}
-                  style={{
-                    display: 'flex',
-                    gap: '20px',
-                    alignItems: 'center',
-                    padding: '20px 24px',
-                    background: '#0a0a0a',
-                    borderRadius: '12px',
-                    border: '1px solid #161616',
-                  }}
-                >
+                <StaggerItem key={item.step}>
                   <div
                     style={{
-                      width: '40px',
-                      height: '40px',
-                      borderRadius: '10px',
-                      background: '#22c55e',
                       display: 'flex',
+                      gap: '20px',
                       alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '16px',
-                      fontWeight: 700,
-                      color: '#050505',
-                      flexShrink: 0,
+                      padding: '20px 24px',
+                      background: '#0a0a0a',
+                      borderRadius: '12px',
+                      border: '1px solid #161616',
                     }}
                   >
-                    {item.step}
+                    <div
+                      style={{
+                        width: '40px',
+                        height: '40px',
+                        borderRadius: '10px',
+                        background: '#22c55e',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '16px',
+                        fontWeight: 700,
+                        color: '#050505',
+                        flexShrink: 0,
+                      }}
+                    >
+                      {item.step}
+                    </div>
+                    <div>
+                      <h3 style={{ fontSize: '16px', fontWeight: 600, margin: 0, marginBottom: '2px' }}>
+                        {item.title}
+                      </h3>
+                      <p style={{ fontSize: '14px', color: '#666', margin: 0 }}>
+                        {item.description}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 style={{ fontSize: '16px', fontWeight: 600, margin: 0, marginBottom: '2px' }}>
-                      {item.title}
-                    </h3>
-                    <p style={{ fontSize: '14px', color: '#666', margin: 0 }}>
-                      {item.description}
-                    </p>
-                  </div>
-                </div>
+                </StaggerItem>
               ))}
-            </div>
+            </StaggerContainer>
           </div>
         </section>
 
         {/* Footer */}
-        <footer
-          style={{
-            padding: '60px 24px 40px',
-            borderTop: '1px solid #111',
-          }}
-        >
-          <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
-                gap: '40px',
-                marginBottom: '48px',
-              }}
-            >
-              {/* Brand */}
-              <div>
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    fontSize: '18px',
-                    fontWeight: 700,
-                    marginBottom: '12px',
-                  }}
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                    <rect x="2" y="2" width="20" height="20" rx="4" fill="#22c55e" />
-                    <path d="M7 12h10M12 7v10" stroke="#050505" strokeWidth="2.5" strokeLinecap="round" />
-                  </svg>
-                  GitSkins
+        <AnimatedSection preset="fadeIn" duration={0.8} as="div">
+          <footer
+            style={{
+              padding: '60px 24px 40px',
+              borderTop: '1px solid #111',
+            }}
+          >
+            <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+                  gap: '40px',
+                  marginBottom: '48px',
+                }}
+              >
+                {/* Brand */}
+                <div>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      fontSize: '18px',
+                      fontWeight: 700,
+                      marginBottom: '12px',
+                    }}
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                      <rect x="2" y="2" width="20" height="20" rx="4" fill="#22c55e" />
+                      <path d="M7 12h10M12 7v10" stroke="#050505" strokeWidth="2.5" strokeLinecap="round" />
+                    </svg>
+                    GitSkins
+                  </div>
+                  <p style={{ fontSize: '14px', color: '#666', lineHeight: 1.6, maxWidth: '200px' }}>
+                    Beautiful GitHub profile widgets and AI-powered README generator.
+                  </p>
                 </div>
-                <p style={{ fontSize: '14px', color: '#666', lineHeight: 1.6, maxWidth: '200px' }}>
-                  Beautiful GitHub profile widgets and AI-powered README generator.
+
+                {/* Product */}
+                <div>
+                  <h4 style={{ fontSize: '13px', fontWeight: 600, color: '#666', marginBottom: '16px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    Product
+                  </h4>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <a href="#features" style={{ fontSize: '14px', color: '#a1a1a1' }}>Features</a>
+                    <a href="#themes" style={{ fontSize: '14px', color: '#a1a1a1' }}>Themes</a>
+                    <Link href="/readme-generator" style={{ fontSize: '14px', color: '#a1a1a1' }}>README Generator</Link>
+                    <Link href="/ai" style={{ fontSize: '14px', color: '#a1a1a1' }}>AI Features</Link>
+                  </div>
+                </div>
+
+                {/* Resources */}
+                <div>
+                  <h4 style={{ fontSize: '13px', fontWeight: 600, color: '#666', marginBottom: '16px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    Resources
+                  </h4>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <Link href="/getting-started" style={{ fontSize: '14px', color: '#a1a1a1' }}>Getting Started</Link>
+                    <Link href="/docs/themes" style={{ fontSize: '14px', color: '#a1a1a1' }}>Theme Spec</Link>
+                    <Link href="/support" style={{ fontSize: '14px', color: '#a1a1a1' }}>Support</Link>
+                  </div>
+                </div>
+
+                {/* Community */}
+                <div>
+                  <h4 style={{ fontSize: '13px', fontWeight: 600, color: '#666', marginBottom: '16px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    Community
+                  </h4>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <a href="https://github.com/asamassekou10/GitSkins" target="_blank" rel="noopener noreferrer" style={{ fontSize: '14px', color: '#a1a1a1' }}>GitHub</a>
+                    <a href="https://github.com/asamassekou10/GitSkins/issues" target="_blank" rel="noopener noreferrer" style={{ fontSize: '14px', color: '#a1a1a1' }}>Request a theme</a>
+                  </div>
+                </div>
+
+                {/* Legal */}
+                <div>
+                  <h4 style={{ fontSize: '13px', fontWeight: 600, color: '#666', marginBottom: '16px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    Legal
+                  </h4>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <Link href="/terms" style={{ fontSize: '14px', color: '#a1a1a1' }}>Terms</Link>
+                    <Link href="/privacy" style={{ fontSize: '14px', color: '#a1a1a1' }}>Privacy</Link>
+                  </div>
+                </div>
+              </div>
+
+              {/* Copyright */}
+              <div
+                style={{
+                  paddingTop: '24px',
+                  borderTop: '1px solid #111',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  flexWrap: 'wrap',
+                  gap: '16px',
+                }}
+              >
+                <p style={{ fontSize: '13px', color: '#404040', margin: 0 }}>
+                  2026 GitSkins. All rights reserved.
+                </p>
+                <p style={{ fontSize: '13px', color: '#404040', margin: 0 }}>
+                  Made for developers · Powered by Google Gemini
                 </p>
               </div>
-
-              {/* Product */}
-              <div>
-                <h4 style={{ fontSize: '13px', fontWeight: 600, color: '#666', marginBottom: '16px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                  Product
-                </h4>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  <a href="#features" style={{ fontSize: '14px', color: '#a1a1a1' }}>Features</a>
-                  <a href="#themes" style={{ fontSize: '14px', color: '#a1a1a1' }}>Themes</a>
-                  <Link href="/readme-generator" style={{ fontSize: '14px', color: '#a1a1a1' }}>README Generator</Link>
-                  <Link href="/ai" style={{ fontSize: '14px', color: '#a1a1a1' }}>AI Features</Link>
-                </div>
-              </div>
-
-              {/* Resources */}
-              <div>
-                <h4 style={{ fontSize: '13px', fontWeight: 600, color: '#666', marginBottom: '16px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                  Resources
-                </h4>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  <Link href="/getting-started" style={{ fontSize: '14px', color: '#a1a1a1' }}>Getting Started</Link>
-                  <Link href="/docs/themes" style={{ fontSize: '14px', color: '#a1a1a1' }}>Theme Spec</Link>
-                  <Link href="/support" style={{ fontSize: '14px', color: '#a1a1a1' }}>Support</Link>
-                </div>
-              </div>
-
-              {/* Community */}
-              <div>
-                <h4 style={{ fontSize: '13px', fontWeight: 600, color: '#666', marginBottom: '16px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                  Community
-                </h4>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  <a href="https://github.com/asamassekou10/GitSkins" target="_blank" rel="noopener noreferrer" style={{ fontSize: '14px', color: '#a1a1a1' }}>GitHub</a>
-                  <a href="https://github.com/asamassekou10/GitSkins/issues" target="_blank" rel="noopener noreferrer" style={{ fontSize: '14px', color: '#a1a1a1' }}>Request a theme</a>
-                </div>
-              </div>
-
-              {/* Legal */}
-              <div>
-                <h4 style={{ fontSize: '13px', fontWeight: 600, color: '#666', marginBottom: '16px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                  Legal
-                </h4>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  <Link href="/terms" style={{ fontSize: '14px', color: '#a1a1a1' }}>Terms</Link>
-                  <Link href="/privacy" style={{ fontSize: '14px', color: '#a1a1a1' }}>Privacy</Link>
-                </div>
-              </div>
             </div>
-
-            {/* Copyright */}
-            <div
-              style={{
-                paddingTop: '24px',
-                borderTop: '1px solid #111',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                flexWrap: 'wrap',
-                gap: '16px',
-              }}
-            >
-              <p style={{ fontSize: '13px', color: '#404040', margin: 0 }}>
-                2026 GitSkins. All rights reserved.
-              </p>
-              <p style={{ fontSize: '13px', color: '#404040', margin: 0 }}>
-                Made for developers · Powered by Google Gemini
-              </p>
-            </div>
-          </div>
-        </footer>
+          </footer>
+        </AnimatedSection>
       </div>
     </>
   );

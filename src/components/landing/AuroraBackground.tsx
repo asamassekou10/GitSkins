@@ -1,5 +1,7 @@
 'use client';
 
+import { motion, useReducedMotion } from 'framer-motion';
+
 interface AuroraBackgroundProps {
   intensity?: 'low' | 'medium' | 'high';
   position?: 'top' | 'center';
@@ -9,6 +11,8 @@ export function AuroraBackground({
   intensity = 'medium',
   position = 'top'
 }: AuroraBackgroundProps) {
+  const prefersReducedMotion = useReducedMotion();
+
   const opacityMap = {
     low: { primary: 0.15, secondary: 0.08 },
     medium: { primary: 0.25, secondary: 0.12 },
@@ -32,8 +36,16 @@ export function AuroraBackground({
       }}
     >
       {/* Main aurora sphere */}
-      <div
-        className="aurora-sphere"
+      <motion.div
+        animate={prefersReducedMotion ? undefined : {
+          scale: [1, 1.05, 1],
+          opacity: [opacity.primary, opacity.primary * 1.5, opacity.primary],
+        }}
+        transition={prefersReducedMotion ? undefined : {
+          duration: 10,
+          repeat: Infinity,
+          ease: 'easeInOut',
+        }}
         style={{
           position: 'absolute',
           top: topPosition,
@@ -50,12 +62,22 @@ export function AuroraBackground({
           )`,
           borderRadius: '50%',
           filter: 'blur(80px)',
-          animation: 'aurora-pulse 10s ease-in-out infinite',
         }}
       />
 
-      {/* Secondary glow for depth */}
-      <div
+      {/* Secondary glow with organic drift */}
+      <motion.div
+        animate={prefersReducedMotion ? undefined : {
+          x: [0, 20, -10, 0],
+          y: [0, -15, 10, 0],
+          scale: [1, 1.08, 0.95, 1],
+          opacity: [opacity.primary * 0.6, opacity.primary * 0.9, opacity.primary * 0.5, opacity.primary * 0.6],
+        }}
+        transition={prefersReducedMotion ? undefined : {
+          duration: 12,
+          repeat: Infinity,
+          ease: 'easeInOut',
+        }}
         style={{
           position: 'absolute',
           top: position === 'top' ? '5%' : '45%',
@@ -70,12 +92,21 @@ export function AuroraBackground({
           )`,
           borderRadius: '50%',
           filter: 'blur(100px)',
-          animation: 'aurora-float 12s ease-in-out infinite',
         }}
       />
 
-      {/* Subtle accent glow */}
-      <div
+      {/* Subtle accent glow - left */}
+      <motion.div
+        animate={prefersReducedMotion ? undefined : {
+          x: [0, -15, 10, 0],
+          y: [0, 10, -8, 0],
+          scale: [1, 1.06, 0.94, 1],
+        }}
+        transition={prefersReducedMotion ? undefined : {
+          duration: 8,
+          repeat: Infinity,
+          ease: 'easeInOut',
+        }}
         style={{
           position: 'absolute',
           top: position === 'top' ? '20%' : '55%',
@@ -89,11 +120,21 @@ export function AuroraBackground({
           )`,
           borderRadius: '50%',
           filter: 'blur(60px)',
-          animation: 'aurora-pulse 8s ease-in-out infinite reverse',
         }}
       />
 
-      <div
+      {/* Subtle accent glow - right */}
+      <motion.div
+        animate={prefersReducedMotion ? undefined : {
+          x: [0, 12, -8, 0],
+          y: [0, -12, 8, 0],
+          scale: [1, 0.96, 1.04, 1],
+        }}
+        transition={prefersReducedMotion ? undefined : {
+          duration: 15,
+          repeat: Infinity,
+          ease: 'easeInOut',
+        }}
         style={{
           position: 'absolute',
           top: position === 'top' ? '15%' : '50%',
@@ -107,7 +148,6 @@ export function AuroraBackground({
           )`,
           borderRadius: '50%',
           filter: 'blur(50px)',
-          animation: 'aurora-float 15s ease-in-out infinite',
         }}
       />
     </div>
