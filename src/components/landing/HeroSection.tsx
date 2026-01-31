@@ -121,12 +121,12 @@ export function HeroSection({ username, onUsernameChange }: HeroSectionProps) {
             {...fadeUp(0.4)}
             style={{ display: 'block' }}
           >
-            Watch AI think,
+            Watch AI think
           </motion.span>
           <motion.span
             {...fadeUp(0.6)}
             className="gradient-text-animated"
-            style={{ display: 'block' }}
+            style={{ display: 'block', paddingBottom: '4px' }}
           >
             then build your profile
           </motion.span>
