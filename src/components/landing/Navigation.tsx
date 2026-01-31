@@ -153,6 +153,41 @@ export function Navigation() {
             )
           )}
 
+          <button
+            type="button"
+            onClick={() => window.dispatchEvent(new CustomEvent('open-command-palette'))}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '8px 12px',
+              background: '#111',
+              border: '1px solid #1f1f1f',
+              borderRadius: '8px',
+              color: '#a1a1a1',
+              fontSize: '13px',
+              fontWeight: 500,
+              cursor: 'pointer',
+              transition: 'all 0.15s ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = '#fafafa';
+              e.currentTarget.style.borderColor = '#2a2a2a';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = '#a1a1a1';
+              e.currentTarget.style.borderColor = '#1f1f1f';
+            }}
+            aria-label="Search themes and pages"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="11" cy="11" r="8" />
+              <path d="m21 21-4.35-4.35" />
+            </svg>
+            Search
+            <kbd style={{ fontSize: '10px', padding: '2px 4px', background: '#1a1a1a', borderRadius: '4px' }}>⌘K</kbd>
+          </button>
+
           <div style={{ width: '1px', height: '20px', background: '#1f1f1f', margin: '0 8px' }} />
 
           {/* Auth Section */}

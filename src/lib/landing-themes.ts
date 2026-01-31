@@ -1,0 +1,23 @@
+/** Theme list for landing page and command palette. */
+export const landingThemes = [
+  { id: 'satan', name: 'Satan', color: '#ff4500', description: 'Hellfire aesthetic', category: 'original' },
+  { id: 'neon', name: 'Neon', color: '#38bdf8', description: 'Cyberpunk HUD', category: 'original' },
+  { id: 'zen', name: 'Zen', color: '#66bb6a', description: 'Japanese garden', category: 'original' },
+  { id: 'github-dark', name: 'GitHub Dark', color: '#58a6ff', description: 'Pro standard', category: 'original', free: true },
+  { id: 'dracula', name: 'Dracula', color: '#bd93f9', description: 'Coding classic', category: 'original' },
+  { id: 'winter', name: 'Winter', color: '#60a5fa', description: 'Frozen elegance', category: 'seasonal' },
+  { id: 'spring', name: 'Spring', color: '#ec4899', description: 'Cherry blossom', category: 'seasonal' },
+  { id: 'summer', name: 'Summer', color: '#fbbf24', description: 'Golden hour', category: 'seasonal' },
+  { id: 'autumn', name: 'Autumn', color: '#d97706', description: 'Falling leaves', category: 'seasonal' },
+  { id: 'christmas', name: 'Christmas', color: '#ef4444', description: 'Festive spirit', category: 'holiday' },
+  { id: 'halloween', name: 'Halloween', color: '#f97316', description: 'Spooky night', category: 'holiday' },
+  { id: 'ocean', name: 'Ocean', color: '#38bdf8', description: 'Deep sea', category: 'developer', free: true },
+  { id: 'forest', name: 'Forest', color: '#4ade80', description: 'Woodland', category: 'developer', free: true },
+  { id: 'sunset', name: 'Sunset', color: '#e879f9', description: 'Twilight', category: 'developer' },
+  { id: 'midnight', name: 'Midnight', color: '#818cf8', description: 'Starry night', category: 'developer', free: true },
+  { id: 'aurora', name: 'Aurora', color: '#2dd4bf', description: 'Northern lights', category: 'developer' },
+  { id: 'retro', name: 'Retro', color: '#ec4899', description: 'Synthwave', category: 'aesthetic' },
+  { id: 'minimal', name: 'Minimal', color: '#64748b', description: 'Clean and modern', category: 'aesthetic', free: true },
+  { id: 'pastel', name: 'Pastel', color: '#a78bfa', description: 'Soft and friendly', category: 'aesthetic' },
+  { id: 'matrix', name: 'Matrix', color: '#22c55e', description: 'Code rain', category: 'aesthetic' },
+];

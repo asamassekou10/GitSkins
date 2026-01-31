@@ -6,29 +6,9 @@ import { analytics } from '@/components/AnalyticsProvider';
 import { Navigation } from '@/components/landing/Navigation';
 import { HeroSection } from '@/components/landing/HeroSection';
 import { ThemeShowcase } from '@/components/landing/ThemeShowcase';
+import { landingThemes } from '@/lib/landing-themes';
 
-const themes = [
-  { id: 'satan', name: 'Satan', color: '#ff4500', description: 'Hellfire aesthetic', category: 'original' },
-  { id: 'neon', name: 'Neon', color: '#38bdf8', description: 'Cyberpunk HUD', category: 'original' },
-  { id: 'zen', name: 'Zen', color: '#66bb6a', description: 'Japanese garden', category: 'original' },
-  { id: 'github-dark', name: 'GitHub Dark', color: '#58a6ff', description: 'Pro standard', category: 'original', free: true },
-  { id: 'dracula', name: 'Dracula', color: '#bd93f9', description: 'Coding classic', category: 'original' },
-  { id: 'winter', name: 'Winter', color: '#60a5fa', description: 'Frozen elegance', category: 'seasonal' },
-  { id: 'spring', name: 'Spring', color: '#ec4899', description: 'Cherry blossom', category: 'seasonal' },
-  { id: 'summer', name: 'Summer', color: '#fbbf24', description: 'Golden hour', category: 'seasonal' },
-  { id: 'autumn', name: 'Autumn', color: '#d97706', description: 'Falling leaves', category: 'seasonal' },
-  { id: 'christmas', name: 'Christmas', color: '#ef4444', description: 'Festive spirit', category: 'holiday' },
-  { id: 'halloween', name: 'Halloween', color: '#f97316', description: 'Spooky night', category: 'holiday' },
-  { id: 'ocean', name: 'Ocean', color: '#38bdf8', description: 'Deep sea', category: 'developer', free: true },
-  { id: 'forest', name: 'Forest', color: '#4ade80', description: 'Woodland', category: 'developer', free: true },
-  { id: 'sunset', name: 'Sunset', color: '#e879f9', description: 'Twilight', category: 'developer' },
-  { id: 'midnight', name: 'Midnight', color: '#818cf8', description: 'Starry night', category: 'developer', free: true },
-  { id: 'aurora', name: 'Aurora', color: '#2dd4bf', description: 'Northern lights', category: 'developer' },
-  { id: 'retro', name: 'Retro', color: '#ec4899', description: 'Synthwave', category: 'aesthetic' },
-  { id: 'minimal', name: 'Minimal', color: '#64748b', description: 'Clean & modern', category: 'aesthetic', free: true },
-  { id: 'pastel', name: 'Pastel', color: '#a78bfa', description: 'Soft & friendly', category: 'aesthetic' },
-  { id: 'matrix', name: 'Matrix', color: '#22c55e', description: 'Code rain', category: 'aesthetic' },
-];
+const themes = landingThemes;
 
 const widgets = [
   { id: 'card', name: 'Profile Card', path: '/api/premium-card', description: 'Full profile with contribution graph' },
@@ -645,7 +625,19 @@ export default function Home() {
                 </h4>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   <Link href="/getting-started" style={{ fontSize: '14px', color: '#a1a1a1' }}>Getting Started</Link>
+                  <Link href="/docs/themes" style={{ fontSize: '14px', color: '#a1a1a1' }}>Theme Spec</Link>
                   <Link href="/support" style={{ fontSize: '14px', color: '#a1a1a1' }}>Support</Link>
+                </div>
+              </div>
+
+              {/* Community */}
+              <div>
+                <h4 style={{ fontSize: '13px', fontWeight: 600, color: '#666', marginBottom: '16px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  Community
+                </h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  <a href="https://github.com/asamassekou10/GitSkins" target="_blank" rel="noopener noreferrer" style={{ fontSize: '14px', color: '#a1a1a1' }}>GitHub</a>
+                  <a href="https://github.com/asamassekou10/GitSkins/issues" target="_blank" rel="noopener noreferrer" style={{ fontSize: '14px', color: '#a1a1a1' }}>Request a theme</a>
                 </div>
               </div>
 
@@ -677,7 +669,7 @@ export default function Home() {
                 2026 GitSkins. All rights reserved.
               </p>
               <p style={{ fontSize: '13px', color: '#404040', margin: 0 }}>
-                Built for developers
+                Made for developers · Powered by Google Gemini
               </p>
             </div>
           </div>

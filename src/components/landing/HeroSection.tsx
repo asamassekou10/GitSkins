@@ -120,7 +120,7 @@ export function HeroSection({ username, onUsernameChange }: HeroSectionProps) {
             lineHeight: 1.7,
           }}
         >
-          Dynamic widgets, AI-generated READMEs, profile intelligence, 
+          20 themes, 4 widgets. Dynamic widgets, AI-generated READMEs, profile intelligence,
           and portfolio case studies. All in one place, completely free.
         </p>
         <p

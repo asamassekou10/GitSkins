@@ -5,6 +5,7 @@ import { Suspense } from 'react';
 import { PostHogProvider } from '@/components/providers/posthog-provider';
 import { SessionProvider } from '@/components/providers/session-provider';
 import { AnalyticsProvider } from '@/components/AnalyticsProvider';
+import { CommandPaletteWrapper } from '@/components/CommandPaletteWrapper';
 import { siteConfig } from '@/config/site';
 import './globals.css';
 
@@ -88,6 +89,7 @@ export default function RootLayout({
                 </main>
               </AnalyticsProvider>
             </Suspense>
+            <CommandPaletteWrapper />
             <Analytics />
             <SpeedInsights />
           </PostHogProvider>
