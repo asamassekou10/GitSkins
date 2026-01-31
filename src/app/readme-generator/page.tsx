@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
+import rehypeRaw from 'rehype-raw';
 import { Navigation } from '@/components/landing/Navigation';
 import {
   checkGenerationAllowed,
@@ -1035,6 +1036,7 @@ export default function ReadmeGeneratorPage() {
                   }}
                 >
                   <ReactMarkdown
+                    rehypePlugins={[rehypeRaw]}
                     components={{
                       h1: ({ children }) => (
                         <h1 style={{ fontSize: '28px', fontWeight: 700, borderBottom: '1px solid #21262d', paddingBottom: '12px', marginBottom: '16px', color: '#e6edf3' }}>

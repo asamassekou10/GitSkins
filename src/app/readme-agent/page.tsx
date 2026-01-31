@@ -3,6 +3,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
+import rehypeRaw from 'rehype-raw';
 import Link from 'next/link';
 import { Navigation } from '@/components/landing/Navigation';
 
@@ -320,7 +321,7 @@ export default function ReadmeAgentPage() {
                 <div style={{ flex: 1, padding: '20px', overflowY: 'auto', fontSize: '14px', lineHeight: 1.7, color: '#d4d4d4' }}>
                   {markdown ? (
                     <div className="readme-preview" style={{ maxWidth: '720px' }}>
-                      <ReactMarkdown>{markdown}</ReactMarkdown>
+                      <ReactMarkdown rehypePlugins={[rehypeRaw]}>{markdown}</ReactMarkdown>
                     </div>
                   ) : streaming ? (
                     <div style={{ color: '#444', fontStyle: 'italic' }}>README will appear here as it streams...</div>
