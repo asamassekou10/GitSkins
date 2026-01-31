@@ -113,7 +113,7 @@ export function HeroSection({ username, onUsernameChange }: HeroSectionProps) {
             margin: 0,
             marginBottom: '20px',
             letterSpacing: '-0.03em',
-            lineHeight: 1.1,
+            lineHeight: 1.2,
             color: '#fafafa',
           }}
         >
@@ -126,7 +126,7 @@ export function HeroSection({ username, onUsernameChange }: HeroSectionProps) {
           <motion.span
             {...fadeUp(0.6)}
             className="gradient-text-animated"
-            style={{ display: 'block', paddingBottom: '4px' }}
+            style={{ display: 'block' }}
           >
             then build your profile
           </motion.span>
