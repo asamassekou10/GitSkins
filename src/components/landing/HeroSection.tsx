@@ -50,7 +50,10 @@ export function HeroSection({ username, onUsernameChange }: HeroSectionProps) {
         alignItems: 'center',
       }}
     >
-      {/* Subtle gradient background */}
+      {/* Modern grid background */}
+      <div className="grid-background" />
+
+      {/* Subtle gradient glow */}
       <div
         style={{
           position: 'absolute',
@@ -62,6 +65,7 @@ export function HeroSection({ username, onUsernameChange }: HeroSectionProps) {
           height: '600px',
           background: 'radial-gradient(ellipse at top, rgba(34, 197, 94, 0.08) 0%, transparent 60%)',
           pointerEvents: 'none',
+          zIndex: 0,
         }}
       />
 
@@ -98,7 +102,7 @@ export function HeroSection({ username, onUsernameChange }: HeroSectionProps) {
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
           </svg>
-          Powered by Google Gemini
+          Powered by Gemini 3
         </motion.div>
 
         {/* Main Headline */}
@@ -117,14 +121,14 @@ export function HeroSection({ username, onUsernameChange }: HeroSectionProps) {
             {...fadeUp(0.4)}
             style={{ display: 'block' }}
           >
-            Your GitHub profile,
+            Watch AI think,
           </motion.span>
           <motion.span
             {...fadeUp(0.6)}
             className="gradient-text-animated"
             style={{ display: 'block' }}
           >
-            powered by AI
+            then build your profile
           </motion.span>
         </h1>
 
@@ -136,12 +140,12 @@ export function HeroSection({ username, onUsernameChange }: HeroSectionProps) {
             color: '#a1a1a1',
             margin: '0 auto',
             marginBottom: '12px',
-            maxWidth: '540px',
+            maxWidth: '580px',
             lineHeight: 1.7,
           }}
         >
-          20 themes, 4 widgets. Dynamic widgets, AI-generated READMEs, profile intelligence,
-          and portfolio case studies. All in one place, completely free.
+          Live streaming README agent with Extended Thinking. 20 themes, dynamic widgets,
+          portfolio case studies, and Google Search-grounded intelligence. All free.
         </motion.p>
         <motion.p
           {...fadeUp(0.9)}
@@ -152,7 +156,7 @@ export function HeroSection({ username, onUsernameChange }: HeroSectionProps) {
             maxWidth: '400px',
           }}
         >
-          Enter your username → get a README and widgets.
+          Enter your username → watch Gemini 3 reason and generate.
         </motion.p>
 
         {/* CTA Buttons */}
@@ -172,7 +176,7 @@ export function HeroSection({ username, onUsernameChange }: HeroSectionProps) {
             transition={{ type: 'spring', stiffness: 400, damping: 15 }}
           >
             <Link
-              href="/readme-generator"
+              href="/readme-agent"
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -197,10 +201,9 @@ export function HeroSection({ username, onUsernameChange }: HeroSectionProps) {
               }}
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                <polyline points="14 2 14 8 20 8" />
+                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
               </svg>
-              Generate README
+              Try Live Agent
             </Link>
           </motion.div>
 
@@ -209,8 +212,8 @@ export function HeroSection({ username, onUsernameChange }: HeroSectionProps) {
             whileTap={prefersReducedMotion ? undefined : { scale: 0.98 }}
             transition={{ type: 'spring', stiffness: 400, damping: 15 }}
           >
-            <a
-              href="#create"
+            <Link
+              href="/readme-generator"
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -235,11 +238,11 @@ export function HeroSection({ username, onUsernameChange }: HeroSectionProps) {
               }}
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <rect x="3" y="3" width="18" height="18" rx="2" />
-                <path d="M9 9h6v6H9z" />
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
               </svg>
-              Browse Widgets
-            </a>
+              Generate README
+            </Link>
           </motion.div>
         </motion.div>
 
@@ -331,7 +334,8 @@ export function HeroSection({ username, onUsernameChange }: HeroSectionProps) {
         >
           {[
             { value: '20', label: 'Themes' },
-            { value: '4', label: 'Widget Types' },
+            { value: 'Live', label: 'Streaming' },
+            { value: '3-Pass', label: 'Agent Loop' },
             { value: '100%', label: 'Free' },
           ].map((stat, i) => (
             <motion.div

@@ -7,6 +7,7 @@ import Link from 'next/link';
 import type { PremiumThemeName } from '@/types/premium-theme';
 import { analytics } from '@/components/AnalyticsProvider';
 import { Navigation } from '@/components/landing/Navigation';
+import { ShareMenu } from '@/components/ShareMenu';
 
 const themes: PremiumThemeName[] = [
   'satan', 'neon', 'zen', 'github-dark', 'dracula',
@@ -340,33 +341,13 @@ function ShowcaseContent() {
               </>
             )}
           </button>
-          <button
-            type="button"
-            onClick={() => {
-              navigator.clipboard.writeText(shareUrl);
-              analytics.track('share_link_copied', { username, theme: selectedTheme });
-            }}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 8,
-              padding: '12px 24px',
-              background: bgElevated,
-              color: textPrimary,
-              border: `1px solid ${border}`,
-              borderRadius: 10,
-              fontWeight: 600,
-              cursor: 'pointer',
-            }}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="18" cy="5" r="3" />
-              <circle cx="6" cy="12" r="3" />
-              <circle cx="18" cy="19" r="3" />
-              <path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98" />
-            </svg>
-            Share Link
-          </button>
+          <ShareMenu
+            shareUrl={shareUrl}
+            shareText={`Check out my GitHub profile card — generated with GitSkins`}
+            imageUrl={cardUrl}
+            downloadFilename={`gitskins-card-${username}.png`}
+            context={{ username, theme: selectedTheme, widget: 'premium-card', source: 'showcase' }}
+          />
           <Link
             href={`/portfolio/${username}`}
             style={{

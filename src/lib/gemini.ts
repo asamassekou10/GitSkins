@@ -1,69 +1,107 @@
 /**
  * Gemini AI Integration Library
  *
- * Provides AI-powered features using Google's Gemini model:
- * - README generation
+ * Provides AI-powered features using Google's Gemini 3 model:
+ * - README generation with Extended Thinking
  * - Theme recommendations
  * - Profile personality analysis
  * - Widget customization suggestions
+ * - Streaming generation with thought surfacing
+ * - Google Search grounding for profile intelligence
  */
 
-import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from '@google/generative-ai';
+import { GoogleGenAI, HarmCategory, HarmBlockThreshold, ThinkingLevel, type GenerateContentConfig } from '@google/genai';
 import type { ExtendedProfileData } from '@/types/readme';
 
 // Safety settings for content generation
-const safetySettings = [
-  {
-    category: HarmCategory.HARM_CATEGORY_HARASSMENT,
-    threshold: HarmBlockThreshold.BLOCK_NONE,
-  },
-  {
-    category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-    threshold: HarmBlockThreshold.BLOCK_NONE,
-  },
-  {
-    category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-    threshold: HarmBlockThreshold.BLOCK_NONE,
-  },
-  {
-    category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-    threshold: HarmBlockThreshold.BLOCK_NONE,
-  },
+const safetySettings: GenerateContentConfig['safetySettings'] = [
+  { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_NONE },
+  { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_NONE },
+  { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_NONE },
+  { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_NONE },
 ];
 
 /**
- * Lazy initialization of Gemini client to avoid build-time errors
+ * Lazy initialization of Gemini client
  */
-let _genAI: GoogleGenerativeAI | null = null;
+let _ai: GoogleGenAI | null = null;
 
-function getGenAI(): GoogleGenerativeAI {
-  if (!_genAI) {
+function getAI(): GoogleGenAI {
+  if (!_ai) {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
       throw new Error('GEMINI_API_KEY environment variable is required');
     }
-    _genAI = new GoogleGenerativeAI(apiKey);
+    _ai = new GoogleGenAI({ apiKey });
   }
-  return _genAI;
+  return _ai;
 }
 
 function getModelName(type: 'fast' | 'pro' = 'fast'): string {
   if (type === 'pro') {
-    return process.env.GEMINI_MODEL_PRO || process.env.GEMINI_MODEL || 'gemini-2.5-pro';
+    return process.env.GEMINI_MODEL_PRO || process.env.GEMINI_MODEL || 'gemini-3-pro-preview';
   }
-  return process.env.GEMINI_MODEL_FAST || process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+  return process.env.GEMINI_MODEL_FAST || process.env.GEMINI_MODEL || 'gemini-3-flash-preview';
 }
 
 /**
- * Get the Gemini model instance
+ * Base config for generation calls
  */
-function getModel(modelName?: string) {
-  const name = modelName || getModelName('fast');
-  return getGenAI().getGenerativeModel({ model: name, safetySettings });
+function baseConfig(options?: {
+  thinking?: 'high' | 'low' | 'medium';
+  includeThoughts?: boolean;
+  grounding?: boolean;
+}): GenerateContentConfig {
+  const config: GenerateContentConfig = {
+    safetySettings,
+  };
+  if (options?.thinking) {
+    const levelMap = { high: ThinkingLevel.HIGH, low: ThinkingLevel.LOW, medium: ThinkingLevel.MEDIUM };
+    config.thinkingConfig = {
+      thinkingLevel: levelMap[options.thinking],
+      includeThoughts: options.includeThoughts ?? false,
+    };
+  }
+  if (options?.grounding) {
+    config.tools = [{ googleSearch: {} }];
+  }
+  return config;
 }
 
 /**
- * Generate README using Gemini AI
+ * Simple content generation helper
+ */
+async function generate(
+  prompt: string,
+  options?: {
+    model?: string;
+    thinking?: 'high' | 'low' | 'medium';
+    includeThoughts?: boolean;
+    grounding?: boolean;
+  }
+): Promise<{ text: string; thoughts?: string }> {
+  const ai = getAI();
+  const response = await ai.models.generateContent({
+    model: options?.model || getModelName('fast'),
+    contents: prompt,
+    config: baseConfig(options),
+  });
+
+  let thoughts: string | undefined;
+  if (options?.includeThoughts && response.candidates?.[0]?.content?.parts) {
+    const thoughtParts = response.candidates[0].content.parts
+      .filter((p) => p.thought && p.text)
+      .map((p) => p.text);
+    if (thoughtParts.length > 0) {
+      thoughts = thoughtParts.join('\n');
+    }
+  }
+
+  return { text: response.text ?? '', thoughts };
+}
+
+/**
+ * Generate README using Gemini AI with Extended Thinking
  */
 export async function generateReadmeWithGemini(
   profileData: ExtendedProfileData,
@@ -77,8 +115,6 @@ export async function generateReadmeWithGemini(
     agentLoop?: boolean;
   }
 ): Promise<{ markdown: string; refinementNotes?: string[]; reasoning?: string }> {
-  const model = getModel(getModelName('pro'));
-
   const topLanguages = profileData.languages.slice(0, 5).map((l) => l.name).join(', ');
   const pinnedReposText = profileData.pinnedRepos
     .map((r) => `- ${r.name}: ${r.description || 'No description'} (${r.stars} stars, ${r.language || 'Unknown'})`)
@@ -86,10 +122,11 @@ export async function generateReadmeWithGemini(
 
   let reasoning: string | undefined;
   if (config.careerMode) {
-    const reasoningModel = getModel(getModelName('fast'));
-    const reasoningPrompt = `You are tailoring a GitHub profile README for a ${config.careerRole || 'fullstack'} role. Profile: ${config.username}, top languages: ${topLanguages || 'unknown'}. In 1–2 short sentences, state how you will focus the README for this role (e.g. "Focusing on backend: emphasizing APIs, data pipelines, and reliability."). Be specific to the role. Reply with ONLY that reasoning, no heading.`;
-    const reasoningResult = await reasoningModel.generateContent(reasoningPrompt);
-    reasoning = reasoningResult.response.text().trim();
+    const reasoningResult = await generate(
+      `You are tailoring a GitHub profile README for a ${config.careerRole || 'fullstack'} role. Profile: ${config.username}, top languages: ${topLanguages || 'unknown'}. In 1–2 short sentences, state how you will focus the README for this role (e.g. "Focusing on backend: emphasizing APIs, data pipelines, and reliability."). Be specific to the role. Reply with ONLY that reasoning, no heading.`,
+      { thinking: 'low' }
+    );
+    reasoning = reasoningResult.text.trim();
   }
 
   const roleContext = config.careerMode
@@ -150,15 +187,15 @@ ${pinnedReposText || 'No pinned repositories'}
 
 Output ONLY the markdown content. No explanations or code blocks around it.`;
 
-  const result = await model.generateContent(prompt);
-  const response = await result.response;
-  let markdown = response.text();
+  const result = await generate(prompt, { model: getModelName('pro'), thinking: 'high' });
+  let markdown = result.text;
 
   if (config.careerMode && config.agentLoop) {
-    const critiquePrompt = `You are a senior technical recruiter and README editor. Review the README below and list up to 5 concrete improvements to better position the candidate for a ${config.careerRole || 'fullstack'} role.\n\nREADME:\n${markdown}\n\nReturn ONLY a JSON array of short improvement notes.`;
-    const critiqueResult = await model.generateContent(critiquePrompt);
-    const critiqueText = critiqueResult.response.text();
-    const cleanedCritique = critiqueText.replace(/```json\n?|\n?```/g, '').trim();
+    const critiqueResult = await generate(
+      `You are a senior technical recruiter and README editor. Review the README below and list up to 5 concrete improvements to better position the candidate for a ${config.careerRole || 'fullstack'} role.\n\nREADME:\n${markdown}\n\nReturn ONLY a JSON array of short improvement notes.`,
+      { model: getModelName('pro'), thinking: 'high' }
+    );
+    const cleanedCritique = critiqueResult.text.replace(/```json\n?|\n?```/g, '').trim();
     let refinementNotes: string[] | undefined;
     try {
       refinementNotes = JSON.parse(cleanedCritique);
@@ -167,14 +204,182 @@ Output ONLY the markdown content. No explanations or code blocks around it.`;
     }
 
     if (refinementNotes && refinementNotes.length > 0) {
-      const refinePrompt = `You are refining a GitHub profile README. Apply these improvement notes while preserving the original structure and widgets. Improvement notes:\n- ${refinementNotes.join('\n- ')}\n\nOriginal README:\n${markdown}\n\nReturn ONLY the improved markdown.`;
-      const refineResult = await model.generateContent(refinePrompt);
-      markdown = refineResult.response.text();
+      const refineResult = await generate(
+        `You are refining a GitHub profile README. Apply these improvement notes while preserving the original structure and widgets. Improvement notes:\n- ${refinementNotes.join('\n- ')}\n\nOriginal README:\n${markdown}\n\nReturn ONLY the improved markdown.`,
+        { model: getModelName('pro'), thinking: 'high' }
+      );
+      markdown = refineResult.text;
       return { markdown, refinementNotes, reasoning };
     }
   }
 
   return { markdown, reasoning };
+}
+
+/**
+ * Streaming README generation with thought surfacing.
+ * Returns an AsyncGenerator yielding { type, content } chunks.
+ */
+export async function* streamReadmeWithGemini(
+  profileData: ExtendedProfileData,
+  config: {
+    username: string;
+    sections: string[];
+    style: 'minimal' | 'detailed' | 'creative';
+    theme: string;
+    careerMode?: boolean;
+    careerRole?: string;
+  }
+): AsyncGenerator<{ type: 'thought' | 'text' | 'status'; content: string }> {
+  const ai = getAI();
+  const topLanguages = profileData.languages.slice(0, 5).map((l) => l.name).join(', ');
+  const pinnedReposText = profileData.pinnedRepos
+    .map((r) => `- ${r.name}: ${r.description || 'No description'} (${r.stars} stars, ${r.language || 'Unknown'})`)
+    .join('\n');
+
+  const roleContext = config.careerMode
+    ? `\n**Target Role:** ${config.careerRole || 'fullstack'} (tailor narrative, highlights, and skills for this role)\n`
+    : '';
+
+  const prompt = `You are a professional GitHub profile README generator. Create an outstanding, well-structured README.md that will impress recruiters and fellow developers.${roleContext}
+
+**Developer Profile:**
+- Username: ${config.username}
+- Name: ${profileData.name || config.username}
+- Bio: ${profileData.bio || 'Not provided'}
+- Location: ${profileData.location || 'Not specified'}
+- Company: ${profileData.company || 'Not specified'}
+- Website: ${profileData.websiteUrl || 'Not provided'}
+- Twitter: ${profileData.twitterUsername ? `@${profileData.twitterUsername}` : 'Not provided'}
+- Followers: ${profileData.followers} | Following: ${profileData.following}
+- Total Repositories: ${profileData.totalRepos}
+- Total Stars Earned: ${profileData.totalStars}
+- Contributions This Year: ${profileData.totalContributions}
+- Current Streak: ${profileData.streak.current} days
+- Longest Streak: ${profileData.streak.longest} days
+- Top Languages: ${topLanguages || 'None detected'}
+
+**Pinned/Featured Repositories:**
+${pinnedReposText || 'No pinned repositories'}
+
+**Generation Settings:**
+- Style: ${config.style} (${config.style === 'minimal' ? 'clean and concise' : config.style === 'creative' ? 'fun, engaging with emojis and personality' : 'professional and comprehensive'})
+- Sections to include: ${config.sections.join(', ')}
+- Widget theme: ${config.theme}
+
+**IMPORTANT - Include these GitSkins widgets:**
+\`\`\`markdown
+![${config.username}'s GitHub Profile](https://gitskins.com/api/premium-card?username=${config.username}&theme=${config.theme})
+![Top Languages](https://gitskins.com/api/languages?username=${config.username}&theme=${config.theme})
+![GitHub Streak](https://gitskins.com/api/streak?username=${config.username}&theme=${config.theme})
+![GitHub Stats](https://gitskins.com/api/stats?username=${config.username}&theme=${config.theme})
+\`\`\`
+
+**Instructions:**
+1. Create an engaging header with the developer's name
+2. Write a compelling "About Me" section
+3. Showcase their tech stack with badges
+4. Include the GitSkins widgets
+5. Feature their best projects
+6. Add social/contact links
+7. Use proper markdown formatting
+8. Match the requested style (${config.style})
+9. End with a footer mentioning GitSkins
+
+Output ONLY the markdown content. No explanations or code blocks around it.`;
+
+  yield { type: 'status', content: 'Gemini is thinking...' };
+
+  const stream = await ai.models.generateContentStream({
+    model: getModelName('pro'),
+    contents: prompt,
+    config: {
+      ...baseConfig({ thinking: 'high', includeThoughts: true }),
+    },
+  });
+
+  let accumulatedMarkdown = '';
+  for await (const chunk of stream) {
+    const parts = chunk.candidates?.[0]?.content?.parts ?? [];
+    for (const part of parts) {
+      if (!part.text) continue;
+      if (part.thought) {
+        yield { type: 'thought', content: part.text };
+      } else {
+        accumulatedMarkdown += part.text;
+        yield { type: 'text', content: part.text };
+      }
+    }
+  }
+
+  // Agent loop: critique + refine (streamed)
+  if (config.careerMode && accumulatedMarkdown.length > 100) {
+    const role = config.careerRole || 'fullstack';
+
+    // Phase 2: Critique
+    yield { type: 'status', content: `Critiquing for ${role} role...` };
+
+    const critiqueStream = await ai.models.generateContentStream({
+      model: getModelName('pro'),
+      contents: `You are a senior technical recruiter reviewing a GitHub profile README. List up to 5 concrete, specific improvements to better position the candidate for a ${role} role. Be direct and actionable.\n\nREADME:\n${accumulatedMarkdown}\n\nReturn ONLY a JSON array of short improvement notes.`,
+      config: {
+        ...baseConfig({ thinking: 'high', includeThoughts: true }),
+      },
+    });
+
+    let critiqueText = '';
+    for await (const chunk of critiqueStream) {
+      const parts = chunk.candidates?.[0]?.content?.parts ?? [];
+      for (const part of parts) {
+        if (!part.text) continue;
+        if (part.thought) {
+          yield { type: 'thought', content: part.text };
+        } else {
+          critiqueText += part.text;
+        }
+      }
+    }
+
+    // Parse critique notes
+    let notes: string[] = [];
+    try {
+      const cleaned = critiqueText.replace(/```json\n?|\n?```/g, '').trim();
+      notes = JSON.parse(cleaned);
+    } catch {
+      // If parsing fails, skip refinement
+    }
+
+    if (notes.length > 0) {
+      // Surface the critique notes
+      yield { type: 'thought', content: `Refinement notes:\n${notes.map((n, i) => `${i + 1}. ${n}`).join('\n')}` };
+
+      // Phase 3: Refine
+      yield { type: 'status', content: 'Refining README...' };
+
+      // Clear previous text — client should replace with refined version
+      yield { type: 'text', content: '\n\n---\n\n<!-- REFINED VERSION -->\n\n' };
+
+      const refineStream = await ai.models.generateContentStream({
+        model: getModelName('pro'),
+        contents: `You are refining a GitHub profile README for a ${role} role. Apply these improvements while preserving the structure and all widgets.\n\nImprovement notes:\n- ${notes.join('\n- ')}\n\nOriginal README:\n${accumulatedMarkdown}\n\nReturn ONLY the improved markdown.`,
+        config: {
+          ...baseConfig({ thinking: 'high', includeThoughts: true }),
+        },
+      });
+
+      for await (const chunk of refineStream) {
+        const parts = chunk.candidates?.[0]?.content?.parts ?? [];
+        for (const part of parts) {
+          if (!part.text) continue;
+          if (part.thought) {
+            yield { type: 'thought', content: part.text };
+          } else {
+            yield { type: 'text', content: part.text };
+          }
+        }
+      }
+    }
+  }
 }
 
 /**
@@ -196,8 +401,6 @@ export async function analyzeProfileWithGemini(
   profileData: ExtendedProfileData,
   username: string
 ): Promise<ProfileAnalysis> {
-  const model = getModel(getModelName('fast'));
-
   const topLanguages = profileData.languages.slice(0, 5).map((l) => `${l.name} (${l.percentage}%)`).join(', ');
   const pinnedReposText = profileData.pinnedRepos
     .map((r) => `${r.name}: ${r.description || 'No description'} (${r.stars} stars)`)
@@ -252,16 +455,12 @@ Respond with ONLY a JSON object (no markdown code blocks):
   "funFact": "A fun observation about their profile"
 }`;
 
-  const result = await model.generateContent(prompt);
-  const response = await result.response;
-  const text = response.text();
+  const result = await generate(prompt, { thinking: 'low' });
 
   try {
-    // Clean up the response - remove markdown code blocks if present
-    const cleanedText = text.replace(/```json\n?|\n?```/g, '').trim();
+    const cleanedText = result.text.replace(/```json\n?|\n?```/g, '').trim();
     return JSON.parse(cleanedText);
   } catch {
-    // Return default analysis if parsing fails
     return {
       developerType: 'Versatile Developer',
       personality: 'A passionate coder who loves building things.',
@@ -289,8 +488,6 @@ export async function getThemeRecommendations(
   profileData: ExtendedProfileData,
   username: string
 ): Promise<ThemeRecommendation[]> {
-  const model = getModel(getModelName('fast'));
-
   const topLanguages = profileData.languages.slice(0, 3).map((l) => l.name).join(', ');
 
   const prompt = `Based on this GitHub profile, recommend the top 5 widget themes that would best match their coding style and personality.
@@ -332,15 +529,12 @@ Respond with ONLY a JSON array (no markdown):
   ...
 ]`;
 
-  const result = await model.generateContent(prompt);
-  const response = await result.response;
-  const text = response.text();
+  const result = await generate(prompt, { thinking: 'low' });
 
   try {
-    const cleanedText = text.replace(/```json\n?|\n?```/g, '').trim();
+    const cleanedText = result.text.replace(/```json\n?|\n?```/g, '').trim();
     return JSON.parse(cleanedText);
   } catch {
-    // Return default recommendations
     return [
       { theme: 'github-dark', score: 90, reason: 'Classic and professional' },
       { theme: 'ocean', score: 85, reason: 'Clean and calming' },
@@ -359,13 +553,15 @@ export interface ProfileIntel {
   recommendations: string[];
 }
 
+/**
+ * Profile Intelligence with Google Search grounding
+ */
 export async function getProfileIntelligence(
   profileData: ExtendedProfileData,
   username: string
 ): Promise<ProfileIntel> {
-  const model = getModel(getModelName('fast'));
   const topLanguages = profileData.languages.slice(0, 4).map((l) => l.name).join(', ');
-  const prompt = `You are a career coach analyzing a GitHub profile. Produce a concise intelligence report.
+  const prompt = `You are a career coach analyzing a GitHub profile. Produce a concise intelligence report. Compare the developer against real industry benchmarks and data where possible.
 
 Profile:
 - Username: ${username}
@@ -379,19 +575,23 @@ Profile:
 
 Return ONLY JSON:
 {
-  "summary": "2-3 sentence summary",
+  "summary": "2-3 sentence summary with industry context",
   "benchmarks": [
-    {"label": "Activity level", "value": "Top 20%", "context": "Compared to active OSS devs"}
+    {"label": "Activity level", "value": "Top 20%", "context": "Compared to active OSS devs based on GitHub data"}
   ],
   "strengths": ["strength1", "strength2", "strength3"],
   "gaps": ["gap1", "gap2"],
   "recommendations": ["action1", "action2", "action3"]
 }`;
 
-  const result = await model.generateContent(prompt);
-  const text = result.response.text();
+  const result = await generate(prompt, {
+    model: getModelName('pro'),
+    thinking: 'high',
+    grounding: true,
+  });
+
   try {
-    const cleaned = text.replace(/```json\n?|\n?```/g, '').trim();
+    const cleaned = result.text.replace(/```json\n?|\n?```/g, '').trim();
     return JSON.parse(cleaned);
   } catch {
     return {
@@ -426,34 +626,41 @@ export async function buildPortfolioCaseStudies(
   profileData: ExtendedProfileData,
   username: string
 ): Promise<PortfolioCaseStudy[]> {
-  const model = getModel(getModelName('pro'));
   const repoList = profileData.pinnedRepos;
   const repoSummaries = repoList
     .map((repo) => `${repo.name}: ${repo.description || 'No description'} (${repo.stars} stars, ${repo.language || 'Unknown'})`)
     .join('\n');
-  const prompt = `Create 2-3 portfolio case studies from these repositories.
+  const prompt = `You are writing portfolio case studies for a senior software developer's professional portfolio website. Create 2-3 compelling case studies from these repositories.
 
 Repos:
 ${repoSummaries}
 
+**Guidelines:**
+- Write like a senior engineer presenting their best work — confident, specific, technically credible.
+- "problem" should clearly articulate the pain point or gap the project addresses (1-2 sentences).
+- "approach" should describe architecture decisions, trade-offs, and technical strategy — not just "built with React" (2-3 sentences).
+- "impact" should include specific metrics where possible (stars, users, performance gains, adoption). If no metrics are available, describe the qualitative impact concretely.
+- "stack" should list the actual technologies used (infer from language and repo context).
+- "highlights" should be 2-3 bullet points about what makes this project stand out — unique technical decisions, scale, or user-facing outcomes.
+- Each "title" should be a compelling one-liner, not just "repo-name Case Study".
+
 Return ONLY JSON array:
 [
   {
-    "title": "Case study title",
+    "title": "Compelling project title",
     "repo": "repo-name",
-    "problem": "What problem it solved",
-    "approach": "How it was built",
-    "impact": "Outcome or measurable impact",
-    "stack": ["Tech1", "Tech2"],
-    "highlights": ["Highlight 1", "Highlight 2"],
+    "problem": "Clear pain point this project solves",
+    "approach": "Architecture decisions and technical strategy",
+    "impact": "Specific metrics or concrete outcomes",
+    "stack": ["Tech1", "Tech2", "Tech3"],
+    "highlights": ["What makes this stand out 1", "What makes this stand out 2"],
     "repoUrl": "https://github.com/${username}/repo-name"
   }
 ]`;
 
-  const result = await model.generateContent(prompt);
-  const text = result.response.text();
+  const result = await generate(prompt, { model: getModelName('pro'), thinking: 'high' });
   try {
-    const cleaned = text.replace(/```json\n?|\n?```/g, '').trim();
+    const cleaned = result.text.replace(/```json\n?|\n?```/g, '').trim();
     return JSON.parse(cleaned);
   } catch {
     if (repoList.length === 0) {
@@ -484,18 +691,18 @@ Return ONLY JSON array:
 
 /**
  * Generate a full portfolio website (HTML + CSS) from profile and case studies.
- * Returns a single-page, self-contained portfolio; CSS can be embedded in HTML or separate.
  */
 export async function generatePortfolioWebsite(
   profileData: ExtendedProfileData,
   username: string,
   caseStudies: PortfolioCaseStudy[]
 ): Promise<{ html: string; css: string }> {
-  const model = getModel(getModelName('pro'));
   const caseStudiesJson = JSON.stringify(caseStudies, null, 2);
   const topLangs = profileData.languages.slice(0, 5).map((l) => l.name).join(', ');
 
-  const prompt = `You are a professional web designer. Generate a single-page portfolio website for a developer.
+  const prompt = `You are an elite frontend developer and designer. Generate a professional, production-quality single-page portfolio website for a software developer.
+
+**Design reference:** Think Stripe, Linear, or Vercel-quality landing pages — clean typography, generous whitespace, subtle animations, polished micro-interactions.
 
 **Profile:**
 - Username: ${username}
@@ -508,19 +715,26 @@ export async function generatePortfolioWebsite(
 **Case studies (use this exact data):**
 ${caseStudiesJson}
 
-**Requirements:**
-1. Output TWO code blocks only. First block: \`\`\`html\\n...\\n\`\`\` (full HTML from <!DOCTYPE> to </html>, semantic: header, hero, section per case study, optional contact/footer). Second block: \`\`\`css\\n...\\n\`\`\` (all styles). No other text.
-2. Single page, responsive, no external CDN or fonts (use system fonts). Green (#22c55e) and black/dark theme to match GitSkins.
-3. Include the avatar, name, bio, and each case study with title, repo, problem, approach, impact, stack, highlights. Link repo names to repoUrl when present.
-4. Professional, minimal, developer portfolio style. No placeholder lorem.
+**Template requirements:**
+1. Output TWO code blocks only. First: \`\`\`html\\n...\\n\`\`\` (full HTML from <!DOCTYPE> to </html>). Second: \`\`\`css\\n...\\n\`\`\` (all styles). No other text.
+2. Modern dark theme: background #050505, cards #0a0a0a/#111111, borders #1a1a1a/#1f1f1f, accent green #22c55e, text #fafafa/#a1a1a1/#666666.
+3. Typography: system-ui font stack, large bold headings using clamp() for responsive sizing, comfortable 16px body text with 1.6 line-height.
+4. Layout: CSS Grid for sections, max-width 1100px centered, generous padding (80-120px per section), 24px horizontal padding.
+5. Hero section: large name as h1, avatar (round with subtle green border-glow), bio text, stats row showing repos/stars/followers as a horizontal bar with numbers.
+6. Projects section: 2-column card grid. Each card has hover effect (translateY(-4px), subtle green box-shadow glow), showing title, problem, approach, impact, tech stack as small pill badges, and highlights. Link repo names to repoUrl.
+7. Skills section: top languages displayed as pill tags or small progress indicators.
+8. Footer: minimal with GitHub profile link and a "Built with GitSkins" credit.
+9. Responsive: mobile-first, cards stack to single column below 768px.
+10. CSS animations: include @keyframes fadeInUp for scroll-ready animations, smooth hover transitions (0.2s ease) on cards and buttons, html { scroll-behavior: smooth }.
+11. NO external CDNs, NO JavaScript frameworks, NO Google Fonts, NO placeholder/lorem text.
+12. Clean semantic HTML5 with descriptive class names. Production-quality CSS with :root custom properties for all colors, proper box-sizing reset, responsive breakpoints via media queries.
 
 Return ONLY the two code blocks (html then css).`;
 
-  const result = await model.generateContent(prompt);
-  const text = result.response.text();
+  const result = await generate(prompt, { model: getModelName('pro'), thinking: 'high' });
 
-  const htmlMatch = text.match(/```html\s*([\s\S]*?)```/);
-  const cssMatch = text.match(/```css\s*([\s\S]*?)```/);
+  const htmlMatch = result.text.match(/```html\s*([\s\S]*?)```/);
+  const cssMatch = result.text.match(/```css\s*([\s\S]*?)```/);
   let html = htmlMatch ? htmlMatch[1].trim() : '';
   let css = cssMatch ? cssMatch[1].trim() : '';
 
@@ -535,18 +749,17 @@ Return ONLY the two code blocks (html then css).`;
 }
 
 /**
- * Edit portfolio website via natural language. Returns updated html and css.
+ * Edit portfolio website via natural language.
  */
 export async function editPortfolioWebsite(
   html: string,
   css: string,
   userMessage: string
 ): Promise<{ html: string; css: string }> {
-  const model = getModel(getModelName('pro'));
   const truncatedHtml = html.length > 12000 ? html.slice(0, 12000) + '\n<!-- ... truncated -->' : html;
   const truncatedCss = css.length > 8000 ? css.slice(0, 8000) + '\n/* ... truncated */' : css;
 
-  const prompt = `You are a web designer. The user wants to change their portfolio page.
+  const prompt = `You are an elite frontend developer. The user wants to modify their professional portfolio page. Apply the change while maintaining production-quality code.
 
 **Current HTML (excerpt):**
 \`\`\`html
@@ -563,14 +776,15 @@ ${truncatedCss}
 **Instructions:**
 1. Apply the requested change. Return the FULL updated HTML and FULL updated CSS.
 2. Output ONLY two code blocks. First: \`\`\`html\\n...\\n\`\`\` (complete HTML). Second: \`\`\`css\\n...\\n\`\`\` (complete CSS). No other text.
-3. Keep the same structure and green/black theme unless the user asks to change it.
-4. If HTML or CSS was truncated above, extend from what you see and keep the rest consistent.`;
+3. Keep the same structure and dark theme unless the user asks to change it.
+4. Maintain the production-quality CSS patterns: :root custom properties, smooth transitions (0.2s ease), hover effects (translateY, box-shadow glow), responsive breakpoints, proper spacing.
+5. If adding new sections, match the existing design quality — use the same card styles, typography scale, and spacing rhythm.
+6. If HTML or CSS was truncated above, extend from what you see and keep the rest consistent.`;
 
-  const result = await model.generateContent(prompt);
-  const text = result.response.text();
+  const result = await generate(prompt, { model: getModelName('pro'), thinking: 'high' });
 
-  const htmlMatch = text.match(/```html\s*([\s\S]*?)```/);
-  const cssMatch = text.match(/```css\s*([\s\S]*?)```/);
+  const htmlMatch = result.text.match(/```html\s*([\s\S]*?)```/);
+  const cssMatch = result.text.match(/```css\s*([\s\S]*?)```/);
   const outHtml = htmlMatch ? htmlMatch[1].trim() : html;
   const outCss = cssMatch ? cssMatch[1].trim() : css;
 
@@ -588,7 +802,7 @@ export async function chatWithGemini(
     profileData?: Partial<ExtendedProfileData>;
   }
 ): Promise<string> {
-  const model = getModel(getModelName('fast'));
+  const ai = getAI();
 
   const systemContext = `You are GitSkins AI Assistant, helping developers customize their GitHub profile widgets.
 
@@ -608,23 +822,16 @@ ${context.profileData ? `**User Stats:** ${context.profileData.totalRepos || 0} 
 
 Be helpful, friendly, and concise. Suggest themes, explain features, and help users get the most out of GitSkins.`;
 
-  // Use startChat for multi-turn conversation
-  const chat = model.startChat({
-    history: [
-      {
-        role: 'user',
-        parts: [{ text: systemContext }],
-      },
-      {
-        role: 'model',
-        parts: [{ text: 'I understand! I\'m GitSkins AI Assistant, ready to help with profile customization, theme recommendations, and widget setup. How can I help you today?' }],
-      },
-    ],
+  const response = await ai.models.generateContent({
+    model: getModelName('fast'),
+    contents: message,
+    config: {
+      ...baseConfig({ thinking: 'low' }),
+      systemInstruction: systemContext,
+    },
   });
 
-  const result = await chat.sendMessage(message);
-  const response = await result.response;
-  return response.text();
+  return response.text ?? '';
 }
 
 /**
@@ -642,8 +849,6 @@ export async function generateWidgetSuggestions(
   }>;
   embedCode: string;
 }> {
-  const model = getModel(getModelName('fast'));
-
   const prompt = `Create an optimal widget layout suggestion for this GitHub profile.
 
 **Profile:**
@@ -671,12 +876,10 @@ Respond with ONLY a JSON object (no markdown):
   "embedCode": "Complete markdown code block for the suggested layout"
 }`;
 
-  const result = await model.generateContent(prompt);
-  const response = await result.response;
-  const text = response.text();
+  const result = await generate(prompt, { thinking: 'low' });
 
   try {
-    const cleanedText = text.replace(/```json\n?|\n?```/g, '').trim();
+    const cleanedText = result.text.replace(/```json\n?|\n?```/g, '').trim();
     return JSON.parse(cleanedText);
   } catch {
     return {
@@ -710,7 +913,6 @@ export async function explainProfileWithGemini(
   profileData: ExtendedProfileData,
   username: string
 ): Promise<string> {
-  const model = getModel(getModelName('fast'));
   const topLanguages = profileData.languages.slice(0, 5).map((l) => l.name).join(', ');
   const pinnedReposText = profileData.pinnedRepos
     .map((r) => `- ${r.name}: ${r.description || 'No description'} (${r.stars} stars)`)
@@ -735,9 +937,8 @@ ${pinnedReposText || 'None'}
 
 Reply with ONLY the 2–3 sentence summary, no heading or bullet points.`;
 
-  const result = await model.generateContent(prompt);
-  const response = await result.response;
-  return response.text().trim();
+  const result = await generate(prompt, { thinking: 'low' });
+  return result.text.trim();
 }
 
 /**

@@ -8,6 +8,7 @@ import { Navigation } from '@/components/landing/Navigation';
 import { HeroSection } from '@/components/landing/HeroSection';
 import { ThemeShowcase } from '@/components/landing/ThemeShowcase';
 import { AnimatedSection, StaggerContainer, StaggerItem } from '@/components/landing/AnimatedSection';
+import { ShareMenu } from '@/components/ShareMenu';
 import { landingThemes } from '@/lib/landing-themes';
 
 const themes = landingThemes;
@@ -23,32 +24,31 @@ const features = [
   {
     icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <rect x="3" y="3" width="18" height="18" rx="2" />
-        <path d="M3 9h18M9 21V9" />
+        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
       </svg>
     ),
-    title: 'Dynamic Widgets',
-    description: 'Real-time stats that update automatically with your GitHub activity.',
+    title: 'Live README Agent',
+    description: 'Watch Gemini 3 think, draft, critique, and refine your README in real-time.',
   },
   {
     icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <circle cx="12" cy="12" r="10" />
-        <path d="M12 6v6l4 2" />
+        <path d="M12 2a8 8 0 0 0-8 8c0 3.4 2 6 5 7.5V20h6v-2.5c3-1.5 5-4.1 5-7.5a8 8 0 0 0-8-8z" />
+        <path d="M10 22h4" />
       </svg>
     ),
-    title: 'Always Fresh',
-    description: 'Smart caching ensures your widgets load fast and stay current.',
+    title: 'Extended Thinking',
+    description: 'Deep multi-step reasoning produces higher quality, career-tailored output.',
   },
   {
     icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <path d="M12 2L2 7l10 5 10-5-10-5z" />
-        <path d="M2 17l10 5 10-5M2 12l10 5 10-5" />
+        <circle cx="11" cy="11" r="8" />
+        <path d="M21 21l-4.35-4.35" />
       </svg>
     ),
-    title: 'AI-Powered',
-    description: 'Generate professional READMEs with Gemini AI in seconds.',
+    title: 'Search Grounding',
+    description: 'Profile intelligence backed by real-world industry data via Google Search.',
   },
   {
     icon: (
@@ -134,10 +134,10 @@ export default function Home() {
                   letterSpacing: '-0.02em',
                 }}
               >
-                All features in one place
+                Everything your profile needs
               </h2>
               <p style={{ fontSize: '16px', color: '#666', maxWidth: '560px', margin: '0 auto' }}>
-                Widgets, 20 themes, README generator, portfolio case studies, website builder with AI edit, profile intelligence, and AI chat.
+                Streaming AI agent, Extended Thinking, 20 themes, dynamic widgets, portfolio builder, and Google Search-grounded intelligence.
               </p>
             </AnimatedSection>
 
@@ -213,7 +213,7 @@ export default function Home() {
                 AI-Powered Features
               </h2>
               <p style={{ fontSize: '16px', color: '#666', maxWidth: '500px', margin: '0 auto' }}>
-                Let Gemini AI craft the perfect README for your profile.
+                Gemini 3 Pro with Extended Thinking, streaming, and search grounding.
               </p>
             </AnimatedSection>
 
@@ -225,6 +225,17 @@ export default function Home() {
               }}
             >
               {[
+                {
+                  title: 'Live README Agent',
+                  description: 'Watch Gemini 3 think, draft, critique, and refine your README with live streaming.',
+                  href: '/readme-agent',
+                  featured: true,
+                  icon: (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+                    </svg>
+                  ),
+                },
                 {
                   title: 'README Generator',
                   description: 'Generate a complete, professional README in seconds.',
@@ -238,23 +249,12 @@ export default function Home() {
                 },
                 {
                   title: 'Profile Intelligence',
-                  description: 'Get insights and recommendations for your profile.',
+                  description: 'Search-grounded insights and recommendations for your profile.',
                   href: '/ai',
                   icon: (
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <circle cx="12" cy="12" r="10" />
-                      <path d="M12 16v-4M12 8h.01" />
-                    </svg>
-                  ),
-                },
-                {
-                  title: 'Portfolio Builder',
-                  description: 'Auto-generate case studies from your repositories.',
-                  href: `/portfolio/${username}`,
-                  icon: (
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <rect x="2" y="7" width="20" height="14" rx="2" />
-                      <path d="M16 3h-8l-2 4h12l-2-4z" />
+                      <circle cx="11" cy="11" r="8" />
+                      <path d="M21 21l-4.35-4.35" />
                     </svg>
                   ),
                 },
@@ -262,7 +262,6 @@ export default function Home() {
                   title: 'Portfolio Website Builder',
                   description: 'Build a full portfolio website with AI chat editing & download.',
                   href: `/portfolio/${username}/build`,
-                  featured: true,
                   icon: (
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <rect x="3" y="3" width="18" height="18" rx="2" />
@@ -471,23 +470,32 @@ export default function Home() {
                           {widget.description}
                         </p>
                       </div>
-                      <button
-                        onClick={() => copyToClipboard(widget)}
-                        style={{
-                          padding: '8px 14px',
-                          fontSize: '13px',
-                          fontWeight: 600,
-                          background: copied === widget.id ? '#16a34a' : '#22c55e',
-                          border: 'none',
-                          borderRadius: '8px',
-                          color: '#050505',
-                          cursor: 'pointer',
-                          transition: 'all 0.15s ease',
-                          whiteSpace: 'nowrap',
-                        }}
-                      >
-                        {copied === widget.id ? 'Copied' : 'Copy'}
-                      </button>
+                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                        <ShareMenu
+                          shareUrl={`${baseUrl}/showcase/${username}?theme=${selectedTheme}`}
+                          shareText={`Check out my GitHub ${widget.name} widget — generated with GitSkins`}
+                          imageUrl={`${baseUrl}${widget.path}?username=${username}&theme=${selectedTheme}`}
+                          downloadFilename={`gitskins-${widget.id}-${username}.png`}
+                          context={{ username, theme: selectedTheme, widget: widget.id, source: 'landing' }}
+                        />
+                        <button
+                          onClick={() => copyToClipboard(widget)}
+                          style={{
+                            padding: '8px 14px',
+                            fontSize: '13px',
+                            fontWeight: 600,
+                            background: copied === widget.id ? '#16a34a' : '#22c55e',
+                            border: 'none',
+                            borderRadius: '8px',
+                            color: '#050505',
+                            cursor: 'pointer',
+                            transition: 'all 0.15s ease',
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          {copied === widget.id ? 'Copied' : 'Copy'}
+                        </button>
+                      </div>
                     </div>
 
                     {/* Widget Preview */}
@@ -572,6 +580,68 @@ export default function Home() {
           </div>
         </section>
 
+        {/* Gemini 3 Features Section */}
+        <section style={{ padding: '100px 24px', background: '#050505' }}>
+          <div style={{ maxWidth: '900px', margin: '0 auto' }}>
+            <AnimatedSection style={{ textAlign: 'center', marginBottom: '48px' }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '5px 12px', background: 'rgba(34, 197, 94, 0.08)', border: '1px solid rgba(34, 197, 94, 0.2)', borderRadius: '100px', fontSize: '12px', fontWeight: 500, color: '#22c55e', marginBottom: '20px' }}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+                Gemini 3 Inside
+              </div>
+              <h2 style={{ fontSize: 'clamp(28px, 4vw, 40px)', fontWeight: 700, marginBottom: '12px', letterSpacing: '-0.02em' }}>
+                Built on Gemini 3
+              </h2>
+              <p style={{ fontSize: '16px', color: '#666', maxWidth: '500px', margin: '0 auto' }}>
+                Every AI feature uses Gemini 3 Pro with cutting-edge capabilities.
+              </p>
+            </AnimatedSection>
+
+            <StaggerContainer staggerDelay={0.08} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '16px' }}>
+              {[
+                { icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2a8 8 0 0 0-8 8c0 3.4 2 6 5 7.5V20h6v-2.5c3-1.5 5-4.1 5-7.5a8 8 0 0 0-8-8z" /><path d="M10 22h4" /></svg>, title: 'Extended Thinking', description: 'Deep multi-step reasoning for higher quality README and portfolio generation.' },
+                { icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" /></svg>, title: 'Real-Time Streaming', description: 'Watch your README generate token-by-token with live thought surfacing.' },
+                { icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" /></svg>, title: 'Google Search Grounding', description: 'Profile intelligence backed by real-world industry data and benchmarks.' },
+                { icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>, title: 'Agent Refinement', description: 'Multi-pass generate-critique-refine loop for career-tailored READMEs.' },
+              ].map((item) => (
+                <StaggerItem key={item.title}>
+                  <div style={{ padding: '24px', background: '#0a0a0a', border: '1px solid #161616', borderRadius: '14px', height: '100%' }}>
+                    <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(34, 197, 94, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#22c55e', marginBottom: '16px' }}>
+                      {item.icon}
+                    </div>
+                    <h3 style={{ fontSize: '15px', fontWeight: 600, margin: '0 0 6px', color: '#e5e5e5' }}>{item.title}</h3>
+                    <p style={{ fontSize: '13px', color: '#666', margin: 0, lineHeight: 1.5 }}>{item.description}</p>
+                  </div>
+                </StaggerItem>
+              ))}
+            </StaggerContainer>
+
+            <AnimatedSection delay={0.3} style={{ textAlign: 'center', marginTop: '32px' }}>
+              <Link
+                href="/readme-agent"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '12px 24px',
+                  background: 'rgba(34, 197, 94, 0.1)',
+                  border: '1px solid rgba(34, 197, 94, 0.25)',
+                  borderRadius: '10px',
+                  color: '#22c55e',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  textDecoration: 'none',
+                  transition: 'all 0.2s ease',
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(34, 197, 94, 0.15)'; e.currentTarget.style.borderColor = 'rgba(34, 197, 94, 0.4)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(34, 197, 94, 0.1)'; e.currentTarget.style.borderColor = 'rgba(34, 197, 94, 0.25)'; }}
+              >
+                Try Live README Agent
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+              </Link>
+            </AnimatedSection>
+          </div>
+        </section>
+
         {/* Footer */}
         <AnimatedSection preset="fadeIn" duration={0.8} as="div">
           <footer
@@ -621,6 +691,7 @@ export default function Home() {
                     <a href="#features" style={{ fontSize: '14px', color: '#a1a1a1' }}>Features</a>
                     <a href="#themes" style={{ fontSize: '14px', color: '#a1a1a1' }}>Themes</a>
                     <Link href="/readme-generator" style={{ fontSize: '14px', color: '#a1a1a1' }}>README Generator</Link>
+                    <Link href="/readme-agent" style={{ fontSize: '14px', color: '#22c55e' }}>Live Agent</Link>
                     <Link href="/ai" style={{ fontSize: '14px', color: '#a1a1a1' }}>AI Features</Link>
                   </div>
                 </div>

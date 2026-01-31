@@ -379,7 +379,7 @@ export default function AIFeaturesPage() {
               <path d="M2 17l10 5 10-5" />
               <path d="M2 12l10 5 10-5" />
             </svg>
-            <span style={{ color: '#22c55e', fontSize: '14px', fontWeight: 500 }}>Profile Agent · Powered by Google Gemini</span>
+            <span style={{ color: '#22c55e', fontSize: '14px', fontWeight: 500 }}>Powered by Gemini 3 Pro · Extended Thinking</span>
           </div>
 
           <h1
@@ -1096,7 +1096,8 @@ export default function AIFeaturesPage() {
         <div style={{ textAlign: 'center', marginTop: '48px' }}>
           <p style={{ color: '#666', fontSize: '14px' }}>
             AI features powered by{' '}
-            <span style={{ color: '#22c55e', fontWeight: 600 }}>Google Gemini</span>
+            <span style={{ color: '#22c55e', fontWeight: 600 }}>Gemini 3 Pro</span>
+            <span style={{ color: '#444', fontSize: '12px', display: 'block', marginTop: '4px' }}>Extended Thinking · Google Search Grounding · Streaming</span>
           </p>
         </div>
       </div>

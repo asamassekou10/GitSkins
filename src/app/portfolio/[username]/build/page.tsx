@@ -7,11 +7,12 @@ import { Navigation } from '@/components/landing/Navigation';
 import JSZip from 'jszip';
 
 const EDIT_SUGGESTIONS = [
-  'Make the header bigger',
-  'Use a blue accent color',
-  'Add a contact section',
-  'Make it more minimal',
-  'Increase font sizes for readability',
+  'Add smooth scroll animations',
+  'Add a skills section with language bars',
+  'Make it more like a Stripe/Linear landing page',
+  'Add a testimonials or recommendations section',
+  'Add dark/light theme toggle',
+  'Improve mobile responsiveness',
 ];
 
 export default function PortfolioBuildPage() {
@@ -260,6 +261,10 @@ export default function PortfolioBuildPage() {
           </div>
 
           <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 12px', background: 'rgba(34, 197, 94, 0.08)', border: '1px solid rgba(34, 197, 94, 0.2)', borderRadius: '100px', fontSize: '12px', fontWeight: 500, color: '#22c55e', marginBottom: '16px' }}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+              Gemini 3 Pro · Extended Thinking
+            </div>
             <h1 style={baseStyles.title}>Portfolio Website Builder</h1>
             <p style={baseStyles.subtitle}>
               Generate a one-page site for @{username}, edit with natural language, then download as ZIP.

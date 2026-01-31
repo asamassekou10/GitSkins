@@ -15,6 +15,7 @@ const navLinks: NavLink[] = [
   { label: 'Themes', href: '/#themes', isHashLink: true },
   { label: 'AI Features', href: '/ai', isHashLink: false },
   { label: 'README Generator', href: '/readme-generator', isHashLink: false },
+  { label: 'Live Agent', href: '/readme-agent', isHashLink: false },
 ];
 
 export function Navigation() {

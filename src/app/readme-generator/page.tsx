@@ -261,7 +261,7 @@ export default function ReadmeGeneratorPage() {
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
               </svg>
-              Profile Agent · Powered by Gemini
+              Powered by Gemini 3 Pro · Extended Thinking
             </div>
 
             <h1
@@ -297,6 +297,27 @@ export default function ReadmeGeneratorPage() {
             >
               The Profile Agent creates a professional GitHub profile README in seconds with AI assistance.
             </p>
+            <a
+              href="/readme-agent"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                marginTop: '16px',
+                padding: '8px 16px',
+                background: 'rgba(34, 197, 94, 0.08)',
+                border: '1px solid rgba(34, 197, 94, 0.2)',
+                borderRadius: '8px',
+                color: '#22c55e',
+                fontSize: '13px',
+                fontWeight: 500,
+                textDecoration: 'none',
+                transition: 'all 0.15s ease',
+              }}
+            >
+              Try Live Agent — watch Gemini 3 think in real-time
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+            </a>
           </div>
         </section>
 
@@ -759,7 +780,7 @@ export default function ReadmeGeneratorPage() {
                   }}
                 />
                 {currentStep === 0 && 'Fetching GitHub profile...'}
-                {currentStep === 1 && 'Generating README with Gemini...'}
+                {currentStep === 1 && 'Gemini 3 is thinking...'}
                 {currentStep === 2 && `Refining for ${careerRole}...`}
                 {currentStep === 3 && 'Done.'}
               </div>
@@ -800,7 +821,7 @@ export default function ReadmeGeneratorPage() {
                     }}
                   />
                   {currentStep === 0 && 'Fetching GitHub profile...'}
-                  {currentStep === 1 && 'Generating README with Gemini...'}
+                  {currentStep === 1 && 'Gemini 3 is thinking...'}
                   {currentStep === 2 && `Refining for ${careerRole}...`}
                   {currentStep === 3 && 'Done.'}
                 </>
