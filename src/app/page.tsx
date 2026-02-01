@@ -137,7 +137,7 @@ export default function Home() {
                 Everything your profile needs
               </h2>
               <p style={{ fontSize: '16px', color: '#666', maxWidth: '560px', margin: '0 auto' }}>
-                Streaming AI agent, Extended Thinking, 20 themes, dynamic widgets, portfolio builder, and Google Search-grounded intelligence.
+                Streaming AI agent, Extended Thinking, 20 themes, dynamic widgets, GitHub Wrapped, repo visualizer, daily dev cards, and more.
               </p>
             </AnimatedSection>
 
@@ -213,7 +213,7 @@ export default function Home() {
                 AI-Powered Features
               </h2>
               <p style={{ fontSize: '16px', color: '#666', maxWidth: '500px', margin: '0 auto' }}>
-                Gemini 3 Pro with Extended Thinking, streaming, and search grounding.
+                Seven AI-powered tools built on Gemini 3 Pro with Extended Thinking, streaming, and search grounding.
               </p>
             </AnimatedSection>
 
@@ -267,6 +267,45 @@ export default function Home() {
                       <rect x="3" y="3" width="18" height="18" rx="2" />
                       <path d="M3 9h18" />
                       <path d="M9 21V9" />
+                    </svg>
+                  ),
+                },
+                {
+                  title: 'GitHub Wrapped',
+                  description: 'Spotify-style year in review with Extended Thinking and industry benchmarks.',
+                  href: '/wrapped',
+                  featured: true,
+                  icon: (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                    </svg>
+                  ),
+                },
+                {
+                  title: 'Repo Visualizer',
+                  description: 'AI-generated architecture diagrams and Mermaid visualizations.',
+                  href: '/visualize',
+                  icon: (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <circle cx="12" cy="12" r="3" />
+                      <circle cx="4" cy="6" r="2" />
+                      <circle cx="20" cy="6" r="2" />
+                      <circle cx="4" cy="18" r="2" />
+                      <circle cx="20" cy="18" r="2" />
+                      <path d="M6 7l4.5 3.5M14 9.5L18 7M6 17l4.5-3.5M14 14.5L18 17" />
+                    </svg>
+                  ),
+                },
+                {
+                  title: 'Daily Dev Card',
+                  description: 'Shareable #BuildInPublic card with AI summaries and 20 themes.',
+                  href: '/daily',
+                  icon: (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <rect x="3" y="4" width="18" height="18" rx="2" />
+                      <line x1="16" y1="2" x2="16" y2="6" />
+                      <line x1="8" y1="2" x2="8" y2="6" />
+                      <line x1="3" y1="10" x2="21" y2="10" />
                     </svg>
                   ),
                 },
@@ -693,6 +732,9 @@ export default function Home() {
                     <Link href="/readme-generator" style={{ fontSize: '14px', color: '#a1a1a1' }}>README Generator</Link>
                     <Link href="/readme-agent" style={{ fontSize: '14px', color: '#22c55e' }}>Live Agent</Link>
                     <Link href="/ai" style={{ fontSize: '14px', color: '#a1a1a1' }}>AI Features</Link>
+                    <Link href="/wrapped" style={{ fontSize: '14px', color: '#a1a1a1' }}>GitHub Wrapped</Link>
+                    <Link href="/visualize" style={{ fontSize: '14px', color: '#a1a1a1' }}>Repo Visualizer</Link>
+                    <Link href="/daily" style={{ fontSize: '14px', color: '#a1a1a1' }}>Daily Dev Card</Link>
                   </div>
                 </div>
 
