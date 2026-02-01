@@ -99,9 +99,68 @@ function getClientIdentifier(request: NextRequest): string {
 }
 
 /**
+ * Waitlist gating.
+ *
+ * When WAITLIST_ENABLED=true, all page routes redirect to /waitlist unless
+ * the visitor has a bypass cookie. To bypass:
+ *   - Visit any URL with ?access=<WAITLIST_SECRET> (sets a cookie)
+ *   - The cookie persists for 30 days
+ */
+function checkWaitlistAccess(request: NextRequest): NextResponse | null {
+  if (process.env.WAITLIST_ENABLED !== 'true') {
+    return null; // Waitlist disabled — allow all traffic
+  }
+
+  const { pathname, searchParams } = request.nextUrl;
+
+  // Always allow: waitlist page, waitlist API, all other APIs, auth routes
+  if (
+    pathname === '/waitlist' ||
+    pathname.startsWith('/api/') ||
+    pathname.startsWith('/auth')
+  ) {
+    return null;
+  }
+
+  // Check for bypass via query param
+  const accessKey = searchParams.get('access');
+  const secret = process.env.WAITLIST_SECRET || 'gitskins2026';
+
+  if (accessKey === secret) {
+    // Set bypass cookie and redirect to clean URL
+    const url = request.nextUrl.clone();
+    url.searchParams.delete('access');
+    const response = NextResponse.redirect(url);
+    response.cookies.set('gitskins_access', secret, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 30, // 30 days
+    });
+    return response;
+  }
+
+  // Check for existing bypass cookie
+  const cookie = request.cookies.get('gitskins_access');
+  if (cookie?.value === secret) {
+    return null; // Has valid bypass
+  }
+
+  // Redirect to waitlist
+  const waitlistUrl = request.nextUrl.clone();
+  waitlistUrl.pathname = '/waitlist';
+  waitlistUrl.search = '';
+  return NextResponse.redirect(waitlistUrl);
+}
+
+/**
  * Main middleware function
  */
 export async function middleware(request: NextRequest) {
+  // Waitlist gate check (runs before everything else)
+  const waitlistResponse = checkWaitlistAccess(request);
+  if (waitlistResponse) return waitlistResponse;
+
   const response = NextResponse.next();
 
   // Security Headers
