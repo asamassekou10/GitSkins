@@ -867,7 +867,7 @@ export interface DailyActivity {
 }
 
 const DAILY_ACTIVITY_QUERY = `
-  query($username: String!, $since: DateTime!, $until: DateTime!) {
+  query($username: String!, $since: DateTime!, $until: DateTime!, $historySince: GitTimestamp!, $historyUntil: GitTimestamp!) {
     user(login: $username) {
       name
       avatarUrl
@@ -882,7 +882,7 @@ const DAILY_ACTIVITY_QUERY = `
           defaultBranchRef {
             target {
               ... on Commit {
-                history(first: 20, since: $since, until: $until) {
+                history(first: 20, since: $historySince, until: $historyUntil) {
                   totalCount
                   nodes {
                     message
@@ -952,7 +952,7 @@ export async function fetchDailyActivity(
 
     const response = await getOctokit().graphql<DailyActivityResponse>(
       DAILY_ACTIVITY_QUERY,
-      { username, since, until }
+      { username, since, until, historySince: since, historyUntil: until }
     );
 
     if (!response.user) {
