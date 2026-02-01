@@ -12,7 +12,7 @@ import { getThemeUniversal } from '@/lib/theme-converter';
 import { widgetConfig, apiConfig } from '@/config/site';
 import type { Theme, LanguageStat } from '@/types';
 
-export const runtime = 'edge';
+export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 const { width, height } = widgetConfig.languages;

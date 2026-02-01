@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getPremiumTheme } from '@/registry/themes/premium-registry';
 import { getPremiumBackgroundPattern } from '@/lib/premium-patterns';
 
-export const runtime = 'edge';
+export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 const WIDTH = 1200;

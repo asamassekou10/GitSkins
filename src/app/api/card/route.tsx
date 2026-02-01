@@ -19,7 +19,7 @@ import { getThemeIcons } from '@/lib/theme-icons';
 import { getThemeBackground } from '@/lib/theme-patterns';
 import type { GitHubData, ThemeName, Theme } from '@/types';
 
-export const runtime = 'edge';
+export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 /**

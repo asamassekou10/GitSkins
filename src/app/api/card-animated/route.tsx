@@ -14,7 +14,7 @@ import { imageConfig, apiConfig } from '@/config/site';
 import type { GitHubData } from '@/types';
 import type { PremiumThemeName } from '@/types/premium-theme';
 
-export const runtime = 'edge';
+export const runtime = 'nodejs';
 
 /**
  * Generate animated SVG card
