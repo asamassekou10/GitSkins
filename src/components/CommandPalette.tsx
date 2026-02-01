@@ -10,6 +10,9 @@ const NAV_ITEMS: { label: string; href: string; keywords: string }[] = [
   { label: 'AI Features', href: '/ai', keywords: 'ai' },
   { label: 'README Generator', href: '/readme-generator', keywords: 'readme' },
   { label: 'Portfolio Builder', href: '/portfolio/octocat', keywords: 'portfolio' },
+  { label: 'GitHub Wrapped', href: '/wrapped', keywords: 'wrapped year review' },
+  { label: 'Repo Visualizer', href: '/visualize', keywords: 'visualize architecture diagram mermaid' },
+  { label: 'Daily Dev Card', href: '/daily', keywords: 'daily card buildinpublic share social' },
 ];
 
 type ItemType = { type: 'nav'; label: string; href: string } | { type: 'theme'; id: string; name: string; href: string };

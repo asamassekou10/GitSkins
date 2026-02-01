@@ -942,6 +942,177 @@ Reply with ONLY the 2–3 sentence summary, no heading or bullet points.`;
 }
 
 /**
+ * Generate a "Today I..." summary from commit messages for the Daily Dev Card.
+ */
+export async function generateDailyCardText(
+  commitMessages: string[],
+  username: string
+): Promise<string> {
+  if (commitMessages.length === 0) {
+    return 'Planned and prepared for upcoming work';
+  }
+
+  const messagesText = commitMessages.slice(0, 15).map((m, i) => `${i + 1}. ${m}`).join('\n');
+
+  const prompt = `You are writing a brief "Today I..." summary for a developer's daily progress card (like a #BuildInPublic post). Based on these commit messages from ${username}'s day, write a 1-2 sentence summary of what they accomplished. Be concise, professional, and use first person. Start with a verb (e.g. "Built...", "Fixed...", "Refactored..."). Do NOT include "Today I" prefix — just the action.
+
+Commit messages:
+${messagesText}
+
+Reply with ONLY the summary text, no quotes or explanation.`;
+
+  const result = await generate(prompt, { thinking: 'low' });
+  return result.text.trim();
+}
+
+/**
+ * Streaming GitHub Wrapped narrative with Extended Thinking + Google Search Grounding.
+ * Returns an AsyncGenerator yielding { type, content } chunks.
+ */
+export async function* streamWrappedNarrative(
+  profileData: ExtendedProfileData,
+  username: string
+): AsyncGenerator<{ type: 'thought' | 'text' | 'status'; content: string }> {
+  const ai = getAI();
+  const topLanguages = profileData.languages.slice(0, 5).map((l) => `${l.name} (${l.percentage}%)`).join(', ');
+  const pinnedReposText = profileData.pinnedRepos
+    .map((r) => `${r.name}: ${r.description || 'No description'} (${r.stars} stars, ${r.language || 'Unknown'})`)
+    .join('\n');
+
+  const prompt = `You are creating a "GitHub Wrapped" — a Spotify Wrapped-style year-in-review for a developer. Use your knowledge and search grounding to compare this developer against real industry benchmarks.
+
+**Developer Profile:**
+- Username: ${username}
+- Name: ${profileData.name || username}
+- Bio: ${profileData.bio || 'Not provided'}
+- Location: ${profileData.location || 'Not specified'}
+- Company: ${profileData.company || 'Not specified'}
+- Followers: ${profileData.followers} | Following: ${profileData.following}
+- Total Repositories: ${profileData.totalRepos}
+- Total Stars: ${profileData.totalStars}
+- Contributions This Year: ${profileData.totalContributions}
+- Current Streak: ${profileData.streak.current} days
+- Longest Streak: ${profileData.streak.longest} days
+- Active Days Total: ${profileData.streak.totalDays}
+- Top Languages: ${topLanguages || 'None detected'}
+
+**Pinned/Featured Repositories:**
+${pinnedReposText || 'No pinned repositories'}
+
+**Instructions:**
+Analyze this profile deeply. Compare their stats against industry averages (use real data from GitHub Octoverse, Stack Overflow surveys, etc.). Generate a JSON response with:
+
+1. "codingPersonality" — A creative archetype title (e.g. "The Night Owl Architect", "The Open Source Evangelist", "The Polyglot Pioneer"). Make it specific to their actual profile.
+2. "contributionComparison" — Compare their contributions to industry averages with real data (e.g. "More active than 85% of GitHub developers based on Octoverse data").
+3. "narrative" — A 3-4 paragraph engaging, personal narrative of their year in code. Reference specific repos, languages, and achievements. Write it like a story, not a report. Use second person ("you").
+4. "highlights" — Array of 4-5 fun, specific facts about their profile (e.g. "Your longest streak of 45 days means you coded for over 6 weeks straight").
+5. "industryBenchmarks" — Array of 3-4 objects with { "metric": string, "userValue": string, "industryAvg": string, "percentile": string } comparing their stats to real industry data.
+
+Respond with ONLY a valid JSON object. No markdown code blocks, no explanation.`;
+
+  yield { type: 'status', content: 'Gemini is analyzing your year...' };
+
+  const stream = await ai.models.generateContentStream({
+    model: getModelName('pro'),
+    contents: prompt,
+    config: {
+      ...baseConfig({ thinking: 'high', includeThoughts: true, grounding: true }),
+    },
+  });
+
+  for await (const chunk of stream) {
+    const parts = chunk.candidates?.[0]?.content?.parts ?? [];
+    for (const part of parts) {
+      if (!part.text) continue;
+      if (part.thought) {
+        yield { type: 'thought', content: part.text };
+      } else {
+        yield { type: 'text', content: part.text };
+      }
+    }
+  }
+}
+
+/**
+ * Streaming repo architecture analysis with Extended Thinking.
+ * Returns an AsyncGenerator yielding { type, content } chunks.
+ */
+export async function* streamRepoArchitecture(
+  treeData: { owner: string; repo: string; description: string | null; language: string | null; stars: number; tree: Array<{ path: string; type: 'blob' | 'tree'; size?: number }> }
+): AsyncGenerator<{ type: 'thought' | 'text' | 'status'; content: string }> {
+  const ai = getAI();
+
+  // Filter tree to meaningful files only
+  const filteredTree = treeData.tree
+    .filter(e =>
+      !e.path.includes('node_modules/') &&
+      !e.path.startsWith('.git/') &&
+      !e.path.includes('vendor/') &&
+      !e.path.includes('dist/') &&
+      !e.path.includes('.next/') &&
+      !e.path.includes('__pycache__/')
+    )
+    .slice(0, 500);
+
+  const treeText = filteredTree
+    .map(e => `${e.type === 'tree' ? 'd' : 'f'} ${e.path}${e.size ? ` (${e.size}b)` : ''}`)
+    .join('\n');
+
+  const prompt = `You are a senior software architect analyzing a repository's file structure. Generate a comprehensive architecture analysis.
+
+**Repository:** ${treeData.owner}/${treeData.repo}
+**Description:** ${treeData.description || 'No description'}
+**Primary Language:** ${treeData.language || 'Unknown'}
+**Stars:** ${treeData.stars}
+**File count:** ${filteredTree.filter(e => e.type === 'blob').length} files
+
+**File Tree** (d = directory, f = file):
+${treeText}
+
+**Instructions:**
+Analyze the architecture and produce output in this EXACT format with these three sections:
+
+1. First, output a Mermaid diagram showing the module/component dependency structure:
+\`\`\`mermaid
+graph TD
+    A[Module A] --> B[Module B]
+    ...
+\`\`\`
+
+2. Then output:
+## Architecture Overview
+A 2-3 paragraph explanation of how the codebase is organized, what frameworks/patterns it uses, and how the major components interact.
+
+3. Then output:
+## Key Patterns
+- Bullet list of 4-6 architectural patterns, design decisions, or notable structural choices you observe.
+
+Make the Mermaid diagram meaningful — show actual modules/directories and their relationships, not generic boxes. Use descriptive labels. Keep the diagram to 8-15 nodes maximum for readability.`;
+
+  yield { type: 'status', content: 'Gemini is analyzing architecture...' };
+
+  const stream = await ai.models.generateContentStream({
+    model: getModelName('pro'),
+    contents: prompt,
+    config: {
+      ...baseConfig({ thinking: 'high', includeThoughts: true }),
+    },
+  });
+
+  for await (const chunk of stream) {
+    const parts = chunk.candidates?.[0]?.content?.parts ?? [];
+    for (const part of parts) {
+      if (!part.text) continue;
+      if (part.thought) {
+        yield { type: 'thought', content: part.text };
+      } else {
+        yield { type: 'text', content: part.text };
+      }
+    }
+  }
+}
+
+/**
  * Check if Gemini is configured
  */
 export function isGeminiConfigured(): boolean {

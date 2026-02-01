@@ -16,6 +16,9 @@ const navLinks: NavLink[] = [
   { label: 'AI Features', href: '/ai', isHashLink: false },
   { label: 'README Generator', href: '/readme-generator', isHashLink: false },
   { label: 'Live Agent', href: '/readme-agent', isHashLink: false },
+  { label: 'Wrapped', href: '/wrapped', isHashLink: false },
+  { label: 'Visualize', href: '/visualize', isHashLink: false },
+  { label: 'Daily Card', href: '/daily', isHashLink: false },
 ];
 
 export function Navigation() {

@@ -719,6 +719,85 @@ export async function fetchProfileForReadme(
 }
 
 /**
+ * Repo tree entry from the Git Trees API
+ */
+export interface RepoTreeEntry {
+  path: string;
+  type: 'blob' | 'tree';
+  size?: number;
+}
+
+export interface RepoTreeData {
+  owner: string;
+  repo: string;
+  defaultBranch: string;
+  totalFiles: number;
+  truncated: boolean;
+  tree: RepoTreeEntry[];
+  description: string | null;
+  language: string | null;
+  stars: number;
+}
+
+/**
+ * Fetch a repository's file tree recursively using the Git Trees REST API.
+ * Used by the Repo Architecture Visualizer.
+ */
+export async function fetchRepoTree(
+  owner: string,
+  repo: string
+): Promise<RepoTreeData | null> {
+  try {
+    const octokit = getOctokit();
+
+    // Step 1: Get repo metadata + default branch
+    const { data: repoData } = await octokit.request('GET /repos/{owner}/{repo}', {
+      owner,
+      repo,
+    });
+
+    // Step 2: Get tree recursively
+    const { data: treeData } = await octokit.request(
+      'GET /repos/{owner}/{repo}/git/trees/{tree_sha}',
+      {
+        owner,
+        repo,
+        tree_sha: repoData.default_branch,
+        recursive: '1',
+      }
+    );
+
+    return {
+      owner,
+      repo,
+      defaultBranch: repoData.default_branch,
+      totalFiles: treeData.tree.filter((e) => e.type === 'blob').length,
+      truncated: treeData.truncated ?? false,
+      tree: treeData.tree
+        .filter((e): e is typeof e & { path: string; type: string } => !!e.path && !!e.type)
+        .map((e) => ({
+          path: e.path,
+          type: e.type as 'blob' | 'tree',
+          size: e.size,
+        })),
+      description: repoData.description,
+      language: repoData.language,
+      stars: repoData.stargazers_count,
+    };
+  } catch (error: unknown) {
+    if (
+      error &&
+      typeof error === 'object' &&
+      'status' in error &&
+      (error.status === 404 || error.status === 409)
+    ) {
+      return null;
+    }
+    throw error;
+  }
+}
+
+/**
  * Fetch a specific repository's data
  *
  * @param username - GitHub username
@@ -771,5 +850,173 @@ export async function fetchRepoData(
     };
   } catch {
     return null;
+  }
+}
+
+/**
+ * Daily activity data for the Daily Dev Card
+ */
+export interface DailyActivity {
+  name: string | null;
+  avatarUrl: string;
+  commits: number;
+  additions: number;
+  deletions: number;
+  prsMerged: number;
+  commitMessages: string[];
+}
+
+const DAILY_ACTIVITY_QUERY = `
+  query($username: String!, $since: DateTime!, $until: DateTime!) {
+    user(login: $username) {
+      name
+      avatarUrl
+      login
+      contributionsCollection(from: $since, to: $until) {
+        totalCommitContributions
+        totalPullRequestContributions
+      }
+      repositories(first: 10, orderBy: {field: PUSHED_AT, direction: DESC}) {
+        nodes {
+          name
+          defaultBranchRef {
+            target {
+              ... on Commit {
+                history(first: 20, since: $since, until: $until) {
+                  totalCount
+                  nodes {
+                    message
+                    additions
+                    deletions
+                    committedDate
+                    author {
+                      user {
+                        login
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
+interface DailyActivityResponse {
+  user: {
+    name: string | null;
+    avatarUrl: string;
+    login: string;
+    contributionsCollection: {
+      totalCommitContributions: number;
+      totalPullRequestContributions: number;
+    };
+    repositories: {
+      nodes: Array<{
+        name: string;
+        defaultBranchRef: {
+          target: {
+            history: {
+              totalCount: number;
+              nodes: Array<{
+                message: string;
+                additions: number;
+                deletions: number;
+                committedDate: string;
+                author: {
+                  user: { login: string } | null;
+                } | null;
+              }>;
+            };
+          };
+        } | null;
+      }>;
+    };
+  } | null;
+}
+
+/**
+ * Fetch a user's daily GitHub activity (commits, additions, deletions, PRs, messages).
+ * Used by the Daily Dev Card feature.
+ */
+export async function fetchDailyActivity(
+  username: string
+): Promise<DailyActivity | null> {
+  try {
+    const now = new Date();
+    const since = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0).toISOString();
+    const until = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59).toISOString();
+
+    const response = await getOctokit().graphql<DailyActivityResponse>(
+      DAILY_ACTIVITY_QUERY,
+      { username, since, until }
+    );
+
+    if (!response.user) {
+      return null;
+    }
+
+    const { user } = response;
+    const loginLower = user.login.toLowerCase();
+
+    let additions = 0;
+    let deletions = 0;
+    const messageSet = new Set<string>();
+
+    for (const repo of user.repositories.nodes) {
+      if (!repo.defaultBranchRef?.target?.history?.nodes) continue;
+
+      for (const commit of repo.defaultBranchRef.target.history.nodes) {
+        // Filter to only this user's commits
+        if (!commit.author?.user?.login || commit.author.user.login.toLowerCase() !== loginLower) {
+          continue;
+        }
+        additions += commit.additions;
+        deletions += commit.deletions;
+        // First line of commit message, deduplicated
+        const firstLine = commit.message.split('\n')[0].trim();
+        if (firstLine) messageSet.add(firstLine);
+      }
+    }
+
+    return {
+      name: user.name,
+      avatarUrl: user.avatarUrl,
+      commits: user.contributionsCollection.totalCommitContributions,
+      additions,
+      deletions,
+      prsMerged: user.contributionsCollection.totalPullRequestContributions,
+      commitMessages: Array.from(messageSet).slice(0, 15),
+    };
+  } catch (error: unknown) {
+    if (
+      error &&
+      typeof error === 'object' &&
+      'errors' in error &&
+      Array.isArray(error.errors)
+    ) {
+      const firstError = error.errors[0];
+      if (
+        typeof firstError === 'object' &&
+        firstError !== null &&
+        'type' in firstError &&
+        firstError.type === 'NOT_FOUND'
+      ) {
+        return null;
+      }
+    }
+    if (
+      error &&
+      typeof error === 'object' &&
+      'message' in error &&
+      typeof error.message === 'string' &&
+      error.message.includes('Could not resolve')
+    ) {
+      return null;
+    }
+    throw error;
   }
 }
