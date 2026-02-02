@@ -4,7 +4,7 @@
  * Generates a widget card for a single repository.
  */
 
-import { ImageResponse } from '@vercel/og';
+import { ImageResponse } from 'next/og';
 import { NextRequest, NextResponse } from 'next/server';
 import { validateRepoQuery } from '@/lib/validations';
 import { fetchRepoData } from '@/lib/github';
@@ -42,7 +42,7 @@ function formatNumber(num: number): string {
 /**
  * Generate error image for repo widget
  */
-function generateErrorImage(message: string, theme: Theme): NextResponse {
+async function generateErrorImage(message: string, theme: Theme): Promise<NextResponse> {
   const imageResponse = new ImageResponse(
     (
       <div
@@ -73,7 +73,8 @@ function generateErrorImage(message: string, theme: Theme): NextResponse {
     { width, height }
   );
 
-  return new NextResponse(imageResponse.body, {
+  const _buf = await imageResponse.arrayBuffer();
+  return new NextResponse(Buffer.from(_buf), {
     headers: {
       'Content-Type': 'image/png',
       'Cache-Control': `public, max-age=${apiConfig.cacheMaxAge}, s-maxage=${apiConfig.cacheSMaxAge}`,
@@ -84,7 +85,7 @@ function generateErrorImage(message: string, theme: Theme): NextResponse {
 /**
  * Generate repo widget image with premium design
  */
-function generateRepoImage(repo: RepoData, theme: Theme): NextResponse {
+async function generateRepoImage(repo: RepoData, theme: Theme): Promise<NextResponse> {
   const imageResponse = new ImageResponse(
     (
       <div
@@ -273,7 +274,8 @@ function generateRepoImage(repo: RepoData, theme: Theme): NextResponse {
     { width, height }
   );
 
-  return new NextResponse(imageResponse.body, {
+  const _buf = await imageResponse.arrayBuffer();
+  return new NextResponse(Buffer.from(_buf), {
     headers: {
       'Content-Type': 'image/png',
       'Cache-Control': `public, max-age=${apiConfig.cacheMaxAge}, s-maxage=${apiConfig.cacheSMaxAge}`,
@@ -301,7 +303,7 @@ export async function GET(request: NextRequest) {
       theme: themeParam,
     });
   } catch {
-    return generateErrorImage('Invalid parameters', theme);
+    return await generateErrorImage('Invalid parameters', theme);
   }
 
   // Fetch repo data
@@ -309,12 +311,12 @@ export async function GET(request: NextRequest) {
   try {
     data = await fetchRepoData(validatedParams.username, validatedParams.repo);
   } catch {
-    return generateErrorImage('API Error', theme);
+    return await generateErrorImage('API Error', theme);
   }
 
   if (!data) {
-    return generateErrorImage('Repo not found', theme);
+    return await generateErrorImage('Repo not found', theme);
   }
 
-  return generateRepoImage(data, theme);
+  return await generateRepoImage(data, theme);
 }

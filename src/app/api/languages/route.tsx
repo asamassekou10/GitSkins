@@ -4,7 +4,7 @@
  * Generates a widget showing top programming languages with progress bars.
  */
 
-import { ImageResponse } from '@vercel/og';
+import { ImageResponse } from 'next/og';
 import { NextRequest, NextResponse } from 'next/server';
 import { validateWidgetQuery } from '@/lib/validations';
 import { fetchExtendedGitHubData } from '@/lib/github';
@@ -20,7 +20,7 @@ const { width, height } = widgetConfig.languages;
 /**
  * Generate error image for languages widget
  */
-function generateErrorImage(message: string, theme: Theme): NextResponse {
+async function generateErrorImage(message: string, theme: Theme): Promise<NextResponse> {
   const imageResponse = new ImageResponse(
     (
       <div
@@ -51,7 +51,8 @@ function generateErrorImage(message: string, theme: Theme): NextResponse {
     { width, height }
   );
 
-  return new NextResponse(imageResponse.body, {
+  const _buf = await imageResponse.arrayBuffer();
+  return new NextResponse(Buffer.from(_buf), {
     headers: {
       'Content-Type': 'image/png',
       'Cache-Control': `public, max-age=${apiConfig.cacheMaxAge}, s-maxage=${apiConfig.cacheSMaxAge}, stale-while-revalidate=86400`,
@@ -65,10 +66,10 @@ function generateErrorImage(message: string, theme: Theme): NextResponse {
 /**
  * Generate languages widget image with premium design
  */
-function generateLanguagesImage(
+async function generateLanguagesImage(
   languages: LanguageStat[],
   theme: Theme
-): NextResponse {
+): Promise<NextResponse> {
   const imageResponse = new ImageResponse(
     (
       <div
@@ -266,7 +267,8 @@ function generateLanguagesImage(
     { width, height }
   );
 
-  return new NextResponse(imageResponse.body, {
+  const _buf = await imageResponse.arrayBuffer();
+  return new NextResponse(Buffer.from(_buf), {
     headers: {
       'Content-Type': 'image/png',
       'Cache-Control': `public, max-age=${apiConfig.cacheMaxAge}, s-maxage=${apiConfig.cacheSMaxAge}, stale-while-revalidate=86400`,
@@ -295,7 +297,7 @@ export async function GET(request: NextRequest) {
       theme: themeParam,
     });
   } catch {
-    return generateErrorImage('Invalid parameters', theme);
+    return await generateErrorImage('Invalid parameters', theme);
   }
 
   // Fetch GitHub data
@@ -303,12 +305,12 @@ export async function GET(request: NextRequest) {
   try {
     data = await fetchExtendedGitHubData(validatedParams.username);
   } catch {
-    return generateErrorImage('API Error', theme);
+    return await generateErrorImage('API Error', theme);
   }
 
   if (!data) {
-    return generateErrorImage('User not found', theme);
+    return await generateErrorImage('User not found', theme);
   }
 
-  return generateLanguagesImage(data.languages, theme);
+  return await generateLanguagesImage(data.languages, theme);
 }

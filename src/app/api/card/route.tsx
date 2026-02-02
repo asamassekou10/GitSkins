@@ -5,7 +5,7 @@
  * Handles validation, data fetching, and image generation.
  */
 
-import { ImageResponse } from '@vercel/og';
+import { ImageResponse } from 'next/og';
 import { NextRequest, NextResponse } from 'next/server';
 import { validateCardQuery } from '@/lib/validations';
 import { fetchGitHubData } from '@/lib/github';
@@ -26,10 +26,10 @@ export const dynamic = 'force-dynamic';
  * Generate error image response
  * Always returns an image (never JSON) to prevent broken image icons
  */
-function generateErrorImage(
+async function generateErrorImage(
   message: string,
   subtitle?: string
-): NextResponse {
+): Promise<NextResponse> {
   const imageResponse = new ImageResponse(
     (
       <div
@@ -75,7 +75,8 @@ function generateErrorImage(
     }
   );
 
-  return new NextResponse(imageResponse.body, {
+  const _buf = await imageResponse.arrayBuffer();
+  return new NextResponse(Buffer.from(_buf), {
     headers: {
       'Content-Type': 'image/png',
       'Cache-Control': `public, max-age=${apiConfig.cacheMaxAge}, s-maxage=${apiConfig.cacheSMaxAge}, stale-while-revalidate=86400`,
@@ -89,7 +90,7 @@ function generateErrorImage(
 /**
  * Generate "missing username" prompt image
  */
-function generateMissingUsernameImage(theme: Theme): NextResponse {
+async function generateMissingUsernameImage(theme: Theme): Promise<NextResponse> {
   const imageResponse = new ImageResponse(
     (
       <div
@@ -119,7 +120,8 @@ function generateMissingUsernameImage(theme: Theme): NextResponse {
     }
   );
 
-  return new NextResponse(imageResponse.body, {
+  const _buf = await imageResponse.arrayBuffer();
+  return new NextResponse(Buffer.from(_buf), {
     headers: {
       'Content-Type': 'image/png',
       'Cache-Control': `public, max-age=${apiConfig.cacheMaxAge}, s-maxage=${apiConfig.cacheSMaxAge}, stale-while-revalidate=86400`,
@@ -133,10 +135,10 @@ function generateMissingUsernameImage(theme: Theme): NextResponse {
 /**
  * Generate "user not found" image
  */
-function generateUserNotFoundImage(
+async function generateUserNotFoundImage(
   username: string,
   theme: Theme
-): NextResponse {
+): Promise<NextResponse> {
   const imageResponse = new ImageResponse(
     (
       <div
@@ -179,7 +181,8 @@ function generateUserNotFoundImage(
     }
   );
 
-  return new NextResponse(imageResponse.body, {
+  const _buf = await imageResponse.arrayBuffer();
+  return new NextResponse(Buffer.from(_buf), {
     headers: {
       'Content-Type': 'image/png',
       'Cache-Control': `public, max-age=${apiConfig.cacheMaxAge}, s-maxage=${apiConfig.cacheSMaxAge}, stale-while-revalidate=86400`,
@@ -193,12 +196,12 @@ function generateUserNotFoundImage(
 /**
  * Generate success card image with premium design
  */
-function generateCardImage(
+async function generateCardImage(
   data: GitHubData,
   username: string,
   theme: Theme,
   themeName: ThemeName
-): NextResponse {
+): Promise<NextResponse> {
   const themeIcons = getThemeIcons(themeName);
   const iconColor = theme.iconColor || theme.accentColor;
   const imageResponse = new ImageResponse(
@@ -475,7 +478,8 @@ function generateCardImage(
     }
   );
 
-  return new NextResponse(imageResponse.body, {
+  const _buf = await imageResponse.arrayBuffer();
+  return new NextResponse(Buffer.from(_buf), {
     headers: {
       'Content-Type': 'image/png',
       'Cache-Control': `public, max-age=${apiConfig.cacheMaxAge}, s-maxage=${apiConfig.cacheSMaxAge}, stale-while-revalidate=86400`,
@@ -505,7 +509,7 @@ export async function GET(request: NextRequest) {
     // Handle missing username early
     if (!usernameParam || usernameParam.trim() === '') {
       const theme = getThemeUniversal(themeParam || undefined);
-      return generateMissingUsernameImage(theme);
+      return await generateMissingUsernameImage(theme);
     }
 
     const rawParams = {
@@ -521,13 +525,13 @@ export async function GET(request: NextRequest) {
       // Validation error - return error image instead of JSON
       const errorMessage =
         error instanceof Error ? error.message : 'Invalid request parameters';
-      return generateErrorImage('Validation Error', errorMessage);
+      return await generateErrorImage('Validation Error', errorMessage);
     }
 
     // Double-check username (shouldn't be needed, but safety check)
     if (!validatedParams.username) {
       const theme = getThemeUniversal(validatedParams.theme);
-      return generateMissingUsernameImage(theme);
+      return await generateMissingUsernameImage(theme);
     }
 
     // Get theme
@@ -540,7 +544,7 @@ export async function GET(request: NextRequest) {
     } catch (error) {
       // GitHub API error - return error image
       console.error('GitHub API error:', error);
-      return generateErrorImage(
+      return await generateErrorImage(
         'GitHub API Error',
         'Unable to fetch user data. Please try again later.'
       );
@@ -548,17 +552,17 @@ export async function GET(request: NextRequest) {
 
     // Handle user not found
     if (!data) {
-      return generateUserNotFoundImage(validatedParams.username, theme);
+      return await generateUserNotFoundImage(validatedParams.username, theme);
     }
 
     // Generate and return card image
-    return generateCardImage(data, validatedParams.username, theme, validatedParams.theme || 'satan');
+    return await generateCardImage(data, validatedParams.username, theme, validatedParams.theme || 'satan');
   } catch (error) {
     // Unexpected error - always return image, never JSON
     console.error('Unexpected error generating card:', error);
     const errorMessage =
       error instanceof Error ? error.message : 'Unknown error occurred';
-    return generateErrorImage('Error Generating Card', errorMessage);
+    return await generateErrorImage('Error Generating Card', errorMessage);
   }
 }
 

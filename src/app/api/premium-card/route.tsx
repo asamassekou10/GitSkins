@@ -5,7 +5,7 @@
  * with rich fonts, effects, and visual designs.
  */
 
-import { ImageResponse } from '@vercel/og';
+import { ImageResponse } from 'next/og';
 import { NextRequest, NextResponse } from 'next/server';
 import { validateCardQuery } from '@/lib/validations';
 import { fetchGitHubData } from '@/lib/github';
@@ -54,7 +54,7 @@ function minimalErrorSvg(message: string, subtitle?: string): NextResponse {
  * Generate error image response (PNG via ImageResponse).
  * On failure (e.g. Edge runtime issue), falls back to SVG.
  */
-function generateErrorImage(message: string, subtitle?: string): NextResponse {
+async function generateErrorImage(message: string, subtitle?: string): Promise<NextResponse> {
   const safeMessage = String(message).slice(0, 60);
   const safeSubtitle = subtitle ? String(subtitle).slice(0, 80) : undefined;
   try {
@@ -90,7 +90,8 @@ function generateErrorImage(message: string, subtitle?: string): NextResponse {
       }
     );
 
-    return new NextResponse(imageResponse.body, {
+    const _buf = await imageResponse.arrayBuffer();
+    return new NextResponse(Buffer.from(_buf), {
       headers: {
         'Content-Type': 'image/png',
         ...IMAGE_HEADERS,
@@ -428,7 +429,8 @@ async function generatePremiumCardImage(
     }
   );
 
-  return new NextResponse(imageResponse.body, {
+  const _buf = await imageResponse.arrayBuffer();
+  return new NextResponse(Buffer.from(_buf), {
     headers: {
       'Content-Type': 'image/png',
       'Cache-Control': `public, max-age=${apiConfig.cacheMaxAge}, s-maxage=${apiConfig.cacheSMaxAge}, stale-while-revalidate=86400`,
@@ -449,9 +451,9 @@ export async function GET(request: NextRequest) {
   let username = 'unknown';
   let theme: string | undefined;
 
-  const safeReturnErrorImage = (msg: string, sub?: string): NextResponse => {
+  const safeReturnErrorImage = async (msg: string, sub?: string): Promise<NextResponse> => {
     try {
-      return generateErrorImage(msg, sub);
+      return await generateErrorImage(msg, sub);
     } catch {
       return minimalErrorSvg(msg, sub);
     }
@@ -459,7 +461,7 @@ export async function GET(request: NextRequest) {
 
   try {
     if (!process.env.GITHUB_TOKEN?.trim()) {
-      return safeReturnErrorImage(
+      return await safeReturnErrorImage(
         'Server configuration',
         'GITHUB_TOKEN not set. Add it in Vercel env vars.'
       );
@@ -479,7 +481,7 @@ export async function GET(request: NextRequest) {
         errorType: 'missing_username',
         duration: Date.now() - startTime,
       });
-      return safeReturnErrorImage('Missing Username', 'Add ?username=yourname');
+      return await safeReturnErrorImage('Missing Username', 'Add ?username=yourname');
     }
 
     const rawParams = {
@@ -500,7 +502,7 @@ export async function GET(request: NextRequest) {
         errorType: 'validation_error',
         duration: Date.now() - startTime,
       });
-      return safeReturnErrorImage('Validation Error', errorMessage);
+      return await safeReturnErrorImage('Validation Error', errorMessage);
     }
 
     // Double-check username
@@ -513,7 +515,7 @@ export async function GET(request: NextRequest) {
         errorType: 'missing_username',
         duration: Date.now() - startTime,
       });
-      return safeReturnErrorImage('Missing Username', 'Add ?username=yourname');
+      return await safeReturnErrorImage('Missing Username', 'Add ?username=yourname');
     }
 
     username = validatedParams.username;
@@ -532,7 +534,7 @@ export async function GET(request: NextRequest) {
         errorType: 'github_api_error',
         duration: Date.now() - startTime,
       });
-      return safeReturnErrorImage('GitHub API Error', 'Check username and try again.');
+      return await safeReturnErrorImage('GitHub API Error', 'Check username and try again.');
     }
 
     if (!data) {
@@ -544,7 +546,7 @@ export async function GET(request: NextRequest) {
         errorType: 'user_not_found',
         duration: Date.now() - startTime,
       });
-      return safeReturnErrorImage('User Not Found', `@${validatedParams.username}`);
+      return await safeReturnErrorImage('User Not Found', `@${validatedParams.username}`);
     }
 
     // Track successful generation
@@ -573,7 +575,7 @@ export async function GET(request: NextRequest) {
       duration: Date.now() - startTime,
     });
     const shortMsg = error instanceof Error ? error.message.slice(0, 50) : 'Unknown error';
-    return safeReturnErrorImage('Error', shortMsg);
+    return await safeReturnErrorImage('Error', shortMsg);
   }
 }
 

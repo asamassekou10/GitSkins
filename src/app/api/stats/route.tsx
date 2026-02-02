@@ -4,7 +4,7 @@
  * Generates a compact stats widget showing stars, contributions, repos, and followers.
  */
 
-import { ImageResponse } from '@vercel/og';
+import { ImageResponse } from 'next/og';
 import { NextRequest, NextResponse } from 'next/server';
 import { validateWidgetQuery } from '@/lib/validations';
 import { fetchExtendedGitHubData } from '@/lib/github';
@@ -20,7 +20,7 @@ const { width, height } = widgetConfig.stats;
 /**
  * Generate error image for stats widget
  */
-function generateErrorImage(message: string, theme: Theme): NextResponse {
+async function generateErrorImage(message: string, theme: Theme): Promise<NextResponse> {
   const imageResponse = new ImageResponse(
     (
       <div
@@ -51,7 +51,8 @@ function generateErrorImage(message: string, theme: Theme): NextResponse {
     { width, height }
   );
 
-  return new NextResponse(imageResponse.body, {
+  const _buf = await imageResponse.arrayBuffer();
+  return new NextResponse(Buffer.from(_buf), {
     headers: {
       'Content-Type': 'image/png',
       'Cache-Control': `public, max-age=${apiConfig.cacheMaxAge}, s-maxage=${apiConfig.cacheSMaxAge}, stale-while-revalidate=86400`,
@@ -65,7 +66,7 @@ function generateErrorImage(message: string, theme: Theme): NextResponse {
 /**
  * Generate stats widget image with premium design
  */
-function generateStatsImage(stats: CompactStats, theme: Theme): NextResponse {
+async function generateStatsImage(stats: CompactStats, theme: Theme): Promise<NextResponse> {
   const imageResponse = new ImageResponse(
     (
       <div
@@ -513,7 +514,8 @@ function generateStatsImage(stats: CompactStats, theme: Theme): NextResponse {
     { width, height }
   );
 
-  return new NextResponse(imageResponse.body, {
+  const _buf = await imageResponse.arrayBuffer();
+  return new NextResponse(Buffer.from(_buf), {
     headers: {
       'Content-Type': 'image/png',
       'Cache-Control': `public, max-age=${apiConfig.cacheMaxAge}, s-maxage=${apiConfig.cacheSMaxAge}, stale-while-revalidate=86400`,
@@ -542,7 +544,7 @@ export async function GET(request: NextRequest) {
       theme: themeParam,
     });
   } catch {
-    return generateErrorImage('Invalid parameters', theme);
+    return await generateErrorImage('Invalid parameters', theme);
   }
 
   // Fetch GitHub data
@@ -550,12 +552,12 @@ export async function GET(request: NextRequest) {
   try {
     data = await fetchExtendedGitHubData(validatedParams.username);
   } catch {
-    return generateErrorImage('API Error', theme);
+    return await generateErrorImage('API Error', theme);
   }
 
   if (!data) {
-    return generateErrorImage('User not found', theme);
+    return await generateErrorImage('User not found', theme);
   }
 
-  return generateStatsImage(data.stats, theme);
+  return await generateStatsImage(data.stats, theme);
 }

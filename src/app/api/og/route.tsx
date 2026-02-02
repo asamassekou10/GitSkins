@@ -1,7 +1,7 @@
-import { ImageResponse } from '@vercel/og';
+import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
 
-export const runtime = 'edge';
+export const runtime = 'nodejs';
 
 /**
  * Dynamic OG Image Generation
@@ -54,6 +54,7 @@ export async function GET(request: NextRequest) {
             {/* Logo/Title */}
             <div
               style={{
+                display: 'flex',
                 fontSize: 72,
                 fontWeight: 'bold',
                 background: `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})`,
@@ -68,6 +69,7 @@ export async function GET(request: NextRequest) {
             {/* Username */}
             <div
               style={{
+                display: 'flex',
                 fontSize: 48,
                 color: '#ffffff',
                 marginBottom: 30,
@@ -99,6 +101,7 @@ export async function GET(request: NextRequest) {
           {/* Footer */}
           <div
             style={{
+              display: 'flex',
               position: 'absolute',
               bottom: 40,
               fontSize: 20,
