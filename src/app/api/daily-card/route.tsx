@@ -68,6 +68,11 @@ export async function GET(request: NextRequest) {
     const avatarUrl = sp.get('avatar') || `https://github.com/${sp.get('username') || 'octocat'}.png`;
     const avatar = await fetchImageAsBase64(avatarUrl);
 
+    // New Data
+    const reposRaw = sp.get('repos');
+    const activeRepos: Array<{ name: string; language: string | null; color: string | null }> = reposRaw ? JSON.parse(reposRaw) : [];
+    const streak = sp.get('streak') || '0';
+
     const theme = getPremiumTheme(themeName);
     const c = theme.colors;
 
@@ -86,6 +91,44 @@ export async function GET(request: NextRequest) {
     
     // Build Text Sections
     let textContent = '';
+
+    // "Focus" Section (Active Repos)
+    if (activeRepos.length > 0) {
+      const repoItems = activeRepos.map(repo => {
+        const langColor = repo.color || c.secondary;
+        return `
+          <g transform="translate(0, 0)">
+             <rect x="0" y="0" width="8" height="8" rx="4" fill="${langColor}" fill-opacity="0.8"/>
+             <text x="16" y="8" fill="${c.primary}" font-size="16" font-weight="600" font-family="'Segoe UI', Roboto, Helvetica, Arial, sans-serif">${esc(repo.name)}</text>
+          </g>
+        `;
+      });
+      
+      // Horizontal layout for repos
+      let repoX = 0;
+      const repoSvgs = activeRepos.map((repo, i) => {
+        const langColor = repo.color || c.secondary;
+        const width = repo.name.length * 10 + 30; // Approx width
+        const svg = `
+          <g transform="translate(${repoX}, 0)">
+             <circle cx="4" cy="-5" r="4" fill="${langColor}"/>
+             <text x="14" y="0" fill="${c.secondary}" font-size="16" font-weight="600" font-family="'Segoe UI', Roboto, Helvetica, Arial, sans-serif">${esc(repo.name)}</text>
+          </g>
+        `;
+        repoX += width;
+        return svg;
+      }).join('');
+
+      textContent += `
+        <g transform="translate(${PADDING}, ${currentY})">
+          <text x="0" y="-10" fill="${c.accent}" font-size="12" font-weight="700" letter-spacing="1.5" font-family="'Segoe UI', Roboto, Helvetica, Arial, sans-serif" opacity="0.9">WORKING ON</text>
+          <g transform="translate(0, 15)">
+            ${repoSvgs}
+          </g>
+        </g>
+      `;
+      currentY += 60;
+    }
 
     if (todayLines.length > 0) {
       textContent += `
@@ -113,12 +156,22 @@ export async function GET(request: NextRequest) {
     }
 
     // Stats Section (Bottom)
+    // Add Streak to stats if > 0
     const stats = [
-      { label: 'COMMITS', value: commits, icon: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h-2v-2h2v2zm0-4h-2V7h2v6z' }, // Simplified icons for now
-      { label: 'ADDITIONS', value: additions },
-      { label: 'DELETIONS', value: deletions },
-      { label: 'MERGED PRS', value: prs },
+      { label: 'COMMITS', value: commits, icon: 'commits' },
+      { label: 'ADDITIONS', value: additions, icon: 'additions' },
+      { label: 'DELETIONS', value: deletions, icon: 'deletions' },
+      { label: 'MERGED PRS', value: prs, icon: 'prs' },
     ];
+    
+    // Replaced Icon with text for now to keep it clean or could add path
+    // Let's add streak as a badge if it exists
+    const streakBadge = streak !== '0' ? `
+      <g transform="translate(${WIDTH - PADDING - 120}, ${HEIGHT - 90})">
+        <rect x="0" y="0" width="120" height="40" rx="20" fill="#f97316" fill-opacity="0.2" stroke="#f97316" stroke-opacity="0.5"/>
+        <text x="60" y="26" text-anchor="middle" fill="#f97316" font-size="16" font-weight="700" font-family="'Segoe UI', Roboto, Helvetica, Arial, sans-serif">🔥 ${streak} DAY STREAK</text>
+      </g>
+    ` : '';
 
     const statsY = HEIGHT - 100;
     const statWidth = CONTENT_WIDTH / 4;
@@ -178,6 +231,9 @@ export async function GET(request: NextRequest) {
 
   <!-- Stats -->
   ${statsContent}
+
+  <!-- Streak Badge (Optional) -->
+  ${streakBadge}
 
   <!-- Branding -->
   <text x="${WIDTH - PADDING}" y="${HEIGHT - 30}" text-anchor="end" fill="${c.secondary}" font-size="12" font-weight="500" font-family="'Segoe UI', Roboto, Helvetica, Arial, sans-serif" opacity="0.4">git-skins.com</text>

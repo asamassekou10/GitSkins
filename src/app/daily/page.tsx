@@ -28,6 +28,8 @@ interface DailyActivity {
   deletions: number;
   prsMerged: number;
   commitMessages: string[];
+  activeRepos: Array<{ name: string; language: string | null; color: string | null }>;
+  streak: number;
 }
 
 export default function DailyPage() {
@@ -103,6 +105,8 @@ export default function DailyPage() {
       date: today,
       name: activity.name || username.trim(),
       avatar: activity.avatarUrl,
+      repos: JSON.stringify(activity.activeRepos),
+      streak: String(activity.streak),
     });
     return `/api/daily-card?${params.toString()}`;
   }, [activity, username, selectedTheme, todayText, tomorrowText, today]);
