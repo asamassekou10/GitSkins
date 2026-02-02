@@ -3,16 +3,16 @@
  *
  * Enhanced API endpoint for generating premium GitHub profile cards
  * with rich fonts, effects, and visual designs.
+ * 
+ * Updated: Uses pure SVG generation for reliability across runtimes.
  */
 
-import { ImageResponse } from 'next/og';
 import { NextRequest, NextResponse } from 'next/server';
 import { validateCardQuery } from '@/lib/validations';
 import { fetchGitHubData } from '@/lib/github';
 import { getPremiumTheme } from '@/registry/themes/premium-registry';
-import { getFireColor, truncateBio } from '@/lib/image-generator';
-import { imageConfig, apiConfig, siteConfig } from '@/config/site';
-import { getPremiumBackgroundPattern } from '@/lib/premium-patterns';
+import { truncateBio } from '@/lib/image-generator';
+import { apiConfig, siteConfig } from '@/config/site';
 import { trackCardGeneration } from '@/lib/analytics';
 import type { GitHubData } from '@/types';
 import type { PremiumThemeName } from '@/types/premium-theme';
@@ -20,460 +20,202 @@ import type { PremiumThemeName } from '@/types/premium-theme';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-const IMAGE_HEADERS = {
-  'Cache-Control': `public, max-age=${apiConfig.cacheMaxAge}, s-maxage=${apiConfig.cacheSMaxAge}, stale-while-revalidate=86400`,
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
-};
+const WIDTH = 1200;
+const HEIGHT = 630;
+
+function esc(str: string): string {
+  return str.replace(/[<>"&']/g, (c) =>
+    c === '<' ? '&lt;' : c === '>' ? '&gt;' : c === '"' ? '&quot;' : c === '&' ? '&amp;' : '&#39;'
+  );
+}
+
+// Fetch image buffer and convert to base64 for embedding
+async function fetchImageAsBase64(url: string): Promise<string> {
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3000); // 3s timeout
+    const res = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeoutId);
+    
+    if (!res.ok) throw new Error('Failed to fetch image');
+    const arrayBuffer = await res.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+    const base64 = buffer.toString('base64');
+    const contentType = res.headers.get('content-type') || 'image/png';
+    return `data:${contentType};base64,${base64}`;
+  } catch (e) {
+    console.warn('Failed to fetch avatar for embedding:', e);
+    // Fallback to a generic placeholder or original URL if possible (though original URL might fail display if CORS/hotlink blocked)
+    return url;
+  }
+}
 
 /**
- * Fallback: return a simple SVG when ImageResponse fails (e.g. in Edge).
- * Ensures we always return 200 + image so the client img never fails to load.
+ * Generate error SVG response
  */
-function minimalErrorSvg(message: string, subtitle?: string): NextResponse {
-  const safeMessage = String(message).slice(0, 60).replace(/[<>"&]/g, '');
-  const safeSubtitle = subtitle ? String(subtitle).slice(0, 80).replace(/[<>"&]/g, '') : '';
-  const w = imageConfig.width;
-  const h = imageConfig.height;
+function generateErrorSvg(message: string, subtitle?: string): NextResponse {
+  const safeMessage = esc(message.slice(0, 60));
+  const safeSubtitle = subtitle ? esc(subtitle.slice(0, 80)) : '';
   const svg = `<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
+<svg xmlns="http://www.w3.org/2000/svg" width="${WIDTH}" height="${HEIGHT}" viewBox="0 0 ${WIDTH} ${HEIGHT}">
   <rect width="100%" height="100%" fill="#0d1117"/>
-  <text x="50%" y="45%" text-anchor="middle" fill="#22c55e" font-size="32" font-family="system-ui,sans-serif">${safeMessage}</text>
-  ${safeSubtitle ? `<text x="50%" y="55%" text-anchor="middle" fill="#888" font-size="20" font-family="system-ui,sans-serif">${safeSubtitle}</text>` : ''}
+  <text x="50%" y="45%" text-anchor="middle" fill="#ef4444" font-size="32" font-family="system-ui,sans-serif" font-weight="bold">${safeMessage}</text>
+  ${safeSubtitle ? `<text x="50%" y="55%" text-anchor="middle" fill="#8b949e" font-size="20" font-family="system-ui,sans-serif">${safeSubtitle}</text>` : ''}
 </svg>`;
   return new NextResponse(svg, {
     headers: {
       'Content-Type': 'image/svg+xml',
-      ...IMAGE_HEADERS,
+      'Cache-Control': 'no-cache',
     },
   });
 }
 
 /**
- * Generate error image response (PNG via ImageResponse).
- * On failure (e.g. Edge runtime issue), falls back to SVG.
+ * Generate premium card SVG
  */
-async function generateErrorImage(message: string, subtitle?: string): Promise<NextResponse> {
-  const safeMessage = String(message).slice(0, 60);
-  const safeSubtitle = subtitle ? String(subtitle).slice(0, 80) : undefined;
-  try {
-    const imageResponse = new ImageResponse(
-      (
-        <div
-          style={{
-            width: imageConfig.width,
-            height: imageConfig.height,
-            background: '#0d1117',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: '#22c55e',
-            fontFamily: 'system-ui',
-            border: '4px solid #30363d',
-          }}
-        >
-          <div style={{ fontSize: 48, marginBottom: 20, fontWeight: 'bold', display: 'flex' }}>
-            <span>{safeMessage}</span>
-          </div>
-          {safeSubtitle && (
-            <div style={{ fontSize: 24, marginTop: 20, color: '#888', display: 'flex' }}>
-              <span>{safeSubtitle}</span>
-            </div>
-          )}
-        </div>
-      ),
-      {
-        width: imageConfig.width,
-        height: imageConfig.height,
-      }
-    );
-
-    const _buf = await imageResponse.arrayBuffer();
-    return new NextResponse(Buffer.from(_buf), {
-      headers: {
-        'Content-Type': 'image/png',
-        ...IMAGE_HEADERS,
-      },
-    });
-  } catch {
-    return minimalErrorSvg(safeMessage, safeSubtitle);
-  }
-}
-
-/**
- * Generate premium card image
- */
-async function generatePremiumCardImage(
+async function generatePremiumCardSvg(
   data: GitHubData,
   username: string,
   themeName: PremiumThemeName
 ): Promise<NextResponse> {
   const theme = getPremiumTheme(themeName);
+  const c = theme.colors;
+  
+  // Embed avatar
+  const avatarBase64 = await fetchImageAsBase64(data.avatarUrl);
 
-  // Note: Custom font loading disabled due to Edge runtime compatibility issues
-  // Google Fonts API doesn't work reliably in Edge runtime
-  // Using system fonts provides consistent, fast rendering
-  const fontData: ArrayBuffer | undefined = undefined;
+  // Stats
+  const stars = data.totalStars.toLocaleString();
+  const contributions = data.totalContributions.toLocaleString();
 
-  const imageResponse = new ImageResponse(
-    (
-      <div
-        style={{
-          width: imageConfig.width,
-          height: imageConfig.height,
-          background: theme.colors.bg,
-          display: 'flex',
-          flexDirection: 'column',
-          fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-          position: 'relative',
-          overflow: 'hidden',
-          padding: 24,
-        }}
-      >
-        {/* Background Pattern Layer */}
-        {getPremiumBackgroundPattern(theme)}
+  // Contribution Graph (Simple Mockup for SVG logic)
+  // In a real SVG, we'd loop through `data.contributionCalendar.weeks` and render rects
+  // We can do that here.
+  
+  let graphContent = '';
+  const weeks = data.contributionCalendar.weeks.slice(-18); // Last ~18 weeks to fit
+  const squareSize = 14;
+  const gap = 3;
+  const startX = 60;
+  const startY = 400;
 
-        {/* Main Card Container with premium styling */}
-        <div
-          style={{
-            position: 'relative',
-            zIndex: 10,
-            display: 'flex',
-            flexDirection: 'column',
-            width: '100%',
-            height: '100%',
-            background: `linear-gradient(165deg, ${theme.colors.cardBg}dd 0%, ${theme.colors.cardBg}aa 50%, ${theme.colors.bg}dd 100%)`,
-            border: `1px solid ${theme.colors.border}`,
-            borderRadius: 24,
-            boxShadow: `0 20px 60px rgba(0, 0, 0, 0.5), 0 8px 24px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.1)`,
-            overflow: 'hidden',
-          }}
-        >
-          {/* Accent Bar at Top */}
-          <div
-            style={{
-              width: '100%',
-              height: 4,
-              background: `linear-gradient(90deg, ${theme.colors.accent} 0%, ${theme.colors.primary} 50%, ${theme.colors.accent} 100%)`,
-              display: 'flex',
-              boxShadow: `0 2px 12px ${theme.colors.accent}40`,
-            }}
-          />
+  weeks.forEach((week, wIndex) => {
+    week.contributionDays.forEach((day, dIndex) => {
+       // Color logic
+       // Map count to theme graph colors
+       let color = c.cardBg;
+       if (day.contributionCount > 0) {
+         // Simple bucket mapping
+         const level = Math.min(Math.ceil(day.contributionCount / 3), theme.graphColors.length - 1);
+         color = theme.graphColors[level] || theme.graphColors[theme.graphColors.length - 1];
+       } else {
+         color = `${c.accent}10`; // Very faint empty state
+       }
 
-          {/* Header Section - Redesigned */}
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              padding: '32px 40px 24px 40px',
-              background: `linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%)`,
-              position: 'relative',
-            }}
-          >
-            {/* Profile Row */}
-            <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-start', marginBottom: 24 }}>
-              {/* Avatar with premium glow */}
-              <div
-                style={{
-                  position: 'relative',
-                  marginRight: 28,
-                  display: 'flex',
-                }}
-              >
-                <img
-                  src={data.avatarUrl}
-                  alt={username}
-                  width="96"
-                  height="96"
-                  style={{
-                    borderRadius: 24,
-                    border: `2px solid ${theme.colors.accent}`,
-                    boxShadow: `0 8px 32px ${theme.colors.accent}50, 0 0 40px ${theme.colors.accent}30, inset 0 1px 0 rgba(255, 255, 255, 0.2)`,
-                  }}
-                />
-              </div>
+       const x = startX + wIndex * (squareSize + gap);
+       const y = startY + dIndex * (squareSize + gap);
+       
+       graphContent += `<rect x="${x}" y="${y}" width="${squareSize}" height="${squareSize}" rx="2" fill="${color}" />`;
+    });
+  });
 
-              {/* User Info */}
-              <div style={{ display: 'flex', flexDirection: 'column', flex: 1, justifyContent: 'center' }}>
-                <div
-                  style={{
-                    fontSize: 36,
-                    fontWeight: 800,
-                    color: theme.colors.primary,
-                    marginBottom: 8,
-                    display: 'flex',
-                    letterSpacing: -0.5,
-                    textShadow: `${theme.effects.textGlow || 'none'}, 0 2px 8px rgba(0, 0, 0, 0.3)`,
-                  }}
-                >
-                  <span>{data.name || username}</span>
-                </div>
-                <div
-                  style={{
-                    fontSize: 16,
-                    color: theme.colors.accent,
-                    marginBottom: 12,
-                    display: 'flex',
-                    fontWeight: 600,
-                    opacity: 0.9,
-                  }}
-                >
-                  <span>@{username}</span>
-                </div>
-                {data.bio && (
-                  <div
-                    style={{
-                      fontSize: 14,
-                      color: theme.colors.secondary,
-                      opacity: 0.85,
-                      display: 'flex',
-                      lineHeight: 1.5,
-                      maxWidth: '500px',
-                    }}
-                  >
-                    <span>{truncateBio(data.bio)}</span>
-                  </div>
-                )}
-              </div>
-            </div>
+  const svg = `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${WIDTH}" height="${HEIGHT}" viewBox="0 0 ${WIDTH} ${HEIGHT}">
+  <defs>
+    <linearGradient id="bg-gradient" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="${c.bg}"/>
+      <stop offset="100%" stop-color="${c.cardBg}"/>
+    </linearGradient>
+    <clipPath id="avatar-clip">
+      <rect x="60" y="60" width="100" height="100" rx="24"/>
+    </clipPath>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="20" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
 
-            {/* Stats Row - Horizontal */}
-            <div style={{ display: 'flex', flexDirection: 'row', gap: 16 }}>
-              {/* Stars Stat */}
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  background: `linear-gradient(135deg, ${theme.colors.accent}15 0%, ${theme.colors.accent}08 100%)`,
-                  padding: '16px 32px',
-                  borderRadius: 16,
-                  border: `1px solid ${theme.colors.accent}30`,
-                  boxShadow: `0 4px 16px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1)`,
-                  flex: 1,
-                }}
-              >
-                <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
-                  <div style={{ fontSize: 11, color: theme.colors.secondary, opacity: 0.7, display: 'flex', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6, fontWeight: 600 }}>
-                    <span>Total Stars</span>
-                  </div>
-                  <div style={{ fontSize: 32, fontWeight: 800, color: theme.colors.primary, display: 'flex', letterSpacing: -0.5 }}>
-                    <span>{data.totalStars.toLocaleString()}</span>
-                  </div>
-                </div>
-              </div>
+  <!-- Background -->
+  <rect width="${WIDTH}" height="${HEIGHT}" fill="${c.bg}"/>
+  <rect width="${WIDTH}" height="${HEIGHT}" fill="url(#bg-gradient)" opacity="0.8"/>
+  
+  <!-- Decorative/Theme Background Pattern (Simplified) -->
+  <circle cx="${WIDTH}" cy="0" r="400" fill="${c.accent}" fill-opacity="0.05" filter="url(#glow)"/>
+  <circle cx="0" cy="${HEIGHT}" r="300" fill="${c.primary}" fill-opacity="0.05" filter="url(#glow)"/>
 
-              {/* Contributions Stat */}
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  background: `linear-gradient(135deg, ${theme.colors.accent}15 0%, ${theme.colors.accent}08 100%)`,
-                  padding: '16px 32px',
-                  borderRadius: 16,
-                  border: `1px solid ${theme.colors.accent}30`,
-                  boxShadow: `0 4px 16px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1)`,
-                  flex: 1,
-                }}
-              >
-                <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
-                  <div style={{ fontSize: 11, color: theme.colors.secondary, opacity: 0.7, display: 'flex', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6, fontWeight: 600 }}>
-                    <span>Contributions</span>
-                  </div>
-                  <div style={{ fontSize: 32, fontWeight: 800, color: theme.colors.primary, display: 'flex', letterSpacing: -0.5 }}>
-                    <span>{data.totalContributions.toLocaleString()}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+  <!-- Card Frame (Simulated) -->
+  <rect x="20" y="20" width="${WIDTH - 40}" height="${HEIGHT - 40}" rx="32" fill="none" stroke="${c.border}" stroke-width="1" stroke-opacity="0.5"/>
+  
+  <!-- Top Accent Bar -->
+  <rect x="20" y="20" width="${WIDTH - 40}" height="4" fill="${c.accent}"/>
 
-          {/* Contribution Graph Section */}
-          <div
-            style={{
-              padding: '28px 40px 32px 40px',
-              display: 'flex',
-              flexDirection: 'column',
-              flex: 1,
-            }}
-          >
-            {/* Section Header */}
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'center',
-                marginBottom: 20,
-                gap: 12,
-              }}
-            >
-              <div
-                style={{
-                  width: 3,
-                  height: 20,
-                  background: `linear-gradient(180deg, ${theme.colors.accent} 0%, ${theme.colors.primary} 100%)`,
-                  borderRadius: 3,
-                  display: 'flex',
-                  boxShadow: `0 0 8px ${theme.colors.accent}40`,
-                }}
-              />
-              <div
-                style={{
-                  fontSize: 13,
-                  color: theme.colors.primary,
-                  fontWeight: 700,
-                  letterSpacing: 1.2,
-                  textTransform: 'uppercase',
-                  display: 'flex',
-                }}
-              >
-                <span>Contribution Activity</span>
-              </div>
-            </div>
+  <!-- Avatar -->
+  <image xlink:href="${esc(avatarBase64)}" x="60" y="60" width="100" height="100" clip-path="url(#avatar-clip)" preserveAspectRatio="xMidYMid slice"/>
+  <rect x="60" y="60" width="100" height="100" rx="24" fill="none" stroke="${c.accent}" stroke-width="2" stroke-opacity="0.5"/>
 
-            {/* Graph Container */}
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'row',
-                gap: imageConfig.squareGap,
-                background: `linear-gradient(165deg, ${theme.colors.cardBg}40 0%, ${theme.colors.bg}60 100%)`,
-                padding: 20,
-                borderRadius: 16,
-                border: `1px solid ${theme.colors.border}`,
-                boxShadow: `0 8px 24px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.05)`,
-              }}
-            >
-              {data.contributionCalendar.weeks.map((week, weekIndex) => (
-                <div
-                  key={weekIndex}
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: imageConfig.squareGap,
-                  }}
-                >
-                  {week.contributionDays.map((day, dayIndex) => {
-                    // Map contribution count to theme graph colors with better progression
-                    const colorIndex = Math.min(
-                      Math.floor((day.contributionCount / 15) * (theme.graphColors.length - 1)),
-                      theme.graphColors.length - 1
-                    );
-                    const color = day.contributionCount === 0 ? theme.colors.cardBg : theme.graphColors[colorIndex];
+  <!-- User Info -->
+  <g transform="translate(190, 80)">
+    <text x="0" y="30" fill="${c.primary}" font-size="42" font-weight="800" font-family="'Segoe UI', Roboto, Helvetica, Arial, sans-serif">${esc(data.name || username)}</text>
+    <text x="0" y="65" fill="${c.accent}" font-size="20" font-weight="600" font-family="'Segoe UI', Roboto, Helvetica, Arial, sans-serif" opacity="0.9">@${esc(username)}</text>
+    <text x="0" y="95" fill="${c.secondary}" font-size="16" font-family="'Segoe UI', Roboto, Helvetica, Arial, sans-serif" opacity="0.7">${esc(truncateBio(data.bio || ''))}</text>
+  </g>
 
-                    // Enhanced glow for active days
-                    const isHighActivity = day.contributionCount > 10;
-                    const isMediumActivity = day.contributionCount > 5 && day.contributionCount <= 10;
+  <!-- Stats Cards -->
+  <g transform="translate(60, 200)">
+     <!-- Stars -->
+     <rect x="0" y="0" width="240" height="100" rx="16" fill="${c.accent}" fill-opacity="0.08" stroke="${c.accent}" stroke-opacity="0.2"/>
+     <text x="24" y="35" fill="${c.secondary}" font-size="14" font-weight="600" letter-spacing="1" font-family="'Segoe UI', sans-serif" opacity="0.8">TOTAL STARS</text>
+     <text x="24" y="75" fill="${c.primary}" font-size="36" font-weight="800" font-family="'Segoe UI', sans-serif">${stars}</text>
 
-                    let glowShadow = 'none';
-                    if (isHighActivity) {
-                      glowShadow = `0 0 10px ${theme.colors.accent}70, 0 0 5px ${theme.colors.accent}50`;
-                    } else if (isMediumActivity) {
-                      glowShadow = `0 0 6px ${theme.colors.accent}40`;
-                    }
+     <!-- Contributions -->
+     <rect x="260" y="0" width="240" height="100" rx="16" fill="${c.accent}" fill-opacity="0.08" stroke="${c.accent}" stroke-opacity="0.2"/>
+     <text x="284" y="35" fill="${c.secondary}" font-size="14" font-weight="600" letter-spacing="1" font-family="'Segoe UI', sans-serif" opacity="0.8">CONTRIBUTIONS</text>
+     <text x="284" y="75" fill="${c.primary}" font-size="36" font-weight="800" font-family="'Segoe UI', sans-serif">${contributions}</text>
+  </g>
 
-                    return (
-                      <div
-                        key={`${weekIndex}-${dayIndex}`}
-                        style={{
-                          width: imageConfig.squareSize,
-                          height: imageConfig.squareSize,
-                          background: color,
-                          borderRadius: 4,
-                          boxShadow: glowShadow,
-                          border: day.contributionCount > 0 ? `0.5px solid ${theme.colors.accent}20` : 'none',
-                        }}
-                      />
-                    );
-                  })}
-                </div>
-              ))}
-            </div>
-          </div>
+  <!-- Contribution Graph Label -->
+  <g transform="translate(60, 360)">
+    <rect x="0" y="0" width="4" height="20" rx="2" fill="${c.primary}"/>
+    <text x="15" y="16" fill="${c.primary}" font-size="16" font-weight="700" letter-spacing="1" font-family="'Segoe UI', sans-serif">CONTRIBUTION ACTIVITY</text>
+  </g>
 
-          {/* Footer with improved styling */}
-          <div
-            style={{
-              position: 'absolute',
-              bottom: 20,
-              right: 28,
-              fontSize: 11,
-              color: theme.colors.secondary,
-              opacity: 0.6,
-              display: 'flex',
-              fontWeight: 500,
-              letterSpacing: 0.5,
-            }}
-          >
-            <span>{siteConfig.footerText}</span>
-          </div>
-        </div>
-      </div>
-    ),
-    {
-      width: imageConfig.width,
-      height: imageConfig.height,
-      fonts: fontData
-        ? [
-            {
-              name: theme.font.family,
-              data: fontData,
-              weight: (theme.font.weight || 400) as 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900,
-              style: 'normal' as const,
-            },
-          ]
-        : undefined,
-    }
-  );
+  <!-- Graph -->
+  ${graphContent}
 
-  const _buf = await imageResponse.arrayBuffer();
-  return new NextResponse(Buffer.from(_buf), {
+  <!-- Footer -->
+  <text x="${WIDTH - 60}" y="${HEIGHT - 40}" text-anchor="end" fill="${c.secondary}" font-size="14" font-weight="500" font-family="'Segoe UI', sans-serif" opacity="0.5">${siteConfig.footerText}</text>
+</svg>`;
+
+  return new NextResponse(svg, {
     headers: {
-      'Content-Type': 'image/png',
+      'Content-Type': 'image/svg+xml',
       'Cache-Control': `public, max-age=${apiConfig.cacheMaxAge}, s-maxage=${apiConfig.cacheSMaxAge}, stale-while-revalidate=86400`,
       'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
     },
   });
 }
 
 /**
  * GET /api/premium-card
- *
- * Generate premium GitHub profile card image
  */
 export async function GET(request: NextRequest) {
   const startTime = Date.now();
   let username = 'unknown';
   let theme: string | undefined;
 
-  const safeReturnErrorImage = async (msg: string, sub?: string): Promise<NextResponse> => {
-    try {
-      return await generateErrorImage(msg, sub);
-    } catch {
-      return minimalErrorSvg(msg, sub);
-    }
-  };
-
   try {
-    if (!process.env.GITHUB_TOKEN?.trim()) {
-      return await safeReturnErrorImage(
-        'Server configuration',
-        'GITHUB_TOKEN not set. Add it in Vercel env vars.'
-      );
-    }
-
     const searchParams = request.nextUrl.searchParams;
     const usernameParam = searchParams.get('username');
     const themeParam = searchParams.get('theme');
     theme = themeParam || 'satan';
 
+    // Basic validation
+    if (!process.env.GITHUB_TOKEN?.trim()) {
+      return generateErrorSvg('Server Error', 'GITHUB_TOKEN not configured');
+    }
+
     if (!usernameParam || usernameParam.trim() === '') {
-      trackCardGeneration({
+       trackCardGeneration({
         cardType: 'premium',
         theme,
         username: 'missing',
@@ -481,51 +223,17 @@ export async function GET(request: NextRequest) {
         errorType: 'missing_username',
         duration: Date.now() - startTime,
       });
-      return await safeReturnErrorImage('Missing Username', 'Add ?username=yourname');
+      return generateErrorSvg('Missing Username', 'Add ?username=yourname');
     }
 
-    const rawParams = {
-      username: usernameParam,
-      theme: themeParam,
-    };
+    username = usernameParam;
 
-    let validatedParams;
-    try {
-      validatedParams = validateCardQuery(rawParams);
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Invalid parameters';
-      trackCardGeneration({
-        cardType: 'premium',
-        theme,
-        username: usernameParam,
-        success: false,
-        errorType: 'validation_error',
-        duration: Date.now() - startTime,
-      });
-      return await safeReturnErrorImage('Validation Error', errorMessage);
-    }
-
-    // Double-check username
-    if (!validatedParams.username) {
-      trackCardGeneration({
-        cardType: 'premium',
-        theme,
-        username: 'missing',
-        success: false,
-        errorType: 'missing_username',
-        duration: Date.now() - startTime,
-      });
-      return await safeReturnErrorImage('Missing Username', 'Add ?username=yourname');
-    }
-
-    username = validatedParams.username;
-
-    // Fetch GitHub data
+    // Fetch Data
     let data;
     try {
-      data = await fetchGitHubData(validatedParams.username);
-    } catch (error) {
-      console.error('GitHub API error:', error);
+      data = await fetchGitHubData(username);
+    } catch (e) {
+      console.error(e);
       trackCardGeneration({
         cardType: 'premium',
         theme,
@@ -534,7 +242,7 @@ export async function GET(request: NextRequest) {
         errorType: 'github_api_error',
         duration: Date.now() - startTime,
       });
-      return await safeReturnErrorImage('GitHub API Error', 'Check username and try again.');
+      return generateErrorSvg('GitHub API Error', 'Could not fetch user data');
     }
 
     if (!data) {
@@ -546,10 +254,9 @@ export async function GET(request: NextRequest) {
         errorType: 'user_not_found',
         duration: Date.now() - startTime,
       });
-      return await safeReturnErrorImage('User Not Found', `@${validatedParams.username}`);
+      return generateErrorSvg('User Not Found', `@${username}`);
     }
 
-    // Track successful generation
     trackCardGeneration({
       cardType: 'premium',
       theme,
@@ -558,12 +265,8 @@ export async function GET(request: NextRequest) {
       duration: Date.now() - startTime,
     });
 
-    // Generate premium card
-    return await generatePremiumCardImage(
-      data,
-      validatedParams.username,
-      (validatedParams.theme || 'satan') as PremiumThemeName
-    );
+    return await generatePremiumCardSvg(data, username, (theme as PremiumThemeName) || 'satan');
+
   } catch (error) {
     console.error('Unexpected error:', error);
     trackCardGeneration({
@@ -574,8 +277,8 @@ export async function GET(request: NextRequest) {
       errorType: 'unexpected_error',
       duration: Date.now() - startTime,
     });
-    const shortMsg = error instanceof Error ? error.message.slice(0, 50) : 'Unknown error';
-    return await safeReturnErrorImage('Error', shortMsg);
+    const msg = error instanceof Error ? error.message : 'Unknown error';
+    return generateErrorSvg('Unexpected Error', msg);
   }
 }
 
