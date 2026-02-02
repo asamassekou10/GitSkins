@@ -264,7 +264,7 @@ export default function DailyPage() {
                   value={todayText}
                   onChange={(e) => setTodayText(e.target.value)}
                   placeholder="Built the daily dev card feature..."
-                  maxLength={200}
+                  maxLength={400}
                   rows={3}
                   style={{
                     width: '100%',
@@ -283,7 +283,7 @@ export default function DailyPage() {
                   onBlur={(e) => { e.currentTarget.style.borderColor = '#1f1f1f'; }}
                 />
                 <div style={{ fontSize: 11, color: '#404040', marginTop: 4, textAlign: 'right' }}>
-                  {todayText.length}/200
+                  {todayText.length}/400
                 </div>
               </div>
               <div>
@@ -294,7 +294,7 @@ export default function DailyPage() {
                   value={tomorrowText}
                   onChange={(e) => setTomorrowText(e.target.value)}
                   placeholder="Add animation and ship the feature..."
-                  maxLength={200}
+                  maxLength={400}
                   rows={3}
                   style={{
                     width: '100%',
@@ -313,7 +313,7 @@ export default function DailyPage() {
                   onBlur={(e) => { e.currentTarget.style.borderColor = '#1f1f1f'; }}
                 />
                 <div style={{ fontSize: 11, color: '#404040', marginTop: 4, textAlign: 'right' }}>
-                  {tomorrowText.length}/200
+                  {tomorrowText.length}/400
                 </div>
               </div>
             </div>

@@ -18,7 +18,23 @@
       "Bash(npm uninstall:*)",
       "Bash(tree:*)",
       "Bash(node -e:*)",
-      "Bash(taskkill:*)"
+      "Bash(taskkill:*)",
+      "WebFetch(domain:draculatheme.com)",
+      "WebFetch(domain:github.com)",
+      "Bash(findstr:*)",
+      "Bash(npx next build:*)",
+      "WebFetch(domain:ai.google.dev)",
+      "WebFetch(domain:gemini3.devpost.com)",
+      "Bash(npm ls:*)",
+      "Bash(cd /d d:gitskins)",
+      "Bash(grep:*)",
+      "Bash(node test-daily.mjs:*)",
+      "Bash(npx tsx:*)",
+      "Bash(del d:gitskinstest-daily.mjs)",
+      "Bash(curl:*)",
+      "Bash(npx next dev:*)",
+      "Bash(npm view:*)",
+      "Bash(git status:*)"
     ]
   }
 }
