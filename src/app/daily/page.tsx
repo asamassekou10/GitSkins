@@ -402,7 +402,7 @@ export default function DailyPage() {
                   shareUrl={`${baseUrl}/daily`}
                   shareText={`Check out what I built today! #BuildInPublic #DevCard`}
                   imageUrl={`${baseUrl}${cardUrl}`}
-                  downloadFilename={`daily-card-${username.trim()}-${today}.png`}
+                  downloadFilename={`daily-card-${username.trim()}-${today}.svg`}
                   context={{ username: username.trim(), theme: selectedTheme, source: 'daily' }}
                 />
               </div>
