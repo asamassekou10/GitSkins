@@ -1,6 +1,6 @@
 'use client';
 
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useCallback, useState } from 'react';
 import { Navigation } from '@/components/landing/Navigation';
@@ -16,16 +16,25 @@ const EDIT_SUGGESTIONS = [
 ];
 
 export default function PortfolioBuildPage() {
+  const router = useRouter();
   const params = useParams();
   const rawUsername = (params.username as string) || '';
   const username = rawUsername.startsWith('@') ? rawUsername.slice(1) : rawUsername;
 
+  const [inputUsername, setInputUsername] = useState(username);
   const [html, setHtml] = useState('');
   const [css, setCss] = useState('');
   const [loading, setLoading] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [editMessage, setEditMessage] = useState('');
+
+  const handleUsernameChange = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (inputUsername.trim() && inputUsername.trim() !== username) {
+      router.push(`/portfolio/${inputUsername.trim()}/build`);
+    }
+  };
 
   const generateWebsite = useCallback(async () => {
     setError(null);
@@ -243,6 +252,26 @@ export default function PortfolioBuildPage() {
       borderRadius: '16px',
       fontSize: '15px',
     },
+    input: {
+      padding: '12px 16px',
+      background: '#111',
+      border: '1px solid #333',
+      borderRadius: '8px',
+      color: '#fff',
+      fontSize: '14px',
+      outline: 'none',
+      width: '240px',
+    },
+    changeBtn: {
+      padding: '12px 20px',
+      background: '#333',
+      color: '#fff',
+      border: 'none',
+      borderRadius: '8px',
+      fontWeight: 500,
+      fontSize: '14px',
+      cursor: 'pointer',
+    },
   };
 
   return (
@@ -261,14 +290,28 @@ export default function PortfolioBuildPage() {
           </div>
 
           <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 12px', background: 'rgba(34, 197, 94, 0.08)', border: '1px solid rgba(34, 197, 94, 0.2)', borderRadius: '100px', fontSize: '12px', fontWeight: 500, color: '#22c55e', marginBottom: '16px' }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 12px', background: 'rgba(255, 255, 255, 0.1)', border: '1px solid rgba(255, 255, 255, 0.2)', borderRadius: '100px', fontSize: '12px', fontWeight: 500, color: '#fff', marginBottom: '16px' }}>
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
-              Gemini 3 Pro · Extended Thinking
+              Gemini 3 Pro · Coder Edition
             </div>
             <h1 style={baseStyles.title}>Portfolio Website Builder</h1>
             <p style={baseStyles.subtitle}>
-              Generate a one-page site for @{username}, edit with natural language, then download as ZIP.
+              Generate a minimalist, black & white coder portfolio for @{username}.
             </p>
+            
+            {/* Username Change Form */}
+            <form onSubmit={handleUsernameChange} style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '24px' }}>
+              <input
+                type="text"
+                value={inputUsername}
+                onChange={(e) => setInputUsername(e.target.value)}
+                placeholder="GitHub Username"
+                style={baseStyles.input}
+              />
+              <button type="submit" style={baseStyles.changeBtn}>
+                Change User
+              </button>
+            </form>
           </div>
 
           {error && <div style={baseStyles.errorBanner}>{error}</div>}
@@ -280,7 +323,7 @@ export default function PortfolioBuildPage() {
               disabled={loading}
               style={{
                 ...baseStyles.btnPrimary,
-                background: loading ? '#333' : '#22c55e',
+                background: loading ? '#333' : '#fff',
                 color: loading ? '#666' : '#000',
                 cursor: loading ? 'not-allowed' : 'pointer',
               }}

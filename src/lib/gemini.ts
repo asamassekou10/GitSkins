@@ -702,7 +702,7 @@ export async function generatePortfolioWebsite(
 
   const prompt = `You are an elite frontend developer and designer. Generate a professional, production-quality single-page portfolio website for a software developer.
 
-**Design reference:** Think Stripe, Linear, or Vercel-quality landing pages — clean typography, generous whitespace, subtle animations, polished micro-interactions.
+**Design reference:** Minimalist Black & White / Coder Monochrome. Think terminal aesthetics, brutalist design, or clean Swiss style. Strict black (#000000), white (#ffffff), and grays. NO colored accents (no green, blue, etc).
 
 **Profile:**
 - Username: ${username}
@@ -717,17 +717,16 @@ ${caseStudiesJson}
 
 **Template requirements:**
 1. Output TWO code blocks only. First: \`\`\`html\\n...\\n\`\`\` (full HTML from <!DOCTYPE> to </html>). Second: \`\`\`css\\n...\\n\`\`\` (all styles). No other text.
-2. Modern dark theme: background #050505, cards #0a0a0a/#111111, borders #1a1a1a/#1f1f1f, accent green #22c55e, text #fafafa/#a1a1a1/#666666.
-3. Typography: system-ui font stack, large bold headings using clamp() for responsive sizing, comfortable 16px body text with 1.6 line-height.
-4. Layout: CSS Grid for sections, max-width 1100px centered, generous padding (80-120px per section), 24px horizontal padding.
-5. Hero section: large name as h1, avatar (round with subtle green border-glow), bio text, stats row showing repos/stars/followers as a horizontal bar with numbers.
-6. Projects section: 2-column card grid. Each card has hover effect (translateY(-4px), subtle green box-shadow glow), showing title, problem, approach, impact, tech stack as small pill badges, and highlights. Link repo names to repoUrl.
-7. Skills section: top languages displayed as pill tags or small progress indicators.
-8. Footer: minimal with GitHub profile link and a "Built with GitSkins" credit.
-9. Responsive: mobile-first, cards stack to single column below 768px.
-10. CSS animations: include @keyframes fadeInUp for scroll-ready animations, smooth hover transitions (0.2s ease) on cards and buttons, html { scroll-behavior: smooth }.
-11. NO external CDNs, NO JavaScript frameworks, NO Google Fonts, NO placeholder/lorem text.
-12. Clean semantic HTML5 with descriptive class names. Production-quality CSS with :root custom properties for all colors, proper box-sizing reset, responsive breakpoints via media queries.
+2. **THEME:** Minimalist Coder Monochrome. Background #000000, text #ffffff. Cards #111111 with 1px white/gray borders. Hover effects should be subtle gray shifts or white borders. NO COLORS.
+3. **TYPOGRAPHY:** Monospace fonts for headers and code elements (Courier New, Fira Code, monospace). Clean sans-serif for body text (Inter, system-ui).
+4. **IMAGES:** For each case study, include an <img> tag. Use this dynamic source: "https://image.pollinations.ai/prompt/[keywords]%20minimal%20UI%20black%20white?nologo=true" where [keywords] are relevant terms from the project stack/title. Ensure images have \`filter: grayscale(100%);\` by default, and optionally \`filter: grayscale(0%);\` on hover.
+5. **LAYOUT:**
+   - **Hero:** Minimalist. Avatar (grayscale), Name (Monospace, large), Bio.
+   - **Projects:** Masonry or Grid layout. Each project card MUST have the generated image at the top.
+   - **Skills:** Simple text list or bordered tags.
+6. **Footer:** Minimal. "Built with GitSkins".
+7. **CSS:** Production-quality. CSS Grid/Flexbox. Responsive (mobile-first). Smooth scrolling.
+8. NO external CSS/JS frameworks (Tailwind, Bootstrap). Pure CSS.
 
 Return ONLY the two code blocks (html then css).`;
 
