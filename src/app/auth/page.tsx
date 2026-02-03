@@ -3,7 +3,6 @@
 import { signIn } from 'next-auth/react';
 import Link from 'next/link';
 import { useState } from 'react';
-import { Navigation } from '@/components/landing/Navigation';
 
 export default function AuthPage() {
   const [isLoading, setIsLoading] = useState(false);
@@ -29,7 +28,6 @@ export default function AuthPage() {
         overflow: 'hidden',
       }}
     >
-      <Navigation />
       <div
         style={{
           flex: 1,

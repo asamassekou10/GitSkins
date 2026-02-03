@@ -4,7 +4,6 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { analytics } from '@/components/AnalyticsProvider';
-import { Navigation } from '@/components/landing/Navigation';
 import { HeroSection } from '@/components/landing/HeroSection';
 import { ThemeShowcase } from '@/components/landing/ThemeShowcase';
 import { AnimatedSection, StaggerContainer, StaggerItem } from '@/components/landing/AnimatedSection';
@@ -107,8 +106,6 @@ export default function Home() {
       />
 
       <div style={{ minHeight: '100vh', background: '#050505', color: '#fafafa' }}>
-        <Navigation />
-
         <HeroSection
           username={username}
           selectedTheme={selectedTheme}

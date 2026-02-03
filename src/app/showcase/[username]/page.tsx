@@ -6,7 +6,6 @@ import { useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import type { PremiumThemeName } from '@/types/premium-theme';
 import { analytics } from '@/components/AnalyticsProvider';
-import { Navigation } from '@/components/landing/Navigation';
 import { ShareMenu } from '@/components/ShareMenu';
 
 const themes: PremiumThemeName[] = [
@@ -127,7 +126,6 @@ function ShowcaseContent() {
         position: 'relative',
       }}
     >
-      <Navigation />
       {/* Background */}
       <div
         style={{

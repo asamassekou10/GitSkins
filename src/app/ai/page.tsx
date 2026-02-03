@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { Navigation } from '@/components/landing/Navigation';
 
 interface ProfileAnalysis {
   developerType: string;
@@ -348,7 +347,6 @@ export default function AIFeaturesPage() {
         color: '#fafafa',
       }}
     >
-      <Navigation />
 
       <div
         style={{

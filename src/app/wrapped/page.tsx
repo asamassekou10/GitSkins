@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Navigation } from '@/components/landing/Navigation';
 
 export default function WrappedEntryPage() {
   const router = useRouter();
@@ -17,7 +16,6 @@ export default function WrappedEntryPage() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#050505', color: '#fafafa' }}>
-      <Navigation />
 
       {/* Background glow */}
       <div

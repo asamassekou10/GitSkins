@@ -4,7 +4,6 @@ import { useState, useCallback, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
-import { Navigation } from '@/components/landing/Navigation';
 import {
   checkGenerationAllowed,
   incrementGenerationUsage,
@@ -234,7 +233,6 @@ export default function ReadmeGeneratorPage() {
         color: '#fafafa',
       }}
     >
-      <Navigation />
 
       <main style={{ paddingTop: '120px', paddingBottom: '80px' }}>
         {/* Hero Section */}

@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Navigation } from '@/components/landing/Navigation';
 import {
   getUserPlan,
   getUsageData,
@@ -76,8 +75,6 @@ export default function DashboardPage() {
         color: '#e5e5e5',
       }}
     >
-      <Navigation />
-
       <div
         style={{
           maxWidth: '1000px',

@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { Navigation } from '@/components/landing/Navigation';
 
 interface PortfolioCaseStudy {
   title: string;
@@ -57,8 +56,6 @@ export default function PortfolioPage() {
         fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
       }}
     >
-      <Navigation />
-
       <main style={{ paddingTop: '120px', paddingBottom: '80px' }}>
         <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '0 20px' }}>
           <div style={{ textAlign: 'center', marginBottom: '40px' }}>

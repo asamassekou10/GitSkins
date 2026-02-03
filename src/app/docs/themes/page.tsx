@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Navigation } from '@/components/landing/Navigation';
 import { landingThemes } from '@/lib/landing-themes';
 
 export default function ThemeSpecPage() {
@@ -20,7 +19,6 @@ export default function ThemeSpecPage() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#050505', color: '#fafafa' }}>
-      <Navigation />
       <main style={{ padding: '120px 24px 80px', maxWidth: '900px', margin: '0 auto' }}>
         <Link
           href="/"

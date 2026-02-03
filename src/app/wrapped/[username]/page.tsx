@@ -3,7 +3,6 @@
 import { useEffect, useState, useRef, useCallback, Suspense } from 'react';
 import { useParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Navigation } from '@/components/landing/Navigation';
 import { ShareMenu } from '@/components/ShareMenu';
 
 interface ProfileData {
@@ -180,7 +179,6 @@ function WrappedContent() {
   if (error) {
     return (
       <div style={{ minHeight: '100vh', background: '#050505', color: '#fafafa' }}>
-        <Navigation />
         <div style={{ maxWidth: 500, margin: '0 auto', padding: '160px 24px', textAlign: 'center' }}>
           <h1 style={{ fontSize: 24, fontWeight: 600, marginBottom: 12 }}>Something went wrong</h1>
           <p style={{ color: '#a1a1a1', marginBottom: 24 }}>{error}</p>
@@ -207,8 +205,6 @@ function WrappedContent() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#050505', color: '#fafafa', overflow: 'hidden' }}>
-      <Navigation />
-
       {/* Main slide area */}
       <div
         style={{

@@ -3,7 +3,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
-import { Navigation } from '@/components/landing/Navigation';
 
 const accent = '#22c55e';
 
@@ -188,7 +187,6 @@ export default function VisualizePage() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#050505', color: '#fafafa' }}>
-      <Navigation />
 
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '80px 24px 48px' }}>
         {/* Header */}

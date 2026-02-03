@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import { Navigation } from '@/components/landing/Navigation';
 
 export default function PrivacyPage() {
   return (
@@ -12,7 +11,6 @@ export default function PrivacyPage() {
         color: '#e5e5e5',
       }}
     >
-      <Navigation />
       <div style={{ maxWidth: '800px', margin: '0 auto', padding: '100px 20px 60px' }}>
         {/* Header */}
         <Link

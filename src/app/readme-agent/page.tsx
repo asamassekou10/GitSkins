@@ -5,7 +5,6 @@ import { useSearchParams } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import Link from 'next/link';
-import { Navigation } from '@/components/landing/Navigation';
 
 type ReadmeStyle = 'minimal' | 'detailed' | 'creative';
 type CareerRole = 'frontend' | 'backend' | 'fullstack' | 'data' | 'mobile' | 'devops' | 'product';
@@ -153,7 +152,6 @@ export default function ReadmeAgentPage() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#050505', color: '#fafafa', fontFamily: 'var(--font-sans, system-ui)' }}>
-      <Navigation />
 
       <main style={{ paddingTop: '80px', paddingBottom: '60px', paddingLeft: 'clamp(12px, 3vw, 24px)', paddingRight: 'clamp(12px, 3vw, 24px)' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>

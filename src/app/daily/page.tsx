@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { Navigation } from '@/components/landing/Navigation';
 import { ShareMenu } from '@/components/ShareMenu';
 
 const ALL_THEMES = [
@@ -115,7 +114,6 @@ export default function DailyPage() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#050505', color: '#fafafa' }}>
-      <Navigation />
 
       {/* Background glow */}
       <div

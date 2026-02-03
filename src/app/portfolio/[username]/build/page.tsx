@@ -3,7 +3,6 @@
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useCallback, useState } from 'react';
-import { Navigation } from '@/components/landing/Navigation';
 import JSZip from 'jszip';
 
 const EDIT_SUGGESTIONS = [
@@ -281,8 +280,6 @@ export default function PortfolioBuildPage() {
 
   return (
     <div style={baseStyles.page}>
-      <Navigation />
-
       <main style={baseStyles.main}>
         <div style={baseStyles.container}>
           <div style={baseStyles.breadcrumb}>

@@ -2,18 +2,8 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { allNavItemsForCommandPalette } from '@/config/nav';
 import { landingThemes } from '@/lib/landing-themes';
-
-const NAV_ITEMS: { label: string; href: string; keywords: string }[] = [
-  { label: 'Features', href: '/#features', keywords: 'features' },
-  { label: 'Themes', href: '/#themes', keywords: 'themes' },
-  { label: 'AI Features', href: '/ai', keywords: 'ai' },
-  { label: 'README Generator', href: '/readme-generator', keywords: 'readme' },
-  { label: 'Portfolio Builder', href: '/portfolio/octocat', keywords: 'portfolio' },
-  { label: 'GitHub Wrapped', href: '/wrapped', keywords: 'wrapped year review' },
-  { label: 'Repo Visualizer', href: '/visualize', keywords: 'visualize architecture diagram mermaid' },
-  { label: 'Daily Dev Card', href: '/daily', keywords: 'daily card buildinpublic share social' },
-];
 
 type ItemType = { type: 'nav'; label: string; href: string } | { type: 'theme'; id: string; name: string; href: string };
 
@@ -28,14 +18,19 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const listRef = useRef<HTMLDivElement>(null);
 
-  const navItems: ItemType[] = NAV_ITEMS.map(({ label, href }) => ({ type: 'nav', label, href }));
+  const navItems: ItemType[] = allNavItemsForCommandPalette.map(({ label, href }) => ({ type: 'nav', label, href }));
   const themeItems: ItemType[] = landingThemes.map((t) => ({ type: 'theme', id: t.id, name: t.name, href: '/#themes' }));
 
   const allItems: ItemType[] = [...navItems, ...themeItems];
 
+  const q = query.toLowerCase().trim();
   const filtered = allItems.filter((item) => {
-    const text = item.type === 'nav' ? item.label : item.name;
-    return text.toLowerCase().includes(query.toLowerCase().trim());
+    if (item.type === 'nav') {
+      const navItem = allNavItemsForCommandPalette.find((n) => n.href === item.href && n.label === item.label);
+      const searchText = `${item.label} ${navItem?.keywords ?? ''}`.toLowerCase();
+      return searchText.includes(q);
+    }
+    return item.name.toLowerCase().includes(q);
   });
 
   const selectItem = useCallback(

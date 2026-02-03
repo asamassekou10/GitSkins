@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { analytics } from '@/components/AnalyticsProvider';
-import { Navigation } from '@/components/landing/Navigation';
 
 const steps = [
   {
@@ -83,7 +82,6 @@ export default function GettingStartedPage() {
         fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
       }}
     >
-      <Navigation />
       <div
         style={{
           padding: '100px 20px 60px',
