@@ -101,11 +101,24 @@ export default function PortfolioBuildPage() {
   const previewDoc = html
     ? (() => {
         const cspMeta =
-          '<meta http-equiv="Content-Security-Policy" content="img-src \'self\' https: data: https://image.pollinations.ai;">';
+          '<meta http-equiv="Content-Security-Policy" content="img-src \'self\' https: data:;">';
         const withStyle = css
           ? html.replace('</head>', `<style>${css}</style></head>`)
           : html;
-        return withStyle.replace('</head>', `${cspMeta}</head>`);
+        const withCsp = withStyle.replace('</head>', `${cspMeta}</head>`);
+        // Proxy external images so they load in same-origin iframe (avoids CSP/sandbox issues)
+        const base = typeof window !== 'undefined' ? window.location.origin : '';
+        const proxyUrl = (url: string) =>
+          `${base}/api/proxy-image?url=${encodeURIComponent(url)}`;
+        return withCsp
+          .replace(
+            /src="(https:\/\/image\.pollinations\.ai\/[^"]*)"/g,
+            (_, url: string) => `src="${proxyUrl(url)}"`
+          )
+          .replace(
+            /src='(https:\/\/image\.pollinations\.ai\/[^']*)'/g,
+            (_, url: string) => `src="${proxyUrl(url)}"`
+          );
       })()
     : '';
 
