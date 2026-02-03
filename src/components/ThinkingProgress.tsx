@@ -100,34 +100,57 @@ export function ThinkingProgress({
           </span>
         </div>
       ) : (
-        <ul style={{ margin: 0, paddingLeft: 0, listStyle: 'none' }}>
-          {list.map((step, i) => {
-            const done = i < activeIndex;
-            const active = i === activeIndex && !allDone;
-            const pending = i > activeIndex;
-            return (
-              <li
-                key={step.id}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  marginTop: i === 0 ? 0 : '8px',
-                  color: done ? '#22c55e' : active ? '#fafafa' : '#666',
-                  fontSize: i === activeIndex && active ? '14px' : '13px',
-                  fontWeight: active ? 500 : 400,
-                }}
-              >
-                {done && checkmark}
-                {active && spinner}
-                {pending && (
-                  <span style={{ width: 18, height: 18, display: 'inline-block' }} />
-                )}
-                {step.label}
-              </li>
-            );
-          })}
-        </ul>
+        <>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
+            {allDone ? checkmark : spinner}
+            <span style={{ fontWeight: 600, color: '#fafafa' }}>
+              {allDone ? 'Done' : `Step ${Math.min(activeIndex + 1, list.length)} of ${list.length}: ${currentLabel}`}
+            </span>
+          </div>
+          <ul style={{ margin: 0, paddingLeft: 0, listStyle: 'none' }}>
+            {list.map((step, i) => {
+              const done = i < activeIndex;
+              const active = i === activeIndex && !allDone;
+              const pending = i > activeIndex;
+              return (
+                <li
+                  key={step.id}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    marginTop: i === 0 ? 0 : '6px',
+                    color: done ? '#22c55e' : active ? '#fafafa' : '#888',
+                    fontSize: '13px',
+                    fontWeight: active ? 600 : 400,
+                  }}
+                >
+                  {done && checkmark}
+                  {active && spinner}
+                  {pending && (
+                    <span
+                      style={{
+                        width: 18,
+                        height: 18,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: '#555',
+                        border: '1px solid #444',
+                        borderRadius: '50%',
+                        fontSize: '10px',
+                        fontWeight: 600,
+                      }}
+                    >
+                      {i + 1}
+                    </span>
+                  )}
+                  <span style={{ opacity: pending ? 0.85 : 1 }}>{step.label}</span>
+                </li>
+              );
+            })}
+          </ul>
+        </>
       )}
       <style>{`@keyframes thinkingProgressSpin { to { transform: rotate(360deg); } }`}</style>
     </div>

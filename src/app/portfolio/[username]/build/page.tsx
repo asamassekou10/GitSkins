@@ -347,8 +347,8 @@ export default function PortfolioBuildPage() {
           {loading && (
             <div style={{ marginBottom: '16px' }}>
               <ThinkingProgress
-                steps={websiteProgress.steps}
-                activeIndex={websiteProgress.activeIndex}
+                steps={websiteSteps}
+                activeIndex={websiteActiveIndex}
                 variant="card"
               />
             </div>
