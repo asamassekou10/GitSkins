@@ -2,6 +2,8 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
+import { ThinkingProgress } from '@/components/ThinkingProgress';
+import { useThinkingProgress } from '@/hooks/useThinkingProgress';
 
 interface ProfileAnalysis {
   developerType: string;
@@ -90,6 +92,12 @@ export default function AIFeaturesPage() {
   // Error state
   const [error, setError] = useState('');
 
+  const analyzeProgress = useThinkingProgress(['Fetching profile', 'Analyzing with Gemini'], { intervalMs: 1200 });
+  const themesProgress = useThinkingProgress(['Fetching profile', 'Matching themes'], { intervalMs: 1200 });
+  const intelProgress = useThinkingProgress(['Fetching profile', 'Searching benchmarks', 'Generating insights'], { intervalMs: 1400 });
+  const portfolioProgress = useThinkingProgress(['Fetching profile', 'Analyzing repos', 'Writing case studies'], { intervalMs: 1500 });
+  const explainProgress = useThinkingProgress(['Fetching profile', 'Explaining profile'], { intervalMs: 1200 });
+
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatMessages]);
@@ -135,6 +143,7 @@ export default function AIFeaturesPage() {
     }
 
     setError('');
+    themesProgress.start();
     setLoadingThemes(true);
     setRecommendations([]);
 
@@ -153,8 +162,10 @@ export default function AIFeaturesPage() {
 
       setRecommendations(data.recommendations);
       setProfileData(data.profile);
+      themesProgress.complete();
     } catch (err: any) {
       setError(err.message || 'Failed to get theme recommendations');
+      themesProgress.reset();
     } finally {
       setLoadingThemes(false);
     }
@@ -201,6 +212,7 @@ export default function AIFeaturesPage() {
     }
 
     setError('');
+    portfolioProgress.start();
     setLoadingPortfolio(true);
     setPortfolio([]);
 
@@ -219,8 +231,10 @@ export default function AIFeaturesPage() {
 
       setPortfolio(data.caseStudies || []);
       setProfileData(data.profile);
+      portfolioProgress.complete();
     } catch (err: any) {
       setError(err.message || 'Failed to build portfolio');
+      portfolioProgress.reset();
     } finally {
       setLoadingPortfolio(false);
     }
@@ -233,6 +247,7 @@ export default function AIFeaturesPage() {
       return;
     }
     setError('');
+    explainProgress.start();
     setLoadingExplain(true);
     setExplainSummary(null);
     try {
@@ -244,8 +259,10 @@ export default function AIFeaturesPage() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Failed to explain profile');
       setExplainSummary(data.summary);
+      explainProgress.complete();
     } catch (err: any) {
       setError(err.message || 'Failed to explain profile');
+      explainProgress.reset();
     } finally {
       setLoadingExplain(false);
     }
@@ -486,6 +503,12 @@ export default function AIFeaturesPage() {
           </button>
         </div>
 
+        {loadingExplain && (
+          <div style={{ maxWidth: '360px', margin: '0 auto 24px' }}>
+            <ThinkingProgress steps={explainProgress.steps} activeIndex={explainProgress.activeIndex} variant="card" />
+          </div>
+        )}
+
         {/* Explain profile summary card */}
         {explainSummary && (
           <div
@@ -584,6 +607,11 @@ export default function AIFeaturesPage() {
             >
               {analyzing ? 'Analyzing with Gemini...' : 'Analyze Profile'}
             </button>
+            {analyzing && (
+              <div style={{ maxWidth: '360px', margin: '0 auto 24px' }}>
+                <ThinkingProgress steps={analyzeProgress.steps} activeIndex={analyzeProgress.activeIndex} variant="card" />
+              </div>
+            )}
 
             {analysis && profileData && (
               <div
@@ -837,6 +865,11 @@ export default function AIFeaturesPage() {
             >
               {loadingIntel ? 'Building Intelligence...' : 'Run Profile Intelligence'}
             </button>
+            {loadingIntel && (
+              <div style={{ maxWidth: '400px', margin: '0 auto 24px' }}>
+                <ThinkingProgress steps={intelProgress.steps} activeIndex={intelProgress.activeIndex} variant="card" />
+              </div>
+            )}
 
             {profileIntel && (
               <div
@@ -916,6 +949,11 @@ export default function AIFeaturesPage() {
             >
               {loadingPortfolio ? 'Generating Portfolio...' : 'Generate Portfolio'}
             </button>
+            {loadingPortfolio && (
+              <div style={{ maxWidth: '400px', margin: '0 auto 24px' }}>
+                <ThinkingProgress steps={portfolioProgress.steps} activeIndex={portfolioProgress.activeIndex} variant="card" />
+              </div>
+            )}
 
             {portfolio.length > 0 && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>

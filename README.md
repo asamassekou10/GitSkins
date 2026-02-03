@@ -1,184 +1,175 @@
 # GitSkins
 
-GitSkins is a Gemini 3-powered **Profile Agent** that turns your GitHub activity into recruiter-ready READMEs, benchmarks, and portfolio case studies — with real-time streaming, extended thinking, and Google Search grounding.
+**AI-powered GitHub profile tools — READMEs, widgets, year-in-review, and portfolio — powered by Google Gemini.**
 
-Built for the **Gemini 3 Hackathon 2026**.
+Built for the **Google Hackathon** (Gemini 3). GitSkins turns your GitHub activity into recruiter-ready READMEs, live-streaming agent sessions, GitHub Wrapped narratives, repo architecture diagrams, daily dev cards, and AI-generated portfolio case studies — with Extended Thinking, real-time streaming, and Google Search grounding.
 
-**Demo video (≤3 min):** [Link to be added]
-
-## Table of Contents
-
-- [Live Demo](#live-demo)
-- [Key Features](#key-features)
-- [Gemini 3 Integration](#gemini-3-integration)
-- [How the Profile Agent Works](#how-the-profile-agent-works)
-- [Tech Stack](#tech-stack)
-- [Usage](#usage)
-- [Quick Start](#quick-start)
-- [Local Development](#local-development)
-- [Testing Instructions](#testing-instructions-demo-flow)
-- [Known Limitations](#known-limitations)
-- [Architecture](#architecture)
-- [Credits](#credits)
-- [License](#license)
+---
 
 ## Live Demo
 
-- Production: https://gitskins.com
-- Demo path: landing → Live README Agent → AI Features → Portfolio Builder
+- **Production:** [https://gitskins.com](https://gitskins.com)
+- **Demo video (≤3 min):** _[Link to be added]_
 
-## Key Features
+**Suggested demo path:** Landing → **Live README Agent** → **AI Features** (Profile Intelligence) → **GitHub Wrapped** → **Portfolio Builder**
 
-- **Live README Agent** — Watch Gemini 3 think, draft, critique, and refine your README in real-time via streaming
-- Dynamic GitHub profile widgets (cards, stats, languages, streaks) with 20 curated themes
-- AI README Generator with Career Mode and multi-pass agent refinement
-- Profile Intelligence with Google Search grounding for real industry benchmarks
-- Portfolio Website Builder with AI-generated case studies and natural language editing
-- AI profile analysis, theme recommendations, and chat assistant
+---
+
+## Table of Contents
+
+- [Features](#features)
+- [Gemini 3 Integration](#gemini-3-integration)
+- [Tech Stack](#tech-stack)
+- [Quick Start](#quick-start)
+- [Environment Variables](#environment-variables)
+- [Testing & Demo Flow](#testing--demo-flow)
+- [Architecture](#architecture)
+- [Credits & License](#credits--license)
+
+---
+
+## Features
+
+### AI-Powered Tools (Gemini 3)
+
+| Feature | Route | Description |
+|--------|------|-------------|
+| **Live README Agent** | `/readme-agent` | Watch Gemini 3 think and stream your README in real time. Career Mode runs a full agent loop: generate → critique → refine, all streamed. |
+| **README Generator** | `/readme-generator` | One-shot or Career Mode README generation with multi-pass agent refinement and Extended Thinking. |
+| **Profile Intelligence** | `/ai` (tab) | Industry benchmarks and profile insights with **Google Search grounding** for real-world data. |
+| **Portfolio Builder** | `/portfolio/{username}/build` | Generate a full portfolio website from your GitHub. Edit with natural language; download as ZIP. |
+| **Portfolio Case Studies** | `/portfolio/{username}` | AI-generated case studies highlighting your most impactful repos (Gemini 3 Pro). |
+| **GitHub Wrapped** | `/wrapped`, `/wrapped/{username}` | Year-in-review narrative with Extended Thinking and optional Search grounding. Streamed slide-by-slide. |
+| **Repo Visualizer** | `/visualize` | Architecture analysis and Mermaid diagrams for any repo — streamed with thought surfacing. |
+| **Daily Dev Card** | `/daily` | Share what you shipped today; AI-generated card text for build-in-public posts. |
+| **Profile Analysis** | `/ai` (tab) | Personality and theme recommendations (Gemini Flash). |
+| **Chat Assistant** | `/ai` (tab) | Ask questions about your profile and get tailored advice. |
+
+### Widgets & Themes
+
+- **Dynamic GitHub profile widgets:** contribution cards, stats, languages, streaks, repos, animated cards.
+- **20 curated themes:** original (Satan, Neon, Zen, GitHub Dark, Dracula), seasonal (Winter, Spring, Summer, Autumn), holiday (Christmas, Halloween), developer (Ocean, Forest, Sunset, Midnight, Aurora), aesthetic (Retro, Minimal, Pastel, Matrix).
+- **Showcase** (`/showcase/{username}`): copy markdown snippets for your README.
+
+### Platform
+
+- **Dashboard** — Usage, plan, and quick links (auth required).
+- **Getting Started** — Docs and onboarding.
+- **Support, Privacy, Terms** — Legal and help pages.
+- **Command Palette** (⌘K) — Quick navigation and theme search.
+
+---
 
 ## Gemini 3 Integration
 
-GitSkins uses the `@google/genai` SDK with deep Gemini 3 feature integration:
+GitSkins uses the **`@google/genai`** SDK with Gemini 3 Pro and Flash.
 
-### Gemini 3 Features Used
+### Capabilities Used
 
-| Feature | Where | Impact |
-|---------|-------|--------|
-| **Extended Thinking** (ThinkingLevel.HIGH) | README gen, portfolio, case studies, profile intel | Deeper reasoning = higher quality output |
-| **Real-Time Streaming** (generateContentStream) | Live README Agent | Token-by-token generation with live thought surfacing |
-| **Google Search Grounding** | Profile Intelligence | Industry benchmarks backed by real-world data |
-| **Multi-Pass Agent Loop** (streamed) | Career Mode README | Generate → critique → refine, all streamed live |
-| **Thought Surfacing** | Live README Agent | Model's reasoning process visible to users |
+| Capability | Where | Impact |
+|------------|-------|--------|
+| **Extended Thinking** (`ThinkingLevel.HIGH`) | README gen, portfolio, case studies, profile intel, Wrapped, Visualizer | Deeper reasoning and higher-quality output |
+| **Real-time streaming** (`generateContentStream`) | Live README Agent, Wrapped, Repo Visualizer | Token-by-token generation with live thought surfacing |
+| **Google Search grounding** | Profile Intelligence, Wrapped | Industry benchmarks and facts backed by real data |
+| **Multi-pass agent loop** (streamed) | Career Mode README, Live Agent | Generate → critique → refine, all streamed |
+| **Thought surfacing** | Live Agent, Visualizer | Model reasoning visible to the user |
 
 ### Model Usage
 
-| Feature | Model | Thinking Level |
-|---------|-------|----------------|
+| Feature | Model | Thinking |
+|---------|--------|----------|
 | README Generator (Career Mode + refinement) | Gemini 3 Pro | HIGH |
 | Live README Agent (streaming + agent loop) | Gemini 3 Pro | HIGH |
 | Portfolio Website Generator | Gemini 3 Pro | HIGH |
 | Portfolio Case Studies | Gemini 3 Pro | HIGH |
 | Profile Intelligence (+ Search grounding) | Gemini 3 Pro | HIGH |
-| Profile Analysis | Gemini 3 Flash | LOW |
-| Theme Recommendations | Gemini 3 Flash | LOW |
-| Chat Assistant | Gemini 3 Flash | LOW |
+| GitHub Wrapped | Gemini 3 Pro | HIGH |
+| Repo Visualizer | Gemini 3 Pro | HIGH |
+| Profile Analysis, Theme Recommendations, Chat | Gemini 3 Flash | LOW |
+| Daily Dev Card text | Gemini 3 | — |
 
-Models are configurable via environment variables (see [Local Development](#local-development)).
+Models are configurable via environment variables (see [Environment Variables](#environment-variables)).
 
-## How the Profile Agent Works
-
-1. **Enter GitHub username** — In the Live README Agent, README Generator, or AI page.
-2. **Profile Agent fetches profile** — From the GitHub API (repos, languages, streaks, pinned repos).
-3. **Gemini 3 thinks and generates** — Extended Thinking reasons about the profile; tokens stream in real-time.
-4. **Agent loop (Career Mode)** — Critique pass identifies improvements, refine pass applies them — all streamed.
-5. **Preview, copy, or download** — View rendered markdown, copy to clipboard, or download portfolio as ZIP.
-
-```mermaid
-flowchart LR
-  User[User] --> Agent[Profile Agent]
-  Agent --> GitHub[GitHub API]
-  Agent --> Think[Gemini 3 Extended Thinking]
-  Think --> Stream[Real-Time Streaming]
-  Stream --> Critique[Agent Critique Pass]
-  Critique --> Refine[Agent Refine Pass]
-  Refine --> Output[README + Intel + Portfolio]
-  Agent --> Ground[Google Search Grounding]
-  Ground --> Output
-```
+---
 
 ## Tech Stack
 
-- Next.js 16 (App Router)
-- TypeScript
-- Tailwind CSS + Framer Motion
-- `@google/genai` SDK (Gemini 3 Pro / Flash)
-- GitHub GraphQL API
+- **Framework:** Next.js 16 (App Router)
+- **Language:** TypeScript
+- **AI:** `@google/genai` (Gemini 3 Pro / Flash)
+- **Auth:** NextAuth.js (GitHub OAuth)
+- **Data:** GitHub GraphQL API
+- **UI:** React, Framer Motion, Tailwind CSS
+- **Other:** Mermaid (diagrams), JSZip (portfolio download), Stripe (optional subscriptions), PostHog (optional analytics)
 
-## Usage
-
-1. **Live README Agent** (`/readme-agent`) — Enter username, watch Gemini 3 think and stream your README live. Enable Career Mode for the full agent loop.
-2. **README Generator** (`/readme-generator`) — Traditional generation with Career Mode and agent refinement.
-3. **AI Features** (`/ai`) — Profile Analysis, Theme Recommendations, Profile Intelligence (with Google Search grounding), Portfolio Builder.
-4. **Portfolio Builder** (`/portfolio/{username}/build`) — Generate a full portfolio website with AI, edit with natural language, download as ZIP.
-5. **Showcase** (`/showcase/{username}`) — Copy markdown widget snippets.
+---
 
 ## Quick Start
 
 ```bash
 git clone https://github.com/asamassekou10/GitSkins.git
-cd gitskins
+cd GitSkins
 cp .env.example .env.local
-# Edit .env.local and add GEMINI_API_KEY and GITHUB_TOKEN
+# Edit .env.local: add GEMINI_API_KEY and GITHUB_TOKEN (see below)
 npm install
 npm run dev
 ```
 
-Open http://localhost:3000
+Open [http://localhost:3000](http://localhost:3000).
 
-## Local Development
+---
 
-### Requirements
+## Environment Variables
 
-- Node.js 20+
-- GitHub personal access token (for GraphQL)
-- Gemini API key
+Create `.env.local` from `.env.example` and set:
 
-### Environment Variables
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `GITHUB_TOKEN` | Yes (for profile/repos) | GitHub personal access token (GraphQL). |
+| `GEMINI_API_KEY` | Yes (for AI features) | Google AI / Gemini API key. |
+| `GEMINI_MODEL` | No | Default model (e.g. `gemini-3-flash-preview`). |
+| `GEMINI_MODEL_PRO` | No | Pro model (e.g. `gemini-3-pro-preview`). |
+| `GEMINI_MODEL_FAST` | No | Fast model for chat/analysis. |
 
-Create a `.env.local`:
+Optional: `NEXTAUTH_SECRET`, `NEXTAUTH_URL` (auth), `NEXT_PUBLIC_POSTHOG_*`, `SENTRY_*`, `WAITLIST_*` (see `.env.example`).
 
-```
-GITHUB_TOKEN=your_github_pat
-GEMINI_API_KEY=your_gemini_api_key
-GEMINI_MODEL=gemini-3-flash-preview (optional, default)
-GEMINI_MODEL_FAST=gemini-3-flash-preview (optional)
-GEMINI_MODEL_PRO=gemini-3-pro-preview (optional)
-```
+Without `GEMINI_API_KEY` and `GITHUB_TOKEN`, the site still loads; AI and profile-dependent features will show a “not configured” or similar message.
 
-Optional:
+---
 
-```
-OPENAI_API_KEY=optional_fallback
-```
+## Testing & Demo Flow
 
-### Run Locally
+Use this flow to showcase the app (e.g. for hackathon judges):
 
-```
-npm install
-npm run dev
-```
+1. **Landing** (`/`) — See widgets and themes for `octocat`.
+2. **Live README Agent** (`/readme-agent`) — Enter a GitHub username; watch Gemini 3 think and stream. Enable Career Mode and re-run to see the full agent loop (critique + refine) streamed.
+3. **README Generator** (`/readme-generator`) — Generate a README with Career Mode.
+4. **AI Features** (`/ai`) — Run **Profile Intelligence** and confirm grounded responses cite real data. Try **Portfolio Builder** and **Theme Recommendations**.
+5. **GitHub Wrapped** (`/wrapped`) — Enter username; get a year-in-review narrative (streamed).
+6. **Repo Visualizer** (`/visualize`) — Enter `owner/repo`; get architecture analysis and Mermaid diagram (streamed).
+7. **Daily Dev Card** (`/daily`) — Generate a “what I shipped today” card.
+8. **Portfolio** (`/portfolio/octocat`, `/portfolio/octocat/build`) — View AI case studies; build and download a portfolio site.
+9. **Showcase** (`/showcase/octocat`) — Copy widget markdown snippets.
 
-## Testing Instructions (Demo Flow)
+Ensure `GEMINI_API_KEY` and `GITHUB_TOKEN` are set for all AI and GitHub-backed features.
 
-1. Open `/` and verify widgets load for `octocat`.
-2. Go to `/readme-agent`, enter a username, and watch Gemini 3 think + stream.
-3. Enable Career Mode and re-generate — verify the critique and refine passes stream live.
-4. Go to `/readme-generator` and generate a README with Career Mode.
-5. Go to `/ai` and run Profile Intelligence — verify grounded responses cite real data.
-6. Visit `/portfolio/octocat/build` and generate a portfolio website.
-7. Visit `/showcase/octocat` and copy the markdown snippet.
-
-For AI features, ensure `GEMINI_API_KEY` and `GITHUB_TOKEN` are set.
-
-## Known Limitations
-
-- **GitHub API rate limits** — Use a personal access token for higher limits.
-- **Gemini token/context limits** — Very long profiles may be truncated to fit model context.
-- **AI features require env vars** — `GEMINI_API_KEY` and `GITHUB_TOKEN` must be set for AI features.
+---
 
 ## Architecture
 
-See `docs/architecture.md` for the Gemini data flow and agent loop overview.
+- **Single nav config** — `src/config/nav.ts` drives navbar and Command Palette.
+- **API routes** — `/api/generate-readme`, `/api/readme-agent`, `/api/ai/*`, `/api/wrapped`, `/api/visualize`, `/api/daily-generate-text`, plus widget image routes (`/api/stats`, `/api/card`, etc.).
+- **Gemini** — `src/lib/gemini.ts` centralizes model calls, streaming, thinking config, and Search grounding.
 
-## Credits
+For data flow and agent loop details, see [docs/architecture.md](docs/architecture.md).
 
-- [Google Gemini 3](https://ai.google.dev/) — Extended Thinking, Streaming, Google Search Grounding
-- [`@google/genai` SDK](https://www.npmjs.com/package/@google/genai) — Gemini 3 integration
-- [GitHub API](https://docs.github.com/en/rest) — Profile data
-- [Next.js](https://nextjs.org/) — Framework
-- [Framer Motion](https://motion.dev/) — Animations
-- [Vercel](https://vercel.com/) — Hosting
+---
 
-## License
+## Credits & License
 
-MIT
+- **[Google Gemini 3](https://ai.google.dev/)** — Extended Thinking, streaming, Google Search grounding
+- **[@google/genai](https://www.npmjs.com/package/@google/genai)** — Gemini SDK
+- **[GitHub API](https://docs.github.com/en/rest)** — Profile and repo data
+- **[Next.js](https://nextjs.org/)**, **[Framer Motion](https://motion.dev/)**, **[Vercel](https://vercel.com/)**
+
+**License:** MIT

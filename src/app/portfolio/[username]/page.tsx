@@ -1,8 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
+import { ThinkingProgress } from '@/components/ThinkingProgress';
+import { useThinkingProgress } from '@/hooks/useThinkingProgress';
 
 interface PortfolioCaseStudy {
   title: string;
@@ -24,7 +26,15 @@ export default function PortfolioPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const portfolioProgress = useThinkingProgress(
+    ['Fetching profile', 'Analyzing repos', 'Writing case studies'],
+    { intervalMs: 1500 }
+  );
+  const progressRef = useRef(portfolioProgress);
+  progressRef.current = portfolioProgress;
+
   useEffect(() => {
+    progressRef.current.start();
     const fetchPortfolio = async () => {
       try {
         const response = await fetch('/api/ai/portfolio', {
@@ -37,8 +47,10 @@ export default function PortfolioPage() {
           throw new Error(data.error || 'Failed to load portfolio');
         }
         setCaseStudies(data.caseStudies || []);
+        progressRef.current.complete();
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load portfolio');
+        progressRef.current.reset();
       } finally {
         setLoading(false);
       }
@@ -114,7 +126,13 @@ export default function PortfolioPage() {
           </div>
 
           {loading && (
-            <div style={{ textAlign: 'center', color: '#888' }}>Building portfolio…</div>
+            <div style={{ maxWidth: '400px', margin: '0 auto 24px' }}>
+              <ThinkingProgress
+                steps={portfolioProgress.steps}
+                activeIndex={portfolioProgress.activeIndex}
+                variant="card"
+              />
+            </div>
           )}
           {error && (
             <div style={{ textAlign: 'center', color: '#ef4444' }}>{error}</div>

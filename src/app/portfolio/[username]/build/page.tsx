@@ -4,6 +4,8 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useCallback, useState } from 'react';
 import JSZip from 'jszip';
+import { ThinkingProgress } from '@/components/ThinkingProgress';
+import { useThinkingProgress } from '@/hooks/useThinkingProgress';
 
 const EDIT_SUGGESTIONS = [
   'Add smooth scroll animations',
@@ -28,6 +30,24 @@ export default function PortfolioBuildPage() {
   const [error, setError] = useState<string | null>(null);
   const [editMessage, setEditMessage] = useState('');
 
+  const {
+    activeIndex: websiteActiveIndex,
+    steps: websiteSteps,
+    start: websiteStart,
+    complete: websiteComplete,
+    reset: websiteReset,
+  } = useThinkingProgress(
+    ['Fetching GitHub profile', 'Building case studies', 'Generating website'],
+    { intervalMs: 1500 }
+  );
+  const {
+    activeIndex: editActiveIndex,
+    steps: editSteps,
+    start: editStart,
+    complete: editComplete,
+    reset: editReset,
+  } = useThinkingProgress(['Applying changes…'], { intervalMs: 800 });
+
   const handleUsernameChange = (e: React.FormEvent) => {
     e.preventDefault();
     if (inputUsername.trim() && inputUsername.trim() !== username) {
@@ -37,6 +57,7 @@ export default function PortfolioBuildPage() {
 
   const generateWebsite = useCallback(async () => {
     setError(null);
+    websiteStart();
     setLoading(true);
     try {
       const res = await fetch('/api/ai/portfolio-website', {
@@ -48,16 +69,19 @@ export default function PortfolioBuildPage() {
       if (!res.ok) throw new Error(data.error || 'Failed to generate website');
       setHtml(data.html || '');
       setCss(data.css || '');
+      websiteComplete();
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to generate website');
+      websiteReset();
     } finally {
       setLoading(false);
     }
-  }, [username]);
+  }, [username, websiteStart, websiteComplete, websiteReset]);
 
   const applyEdit = useCallback(async () => {
     if (!editMessage.trim() || !html) return;
     setError(null);
+    editStart();
     setEditLoading(true);
     try {
       const res = await fetch('/api/ai/portfolio-website-edit', {
@@ -70,12 +94,14 @@ export default function PortfolioBuildPage() {
       setHtml(data.html ?? html);
       setCss(data.css ?? css);
       setEditMessage('');
+      editComplete();
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to apply edit');
+      editReset();
     } finally {
       setEditLoading(false);
     }
-  }, [html, css, editMessage]);
+  }, [html, css, editMessage, editStart, editComplete, editReset]);
 
   const setSuggestion = useCallback((text: string) => {
     setEditMessage(text);
@@ -318,6 +344,16 @@ export default function PortfolioBuildPage() {
 
           {error && <div style={baseStyles.errorBanner}>{error}</div>}
 
+          {loading && (
+            <div style={{ marginBottom: '16px' }}>
+              <ThinkingProgress
+                steps={websiteProgress.steps}
+                activeIndex={websiteProgress.activeIndex}
+                variant="card"
+              />
+            </div>
+          )}
+
           <div style={baseStyles.toolbar}>
             <button
               type="button"
@@ -347,6 +383,15 @@ export default function PortfolioBuildPage() {
                 </svg>
                 Edit with AI
               </div>
+              {editLoading && (
+                <div style={{ marginBottom: '12px' }}>
+                  <ThinkingProgress
+                    steps={editSteps}
+                    activeIndex={editActiveIndex}
+                    variant="inline"
+                  />
+                </div>
+              )}
               <div style={baseStyles.chipRow}>
                 {EDIT_SUGGESTIONS.map((s) => (
                   <button

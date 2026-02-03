@@ -2,6 +2,8 @@
 
 import { useState, useMemo } from 'react';
 import { ShareMenu } from '@/components/ShareMenu';
+import { ThinkingProgress } from '@/components/ThinkingProgress';
+import { useThinkingProgress } from '@/hooks/useThinkingProgress';
 
 const ALL_THEMES = [
   'satan', 'neon', 'zen', 'github-dark', 'dracula',
@@ -64,6 +66,7 @@ export default function DailyPage() {
 
       // Auto-generate AI text from commit messages
       if (data.commitMessages.length > 0) {
+        dailyAiProgress.start();
         setAiLoading(true);
         try {
           const aiRes = await fetch('/api/daily-generate-text', {
@@ -74,9 +77,12 @@ export default function DailyPage() {
           if (aiRes.ok) {
             const aiData = await aiRes.json();
             setTodayText(aiData.text || '');
+            dailyAiProgress.complete();
+          } else {
+            dailyAiProgress.reset();
           }
         } catch {
-          // AI text is optional, proceed without it
+          dailyAiProgress.reset();
         } finally {
           setAiLoading(false);
         }
@@ -258,9 +264,17 @@ export default function DailyPage() {
               }}
             >
               <div>
+                {aiLoading && (
+                  <div style={{ marginBottom: 12 }}>
+                    <ThinkingProgress
+                      steps={dailyAiProgress.steps}
+                      activeIndex={dailyAiProgress.activeIndex}
+                      variant="inline"
+                    />
+                  </div>
+                )}
                 <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#666', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 1 }}>
                   Today I...
-                  {aiLoading && <span style={{ color: '#22c55e', marginLeft: 8, fontWeight: 400, textTransform: 'none' }}>AI generating...</span>}
                 </label>
                 <textarea
                   value={todayText}

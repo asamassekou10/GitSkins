@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
@@ -13,6 +13,8 @@ import {
 } from '@/lib/usage-tracker';
 import { FREE_THEMES } from '@/config/subscription';
 import type { GenerationCheckResult } from '@/types/subscription';
+import { ThinkingProgress } from '@/components/ThinkingProgress';
+import { useThinkingProgress } from '@/hooks/useThinkingProgress';
 
 type ReadmeStyle = 'minimal' | 'detailed' | 'creative';
 type SectionType = 'header' | 'about' | 'skills' | 'stats' | 'projects' | 'streak' | 'connect';
@@ -76,7 +78,6 @@ export default function ReadmeGeneratorPage() {
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [viewMode, setViewMode] = useState<'code' | 'preview'>('preview');
-  const [currentStep, setCurrentStep] = useState(0);
   const [refinementNotes, setRefinementNotes] = useState<string[] | null>(null);
   const [agentReasoning, setAgentReasoning] = useState<string | null>(null);
   const [agentLogExpanded, setAgentLogExpanded] = useState(false);
@@ -84,6 +85,15 @@ export default function ReadmeGeneratorPage() {
   // Usage tracking
   const [usageInfo, setUsageInfo] = useState<GenerationCheckResult | null>(null);
   const [userIsPro, setUserIsPro] = useState(false);
+
+  const readmeStepLabels = useMemo(
+    () =>
+      careerMode && agentLoop
+        ? ['Fetching GitHub profile', 'Gemini 3 is thinking', `Refining for ${careerRole}`]
+        : ['Fetching GitHub profile', 'Gemini 3 is thinking'],
+    [careerMode, agentLoop, careerRole]
+  );
+  const readmeProgress = useThinkingProgress(readmeStepLabels, { intervalMs: 1200 });
 
   useEffect(() => {
     // Load usage info on mount
@@ -102,16 +112,6 @@ export default function ReadmeGeneratorPage() {
       }
     }
   }, [searchParams]);
-
-  // Step progress timer during README generation
-  const maxStepIndex = careerMode && agentLoop ? 2 : 1;
-  useEffect(() => {
-    if (!isLoading) return;
-    const interval = setInterval(() => {
-      setCurrentStep((prev) => (prev < maxStepIndex ? prev + 1 : prev));
-    }, 1200);
-    return () => clearInterval(interval);
-  }, [isLoading, maxStepIndex]);
 
   const refreshUsageInfo = () => {
     const info = checkGenerationAllowed();
@@ -150,7 +150,7 @@ export default function ReadmeGeneratorPage() {
     setAiProvider(null);
     setRefinementNotes(null);
     setAgentReasoning(null);
-    setCurrentStep(0);
+    readmeProgress.start();
 
     try {
       const response = await fetch('/api/generate-readme', {
@@ -183,14 +183,14 @@ export default function ReadmeGeneratorPage() {
       setGeneratedReadme(data.readme);
       setAiProvider(data.aiProvider || null);
       setProfileData(data.profile);
-      setCurrentStep(3);
+      readmeProgress.complete();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
+      readmeProgress.reset();
     } finally {
       setIsLoading(false);
-      setCurrentStep(0);
     }
-  }, [username, sections, style, theme, careerMode, careerRole, agentLoop, useAI]);
+  }, [username, sections, style, theme, careerMode, careerRole, agentLoop, useAI, readmeProgress.start, readmeProgress.complete, readmeProgress.reset]);
 
   const copyToClipboard = async () => {
     if (!generatedReadme) return;
@@ -752,36 +752,13 @@ export default function ReadmeGeneratorPage() {
               </button>
             </div>
 
-            {/* Step progress (when loading) */}
             {isLoading && (
-              <div
-                style={{
-                  marginBottom: '16px',
-                  padding: '12px 16px',
-                  background: 'rgba(34, 197, 94, 0.08)',
-                  border: '1px solid rgba(34, 197, 94, 0.2)',
-                  borderRadius: '10px',
-                  fontSize: '14px',
-                  color: '#22c55e',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                }}
-              >
-                <span
-                  style={{
-                    width: '18px',
-                    height: '18px',
-                    border: '2px solid currentColor',
-                    borderTopColor: 'transparent',
-                    borderRadius: '50%',
-                    animation: 'spin 1s linear infinite',
-                  }}
+              <div style={{ marginBottom: '16px' }}>
+                <ThinkingProgress
+                  steps={readmeProgress.steps}
+                  activeIndex={readmeProgress.activeIndex}
+                  variant="card"
                 />
-                {currentStep === 0 && 'Fetching GitHub profile...'}
-                {currentStep === 1 && 'Gemini 3 is thinking...'}
-                {currentStep === 2 && `Refining for ${careerRole}...`}
-                {currentStep === 3 && 'Done.'}
               </div>
             )}
 
@@ -808,22 +785,7 @@ export default function ReadmeGeneratorPage() {
               }}
             >
               {isLoading ? (
-                <>
-                  <span
-                    style={{
-                      width: '20px',
-                      height: '20px',
-                      border: '2px solid #000',
-                      borderTopColor: 'transparent',
-                      borderRadius: '50%',
-                      animation: 'spin 1s linear infinite',
-                    }}
-                  />
-                  {currentStep === 0 && 'Fetching GitHub profile...'}
-                  {currentStep === 1 && 'Gemini 3 is thinking...'}
-                  {currentStep === 2 && `Refining for ${careerRole}...`}
-                  {currentStep === 3 && 'Done.'}
-                </>
+                <>Generating…</>
               ) : usageInfo && !usageInfo.allowed ? (
                 <>
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
