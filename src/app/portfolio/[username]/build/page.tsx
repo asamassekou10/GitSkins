@@ -99,9 +99,14 @@ export default function PortfolioBuildPage() {
   }, [html, css, username]);
 
   const previewDoc = html
-    ? css
-      ? html.replace('</head>', `<style>${css}</style></head>`)
-      : html
+    ? (() => {
+        const cspMeta =
+          '<meta http-equiv="Content-Security-Policy" content="img-src \'self\' https: data: https://image.pollinations.ai;">';
+        const withStyle = css
+          ? html.replace('</head>', `<style>${css}</style></head>`)
+          : html;
+        return withStyle.replace('</head>', `${cspMeta}</head>`);
+      })()
     : '';
 
   const baseStyles = {

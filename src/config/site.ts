@@ -76,7 +76,7 @@ export const securityConfig = {
   /** Content Security Policy */
   csp: {
     defaultSrc: ["'self'"],
-    imgSrc: ["'self'", 'https:', 'data:'],
+    imgSrc: ["'self'", 'https:', 'data:', 'https://image.pollinations.ai'],
     styleSrc: ["'self'", "'unsafe-inline'"],
     scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
   },
