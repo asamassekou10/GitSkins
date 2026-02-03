@@ -105,20 +105,7 @@ export default function PortfolioBuildPage() {
         const withStyle = css
           ? html.replace('</head>', `<style>${css}</style></head>`)
           : html;
-        const withCsp = withStyle.replace('</head>', `${cspMeta}</head>`);
-        // Proxy external images so they load in same-origin iframe (avoids CSP/sandbox issues)
-        const base = typeof window !== 'undefined' ? window.location.origin : '';
-        const proxyUrl = (url: string) =>
-          `${base}/api/proxy-image?url=${encodeURIComponent(url)}`;
-        return withCsp
-          .replace(
-            /src="(https:\/\/image\.pollinations\.ai\/[^"]*)"/g,
-            (_, url: string) => `src="${proxyUrl(url)}"`
-          )
-          .replace(
-            /src='(https:\/\/image\.pollinations\.ai\/[^']*)'/g,
-            (_, url: string) => `src="${proxyUrl(url)}"`
-          );
+        return withStyle.replace('</head>', `${cspMeta}</head>`);
       })()
     : '';
 

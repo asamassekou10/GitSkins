@@ -702,7 +702,10 @@ export async function generatePortfolioWebsite(
 
   const prompt = `You are an elite frontend developer and designer. Generate a professional, production-quality single-page portfolio website for a software developer.
 
-**Design reference:** Minimalist Black & White / Coder Monochrome. Think terminal aesthetics, brutalist design, or clean Swiss style. Strict black (#000000), white (#ffffff), and grays. NO colored accents (no green, blue, etc).
+**Design:**
+- **Background:** Black (#000000) only for the page background.
+- **Main text:** White (#ffffff) for headings and body copy.
+- **Everything else in color:** Use a single accent color (e.g. #22c55e green, or #3b82f6 blue) for: links, buttons, tech stack pills/badges, card borders or top accent bars, icons, hover states, and any decorative elements. Secondary elements can use gray (#888, #666) or the accent at lower opacity. The page should feel black-and-white with clear, colorful accents.
 
 **Profile:**
 - Username: ${username}
@@ -717,16 +720,15 @@ ${caseStudiesJson}
 
 **Template requirements:**
 1. Output TWO code blocks only. First: \`\`\`html\\n...\\n\`\`\` (full HTML from <!DOCTYPE> to </html>). Second: \`\`\`css\\n...\\n\`\`\` (all styles). No other text.
-2. **THEME:** Minimalist Coder Monochrome. Background #000000, text #ffffff. Cards #111111 with 1px white/gray borders. Hover effects should be subtle gray shifts or white borders. NO COLORS.
-3. **TYPOGRAPHY:** Monospace fonts for headers and code elements (Courier New, Fira Code, monospace). Clean sans-serif for body text (Inter, system-ui).
-4. **IMAGES:** For each case study, include an <img> tag. Use this dynamic source: "https://image.pollinations.ai/prompt/[keywords]%20minimal%20UI%20black%20white?nologo=true" where [keywords] are relevant terms from the project stack/title. Ensure images have \`filter: grayscale(100%);\` by default, and optionally \`filter: grayscale(0%);\` on hover.
+2. **THEME:** Black background (#000), white text. Accent color for links, pills, card accents, hovers. No external images.
+3. **TYPOGRAPHY:** Monospace for headers/code (Courier New, Fira Code, monospace). Sans-serif for body (system-ui).
+4. **PROJECT PLACEHOLDERS (no external images):** For each case study card, use a placeholder only: an inline SVG or a CSS-styled div. For example: a div with aspect-ratio 16/9, background linear-gradient with the accent color at low opacity, and the repo name or a simple code/terminal icon as inline SVG in the center. Do NOT use <img> or any external URLs. The placeholder must be self-contained (inline SVG or CSS only) so it works with zero network requests.
 5. **LAYOUT:**
-   - **Hero:** Minimalist. Avatar (grayscale), Name (Monospace, large), Bio.
-   - **Projects:** Masonry or Grid layout. Each project card MUST have the generated image at the top.
-   - **Skills:** Simple text list or bordered tags.
-6. **Footer:** Minimal. "Built with GitSkins".
-7. **CSS:** Production-quality. CSS Grid/Flexbox. Responsive (mobile-first). Smooth scrolling.
-8. NO external CSS/JS frameworks (Tailwind, Bootstrap). Pure CSS.
+   - **Hero:** Avatar, name (large), bio. Use accent for avatar border or link.
+   - **Projects:** Grid. Each card: placeholder block at top (inline SVG or CSS div), then title, problem, approach, impact, tech pills (in accent color), link to repo.
+   - **Skills:** Top languages as colored pills or tags.
+6. **Footer:** Minimal; "Built with GitSkins" with accent link.
+7. **CSS:** Production-quality. Responsive. No Tailwind/Bootstrap. Pure CSS.
 
 Return ONLY the two code blocks (html then css).`;
 
