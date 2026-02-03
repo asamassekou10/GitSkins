@@ -43,6 +43,8 @@ export default function DailyPage() {
   const [aiLoading, setAiLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const dailyAiProgress = useThinkingProgress(['Generating card text…'], { intervalMs: 800 });
+
   const handleFetch = async () => {
     const trimmed = username.trim();
     if (!trimmed) return;
