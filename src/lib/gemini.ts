@@ -44,6 +44,15 @@ function getModelName(type: 'fast' | 'pro' = 'fast'): string {
   return process.env.GEMINI_MODEL_FAST || process.env.GEMINI_MODEL || 'gemini-3-flash-preview';
 }
 
+/** Detect 429 / quota exceeded from Gemini API errors */
+function isQuotaExceeded(error: unknown): boolean {
+  if (!error) return false;
+  const err = error as { code?: number; status?: number; response?: { status?: number }; message?: string };
+  if (err.code === 429 || err.status === 429 || err.response?.status === 429) return true;
+  const msg = err.message?.toString() ?? '';
+  return msg.includes('429') || msg.includes('RESOURCE_EXHAUSTED') || msg.includes('quota');
+}
+
 /**
  * Base config for generation calls
  */
@@ -69,7 +78,8 @@ function baseConfig(options?: {
 }
 
 /**
- * Simple content generation helper
+ * Simple content generation helper.
+ * When using Pro model and the API returns 429 (quota exceeded), retries once with Flash.
  */
 async function generate(
   prompt: string,
@@ -81,23 +91,37 @@ async function generate(
   }
 ): Promise<{ text: string; thoughts?: string }> {
   const ai = getAI();
-  const response = await ai.models.generateContent({
-    model: options?.model || getModelName('fast'),
-    contents: prompt,
-    config: baseConfig(options),
-  });
+  const proModel = getModelName('pro');
+  const fastModel = getModelName('fast');
+  let model = options?.model || fastModel;
 
-  let thoughts: string | undefined;
-  if (options?.includeThoughts && response.candidates?.[0]?.content?.parts) {
-    const thoughtParts = response.candidates[0].content.parts
-      .filter((p) => p.thought && p.text)
-      .map((p) => p.text);
-    if (thoughtParts.length > 0) {
-      thoughts = thoughtParts.join('\n');
+  const doGenerate = async (useModel: string) => {
+    const response = await ai.models.generateContent({
+      model: useModel,
+      contents: prompt,
+      config: baseConfig(options),
+    });
+    let thoughts: string | undefined;
+    if (options?.includeThoughts && response.candidates?.[0]?.content?.parts) {
+      const thoughtParts = response.candidates[0].content.parts
+        .filter((p) => p.thought && p.text)
+        .map((p) => p.text);
+      if (thoughtParts.length > 0) {
+        thoughts = thoughtParts.join('\n');
+      }
     }
-  }
+    return { text: response.text ?? '', thoughts };
+  };
 
-  return { text: response.text ?? '', thoughts };
+  try {
+    return await doGenerate(model);
+  } catch (err) {
+    if (isQuotaExceeded(err) && model === proModel) {
+      model = fastModel;
+      return await doGenerate(model);
+    }
+    throw err;
+  }
 }
 
 /**
@@ -290,13 +314,28 @@ Output ONLY the markdown content. No explanations or code blocks around it.`;
 
   yield { type: 'status', content: 'Gemini is thinking...' };
 
-  const stream = await ai.models.generateContentStream({
-    model: getModelName('pro'),
-    contents: prompt,
-    config: {
-      ...baseConfig({ thinking: 'high', includeThoughts: true }),
-    },
-  });
+  let model = getModelName('pro');
+  let stream: Awaited<ReturnType<typeof ai.models.generateContentStream>>;
+  try {
+    stream = await ai.models.generateContentStream({
+      model,
+      contents: prompt,
+      config: {
+        ...baseConfig({ thinking: 'high', includeThoughts: true }),
+      },
+    });
+  } catch (err) {
+    if (isQuotaExceeded(err)) {
+      model = getModelName('fast');
+      stream = await ai.models.generateContentStream({
+        model,
+        contents: prompt,
+        config: {
+          ...baseConfig({ thinking: 'high', includeThoughts: true }),
+        },
+      });
+    } else throw err;
+  }
 
   let accumulatedMarkdown = '';
   for await (const chunk of stream) {
@@ -319,13 +358,27 @@ Output ONLY the markdown content. No explanations or code blocks around it.`;
     // Phase 2: Critique
     yield { type: 'status', content: `Critiquing for ${role} role...` };
 
-    const critiqueStream = await ai.models.generateContentStream({
-      model: getModelName('pro'),
-      contents: `You are a senior technical recruiter reviewing a GitHub profile README. List up to 5 concrete, specific improvements to better position the candidate for a ${role} role. Be direct and actionable.\n\nREADME:\n${accumulatedMarkdown}\n\nReturn ONLY a JSON array of short improvement notes.`,
-      config: {
-        ...baseConfig({ thinking: 'high', includeThoughts: true }),
-      },
-    });
+    let critiqueStream: Awaited<ReturnType<typeof ai.models.generateContentStream>>;
+    try {
+      critiqueStream = await ai.models.generateContentStream({
+        model,
+        contents: `You are a senior technical recruiter reviewing a GitHub profile README. List up to 5 concrete, specific improvements to better position the candidate for a ${role} role. Be direct and actionable.\n\nREADME:\n${accumulatedMarkdown}\n\nReturn ONLY a JSON array of short improvement notes.`,
+        config: {
+          ...baseConfig({ thinking: 'high', includeThoughts: true }),
+        },
+      });
+    } catch (err) {
+      if (isQuotaExceeded(err)) {
+        model = getModelName('fast');
+        critiqueStream = await ai.models.generateContentStream({
+          model,
+          contents: `You are a senior technical recruiter reviewing a GitHub profile README. List up to 5 concrete, specific improvements to better position the candidate for a ${role} role. Be direct and actionable.\n\nREADME:\n${accumulatedMarkdown}\n\nReturn ONLY a JSON array of short improvement notes.`,
+          config: {
+            ...baseConfig({ thinking: 'high', includeThoughts: true }),
+          },
+        });
+      } else throw err;
+    }
 
     let critiqueText = '';
     for await (const chunk of critiqueStream) {
@@ -359,13 +412,27 @@ Output ONLY the markdown content. No explanations or code blocks around it.`;
       // Clear previous text — client should replace with refined version
       yield { type: 'text', content: '\n\n---\n\n<!-- REFINED VERSION -->\n\n' };
 
-      const refineStream = await ai.models.generateContentStream({
-        model: getModelName('pro'),
-        contents: `You are refining a GitHub profile README for a ${role} role. Apply these improvements while preserving the structure and all widgets.\n\nImprovement notes:\n- ${notes.join('\n- ')}\n\nOriginal README:\n${accumulatedMarkdown}\n\nReturn ONLY the improved markdown.`,
-        config: {
-          ...baseConfig({ thinking: 'high', includeThoughts: true }),
-        },
-      });
+      let refineStream: Awaited<ReturnType<typeof ai.models.generateContentStream>>;
+      try {
+        refineStream = await ai.models.generateContentStream({
+          model,
+          contents: `You are refining a GitHub profile README for a ${role} role. Apply these improvements while preserving the structure and all widgets.\n\nImprovement notes:\n- ${notes.join('\n- ')}\n\nOriginal README:\n${accumulatedMarkdown}\n\nReturn ONLY the improved markdown.`,
+          config: {
+            ...baseConfig({ thinking: 'high', includeThoughts: true }),
+          },
+        });
+      } catch (err) {
+        if (isQuotaExceeded(err)) {
+          model = getModelName('fast');
+          refineStream = await ai.models.generateContentStream({
+            model,
+            contents: `You are refining a GitHub profile README for a ${role} role. Apply these improvements while preserving the structure and all widgets.\n\nImprovement notes:\n- ${notes.join('\n- ')}\n\nOriginal README:\n${accumulatedMarkdown}\n\nReturn ONLY the improved markdown.`,
+            config: {
+              ...baseConfig({ thinking: 'high', includeThoughts: true }),
+            },
+          });
+        } else throw err;
+      }
 
       for await (const chunk of refineStream) {
         const parts = chunk.candidates?.[0]?.content?.parts ?? [];
@@ -1013,13 +1080,28 @@ Respond with ONLY a valid JSON object. No markdown code blocks, no explanation.`
 
   yield { type: 'status', content: 'Gemini is analyzing your year...' };
 
-  const stream = await ai.models.generateContentStream({
-    model: getModelName('pro'),
-    contents: prompt,
-    config: {
-      ...baseConfig({ thinking: 'high', includeThoughts: true, grounding: true }),
-    },
-  });
+  let model = getModelName('pro');
+  let stream: Awaited<ReturnType<typeof ai.models.generateContentStream>>;
+  try {
+    stream = await ai.models.generateContentStream({
+      model,
+      contents: prompt,
+      config: {
+        ...baseConfig({ thinking: 'high', includeThoughts: true, grounding: true }),
+      },
+    });
+  } catch (err) {
+    if (isQuotaExceeded(err)) {
+      model = getModelName('fast');
+      stream = await ai.models.generateContentStream({
+        model,
+        contents: prompt,
+        config: {
+          ...baseConfig({ thinking: 'high', includeThoughts: true, grounding: true }),
+        },
+      });
+    } else throw err;
+  }
 
   for await (const chunk of stream) {
     const parts = chunk.candidates?.[0]?.content?.parts ?? [];
@@ -1092,13 +1174,28 @@ Make the Mermaid diagram meaningful — show actual modules/directories and thei
 
   yield { type: 'status', content: 'Gemini is analyzing architecture...' };
 
-  const stream = await ai.models.generateContentStream({
-    model: getModelName('pro'),
-    contents: prompt,
-    config: {
-      ...baseConfig({ thinking: 'high', includeThoughts: true }),
-    },
-  });
+  let model = getModelName('pro');
+  let stream: Awaited<ReturnType<typeof ai.models.generateContentStream>>;
+  try {
+    stream = await ai.models.generateContentStream({
+      model,
+      contents: prompt,
+      config: {
+        ...baseConfig({ thinking: 'high', includeThoughts: true }),
+      },
+    });
+  } catch (err) {
+    if (isQuotaExceeded(err)) {
+      model = getModelName('fast');
+      stream = await ai.models.generateContentStream({
+        model,
+        contents: prompt,
+        config: {
+          ...baseConfig({ thinking: 'high', includeThoughts: true }),
+        },
+      });
+    } else throw err;
+  }
 
   for await (const chunk of stream) {
     const parts = chunk.candidates?.[0]?.content?.parts ?? [];

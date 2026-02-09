@@ -2,7 +2,7 @@
 
 **AI-powered GitHub profile tools — READMEs, widgets, year-in-review, and portfolio — powered by Google Gemini.**
 
-Built for the **Google Hackathon** (Gemini 3). GitSkins turns your GitHub activity into recruiter-ready READMEs, live-streaming agent sessions, GitHub Wrapped narratives, repo architecture diagrams, daily dev cards, and AI-generated portfolio case studies — with Extended Thinking, real-time streaming, and Google Search grounding.
+Built for the **Google Gemini 3 Hackathon 2026** (Gemini 3). GitSkins turns your GitHub activity into recruiter-ready READMEs, live-streaming agent sessions, GitHub Wrapped narratives, repo architecture diagrams, daily dev cards, and AI-generated portfolio case studies — with Extended Thinking, real-time streaming, and Google Search grounding.
 
 ---
 
@@ -131,7 +131,7 @@ Create `.env.local` from `.env.example` and set:
 | `GEMINI_MODEL_PRO` | No | Pro model (e.g. `gemini-3-pro-preview`). |
 | `GEMINI_MODEL_FAST` | No | Fast model for chat/analysis. |
 
-Optional: `NEXTAUTH_SECRET`, `NEXTAUTH_URL` (auth), `NEXT_PUBLIC_POSTHOG_*`, `SENTRY_*`, `WAITLIST_*` (see `.env.example`).
+Optional: `NEXTAUTH_SECRET`, `NEXTAUTH_URL` (auth), `NEXT_PUBLIC_POSTHOG_*`, `SENTRY_*`, `WAITLIST_*` (see `.env.example`). If you hit Gemini 3 Pro quota (429), the app automatically retries with Flash; or set `GEMINI_MODEL_PRO=gemini-3-flash-preview` to use Flash for heavy features.
 
 Without `GEMINI_API_KEY` and `GITHUB_TOKEN`, the site still loads; AI and profile-dependent features will show a “not configured” or similar message.
 
