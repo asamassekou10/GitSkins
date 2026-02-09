@@ -127,9 +127,9 @@ Create `.env.local` from `.env.example` and set:
 |----------|----------|-------------|
 | `GITHUB_TOKEN` | Yes (for profile/repos) | GitHub personal access token (GraphQL). |
 | `GEMINI_API_KEY` | Yes (for AI features) | Google AI / Gemini API key. |
-| `GEMINI_MODEL` | No | Default model (e.g. `gemini-3-flash-preview`). |
-| `GEMINI_MODEL_PRO` | No | Pro model (e.g. `gemini-3-pro-preview`). |
-| `GEMINI_MODEL_FAST` | No | Fast model for chat/analysis. |
+| `GEMINI_MODEL` | No | Default model. Defaults: `gemini-2.5-flash` (2.5 for better quota). |
+| `GEMINI_MODEL_PRO` | No | Pro model. Default: `gemini-2.5-pro`. Set to `gemini-3-pro-preview` for Gemini 3. |
+| `GEMINI_MODEL_FAST` | No | Fast model. Default: `gemini-2.5-flash`. |
 
 Optional: `NEXTAUTH_SECRET`, `NEXTAUTH_URL` (auth), `NEXT_PUBLIC_POSTHOG_*`, `SENTRY_*`, `WAITLIST_*` (see `.env.example`). If you hit Gemini 3 Pro quota (429), the app automatically retries with Flash; or set `GEMINI_MODEL_PRO=gemini-3-flash-preview` to use Flash for heavy features.
 

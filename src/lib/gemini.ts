@@ -39,9 +39,9 @@ function getAI(): GoogleGenAI {
 
 function getModelName(type: 'fast' | 'pro' = 'fast'): string {
   if (type === 'pro') {
-    return process.env.GEMINI_MODEL_PRO || process.env.GEMINI_MODEL || 'gemini-3-pro-preview';
+    return process.env.GEMINI_MODEL_PRO || process.env.GEMINI_MODEL || 'gemini-2.5-pro';
   }
-  return process.env.GEMINI_MODEL_FAST || process.env.GEMINI_MODEL || 'gemini-3-flash-preview';
+  return process.env.GEMINI_MODEL_FAST || process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 }
 
 /** Detect 429 / quota exceeded from Gemini API errors */
