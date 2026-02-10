@@ -9,7 +9,7 @@ Built for the **Google Gemini 3 Hackathon 2026** (Gemini 3). GitSkins turns your
 ## Live Demo
 
 - **Production:** [https://gitskins.com](https://gitskins.com)
-- **Demo video (≤3 min):** _[Link to be added]_
+- **Demo video (≤3 min):** https://youtu.be/deyzfg6oPII?si=vKPIdoAoegzxieM1
 
 **Suggested demo path:** Landing → **Live README Agent** → **AI Features** (Profile Intelligence) → **GitHub Wrapped** → **Portfolio Builder**
 
