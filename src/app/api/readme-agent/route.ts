@@ -8,8 +8,10 @@
 
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
+import { auth } from '@/auth';
 import { fetchProfileForReadme } from '@/lib/github';
 import { streamReadmeWithGemini, isGeminiConfigured } from '@/lib/gemini';
+import { checkReadmeAllowed, incrementReadmeUsage } from '@/lib/server-usage';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -28,6 +30,37 @@ const requestSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    const session = await auth();
+    if (!session?.user) {
+      return new Response(
+        JSON.stringify({ error: 'Authentication required', code: 'UNAUTHORIZED' }),
+        { status: 401, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const sessionUser = session.user as { username?: string };
+    const sessionUsername = sessionUser.username;
+    if (!sessionUsername) {
+      return new Response(
+        JSON.stringify({ error: 'No GitHub username in session', code: 'UNAUTHORIZED' }),
+        { status: 401, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const usageCheck = await checkReadmeAllowed(sessionUsername);
+    if (!usageCheck.allowed) {
+      return new Response(
+        JSON.stringify({
+          error: 'Monthly README generation limit reached',
+          code: 'LIMIT_REACHED',
+          remaining: 0,
+          limit: usageCheck.limit,
+          plan: usageCheck.plan,
+        }),
+        { status: 429, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
     const body = await request.json();
     const validatedData = requestSchema.parse(body);
     const { username, sections, style, theme, careerMode, careerRole } = validatedData;
@@ -47,6 +80,9 @@ export async function POST(request: NextRequest) {
         { status: 404, headers: { 'Content-Type': 'application/json' } }
       );
     }
+
+    // Count the generation before streaming starts
+    await incrementReadmeUsage(sessionUsername);
 
     const encoder = new TextEncoder();
 

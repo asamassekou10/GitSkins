@@ -7,12 +7,14 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { auth } from '@/auth';
 import { fetchProfileForReadme } from '@/lib/github';
 import {
   generateReadmeTemplate,
   parseGeneratedReadme,
 } from '@/lib/readme-generator';
 import { generateReadmeWithGemini, isGeminiConfigured } from '@/lib/gemini';
+import { checkReadmeAllowed, incrementReadmeUsage } from '@/lib/server-usage';
 import type { ReadmeConfig, ReadmeSectionType, ReadmeStyle } from '@/types/readme';
 
 export const runtime = 'nodejs';
@@ -34,6 +36,37 @@ const requestSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    const session = await auth();
+    if (!session?.user) {
+      return NextResponse.json(
+        { error: 'Authentication required', code: 'UNAUTHORIZED' },
+        { status: 401 }
+      );
+    }
+
+    const sessionUser = session.user as { username?: string };
+    const sessionUsername = sessionUser.username;
+    if (!sessionUsername) {
+      return NextResponse.json(
+        { error: 'No GitHub username in session', code: 'UNAUTHORIZED' },
+        { status: 401 }
+      );
+    }
+
+    const usageCheck = await checkReadmeAllowed(sessionUsername);
+    if (!usageCheck.allowed) {
+      return NextResponse.json(
+        {
+          error: 'Monthly README generation limit reached',
+          code: 'LIMIT_REACHED',
+          remaining: 0,
+          limit: usageCheck.limit,
+          plan: usageCheck.plan,
+        },
+        { status: 429 }
+      );
+    }
+
     const body = await request.json();
     const validatedData = requestSchema.parse(body);
 
@@ -148,6 +181,8 @@ export async function POST(request: NextRequest) {
       result = generateReadmeTemplate(profileData, config);
     }
 
+    await incrementReadmeUsage(sessionUsername);
+
     return NextResponse.json({
       success: true,
       readme: result.markdown,
@@ -163,6 +198,11 @@ export async function POST(request: NextRequest) {
         followers: profileData.followers,
         totalStars: profileData.totalStars,
         totalRepos: profileData.totalRepos,
+      },
+      usage: {
+        remaining: usageCheck.remaining - 1,
+        limit: usageCheck.limit,
+        plan: usageCheck.plan,
       },
     });
   } catch (error) {

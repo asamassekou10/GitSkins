@@ -15,6 +15,10 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'image.pollinations.ai',
       },
+      {
+        protocol: 'https',
+        hostname: 'lh3.googleusercontent.com',
+      },
     ],
     formats: ['image/avif', 'image/webp'],
     minimumCacheTTL: 86400, // 24 hours

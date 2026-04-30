@@ -19,6 +19,7 @@ export const primaryNavItems: NavItemWithHash[] = [
   { label: 'Features', href: '/#features', isHashLink: true },
   { label: 'Themes', href: '/#themes', isHashLink: true },
   { label: 'AI Features', href: '/ai', isHashLink: false },
+  { label: 'Pricing', href: '/pricing', isHashLink: false },
 ];
 
 /** Tools dropdown: product/tool pages. */

@@ -21,16 +21,31 @@ export const config = {
   ],
 };
 
+// AI/expensive routes get a much tighter per-IP budget: 10 req/min
+const AI_ROUTE_PREFIXES = [
+  '/api/generate-readme',
+  '/api/readme-agent',
+  '/api/ai/',
+  '/api/wrapped',
+  '/api/visualize',
+];
+
+function isAiRoute(pathname: string): boolean {
+  return AI_ROUTE_PREFIXES.some((p) => pathname.startsWith(p));
+}
+
 /**
  * Rate limiting using KV (Upstash Redis)
- * 
- * @param request - Next.js request object
+ *
  * @param identifier - Unique identifier (IP address or user ID)
+ * @param limit      - Max requests allowed in the window
+ * @param windowSecs - Window size in seconds
  * @returns true if within rate limit, false if exceeded
  */
 async function checkRateLimit(
-  request: NextRequest,
-  identifier: string
+  identifier: string,
+  limit: number,
+  windowSecs: number
 ): Promise<boolean> {
   if (!rateLimitConfig.enabled) {
     return true;
@@ -41,42 +56,32 @@ async function checkRateLimit(
     return true;
   }
 
-  // @vercel/kv is optional - if not installed, rate limiting is disabled
   try {
     const kvModule = await import('@vercel/kv');
-    
-    if (!kvModule || !kvModule.kv) {
-      // @vercel/kv not available - rate limiting disabled
+
+    if (!kvModule?.kv) {
       return true;
     }
-    
+
     const kv = kvModule.kv;
     const key = `ratelimit:${identifier}`;
     const current = await kv.get<number>(key);
 
     if (current === null) {
-      // First request in window
-      await kv.setex(key, rateLimitConfig.windowSeconds, 1);
+      await kv.setex(key, windowSecs, 1);
       return true;
     }
 
-    if (current >= rateLimitConfig.requestsPerWindow) {
-      // Rate limit exceeded
+    if (current >= limit) {
       return false;
     }
 
-    // Increment counter
     await kv.incr(key);
     return true;
   } catch (error: any) {
-    // If @vercel/kv is not installed or KV fails, allow request (fail open)
-    // Rate limiting is optional, so we don't block requests if it fails
-    // Check if it's a module not found error
     if (error?.code === 'MODULE_NOT_FOUND' || error?.message?.includes('Cannot find module')) {
-      // Package not installed - that's okay, rate limiting is optional
       return true;
     }
-    // Other errors - also allow (fail open)
     return true;
   }
 }
@@ -205,8 +210,16 @@ export async function middleware(request: NextRequest) {
 
   // Rate Limiting (for API routes)
   if (request.nextUrl.pathname.startsWith('/api/')) {
-    const identifier = getClientIdentifier(request);
-    const isAllowed = await checkRateLimit(request, identifier);
+    const ip = getClientIdentifier(request);
+    const pathname = request.nextUrl.pathname;
+    const ai = isAiRoute(pathname);
+
+    // AI routes: 10 req/min; everything else: global limit from config
+    const limit = ai ? 10 : rateLimitConfig.requestsPerWindow;
+    const windowSecs = ai ? 60 : rateLimitConfig.windowSeconds;
+    const bucketKey = ai ? `ai:${ip}` : ip;
+
+    const isAllowed = await checkRateLimit(bucketKey, limit, windowSecs);
 
     if (!isAllowed) {
       return new NextResponse(
@@ -218,7 +231,7 @@ export async function middleware(request: NextRequest) {
           status: 429,
           headers: {
             'Content-Type': 'application/json',
-            'Retry-After': rateLimitConfig.windowSeconds.toString(),
+            'Retry-After': windowSecs.toString(),
             ...Object.fromEntries(response.headers.entries()),
           },
         }

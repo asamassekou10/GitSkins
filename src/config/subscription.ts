@@ -1,14 +1,5 @@
-/**
- * Subscription Configuration
- *
- * Defines plans, limits, and pricing for GitSkins monetization.
- */
-
 import type { Plan, CreditPack } from '@/types/subscription';
 
-/**
- * All available themes organized by category
- */
 export const ALL_THEMES = {
   original: ['satan', 'neon', 'zen', 'github-dark', 'dracula'],
   seasonal: ['winter', 'spring', 'summer', 'autumn'],
@@ -17,20 +8,10 @@ export const ALL_THEMES = {
   aesthetic: ['retro', 'minimal', 'pastel', 'matrix'],
 } as const;
 
-/**
- * Free tier themes (all themes - hackathon edition)
- */
-export const FREE_THEMES = [
-  ...ALL_THEMES.original,
-  ...ALL_THEMES.seasonal,
-  ...ALL_THEMES.holiday,
-  ...ALL_THEMES.developer,
-  ...ALL_THEMES.aesthetic,
-] as const;
+/** Themes available on the free tier. */
+export const FREE_THEMES = [...ALL_THEMES.original] as const;
 
-/**
- * Pro tier themes (all 20 themes)
- */
+/** All 20 themes — available on Pro. */
 export const PRO_THEMES = [
   ...ALL_THEMES.original,
   ...ALL_THEMES.seasonal,
@@ -39,49 +20,48 @@ export const PRO_THEMES = [
   ...ALL_THEMES.aesthetic,
 ] as const;
 
-/**
- * Plan definitions
- * NOTE: All features are free for hackathon testing
- */
+/** Monthly README generation limits per plan. */
+export const FREE_TIER_README_LIMIT = 5;
+export const PRO_TIER_README_LIMIT = 9999;
+
 export const PLANS: Record<'free' | 'pro', Plan> = {
   free: {
     id: 'free',
     name: 'Free',
     price: 0,
     priceLabel: 'Free forever',
-    description: 'Full access - Hackathon Edition',
+    description: 'Get started with GitSkins',
     features: [
-      'All widgets (card, stats, languages, streak)',
-      'All 20 premium themes',
-      'Unlimited README generations',
-      'No watermark on widgets',
-      'Priority widget rendering',
-      'All AI features included',
+      '5 README generations per month',
+      '5 themes (Satan, Neon, Zen, GitHub Dark, Dracula)',
+      'All profile widgets',
+      'GitHub Wrapped',
+      'Repo Visualizer',
     ],
     limits: {
-      readmeGenerations: 9999,
-      themes: [...PRO_THEMES],
-      hasWatermark: false,
-      hasPriorityRendering: true,
-      hasCustomColors: true,
+      readmeGenerations: FREE_TIER_README_LIMIT,
+      themes: [...FREE_THEMES],
+      hasWatermark: true,
+      hasPriorityRendering: false,
+      hasCustomColors: false,
     },
   },
   pro: {
     id: 'pro',
     name: 'Pro',
-    price: 0,
-    priceLabel: 'Free (Hackathon)',
-    description: 'Full access - Hackathon Edition',
+    price: 9,
+    priceLabel: '$9 / month',
+    description: 'Unlimited everything',
     features: [
-      'All widgets (card, stats, languages, streak)',
-      'All 20 premium themes',
       'Unlimited README generations',
+      'All 20 premium themes',
       'No watermark on widgets',
       'Priority widget rendering',
-      'All AI features included',
+      'Custom colors',
+      'All AI features',
     ],
     limits: {
-      readmeGenerations: 9999,
+      readmeGenerations: PRO_TIER_README_LIMIT,
       themes: [...PRO_THEMES],
       hasWatermark: false,
       hasPriorityRendering: true,
@@ -90,77 +70,41 @@ export const PLANS: Record<'free' | 'pro', Plan> = {
   },
 };
 
-/**
- * Credit packs for additional README generations
- */
 export const CREDIT_PACKS: CreditPack[] = [
-  {
-    id: 'credits-50',
-    name: '50 Credits',
-    credits: 50,
-    price: 5,
-    priceLabel: '$5',
-  },
-  {
-    id: 'credits-150',
-    name: '150 Credits',
-    credits: 150,
-    price: 12,
-    priceLabel: '$12',
-  },
+  { id: 'credits-50', name: '50 Credits', credits: 50, price: 5, priceLabel: '$5' },
+  { id: 'credits-150', name: '150 Credits', credits: 150, price: 12, priceLabel: '$12' },
 ];
 
-/**
- * Stripe configuration (disabled for hackathon - all features are free)
- */
 export const STRIPE_CONFIG = {
   priceIds: {
-    proLifetime: '',
-    credits50: '',
-    credits150: '',
+    proMonthly: process.env.STRIPE_PRICE_PRO_MONTHLY ?? '',
+    proLifetime: process.env.STRIPE_PRICE_PRO_LIFETIME ?? '',
+    credits50: process.env.STRIPE_PRICE_CREDITS_50 ?? '',
+    credits150: process.env.STRIPE_PRICE_CREDITS_150 ?? '',
   },
-  successUrl: '/',
-  cancelUrl: '/',
+  successUrl: '/dashboard?upgrade=success',
+  cancelUrl: '/pricing',
 };
 
-/**
- * Get the reset date for monthly limits (1st of next month)
- */
 export function getNextResetDate(): string {
   const now = new Date();
   const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
   return nextMonth.toISOString();
 }
 
-/**
- * Check if a reset is needed based on the stored reset date
- */
 export function shouldResetUsage(resetDateStr: string): boolean {
-  const resetDate = new Date(resetDateStr);
-  const now = new Date();
-  return now >= resetDate;
+  return new Date() >= new Date(resetDateStr);
 }
 
-/**
- * Check if a theme is available for a plan
- */
 export function isThemeAvailable(theme: string, plan: 'free' | 'pro'): boolean {
-  return PLANS[plan].limits.themes.includes(theme);
+  return (PLANS[plan].limits.themes as readonly string[]).includes(theme);
 }
 
-/**
- * Check if a theme is free
- */
 export function isFreeTierTheme(theme: string): boolean {
-  return FREE_THEMES.includes(theme as typeof FREE_THEMES[number]);
+  return (FREE_THEMES as readonly string[]).includes(theme);
 }
 
-/**
- * Get theme restriction message
- */
 export function getThemeRestrictionMessage(theme: string): string | null {
-  if (isFreeTierTheme(theme)) {
-    return null;
-  }
-  return `${theme} theme is only available with Pro plan`;
+  if (isFreeTierTheme(theme)) return null;
+  return `${theme} theme requires a Pro plan`;
 }

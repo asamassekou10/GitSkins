@@ -18,6 +18,7 @@ import type {
 } from '@/types';
 import { githubConfig } from '@/config/site';
 import { calculateStreaks } from './streak-calculator';
+import { withCache } from './kv-cache';
 
 /**
  * Initialize Octokit client lazily to avoid build-time errors
@@ -355,7 +356,7 @@ function aggregateLanguages(repos: RepositoriesData): LanguageStat[] {
  * @param username - GitHub username (validated)
  * @returns ExtendedGitHubData object or null if user not found
  */
-export async function fetchExtendedGitHubData(
+async function _fetchExtendedGitHubDataRaw(
   username: string
 ): Promise<ExtendedGitHubData | null> {
   try {
@@ -451,6 +452,16 @@ export async function fetchExtendedGitHubData(
     // Re-throw unexpected errors
     throw error;
   }
+}
+
+export function fetchExtendedGitHubData(
+  username: string
+): Promise<ExtendedGitHubData | null> {
+  return withCache(
+    `github:widget:${username}`,
+    600,
+    () => _fetchExtendedGitHubDataRaw(username)
+  );
 }
 
 /**
@@ -601,7 +612,7 @@ export interface ExtendedProfileData {
 /**
  * Fetch extended profile data for README generation
  */
-export async function fetchProfileForReadme(
+async function _fetchProfileForReadmeRaw(
   username: string
 ): Promise<ExtendedProfileData | null> {
   try {
@@ -716,6 +727,16 @@ export async function fetchProfileForReadme(
 
     throw error;
   }
+}
+
+export function fetchProfileForReadme(
+  username: string
+): Promise<ExtendedProfileData | null> {
+  return withCache(
+    `github:readme:${username}`,
+    300,
+    () => _fetchProfileForReadmeRaw(username)
+  );
 }
 
 /**

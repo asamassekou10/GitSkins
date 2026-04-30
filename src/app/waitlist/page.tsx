@@ -322,7 +322,7 @@ export default function WaitlistPage() {
           color: '#333',
         }}
       >
-        2026 GitSkins. Built for the Gemini 3 Hackathon.
+        © 2026 GitSkins
       </div>
     </div>
   );

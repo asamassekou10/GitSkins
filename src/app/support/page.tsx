@@ -9,15 +9,15 @@ const faqs = [
   },
   {
     question: 'Are the widgets free to use?',
-    answer: 'Yes! GitSkins is completely free. All features and themes are available at no cost.',
+    answer: 'Yes — core widgets and the free tier are available at no cost. Pro unlocks all premium themes, removes watermarks, and gives you unlimited README generations. See /pricing for details.',
   },
   {
     question: 'How often do the widgets update?',
     answer: 'Widgets are cached for 24 hours to ensure fast loading. Your stats will update automatically within 24 hours of any changes to your GitHub activity.',
   },
   {
-    question: 'Can I customize the themes?',
-    answer: 'Currently, we offer 5 pre-built themes: Satan, Neon, Zen, GitHub Dark, and Dracula. Custom theme creation is coming soon!',
+    question: 'How many themes are available?',
+    answer: 'Free accounts get 5 themes (Satan, Neon, Zen, GitHub Dark, and Dracula). Pro users unlock all 20 premium themes. New themes are added regularly and automatically available to Pro users.',
   },
   {
     question: 'What widgets are available?',

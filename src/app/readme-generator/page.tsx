@@ -353,8 +353,6 @@ export default function ReadmeGeneratorPage() {
                 </span>
               </div>
 
-              {/* All features free for hackathon */}
-
               {userIsPro && (
                 <span
                   style={{
