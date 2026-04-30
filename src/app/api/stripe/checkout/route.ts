@@ -2,13 +2,13 @@
  * POST /api/stripe/checkout
  *
  * Creates a Stripe Checkout Session and returns the redirect URL.
- * Body: { priceId: string, mode: 'subscription' | 'payment' }
+ * Body: { plan: 'monthly' | 'lifetime' }
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { stripe } from '@/lib/stripe';
-import { getStripeCustomerId } from '@/lib/server-usage';
+import { getStripeCustomerIdByUserId } from '@/lib/server-usage';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -19,9 +19,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
   }
 
-  const user = session.user as { username?: string; email?: string; name?: string };
-  if (!user.username) {
-    return NextResponse.json({ error: 'No GitHub username in session' }, { status: 400 });
+  const user = session.user as { id?: string; username?: string; email?: string; name?: string };
+  const userId = user.id;
+  if (!userId) {
+    return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
   }
 
   const { plan } = await request.json() as { plan: 'monthly' | 'lifetime' };
@@ -43,11 +44,9 @@ export async function POST(request: NextRequest) {
   }
 
   const { priceId, mode } = selected;
-
   const baseUrl = process.env.NEXTAUTH_URL ?? 'https://gitskins.com';
 
-  // Re-use existing Stripe customer if the user has already paid before
-  const existingCustomerId = await getStripeCustomerId(user.username);
+  const existingCustomerId = await getStripeCustomerIdByUserId(userId);
 
   const checkoutSession = await stripe.checkout.sessions.create({
     mode,
@@ -56,12 +55,12 @@ export async function POST(request: NextRequest) {
       : { customer_email: user.email ?? undefined }),
     line_items: [{ price: priceId, quantity: 1 }],
     metadata: {
-      username: user.username,
+      userId,
+      username: user.username ?? '',
     },
-    // For subscriptions, allow the customer to manage their subscription after checkout
     ...(mode === 'subscription' && {
       subscription_data: {
-        metadata: { username: user.username },
+        metadata: { userId, username: user.username ?? '' },
       },
     }),
     success_url: `${baseUrl}/dashboard?upgrade=success`,

@@ -30,6 +30,9 @@ debug.log
 # Vercel
 .vercel
 
+# Claude Code local settings
+.claude/
+
 # TypeScript
 *.tsbuildinfo
 next-env.d.ts

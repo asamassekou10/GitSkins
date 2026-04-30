@@ -12,6 +12,7 @@ import { FREE_TIER_README_LIMIT, PRO_TIER_README_LIMIT } from '@/config/subscrip
 // ─── Plan management (called by Stripe webhook) ──────────────────────────────
 
 export async function upgradeToPro(params: {
+  userId?: string;
   githubId?: string;
   username?: string;
   stripeCustomerId: string;
@@ -19,15 +20,19 @@ export async function upgradeToPro(params: {
   stripePriceId: string;
   stripeCurrentPeriodEnd: Date | null;
 }): Promise<void> {
-  const where = params.githubId
-    ? { githubId: params.githubId }
-    : { username: params.username! };
+  let userId = params.userId;
 
-  const user = await db.user.findUnique({ where, select: { id: true } });
-  if (!user) return;
+  if (!userId) {
+    const where = params.githubId
+      ? { githubId: params.githubId }
+      : { username: params.username! };
+    const user = await db.user.findUnique({ where, select: { id: true } });
+    if (!user) return;
+    userId = user.id;
+  }
 
   await db.subscription.upsert({
-    where: { userId: user.id },
+    where: { userId },
     update: {
       plan: 'pro',
       status: 'active',
@@ -37,7 +42,7 @@ export async function upgradeToPro(params: {
       stripeCurrentPeriodEnd: params.stripeCurrentPeriodEnd,
     },
     create: {
-      userId: user.id,
+      userId,
       plan: 'pro',
       status: 'active',
       stripeCustomerId: params.stripeCustomerId,
@@ -81,6 +86,32 @@ export async function getStripeCustomerId(username: string): Promise<string | nu
     return sub?.stripeCustomerId ?? null;
   } catch {
     return null;
+  }
+}
+
+export async function getStripeCustomerIdByUserId(userId: string): Promise<string | null> {
+  if (!dbAvailable()) return null;
+  try {
+    const sub = await db.subscription.findFirst({
+      where: { userId },
+      select: { stripeCustomerId: true },
+    });
+    return sub?.stripeCustomerId ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export async function getUserPlanById(userId: string): Promise<'free' | 'pro'> {
+  if (!dbAvailable()) return 'free';
+  try {
+    const sub = await db.subscription.findFirst({
+      where: { userId, status: 'active' },
+      select: { plan: true },
+    });
+    return sub?.plan === 'pro' ? 'pro' : 'free';
+  } catch {
+    return 'free';
   }
 }
 

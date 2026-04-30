@@ -49,10 +49,11 @@ export async function POST(request: NextRequest) {
     switch (event.type) {
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session;
+        const userId = session.metadata?.userId;
         const username = session.metadata?.username;
 
-        if (!username) {
-          console.error('[webhook] checkout.session.completed missing username metadata');
+        if (!userId && !username) {
+          console.error('[webhook] checkout.session.completed missing user metadata');
           break;
         }
 
@@ -61,7 +62,6 @@ export async function POST(request: NextRequest) {
           : session.customer?.id ?? '';
 
         if (session.mode === 'subscription') {
-          // Monthly subscription — fetch subscription details
           const subscriptionId = typeof session.subscription === 'string'
             ? session.subscription
             : session.subscription?.id ?? null;
@@ -71,39 +71,33 @@ export async function POST(request: NextRequest) {
 
           if (subscriptionId) {
             const sub = await stripe.subscriptions.retrieve(subscriptionId);
-            // cancel_at is set only when the subscription is scheduled to end
             cancelAt = sub.cancel_at ? new Date(sub.cancel_at * 1000) : null;
             priceId = sub.items.data[0]?.price.id ?? priceId;
           }
 
           await upgradeToPro({
-            username,
+            userId,
+            username: username || undefined,
             stripeCustomerId: customerId,
             stripeSubscriptionId: subscriptionId,
             stripePriceId: priceId,
             stripeCurrentPeriodEnd: cancelAt,
           });
 
-          sendPaymentConfirmationEmail(
-            await getUserEmail(username),
-            username,
-            'monthly'
-          ).catch(() => {});
+          const { email, name } = await getUserInfo(userId, username);
+          sendPaymentConfirmationEmail(email, name, 'monthly').catch(() => {});
         } else if (session.mode === 'payment') {
-          // One-time lifetime purchase — no subscription object
           await upgradeToPro({
-            username,
+            userId,
+            username: username || undefined,
             stripeCustomerId: customerId,
             stripeSubscriptionId: null,
             stripePriceId: process.env.STRIPE_PRICE_PRO_LIFETIME ?? '',
             stripeCurrentPeriodEnd: null,
           });
 
-          sendPaymentConfirmationEmail(
-            await getUserEmail(username),
-            username,
-            'lifetime'
-          ).catch(() => {});
+          const { email, name } = await getUserInfo(userId, username);
+          sendPaymentConfirmationEmail(email, name, 'lifetime').catch(() => {});
         }
         break;
       }
@@ -125,25 +119,31 @@ export async function POST(request: NextRequest) {
       }
 
       default:
-        // Unhandled event — ignore silently
         break;
     }
   } catch (err) {
     console.error(`[webhook] Error handling ${event.type}:`, err);
-    // Return 200 so Stripe doesn't retry — log the error for investigation
+    // Return 200 so Stripe doesn't retry
   }
 
   return NextResponse.json({ received: true });
 }
 
-async function getUserEmail(username: string): Promise<string> {
+async function getUserInfo(
+  userId?: string,
+  username?: string
+): Promise<{ email: string; name: string }> {
   try {
+    const where = userId ? { id: userId } : { username: username! };
     const user = await db.user.findUnique({
-      where: { username },
-      select: { email: true },
+      where,
+      select: { email: true, name: true, username: true },
     });
-    return user?.email ?? '';
+    return {
+      email: user?.email ?? '',
+      name: user?.name ?? user?.username ?? '',
+    };
   } catch {
-    return '';
+    return { email: '', name: '' };
   }
 }

@@ -84,11 +84,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
     async session({ session, token }) {
       if (session.user) {
-        (session.user as { username?: string; avatar?: string; githubId?: string }).username =
+        (session.user as { id?: string; username?: string; avatar?: string; githubId?: string }).id =
+          token.id as string;
+        (session.user as { id?: string; username?: string; avatar?: string; githubId?: string }).username =
           token.username as string;
-        (session.user as { username?: string; avatar?: string; githubId?: string }).avatar =
+        (session.user as { id?: string; username?: string; avatar?: string; githubId?: string }).avatar =
           token.avatar as string;
-        (session.user as { username?: string; avatar?: string; githubId?: string }).githubId =
+        (session.user as { id?: string; username?: string; avatar?: string; githubId?: string }).githubId =
           token.githubId as string | undefined;
       }
       return session;
