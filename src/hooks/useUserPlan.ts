@@ -1,6 +1,6 @@
 'use client';
 
-import useSWR from 'swr';
+import { useEffect, useRef, useState } from 'react';
 import { useSession } from 'next-auth/react';
 
 export interface UserPlanData {
@@ -21,25 +21,47 @@ const DEFAULT: UserPlanData = {
   loading: true,
 };
 
-const fetcher = (url: string) =>
-  fetch(url).then((r) => (r.ok ? r.json() : null));
+// Module-level cache: key → { data, fetchedAt }
+const cache = new Map<string, { data: UserPlanData; fetchedAt: number }>();
+const CACHE_TTL = 30_000; // 30 seconds
 
 export function useUserPlan(): UserPlanData {
   const { status } = useSession();
+  const [result, setResult] = useState<UserPlanData>(DEFAULT);
+  const fetchingRef = useRef(false);
 
-  const { data, isLoading } = useSWR(
-    status === 'authenticated' ? '/api/usage' : null,
-    fetcher,
-    {
-      revalidateOnFocus: false,
-      dedupingInterval: 30_000,
-      shouldRetryOnError: false,
+  useEffect(() => {
+    if (status === 'loading') return;
+
+    if (status === 'unauthenticated') {
+      setResult({ ...DEFAULT, loading: false });
+      return;
     }
-  );
 
-  if (status === 'unauthenticated') return { ...DEFAULT, loading: false };
-  if (status === 'loading' || isLoading) return DEFAULT;
-  if (!data) return { ...DEFAULT, loading: false };
+    const key = '/api/usage';
+    const cached = cache.get(key);
+    if (cached && Date.now() - cached.fetchedAt < CACHE_TTL) {
+      setResult(cached.data);
+      return;
+    }
 
-  return { ...data, loading: false };
+    if (fetchingRef.current) return;
+    fetchingRef.current = true;
+
+    fetch(key)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (!data) {
+          setResult({ ...DEFAULT, loading: false });
+          return;
+        }
+        const resolved: UserPlanData = { ...data, loading: false };
+        cache.set(key, { data: resolved, fetchedAt: Date.now() });
+        setResult(resolved);
+      })
+      .catch(() => setResult({ ...DEFAULT, loading: false }))
+      .finally(() => { fetchingRef.current = false; });
+  }, [status]);
+
+  return result;
 }
