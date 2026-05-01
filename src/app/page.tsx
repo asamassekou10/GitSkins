@@ -2,10 +2,11 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { analytics } from '@/components/AnalyticsProvider';
 import { HeroSection } from '@/components/landing/HeroSection';
 import { ThemeShowcase } from '@/components/landing/ThemeShowcase';
+import { BenefitsSection } from '@/components/landing/BenefitsSection';
 import { AnimatedSection, StaggerContainer, StaggerItem } from '@/components/landing/AnimatedSection';
 import { ShareMenu } from '@/components/ShareMenu';
 import { landingThemes } from '@/lib/landing-themes';
@@ -19,6 +20,19 @@ const widgets = [
   { id: 'streak', name: 'Streak', path: '/api/streak', description: 'Current and longest streak' },
 ];
 
+const MARQUEE_ITEMS = [
+  '20 Themes',
+  'Live README Agent',
+  'GitHub Wrapped',
+  'Profile Intelligence',
+  'Avatar Generator',
+  'Repo Visualizer',
+  'Daily Dev Card',
+  'Portfolio Builder',
+  'AI Analysis',
+  'Free Forever',
+];
+
 const features = [
   {
     icon: (
@@ -27,7 +41,7 @@ const features = [
       </svg>
     ),
     title: 'Live README Agent',
-    description: 'Watch Gemini 3 think, draft, critique, and refine your README in real-time.',
+    description: 'Watch AI think, draft, critique, and refine your README in real-time with live streaming.',
   },
   {
     icon: (
@@ -36,8 +50,8 @@ const features = [
         <path d="M10 22h4" />
       </svg>
     ),
-    title: 'Extended Thinking',
-    description: 'Deep multi-step reasoning produces higher quality, career-tailored output.',
+    title: 'Smart AI Agent',
+    description: 'Multi-pass generate-critique-refine loop produces career-tailored, high-quality output.',
   },
   {
     icon: (
@@ -46,8 +60,8 @@ const features = [
         <path d="M21 21l-4.35-4.35" />
       </svg>
     ),
-    title: 'Search Grounding',
-    description: 'Profile intelligence backed by real-world industry data via Google Search.',
+    title: 'Profile Intelligence',
+    description: 'Deep insights and benchmarks powered by real-world industry data.',
   },
   {
     icon: (
@@ -113,6 +127,49 @@ export default function Home() {
           onThemeChange={handleThemeChange}
         />
 
+        {/* Marquee Strip */}
+        <style>{`
+          @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+          }
+        `}</style>
+        <div
+          style={{
+            overflow: 'hidden',
+            borderTop: '1px solid #111',
+            borderBottom: '1px solid #111',
+            padding: '14px 0',
+            background: '#080808',
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              gap: '0',
+              animation: 'marquee 25s linear infinite',
+              width: 'max-content',
+            }}
+          >
+            {[...MARQUEE_ITEMS, ...MARQUEE_ITEMS].map((item, i) => (
+              <span key={i} style={{ display: 'inline-flex', alignItems: 'center' }}>
+                <span
+                  style={{
+                    color: '#444',
+                    fontSize: '13px',
+                    fontWeight: 500,
+                    whiteSpace: 'nowrap',
+                    padding: '0 16px',
+                  }}
+                >
+                  {item}
+                </span>
+                <span style={{ color: '#22c55e', fontSize: '10px' }}>•</span>
+              </span>
+            ))}
+          </div>
+        </div>
+
         {/* Features Section */}
         <section
           id="features"
@@ -134,7 +191,7 @@ export default function Home() {
                 Everything your profile needs
               </h2>
               <p style={{ fontSize: '16px', color: '#666', maxWidth: '560px', margin: '0 auto' }}>
-                Streaming AI agent, Extended Thinking, 20 themes, dynamic widgets, GitHub Wrapped, repo visualizer, daily dev cards, and more.
+                Streaming AI agent, smart multi-pass thinking, 20 themes, dynamic widgets, GitHub Wrapped, repo visualizer, daily dev cards, and more.
               </p>
             </AnimatedSection>
 
@@ -210,7 +267,7 @@ export default function Home() {
                 AI-Powered Features
               </h2>
               <p style={{ fontSize: '16px', color: '#666', maxWidth: '500px', margin: '0 auto' }}>
-                Seven AI-powered tools built on Gemini 3 Pro with Extended Thinking, streaming, and search grounding.
+                Seven AI-powered tools that analyze your GitHub profile, generate READMEs, and build your portfolio.
               </p>
             </AnimatedSection>
 
@@ -224,7 +281,7 @@ export default function Home() {
               {[
                 {
                   title: 'Live README Agent',
-                  description: 'Watch Gemini 3 think, draft, critique, and refine your README with live streaming.',
+                  description: 'Watch AI think, draft, critique, and refine your README with live streaming.',
                   href: '/readme-agent',
                   featured: true,
                   icon: (
@@ -269,7 +326,7 @@ export default function Home() {
                 },
                 {
                   title: 'GitHub Wrapped',
-                  description: 'Spotify-style year in review with Extended Thinking and industry benchmarks.',
+                  description: 'Spotify-style year in review with AI analysis and industry benchmarks.',
                   href: '/wrapped',
                   featured: true,
                   icon: (
@@ -616,67 +673,130 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Gemini 3 Features Section */}
-        <section style={{ padding: '100px 24px', background: '#050505' }}>
-          <div style={{ maxWidth: '900px', margin: '0 auto' }}>
-            <AnimatedSection style={{ textAlign: 'center', marginBottom: '48px' }}>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '5px 12px', background: 'rgba(34, 197, 94, 0.08)', border: '1px solid rgba(34, 197, 94, 0.2)', borderRadius: '100px', fontSize: '12px', fontWeight: 500, color: '#22c55e', marginBottom: '20px' }}>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
-                Gemini 3 Inside
-              </div>
-              <h2 style={{ fontSize: 'clamp(28px, 4vw, 40px)', fontWeight: 700, marginBottom: '12px', letterSpacing: '-0.02em' }}>
-                Built on Gemini 3
-              </h2>
-              <p style={{ fontSize: '16px', color: '#666', maxWidth: '500px', margin: '0 auto' }}>
-                Every AI feature uses Gemini 3 Pro with cutting-edge capabilities.
-              </p>
-            </AnimatedSection>
+        <BenefitsSection />
 
-            <StaggerContainer staggerDelay={0.08} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '16px' }}>
-              {[
-                { icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2a8 8 0 0 0-8 8c0 3.4 2 6 5 7.5V20h6v-2.5c3-1.5 5-4.1 5-7.5a8 8 0 0 0-8-8z" /><path d="M10 22h4" /></svg>, title: 'Extended Thinking', description: 'Deep multi-step reasoning for higher quality README and portfolio generation.' },
-                { icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" /></svg>, title: 'Real-Time Streaming', description: 'Watch your README generate token-by-token with live thought surfacing.' },
-                { icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" /></svg>, title: 'Google Search Grounding', description: 'Profile intelligence backed by real-world industry data and benchmarks.' },
-                { icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>, title: 'Agent Refinement', description: 'Multi-pass generate-critique-refine loop for career-tailored READMEs.' },
-              ].map((item) => (
-                <StaggerItem key={item.title}>
-                  <div style={{ padding: '24px', background: '#0a0a0a', border: '1px solid #161616', borderRadius: '14px', height: '100%' }}>
-                    <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(34, 197, 94, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#22c55e', marginBottom: '16px' }}>
-                      {item.icon}
-                    </div>
-                    <h3 style={{ fontSize: '15px', fontWeight: 600, margin: '0 0 6px', color: '#e5e5e5' }}>{item.title}</h3>
-                    <p style={{ fontSize: '13px', color: '#666', margin: 0, lineHeight: 1.5 }}>{item.description}</p>
-                  </div>
-                </StaggerItem>
-              ))}
-            </StaggerContainer>
+        {/* CTA Section */}
+        <AnimatedSection>
+          <section
+            style={{
+              padding: '120px 24px',
+              textAlign: 'center',
+              position: 'relative',
+              overflow: 'hidden',
+            }}
+          >
+            {/* Animated green blob */}
+            <motion.div
+              animate={{ scale: [1, 1.1, 1], opacity: [0.05, 0.1, 0.05] }}
+              transition={{ duration: 6, ease: 'easeInOut', repeat: Infinity }}
+              style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                width: '600px',
+                height: '600px',
+                borderRadius: '50%',
+                background: 'radial-gradient(circle, rgba(34, 197, 94, 1) 0%, transparent 70%)',
+                pointerEvents: 'none',
+                zIndex: 0,
+              }}
+            />
 
-            <AnimatedSection delay={0.3} style={{ textAlign: 'center', marginTop: '32px' }}>
-              <Link
-                href="/readme-agent"
+            <div style={{ position: 'relative', zIndex: 1, maxWidth: '700px', margin: '0 auto' }}>
+              <h2
                 style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  padding: '12px 24px',
-                  background: 'rgba(34, 197, 94, 0.1)',
-                  border: '1px solid rgba(34, 197, 94, 0.25)',
-                  borderRadius: '10px',
-                  color: '#22c55e',
-                  fontSize: '14px',
-                  fontWeight: 600,
-                  textDecoration: 'none',
-                  transition: 'all 0.2s ease',
+                  fontSize: 'clamp(32px, 5vw, 56px)',
+                  fontWeight: 700,
+                  color: '#fafafa',
+                  letterSpacing: '-0.03em',
+                  lineHeight: 1.15,
+                  marginBottom: '20px',
                 }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(34, 197, 94, 0.15)'; e.currentTarget.style.borderColor = 'rgba(34, 197, 94, 0.4)'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(34, 197, 94, 0.1)'; e.currentTarget.style.borderColor = 'rgba(34, 197, 94, 0.25)'; }}
               >
-                Try Live README Agent
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
-              </Link>
-            </AnimatedSection>
-          </div>
-        </section>
+                Your GitHub profile is your resume. Make it count.
+              </h2>
+              <p
+                style={{
+                  fontSize: '18px',
+                  color: '#a1a1a1',
+                  marginBottom: '40px',
+                  lineHeight: 1.6,
+                }}
+              >
+                Join thousands of developers who use GitSkins to stand out.
+              </p>
+              <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                <motion.div
+                  whileHover={{ scale: 1.03, y: -2 }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+                >
+                  <Link
+                    href="/auth"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '16px 32px',
+                      fontSize: '16px',
+                      fontWeight: 600,
+                      background: '#22c55e',
+                      border: 'none',
+                      borderRadius: '10px',
+                      color: '#050505',
+                      textDecoration: 'none',
+                      transition: 'background 0.2s ease, box-shadow 0.2s ease',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = '#4ade80';
+                      e.currentTarget.style.boxShadow = '0 8px 24px rgba(34, 197, 94, 0.35)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = '#22c55e';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}
+                  >
+                    Get Started Free →
+                  </Link>
+                </motion.div>
+                <motion.div
+                  whileHover={{ scale: 1.03, y: -2 }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+                >
+                  <Link
+                    href="#themes"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '16px 32px',
+                      fontSize: '16px',
+                      fontWeight: 600,
+                      background: 'transparent',
+                      border: '1px solid #2a2a2a',
+                      borderRadius: '10px',
+                      color: '#fafafa',
+                      textDecoration: 'none',
+                      transition: 'border-color 0.2s ease, background 0.2s ease',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = '#404040';
+                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = '#2a2a2a';
+                      e.currentTarget.style.background = 'transparent';
+                    }}
+                  >
+                    View Themes
+                  </Link>
+                </motion.div>
+              </div>
+            </div>
+          </section>
+        </AnimatedSection>
 
         {/* Footer */}
         <AnimatedSection preset="fadeIn" duration={0.8} as="div">
@@ -730,6 +850,7 @@ export default function Home() {
                     <Link href="/readme-agent" style={{ fontSize: '14px', color: '#22c55e' }}>Live Agent</Link>
                     <Link href="/ai" style={{ fontSize: '14px', color: '#a1a1a1' }}>AI Features</Link>
                     <Link href="/wrapped" style={{ fontSize: '14px', color: '#a1a1a1' }}>GitHub Wrapped</Link>
+                    <Link href="/avatar" style={{ fontSize: '14px', color: '#a1a1a1' }}>Avatar Generator</Link>
                     <Link href="/visualize" style={{ fontSize: '14px', color: '#a1a1a1' }}>Repo Visualizer</Link>
                     <Link href="/daily" style={{ fontSize: '14px', color: '#a1a1a1' }}>Daily Dev Card</Link>
                   </div>
@@ -786,7 +907,7 @@ export default function Home() {
                   2026 GitSkins. All rights reserved.
                 </p>
                 <p style={{ fontSize: '13px', color: '#404040', margin: 0 }}>
-                  Made for developers · Powered by Google Gemini
+                  Made for developers, by developers.
                 </p>
               </div>
             </div>

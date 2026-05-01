@@ -1,413 +1,223 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
-import Link from 'next/link';
+import { useState } from 'react';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { useUserPlan } from '@/hooks/useUserPlan';
+import { ProGate } from '@/components/ProGate';
 import { ThinkingProgress } from '@/components/ThinkingProgress';
 import { useThinkingProgress } from '@/hooks/useThinkingProgress';
+import { AnalyzeTab } from './features/AnalyzeTab';
+import { ThemesTab } from './features/ThemesTab';
+import { IntelTab } from './features/IntelTab';
+import { PortfolioTab } from './features/PortfolioTab';
+import { ChatTab } from './features/ChatTab';
+import type {
+  ProfileAnalysis,
+  ThemeRecommendation,
+  ProfileIntel,
+  PortfolioCaseStudy,
+  ChatMessage,
+  ProfileData,
+} from './features/types';
 
-interface ProfileAnalysis {
-  developerType: string;
-  personality: string;
-  strengths: string[];
-  codingStyle: string;
-  collaborationLevel: string;
-  recommendedTheme: string;
-  themeReason: string;
-  careerInsight: string;
-  funFact: string;
-}
+type TabId = 'analyze' | 'themes' | 'intel' | 'portfolio' | 'chat';
 
-interface ThemeRecommendation {
-  theme: string;
-  score: number;
-  reason: string;
-}
+const TABS: { id: TabId; label: string }[] = [
+  { id: 'analyze', label: 'Profile Analysis' },
+  { id: 'themes', label: 'Theme Recommendations' },
+  { id: 'intel', label: 'Profile Intelligence' },
+  { id: 'portfolio', label: 'Portfolio Builder' },
+  { id: 'chat', label: 'AI Assistant' },
+];
 
-interface ProfileIntel {
-  summary: string;
-  benchmarks: Array<{
-    label: string;
-    value: string;
-    context: string;
-  }>;
-  strengths: string[];
-  gaps: string[];
-  recommendations: string[];
-}
-
-interface PortfolioCaseStudy {
-  title: string;
-  repo: string;
-  problem: string;
-  approach: string;
-  impact: string;
-  stack: string[];
-  highlights: string[];
-  repoUrl?: string;
-}
-
-interface ChatMessage {
-  role: 'user' | 'assistant';
-  content: string;
-  timestamp: Date;
-}
+const INITIAL_CHAT: ChatMessage[] = [{
+  role: 'assistant',
+  content: 'Hi! I\'m GitSkins AI Assistant powered by Google Gemini. I can help you customize your GitHub profile widgets, recommend themes, and answer questions about GitSkins features. What would you like to know?',
+  timestamp: new Date(),
+}];
 
 export default function AIFeaturesPage() {
-  const [username, setUsername] = useState('octocat');
-  const [activeTab, setActiveTab] = useState<'analyze' | 'themes' | 'intel' | 'portfolio' | 'chat'>('analyze');
+  const prefersReducedMotion = useReducedMotion();
+  const { plan, loading: planLoading } = useUserPlan();
 
-  // Analysis state
+  const [username, setUsername] = useState('octocat');
+  const [activeTab, setActiveTab] = useState<TabId>('analyze');
+  const [error, setError] = useState('');
+
+  // Per-tab state
   const [analysis, setAnalysis] = useState<ProfileAnalysis | null>(null);
-  const [profileData, setProfileData] = useState<any>(null);
+  const [profileData, setProfileData] = useState<ProfileData | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
 
-  // Theme recommendations state
   const [recommendations, setRecommendations] = useState<ThemeRecommendation[]>([]);
   const [loadingThemes, setLoadingThemes] = useState(false);
 
-  // Profile intelligence state
   const [profileIntel, setProfileIntel] = useState<ProfileIntel | null>(null);
   const [loadingIntel, setLoadingIntel] = useState(false);
 
-  // Portfolio state
   const [portfolio, setPortfolio] = useState<PortfolioCaseStudy[]>([]);
   const [loadingPortfolio, setLoadingPortfolio] = useState(false);
 
-  // Explain profile state
   const [explainSummary, setExplainSummary] = useState<string | null>(null);
   const [loadingExplain, setLoadingExplain] = useState(false);
 
-  // Chat state
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
-    {
-      role: 'assistant',
-      content: 'Hi! I\'m GitSkins AI Assistant powered by Google Gemini. I can help you customize your GitHub profile widgets, recommend themes, and answer questions about GitSkins features. What would you like to know?',
-      timestamp: new Date(),
-    },
-  ]);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>(INITIAL_CHAT);
   const [chatInput, setChatInput] = useState('');
   const [chatLoading, setChatLoading] = useState(false);
-  const chatEndRef = useRef<HTMLDivElement>(null);
 
-  // Error state
-  const [error, setError] = useState('');
-
+  // Progress hooks
   const analyzeProgress = useThinkingProgress(['Fetching profile', 'Analyzing with Gemini'], { intervalMs: 1200 });
   const themesProgress = useThinkingProgress(['Fetching profile', 'Matching themes'], { intervalMs: 1200 });
   const intelProgress = useThinkingProgress(['Fetching profile', 'Searching benchmarks', 'Generating insights'], { intervalMs: 1400 });
   const portfolioProgress = useThinkingProgress(['Fetching profile', 'Analyzing repos', 'Writing case studies'], { intervalMs: 1500 });
   const explainProgress = useThinkingProgress(['Fetching profile', 'Explaining profile'], { intervalMs: 1200 });
 
-  useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [chatMessages]);
+  // Pro gate
+  if (planLoading) {
+    return (
+      <div style={{ minHeight: '100vh', background: '#050505', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ width: '32px', height: '32px', border: '2px solid #22c55e', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+      </div>
+    );
+  }
 
-  const handleAnalyze = async (overrideUsername?: string) => {
-    const targetUsername = (overrideUsername ?? username).trim();
-    if (!targetUsername) {
-      setError('Please enter a GitHub username');
-      return;
-    }
+  if (plan !== 'pro') {
+    return (
+      <ProGate
+        feature="AI Profile Tools"
+        tagline="Unlock AI-powered analysis, theme recommendations, portfolio case studies, and more — all driven by your GitHub data."
+        benefits={[
+          'Profile personality analysis with Gemini AI',
+          'AI-matched theme recommendations',
+          'Deep profile intelligence & benchmarks',
+          'Auto-generated portfolio case studies',
+          'GitHub profile AI chat assistant',
+          'Unlimited AI requests',
+        ]}
+      />
+    );
+  }
 
-    setError('');
-    setAnalyzing(true);
-    setAnalysis(null);
-
+  // Handlers
+  async function handleAnalyze(overrideUsername?: string) {
+    const target = (overrideUsername ?? username).trim();
+    if (!target) { setError('Please enter a GitHub username'); return; }
+    setError(''); setAnalyzing(true); setAnalysis(null);
+    analyzeProgress.start();
     try {
-      const response = await fetch('/api/ai/analyze', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: targetUsername }),
-      });
+      const res = await fetch('/api/ai/analyze', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: target }) });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to analyze profile');
+      setAnalysis(data.analysis); setProfileData(data.profile);
+      analyzeProgress.complete();
+    } catch (err: any) { setError(err.message); analyzeProgress.reset(); }
+    finally { setAnalyzing(false); }
+  }
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to analyze profile');
-      }
-
-      setAnalysis(data.analysis);
-      setProfileData(data.profile);
-    } catch (err: any) {
-      setError(err.message || 'Failed to analyze profile');
-    } finally {
-      setAnalyzing(false);
-    }
-  };
-
-  const handleGetThemes = async (overrideUsername?: string) => {
-    const targetUsername = (overrideUsername ?? username).trim();
-    if (!targetUsername) {
-      setError('Please enter a GitHub username');
-      return;
-    }
-
-    setError('');
-    themesProgress.start();
-    setLoadingThemes(true);
-    setRecommendations([]);
-
+  async function handleGetThemes(overrideUsername?: string) {
+    const target = (overrideUsername ?? username).trim();
+    if (!target) { setError('Please enter a GitHub username'); return; }
+    setError(''); themesProgress.start(); setLoadingThemes(true); setRecommendations([]);
     try {
-      const response = await fetch('/api/ai/recommend-themes', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: targetUsername }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to get recommendations');
-      }
-
-      setRecommendations(data.recommendations);
-      setProfileData(data.profile);
+      const res = await fetch('/api/ai/recommend-themes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: target }) });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to get recommendations');
+      setRecommendations(data.recommendations); setProfileData(data.profile);
       themesProgress.complete();
-    } catch (err: any) {
-      setError(err.message || 'Failed to get theme recommendations');
-      themesProgress.reset();
-    } finally {
-      setLoadingThemes(false);
-    }
-  };
+    } catch (err: any) { setError(err.message); themesProgress.reset(); }
+    finally { setLoadingThemes(false); }
+  }
 
-  const handleGetIntel = async (overrideUsername?: string) => {
-    const targetUsername = (overrideUsername ?? username).trim();
-    if (!targetUsername) {
-      setError('Please enter a GitHub username');
-      return;
-    }
-
-    setError('');
-    setLoadingIntel(true);
-    setProfileIntel(null);
-
+  async function handleGetIntel(overrideUsername?: string) {
+    const target = (overrideUsername ?? username).trim();
+    if (!target) { setError('Please enter a GitHub username'); return; }
+    setError(''); intelProgress.start(); setLoadingIntel(true); setProfileIntel(null);
     try {
-      const response = await fetch('/api/ai/profile-intel', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: targetUsername }),
-      });
+      const res = await fetch('/api/ai/profile-intel', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: target }) });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to get profile intelligence');
+      setProfileIntel(data.intel); setProfileData(data.profile);
+      intelProgress.complete();
+    } catch (err: any) { setError(err.message); intelProgress.reset(); }
+    finally { setLoadingIntel(false); }
+  }
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to get profile intelligence');
-      }
-
-      setProfileIntel(data.intel);
-      setProfileData(data.profile);
-    } catch (err: any) {
-      setError(err.message || 'Failed to get profile intelligence');
-    } finally {
-      setLoadingIntel(false);
-    }
-  };
-
-  const handleGetPortfolio = async (overrideUsername?: string) => {
-    const targetUsername = (overrideUsername ?? username).trim();
-    if (!targetUsername) {
-      setError('Please enter a GitHub username');
-      return;
-    }
-
-    setError('');
-    portfolioProgress.start();
-    setLoadingPortfolio(true);
-    setPortfolio([]);
-
+  async function handleGetPortfolio(overrideUsername?: string) {
+    const target = (overrideUsername ?? username).trim();
+    if (!target) { setError('Please enter a GitHub username'); return; }
+    setError(''); portfolioProgress.start(); setLoadingPortfolio(true); setPortfolio([]);
     try {
-      const response = await fetch('/api/ai/portfolio', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: targetUsername }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to build portfolio');
-      }
-
-      setPortfolio(data.caseStudies || []);
-      setProfileData(data.profile);
+      const res = await fetch('/api/ai/portfolio', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: target }) });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to build portfolio');
+      setPortfolio(data.caseStudies || []); setProfileData(data.profile);
       portfolioProgress.complete();
-    } catch (err: any) {
-      setError(err.message || 'Failed to build portfolio');
-      portfolioProgress.reset();
-    } finally {
-      setLoadingPortfolio(false);
-    }
-  };
+    } catch (err: any) { setError(err.message); portfolioProgress.reset(); }
+    finally { setLoadingPortfolio(false); }
+  }
 
-  const handleExplainProfile = async (overrideUsername?: string) => {
-    const targetUsername = (overrideUsername ?? username).trim();
-    if (!targetUsername) {
-      setError('Please enter a GitHub username');
-      return;
-    }
-    setError('');
-    explainProgress.start();
-    setLoadingExplain(true);
-    setExplainSummary(null);
+  async function handleExplainProfile() {
+    const target = username.trim();
+    if (!target) { setError('Please enter a GitHub username'); return; }
+    setError(''); explainProgress.start(); setLoadingExplain(true); setExplainSummary(null);
     try {
-      const response = await fetch('/api/ai/explain-profile', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: targetUsername }),
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Failed to explain profile');
+      const res = await fetch('/api/ai/explain-profile', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: target }) });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to explain profile');
       setExplainSummary(data.summary);
       explainProgress.complete();
-    } catch (err: any) {
-      setError(err.message || 'Failed to explain profile');
-      explainProgress.reset();
-    } finally {
-      setLoadingExplain(false);
-    }
-  };
+    } catch (err: any) { setError(err.message); explainProgress.reset(); }
+    finally { setLoadingExplain(false); }
+  }
 
-  const runDemo = () => {
-    const demoUsername = 'octocat';
-    setUsername(demoUsername);
-    if (activeTab === 'analyze') {
-      void handleAnalyze(demoUsername);
-    } else if (activeTab === 'themes') {
-      void handleGetThemes(demoUsername);
-    } else if (activeTab === 'intel') {
-      void handleGetIntel(demoUsername);
-    } else if (activeTab === 'portfolio') {
-      void handleGetPortfolio(demoUsername);
-    }
-  };
-
-  const handleSendChat = async () => {
+  async function handleSendChat() {
     if (!chatInput.trim() || chatLoading) return;
-
-    const userMessage: ChatMessage = {
-      role: 'user',
-      content: chatInput.trim(),
-      timestamp: new Date(),
-    };
-
-    setChatMessages((prev) => [...prev, userMessage]);
+    const userMsg: ChatMessage = { role: 'user', content: chatInput.trim(), timestamp: new Date() };
+    setChatMessages((prev) => [...prev, userMsg]);
     setChatInput('');
     setChatLoading(true);
-
     try {
-      const response = await fetch('/api/ai/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: userMessage.content,
-          context: {
-            username: username || undefined,
-            profileData: profileData || undefined,
-          },
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to get response');
-      }
-
-      const assistantMessage: ChatMessage = {
-        role: 'assistant',
-        content: data.response,
-        timestamp: new Date(),
-      };
-
-      setChatMessages((prev) => [...prev, assistantMessage]);
-    } catch (err: any) {
-      const errorMessage: ChatMessage = {
-        role: 'assistant',
-        content: 'Sorry, I encountered an error. Please try again.',
-        timestamp: new Date(),
-      };
-      setChatMessages((prev) => [...prev, errorMessage]);
+      const res = await fetch('/api/ai/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: userMsg.content, context: { username: username || undefined, profileData: profileData || undefined } }) });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to get response');
+      setChatMessages((prev) => [...prev, { role: 'assistant', content: data.response, timestamp: new Date() }]);
+    } catch {
+      setChatMessages((prev) => [...prev, { role: 'assistant', content: 'Sorry, I encountered an error. Please try again.', timestamp: new Date() }]);
     } finally {
       setChatLoading(false);
     }
-  };
+  }
 
-  const themeColors: Record<string, string> = {
-    satan: '#dc2626',
-    neon: '#22d3ee',
-    zen: '#a3a3a3',
-    'github-dark': '#238636',
-    dracula: '#bd93f9',
-    ocean: '#0ea5e9',
-    forest: '#22c55e',
-    sunset: '#f97316',
-    midnight: '#3b82f6',
-    aurora: '#a855f7',
-    retro: '#f472b6',
-    minimal: '#737373',
-    pastel: '#fda4af',
-    matrix: '#22c55e',
-    winter: '#7dd3fc',
-    spring: '#86efac',
-    summer: '#fcd34d',
-    autumn: '#ea580c',
-    christmas: '#dc2626',
-    halloween: '#f97316',
-  };
+  function runDemo() {
+    const demo = 'octocat';
+    setUsername(demo);
+    if (activeTab === 'analyze') void handleAnalyze(demo);
+    else if (activeTab === 'themes') void handleGetThemes(demo);
+    else if (activeTab === 'intel') void handleGetIntel(demo);
+    else if (activeTab === 'portfolio') void handleGetPortfolio(demo);
+  }
+
+  function handleEnterKey(e: React.KeyboardEvent) {
+    if (e.key !== 'Enter') return;
+    if (activeTab === 'analyze') void handleAnalyze();
+    else if (activeTab === 'themes') void handleGetThemes();
+    else if (activeTab === 'intel') void handleGetIntel();
+    else if (activeTab === 'portfolio') void handleGetPortfolio();
+  }
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        background: '#050505',
-        color: '#fafafa',
-      }}
-    >
+    <div style={{ minHeight: '100vh', background: '#050505', color: '#fafafa' }}>
+      <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '100px clamp(16px, 4vw, 24px) 60px', position: 'relative', zIndex: 1, width: '100%' }}>
 
-      <div
-        style={{
-          maxWidth: '1100px',
-          margin: '0 auto',
-          padding: '100px clamp(16px, 4vw, 24px) 60px',
-          position: 'relative',
-          zIndex: 1,
-          width: '100%',
-        }}
-      >
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: '48px' }}>
-          <div
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '8px 16px',
-              background: 'rgba(34, 197, 94, 0.1)',
-              border: '1px solid rgba(34, 197, 94, 0.3)',
-              borderRadius: '24px',
-              marginBottom: '16px',
-            }}
-          >
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '8px 16px', background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.3)', borderRadius: '24px', marginBottom: '16px' }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2">
-              <path d="M12 2L2 7l10 5 10-5-10-5z" />
-              <path d="M2 17l10 5 10-5" />
-              <path d="M2 12l10 5 10-5" />
+              <path d="M12 2L2 7l10 5 10-5-10-5z" /><path d="M2 17l10 5 10-5" /><path d="M2 12l10 5 10-5" />
             </svg>
             <span style={{ color: '#22c55e', fontSize: '14px', fontWeight: 500 }}>Powered by Gemini 3 Pro · Extended Thinking</span>
           </div>
-
-          <h1
-            style={{
-              fontSize: 'clamp(32px, 5vw, 48px)',
-              fontWeight: 800,
-              background: 'linear-gradient(135deg, #fff 0%, #22c55e 50%, #4ade80 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-              marginBottom: '16px',
-            }}
-          >
+          <h1 style={{ fontSize: 'clamp(32px, 5vw, 48px)', fontWeight: 800, background: 'linear-gradient(135deg, #fff 0%, #22c55e 50%, #4ade80 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', marginBottom: '16px' }}>
             AI-Powered Features
           </h1>
           <p style={{ color: '#888', fontSize: '18px', maxWidth: '600px', margin: '0 auto' }}>
@@ -416,26 +226,8 @@ export default function AIFeaturesPage() {
         </div>
 
         {/* Username Input */}
-        <div
-          style={{
-            maxWidth: '500px',
-            margin: '0 auto 32px',
-            display: 'flex',
-            gap: '12px',
-          }}
-        >
-          <div
-            style={{
-              flex: 1,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px',
-              background: '#161616',
-              border: '1px solid #2a2a2a',
-              borderRadius: '12px',
-              padding: '12px 16px',
-            }}
-          >
+        <div style={{ maxWidth: '500px', margin: '0 auto 32px', display: 'flex', gap: '12px' }}>
+          <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '12px', background: '#161616', border: '1px solid #2a2a2a', borderRadius: '12px', padding: '12px 16px' }}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2">
               <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
             </svg>
@@ -443,62 +235,18 @@ export default function AIFeaturesPage() {
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
+              onKeyDown={handleEnterKey}
               placeholder="Enter GitHub username"
-              style={{
-                flex: 1,
-                background: 'transparent',
-                border: 'none',
-                outline: 'none',
-                color: '#fff',
-                fontSize: '16px',
-              }}
-              onKeyPress={(e) => {
-                if (e.key !== 'Enter') return;
-                if (activeTab === 'analyze') {
-                  void handleAnalyze();
-                } else if (activeTab === 'themes') {
-                  void handleGetThemes();
-                } else if (activeTab === 'intel') {
-                  void handleGetIntel();
-                } else if (activeTab === 'portfolio') {
-                  void handleGetPortfolio();
-                }
-              }}
+              style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', color: '#fff', fontSize: '16px' }}
             />
           </div>
         </div>
+
         <div style={{ textAlign: 'center', marginBottom: '24px', display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
-          <button
-            type="button"
-            onClick={() => handleExplainProfile()}
-            disabled={loadingExplain || !username.trim()}
-            style={{
-              padding: '8px 16px',
-              background: loadingExplain ? '#1a1a1a' : 'rgba(34, 197, 94, 0.15)',
-              border: '1px solid rgba(34, 197, 94, 0.3)',
-              borderRadius: '999px',
-              color: loadingExplain ? '#666' : '#22c55e',
-              fontSize: '13px',
-              fontWeight: 600,
-              cursor: loadingExplain ? 'not-allowed' : 'pointer',
-            }}
-          >
+          <button type="button" onClick={handleExplainProfile} disabled={loadingExplain || !username.trim()} style={{ padding: '8px 16px', background: loadingExplain ? '#1a1a1a' : 'rgba(34,197,94,0.15)', border: '1px solid rgba(34,197,94,0.3)', borderRadius: '999px', color: loadingExplain ? '#666' : '#22c55e', fontSize: '13px', fontWeight: 600, cursor: loadingExplain ? 'not-allowed' : 'pointer' }}>
             {loadingExplain ? 'Explaining...' : 'Explain this profile'}
           </button>
-          <button
-            type="button"
-            onClick={runDemo}
-            style={{
-              padding: '8px 16px',
-              background: 'rgba(34, 197, 94, 0.15)',
-              border: '1px solid rgba(34, 197, 94, 0.3)',
-              borderRadius: '999px',
-              color: '#22c55e',
-              fontSize: '13px',
-              fontWeight: 600,
-              cursor: 'pointer',
-            }}
-          >
+          <button type="button" onClick={runDemo} style={{ padding: '8px 16px', background: 'rgba(34,197,94,0.15)', border: '1px solid rgba(34,197,94,0.3)', borderRadius: '999px', color: '#22c55e', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>
             Run demo with octocat
           </button>
         </div>
@@ -509,630 +257,70 @@ export default function AIFeaturesPage() {
           </div>
         )}
 
-        {/* Explain profile summary card */}
         {explainSummary && (
-          <div
-            style={{
-              maxWidth: '600px',
-              margin: '0 auto 24px',
-              padding: '16px 20px',
-              background: '#161616',
-              border: '1px solid #2a2a2a',
-              borderRadius: '12px',
-            }}
-          >
-            <div style={{ fontSize: '12px', color: '#22c55e', fontWeight: 600, marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-              Profile summary
-            </div>
+          <div style={{ maxWidth: '600px', margin: '0 auto 24px', padding: '16px 20px', background: '#161616', border: '1px solid #2a2a2a', borderRadius: '12px' }}>
+            <div style={{ fontSize: '12px', color: '#22c55e', fontWeight: 600, marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Profile summary</div>
             <p style={{ color: '#e5e5e5', lineHeight: 1.6, margin: 0 }}>{explainSummary}</p>
           </div>
         )}
 
-        {/* Tab Navigation */}
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            gap: '8px',
-            marginBottom: '32px',
-            flexWrap: 'wrap',
-          }}
-        >
-          {[
-            { id: 'analyze', label: 'Profile Analysis' },
-            { id: 'themes', label: 'Theme Recommendations' },
-            { id: 'intel', label: 'Profile Intelligence' },
-            { id: 'portfolio', label: 'Portfolio Builder' },
-            { id: 'chat', label: 'AI Assistant' },
-          ].map((tab) => (
+        {/* Tabs */}
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '6px', marginBottom: '32px', flexWrap: 'wrap', padding: '6px', background: '#0d0d0d', border: '1px solid #1a1a1a', borderRadius: '12px', maxWidth: 'fit-content', margin: '0 auto 32px' }}>
+          {TABS.map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
-              style={{
-                padding: '10px 20px',
-                background: activeTab === tab.id ? '#22c55e' : '#111',
-                border: '1px solid',
-                borderColor: activeTab === tab.id ? '#22c55e' : '#1f1f1f',
-                borderRadius: '8px',
-                color: activeTab === tab.id ? '#050505' : '#a1a1a1',
-                fontSize: '14px',
-                fontWeight: 500,
-                cursor: 'pointer',
-                transition: 'all 0.15s ease',
-              }}
+              onClick={() => setActiveTab(tab.id)}
+              style={{ position: 'relative', padding: '9px 18px', background: 'transparent', border: 'none', borderRadius: '8px', color: activeTab === tab.id ? '#050505' : '#666', fontSize: '13px', fontWeight: 500, cursor: 'pointer', zIndex: 1, transition: 'color 0.2s' }}
             >
+              {activeTab === tab.id && (
+                <motion.div
+                  layoutId="ai-tab-indicator"
+                  style={{ position: 'absolute', inset: 0, background: '#22c55e', borderRadius: '8px', zIndex: -1 }}
+                  transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                />
+              )}
               {tab.label}
             </button>
           ))}
         </div>
 
-        {/* Error Display */}
+        {/* Error */}
         {error && (
-          <div
-            style={{
-              maxWidth: '600px',
-              margin: '0 auto 24px',
-              padding: '12px 16px',
-              background: 'rgba(239, 68, 68, 0.1)',
-              border: '1px solid rgba(239, 68, 68, 0.3)',
-              borderRadius: '8px',
-              color: '#ef4444',
-              textAlign: 'center',
-            }}
-          >
+          <div style={{ maxWidth: '600px', margin: '0 auto 24px', padding: '12px 16px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: '8px', color: '#ef4444', textAlign: 'center' }}>
             {error}
           </div>
         )}
 
-        {/* Profile Analysis Tab */}
-        {activeTab === 'analyze' && (
-          <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-            <button
-              onClick={() => handleAnalyze()}
-              disabled={analyzing || !username.trim()}
-              style={{
-                display: 'block',
-                width: '100%',
-                maxWidth: '300px',
-                margin: '0 auto 32px',
-                padding: '14px 28px',
-                background: analyzing ? '#1a1a1a' : '#22c55e',
-                border: 'none',
-                borderRadius: '12px',
-                color: analyzing ? '#888' : '#000',
-                fontSize: '16px',
-                fontWeight: 600,
-                cursor: analyzing ? 'not-allowed' : 'pointer',
-              }}
-            >
-              {analyzing ? 'Analyzing with Gemini...' : 'Analyze Profile'}
-            </button>
-            {analyzing && (
-              <div style={{ maxWidth: '360px', margin: '0 auto 24px' }}>
-                <ThinkingProgress steps={analyzeProgress.steps} activeIndex={analyzeProgress.activeIndex} variant="card" />
-              </div>
-            )}
-
-            {analysis && profileData && (
-              <div
-                style={{
-                  background: '#161616',
-                  border: '1px solid #2a2a2a',
-                  borderRadius: '20px',
-                  padding: '32px',
-                }}
-              >
-                {/* Profile Header */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '32px', flexWrap: 'wrap' }}>
-                  <img
-                    src={profileData.avatarUrl}
-                    alt={profileData.name}
-                    style={{ width: '80px', height: '80px', borderRadius: '50%', border: '3px solid #22c55e' }}
-                  />
-                  <div>
-                    <h2 style={{ margin: 0, fontSize: '24px', fontWeight: 700, color: '#fff' }}>
-                      {profileData.name || username}
-                    </h2>
-                    <p style={{ margin: '4px 0 0', color: '#22c55e', fontSize: '18px', fontWeight: 600 }}>
-                      {analysis.developerType}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Personality */}
-                <div style={{ marginBottom: '24px' }}>
-                  <h3 style={{ fontSize: '14px', color: '#888', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px' }}>
-                    Personality
-                  </h3>
-                  <p style={{ color: '#e5e5e5', lineHeight: 1.6 }}>{analysis.personality}</p>
-                </div>
-
-                {/* Stats Grid */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '24px' }}>
-                  <div style={{ background: '#1a1a1a', borderRadius: '12px', padding: '16px' }}>
-                    <div style={{ color: '#888', fontSize: '12px', marginBottom: '4px' }}>Coding Style</div>
-                    <div style={{ color: '#fff', fontWeight: 500 }}>{analysis.codingStyle}</div>
-                  </div>
-                  <div style={{ background: '#1a1a1a', borderRadius: '12px', padding: '16px' }}>
-                    <div style={{ color: '#888', fontSize: '12px', marginBottom: '4px' }}>Collaboration</div>
-                    <div style={{ color: '#fff', fontWeight: 500 }}>{analysis.collaborationLevel}</div>
-                  </div>
-                </div>
-
-                {/* Strengths */}
-                <div style={{ marginBottom: '24px' }}>
-                  <h3 style={{ fontSize: '14px', color: '#888', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '12px' }}>
-                    Key Strengths
-                  </h3>
-                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                    {analysis.strengths.map((strength, i) => (
-                      <span
-                        key={i}
-                        style={{
-                          padding: '6px 14px',
-                          background: 'rgba(34, 197, 94, 0.15)',
-                          border: '1px solid rgba(34, 197, 94, 0.3)',
-                          borderRadius: '20px',
-                          color: '#22c55e',
-                          fontSize: '14px',
-                        }}
-                      >
-                        {strength}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Recommended Theme */}
-                <div
-                  style={{
-                    background: `linear-gradient(135deg, ${themeColors[analysis.recommendedTheme] || '#22c55e'}20, transparent)`,
-                    border: `1px solid ${themeColors[analysis.recommendedTheme] || '#22c55e'}40`,
-                    borderRadius: '12px',
-                    padding: '20px',
-                    marginBottom: '24px',
-                  }}
-                >
-                  <h3 style={{ fontSize: '14px', color: '#888', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px' }}>
-                    Recommended Theme
-                  </h3>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-                    <div
-                      style={{
-                        width: '32px',
-                        height: '32px',
-                        borderRadius: '8px',
-                        background: themeColors[analysis.recommendedTheme] || '#22c55e',
-                      }}
-                    />
-                    <span style={{ color: '#fff', fontSize: '20px', fontWeight: 600, textTransform: 'capitalize' }}>
-                      {analysis.recommendedTheme}
-                    </span>
-                  </div>
-                  <p style={{ color: '#a3a3a3', margin: 0 }}>{analysis.themeReason}</p>
-                </div>
-
-                {/* Fun Fact */}
-                <div style={{ background: '#1a1a1a', borderRadius: '12px', padding: '16px', display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2" style={{ flexShrink: 0, marginTop: '2px' }}>
-                    <circle cx="12" cy="12" r="10" />
-                    <path d="M12 16v-4M12 8h.01" />
-                  </svg>
-                  <span style={{ color: '#a1a1a1' }}>{analysis.funFact}</span>
-                </div>
-
-                {/* CTA */}
-                <div style={{ marginTop: '24px', textAlign: 'center' }}>
-                  <Link
-                    href={`/showcase/${username}?theme=${analysis.recommendedTheme}`}
-                    style={{
-                      display: 'inline-block',
-                      padding: '12px 24px',
-                      background: '#22c55e',
-                      borderRadius: '10px',
-                      color: '#000',
-                      fontWeight: 600,
-                      textDecoration: 'none',
-                    }}
-                  >
-                    View Widgets with {analysis.recommendedTheme} Theme
-                  </Link>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Theme Recommendations Tab */}
-        {activeTab === 'themes' && (
-          <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-            <button
-              onClick={() => handleGetThemes()}
-              disabled={loadingThemes || !username.trim()}
-              style={{
-                display: 'block',
-                width: '100%',
-                maxWidth: '300px',
-                margin: '0 auto 32px',
-                padding: '14px 28px',
-                background: loadingThemes ? '#1a1a1a' : '#22c55e',
-                border: 'none',
-                borderRadius: '12px',
-                color: loadingThemes ? '#888' : '#000',
-                fontSize: '16px',
-                fontWeight: 600,
-                cursor: loadingThemes ? 'not-allowed' : 'pointer',
-              }}
-            >
-              {loadingThemes ? 'Getting Recommendations...' : 'Get Theme Recommendations'}
-            </button>
-
-            {recommendations.length > 0 && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                {recommendations.map((rec, index) => (
-                  <div
-                    key={rec.theme}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '16px',
-                      background: '#161616',
-                      border: '1px solid #2a2a2a',
-                      borderRadius: '16px',
-                      padding: '20px',
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: '48px',
-                        height: '48px',
-                        borderRadius: '12px',
-                        background: themeColors[rec.theme] || '#22c55e',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '20px',
-                        fontWeight: 700,
-                        color: '#000',
-                        flexShrink: 0,
-                      }}
-                    >
-                      {index + 1}
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '4px' }}>
-                        <span style={{ color: '#fff', fontSize: '18px', fontWeight: 600, textTransform: 'capitalize' }}>
-                          {rec.theme}
-                        </span>
-                        <span
-                          style={{
-                            padding: '2px 8px',
-                            background: 'rgba(34, 197, 94, 0.2)',
-                            borderRadius: '10px',
-                            color: '#22c55e',
-                            fontSize: '12px',
-                            fontWeight: 600,
-                          }}
-                        >
-                          {rec.score}% match
-                        </span>
-                      </div>
-                      <p style={{ color: '#888', margin: 0, fontSize: '14px' }}>{rec.reason}</p>
-                    </div>
-                    <Link
-                      href={`/showcase/${username}?theme=${rec.theme}`}
-                      style={{
-                        padding: '10px 16px',
-                        background: '#1a1a1a',
-                        border: '1px solid #2a2a2a',
-                        borderRadius: '8px',
-                        color: '#888',
-                        fontSize: '13px',
-                        fontWeight: 500,
-                        textDecoration: 'none',
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
-                      Preview
-                    </Link>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Profile Intelligence Tab */}
-        {activeTab === 'intel' && (
-          <div style={{ maxWidth: '850px', margin: '0 auto' }}>
-            <button
-              onClick={() => handleGetIntel()}
-              disabled={loadingIntel || !username.trim()}
-              style={{
-                display: 'block',
-                width: '100%',
-                maxWidth: '320px',
-                margin: '0 auto 32px',
-                padding: '14px 28px',
-                background: loadingIntel ? '#1a1a1a' : '#22c55e',
-                border: 'none',
-                borderRadius: '12px',
-                color: loadingIntel ? '#888' : '#000',
-                fontSize: '16px',
-                fontWeight: 600,
-                cursor: loadingIntel ? 'not-allowed' : 'pointer',
-              }}
-            >
-              {loadingIntel ? 'Building Intelligence...' : 'Run Profile Intelligence'}
-            </button>
-            {loadingIntel && (
-              <div style={{ maxWidth: '400px', margin: '0 auto 24px' }}>
-                <ThinkingProgress steps={intelProgress.steps} activeIndex={intelProgress.activeIndex} variant="card" />
-              </div>
-            )}
-
-            {profileIntel && (
-              <div
-                style={{
-                  background: '#161616',
-                  border: '1px solid #2a2a2a',
-                  borderRadius: '20px',
-                  padding: '28px',
-                }}
-              >
-                <h3 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '12px', color: '#fff' }}>
-                  Profile Intelligence Summary
-                </h3>
-                <p style={{ color: '#cfcfcf', lineHeight: 1.6, marginBottom: '24px' }}>{profileIntel.summary}</p>
-
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '24px' }}>
-                  {profileIntel.benchmarks.map((benchmark, index) => (
-                    <div key={`${benchmark.label}-${index}`} style={{ background: '#1a1a1a', borderRadius: '12px', padding: '16px' }}>
-                      <div style={{ color: '#888', fontSize: '12px', marginBottom: '6px' }}>{benchmark.label}</div>
-                      <div style={{ color: '#fff', fontWeight: 700, fontSize: '18px' }}>{benchmark.value}</div>
-                      <div style={{ color: '#666', fontSize: '12px', marginTop: '6px' }}>{benchmark.context}</div>
-                    </div>
-                  ))}
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
-                  <div style={{ background: '#1a1a1a', borderRadius: '12px', padding: '16px' }}>
-                    <div style={{ color: '#22c55e', fontWeight: 600, marginBottom: '8px' }}>Strengths</div>
-                    <ul style={{ color: '#cfcfcf', paddingLeft: '18px', margin: 0 }}>
-                      {profileIntel.strengths.map((item, index) => (
-                        <li key={`strength-${index}`} style={{ marginBottom: '6px' }}>{item}</li>
-                      ))}
-                    </ul>
-                  </div>
-                  <div style={{ background: '#1a1a1a', borderRadius: '12px', padding: '16px' }}>
-                    <div style={{ color: '#fbbf24', fontWeight: 600, marginBottom: '8px' }}>Gaps to Close</div>
-                    <ul style={{ color: '#cfcfcf', paddingLeft: '18px', margin: 0 }}>
-                      {profileIntel.gaps.map((item, index) => (
-                        <li key={`gap-${index}`} style={{ marginBottom: '6px' }}>{item}</li>
-                      ))}
-                    </ul>
-                  </div>
-                  <div style={{ background: '#1a1a1a', borderRadius: '12px', padding: '16px' }}>
-                    <div style={{ color: '#60a5fa', fontWeight: 600, marginBottom: '8px' }}>Next Actions</div>
-                    <ul style={{ color: '#cfcfcf', paddingLeft: '18px', margin: 0 }}>
-                      {profileIntel.recommendations.map((item, index) => (
-                        <li key={`rec-${index}`} style={{ marginBottom: '6px' }}>{item}</li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Portfolio Builder Tab */}
-        {activeTab === 'portfolio' && (
-          <div style={{ maxWidth: '900px', margin: '0 auto' }}>
-            <button
-              onClick={() => handleGetPortfolio()}
-              disabled={loadingPortfolio || !username.trim()}
-              style={{
-                display: 'block',
-                width: '100%',
-                maxWidth: '320px',
-                margin: '0 auto 32px',
-                padding: '14px 28px',
-                background: loadingPortfolio ? '#1a1a1a' : '#22c55e',
-                border: 'none',
-                borderRadius: '12px',
-                color: loadingPortfolio ? '#888' : '#000',
-                fontSize: '16px',
-                fontWeight: 600,
-                cursor: loadingPortfolio ? 'not-allowed' : 'pointer',
-              }}
-            >
-              {loadingPortfolio ? 'Generating Portfolio...' : 'Generate Portfolio'}
-            </button>
-            {loadingPortfolio && (
-              <div style={{ maxWidth: '400px', margin: '0 auto 24px' }}>
-                <ThinkingProgress steps={portfolioProgress.steps} activeIndex={portfolioProgress.activeIndex} variant="card" />
-              </div>
-            )}
-
-            {portfolio.length > 0 && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                {portfolio.map((caseStudy, index) => (
-                  <div key={`${caseStudy.repo}-${index}`} style={{ background: '#161616', border: '1px solid #2a2a2a', borderRadius: '18px', padding: '24px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-                      <div>
-                        <div style={{ color: '#fff', fontSize: '20px', fontWeight: 700 }}>{caseStudy.title}</div>
-                        <div style={{ color: '#888', fontSize: '14px' }}>{caseStudy.repo}</div>
-                      </div>
-                      {caseStudy.repoUrl && (
-                        <Link
-                          href={caseStudy.repoUrl}
-                          style={{
-                            padding: '8px 14px',
-                            background: '#1a1a1a',
-                            border: '1px solid #2a2a2a',
-                            borderRadius: '8px',
-                            color: '#888',
-                            textDecoration: 'none',
-                            fontSize: '13px',
-                          }}
-                        >
-                          View Repo
-                        </Link>
-                      )}
-                    </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px', marginTop: '16px' }}>
-                      <div>
-                        <div style={{ color: '#22c55e', fontWeight: 600, marginBottom: '6px' }}>Problem</div>
-                        <p style={{ color: '#cfcfcf', margin: 0 }}>{caseStudy.problem}</p>
-                      </div>
-                      <div>
-                        <div style={{ color: '#60a5fa', fontWeight: 600, marginBottom: '6px' }}>Approach</div>
-                        <p style={{ color: '#cfcfcf', margin: 0 }}>{caseStudy.approach}</p>
-                      </div>
-                      <div>
-                        <div style={{ color: '#fbbf24', fontWeight: 600, marginBottom: '6px' }}>Impact</div>
-                        <p style={{ color: '#cfcfcf', margin: 0 }}>{caseStudy.impact}</p>
-                      </div>
-                    </div>
-                    <div style={{ marginTop: '14px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                      {caseStudy.stack.map((tech) => (
-                        <span key={`${caseStudy.repo}-${tech}`} style={{ padding: '4px 10px', background: '#1a1a1a', borderRadius: '999px', fontSize: '12px', color: '#888' }}>
-                          {tech}
-                        </span>
-                      ))}
-                    </div>
-                    <ul style={{ marginTop: '12px', color: '#cfcfcf', paddingLeft: '18px' }}>
-                      {caseStudy.highlights.map((highlight, idx) => (
-                        <li key={`${caseStudy.repo}-h-${idx}`} style={{ marginBottom: '6px' }}>{highlight}</li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* AI Chat Tab */}
-        {activeTab === 'chat' && (
-          <div
-            style={{
-              maxWidth: '700px',
-              margin: '0 auto',
-              width: '100%',
-              background: '#161616',
-              border: '1px solid #2a2a2a',
-              borderRadius: '20px',
-              overflow: 'hidden',
-            }}
+        {/* Tab content */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            initial={prefersReducedMotion ? false : { opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={prefersReducedMotion ? undefined : { opacity: 0, y: -6 }}
+            transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }}
           >
-            {/* Chat Messages */}
-            <div
-              style={{
-                minHeight: 'clamp(280px, 50vh, 400px)',
-                maxHeight: '400px',
-                overflowY: 'auto',
-                padding: '20px',
-                WebkitOverflowScrolling: 'touch',
-              }}
-            >
-              {chatMessages.map((msg, index) => (
-                <div
-                  key={index}
-                  style={{
-                    display: 'flex',
-                    justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start',
-                    marginBottom: '16px',
-                  }}
-                >
-                  <div
-                    style={{
-                      maxWidth: 'min(85%, 520px)',
-                      padding: '12px 16px',
-                      background: msg.role === 'user' ? '#22c55e' : '#1a1a1a',
-                      borderRadius: msg.role === 'user' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
-                      color: msg.role === 'user' ? '#000' : '#e5e5e5',
-                      fontSize: '15px',
-                      lineHeight: 1.5,
-                    }}
-                  >
-                    {msg.content}
-                  </div>
-                </div>
-              ))}
-              {chatLoading && (
-                <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: '16px' }}>
-                  <div
-                    style={{
-                      padding: '12px 16px',
-                      background: '#1a1a1a',
-                      borderRadius: '16px 16px 16px 4px',
-                      color: '#888',
-                    }}
-                  >
-                    Thinking...
-                  </div>
-                </div>
-              )}
-              <div ref={chatEndRef} />
-            </div>
+            {activeTab === 'analyze' && (
+              <AnalyzeTab username={username} analyzing={analyzing} analysis={analysis} profileData={profileData} analyzeSteps={analyzeProgress.steps} analyzeActiveIndex={analyzeProgress.activeIndex} onAnalyze={() => void handleAnalyze()} />
+            )}
+            {activeTab === 'themes' && (
+              <ThemesTab username={username} loading={loadingThemes} recommendations={recommendations} themesSteps={themesProgress.steps} themesActiveIndex={themesProgress.activeIndex} onGetThemes={() => void handleGetThemes()} />
+            )}
+            {activeTab === 'intel' && (
+              <IntelTab username={username} loading={loadingIntel} intel={profileIntel} intelSteps={intelProgress.steps} intelActiveIndex={intelProgress.activeIndex} onGetIntel={() => void handleGetIntel()} />
+            )}
+            {activeTab === 'portfolio' && (
+              <PortfolioTab username={username} loading={loadingPortfolio} portfolio={portfolio} portfolioSteps={portfolioProgress.steps} portfolioActiveIndex={portfolioProgress.activeIndex} onGetPortfolio={() => void handleGetPortfolio()} />
+            )}
+            {activeTab === 'chat' && (
+              <ChatTab messages={chatMessages} input={chatInput} loading={chatLoading} username={username} profileData={profileData} onInputChange={setChatInput} onSend={handleSendChat} />
+            )}
+          </motion.div>
+        </AnimatePresence>
 
-            {/* Chat Input */}
-            <div
-              style={{
-                padding: '16px 20px',
-                borderTop: '1px solid #2a2a2a',
-                display: 'flex',
-                gap: '12px',
-                flexWrap: 'wrap',
-                alignItems: 'center',
-              }}
-            >
-              <input
-                type="text"
-                value={chatInput}
-                onChange={(e) => setChatInput(e.target.value)}
-                placeholder="Ask me anything about GitSkins..."
-                style={{
-                  flex: '1 1 200px',
-                  minWidth: 0,
-                  padding: '14px 16px',
-                  background: '#1a1a1a',
-                  border: '1px solid #2a2a2a',
-                  borderRadius: '12px',
-                  color: '#fff',
-                  fontSize: '15px',
-                  outline: 'none',
-                }}
-                onKeyDown={(e) => e.key === 'Enter' && handleSendChat()}
-              />
-              <button
-                onClick={handleSendChat}
-                disabled={chatLoading || !chatInput.trim()}
-                style={{
-                  padding: '14px 24px',
-                  minHeight: '48px',
-                  background: chatLoading || !chatInput.trim() ? '#1a1a1a' : '#22c55e',
-                  border: 'none',
-                  borderRadius: '12px',
-                  color: chatLoading || !chatInput.trim() ? '#888' : '#000',
-                  fontWeight: 600,
-                  cursor: chatLoading || !chatInput.trim() ? 'not-allowed' : 'pointer',
-                  flexShrink: 0,
-                }}
-              >
-                Send
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Powered by Gemini Footer */}
         <div style={{ textAlign: 'center', marginTop: '48px' }}>
           <p style={{ color: '#666', fontSize: '14px' }}>
-            AI features powered by{' '}
-            <span style={{ color: '#22c55e', fontWeight: 600 }}>Gemini 3 Pro</span>
+            AI features powered by <span style={{ color: '#22c55e', fontWeight: 600 }}>Gemini 3 Pro</span>
             <span style={{ color: '#444', fontSize: '12px', display: 'block', marginTop: '4px' }}>Extended Thinking · Google Search Grounding · Streaming</span>
           </p>
         </div>

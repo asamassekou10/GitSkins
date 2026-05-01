@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { motion, useReducedMotion } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { analytics } from '@/components/AnalyticsProvider';
 
 interface HeroSectionProps {
@@ -12,9 +12,20 @@ interface HeroSectionProps {
   onThemeChange: (theme: string) => void;
 }
 
+const CYCLING_WORDS = ['profile stand out', 'README unforgettable', 'brand consistent', 'story compelling'];
+
 export function HeroSection({ username, onUsernameChange }: HeroSectionProps) {
   const [inputValue, setInputValue] = useState(username);
+  const [wordIndex, setWordIndex] = useState(0);
   const prefersReducedMotion = useReducedMotion();
+
+  useEffect(() => {
+    if (prefersReducedMotion) return;
+    const interval = setInterval(() => {
+      setWordIndex((prev) => (prev + 1) % CYCLING_WORDS.length);
+    }, 2500);
+    return () => clearInterval(interval);
+  }, [prefersReducedMotion]);
 
   const handleTryIt = () => {
     if (inputValue.trim()) {
@@ -78,33 +89,6 @@ export function HeroSection({ username, onUsernameChange }: HeroSectionProps) {
           zIndex: 1,
         }}
       >
-        {/* Badge */}
-        <motion.div
-          {...(prefersReducedMotion ? {} : {
-            initial: { opacity: 0, y: -10 },
-            animate: { opacity: 1, y: 0 },
-            transition: { duration: 0.5, delay: 0.2, ease },
-          })}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            padding: '6px 14px',
-            background: 'rgba(34, 197, 94, 0.08)',
-            border: '1px solid rgba(34, 197, 94, 0.2)',
-            borderRadius: '100px',
-            fontSize: '13px',
-            fontWeight: 500,
-            color: '#22c55e',
-            marginBottom: '32px',
-          }}
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-          </svg>
-          Powered by Gemini 3
-        </motion.div>
-
         {/* Main Headline */}
         <h1
           style={{
@@ -121,14 +105,29 @@ export function HeroSection({ username, onUsernameChange }: HeroSectionProps) {
             {...fadeUp(0.4)}
             style={{ display: 'block' }}
           >
-            Watch AI think
+            Make your GitHub
           </motion.span>
           <motion.span
             {...fadeUp(0.6)}
-            className="gradient-text-animated"
-            style={{ display: 'block' }}
+            style={{ display: 'block', minHeight: '1.2em', position: 'relative' }}
           >
-            then build your profile
+            {prefersReducedMotion ? (
+              <span className="gradient-text-animated">{CYCLING_WORDS[0]}</span>
+            ) : (
+              <AnimatePresence mode="wait">
+                <motion.span
+                  key={wordIndex}
+                  className="gradient-text-animated"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.4, ease }}
+                  style={{ display: 'inline-block' }}
+                >
+                  {CYCLING_WORDS[wordIndex]}
+                </motion.span>
+              </AnimatePresence>
+            )}
           </motion.span>
         </h1>
 
@@ -139,24 +138,12 @@ export function HeroSection({ username, onUsernameChange }: HeroSectionProps) {
             fontSize: 'clamp(16px, 2vw, 18px)',
             color: '#a1a1a1',
             margin: '0 auto',
-            marginBottom: '12px',
+            marginBottom: '40px',
             maxWidth: '580px',
             lineHeight: 1.7,
           }}
         >
-          Live streaming README agent with Extended Thinking. 20 themes, dynamic widgets,
-          portfolio case studies, and Google Search-grounded intelligence. All free.
-        </motion.p>
-        <motion.p
-          {...fadeUp(0.9)}
-          style={{
-            fontSize: '14px',
-            color: '#737373',
-            margin: '0 auto 40px',
-            maxWidth: '400px',
-          }}
-        >
-          Enter your username → watch Gemini 3 reason and generate.
+          20 themes, AI-powered widgets, live README agent, GitHub Wrapped, and more — all free.
         </motion.p>
 
         {/* CTA Buttons */}
@@ -167,7 +154,7 @@ export function HeroSection({ username, onUsernameChange }: HeroSectionProps) {
             gap: '12px',
             justifyContent: 'center',
             flexWrap: 'wrap',
-            marginBottom: '64px',
+            marginBottom: '48px',
           }}
         >
           <motion.div
@@ -322,6 +309,29 @@ export function HeroSection({ username, onUsernameChange }: HeroSectionProps) {
           </div>
         </motion.div>
 
+        {/* Floating Widget Preview */}
+        <motion.div
+          animate={prefersReducedMotion ? undefined : { y: [0, -8, 0] }}
+          transition={{ duration: 4, ease: 'easeInOut', repeat: Infinity }}
+          style={{
+            maxWidth: '420px',
+            margin: '40px auto 0',
+            display: 'flex',
+            justifyContent: 'center',
+          }}
+        >
+          <img
+            src="/api/stats?username=octocat&theme=midnight"
+            alt="widget preview"
+            style={{
+              width: '100%',
+              maxWidth: '340px',
+              borderRadius: '12px',
+              boxShadow: '0 20px 60px rgba(34,197,94,0.15), 0 0 0 1px rgba(34,197,94,0.1)',
+            }}
+          />
+        </motion.div>
+
         {/* Stats Row */}
         <div
           style={{
@@ -333,9 +343,9 @@ export function HeroSection({ username, onUsernameChange }: HeroSectionProps) {
           }}
         >
           {[
-            { value: '20', label: 'Themes' },
-            { value: 'Live', label: 'Streaming' },
-            { value: '3-Pass', label: 'Agent Loop' },
+            { value: '20+', label: 'Themes' },
+            { value: '7', label: 'AI Tools' },
+            { value: '∞', label: 'Widgets' },
             { value: '100%', label: 'Free' },
           ].map((stat, i) => (
             <motion.div

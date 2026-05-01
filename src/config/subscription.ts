@@ -78,6 +78,7 @@ export const CREDIT_PACKS: CreditPack[] = [
 export const STRIPE_CONFIG = {
   priceIds: {
     proMonthly: process.env.STRIPE_PRICE_PRO_MONTHLY ?? '',
+    proAnnual: process.env.STRIPE_PRICE_PRO_ANNUAL ?? '',
     proLifetime: process.env.STRIPE_PRICE_PRO_LIFETIME ?? '',
     credits50: process.env.STRIPE_PRICE_CREDITS_50 ?? '',
     credits150: process.env.STRIPE_PRICE_CREDITS_150 ?? '',

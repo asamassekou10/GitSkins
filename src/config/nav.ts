@@ -30,6 +30,7 @@ export const toolsNavItems: NavItem[] = [
   { label: 'Repo Visualizer', href: '/visualize', keywords: 'visualize architecture diagram mermaid' },
   { label: 'Daily Dev Card', href: '/daily', keywords: 'daily card buildinpublic share social' },
   { label: 'Portfolio Builder', href: '/portfolio/octocat', keywords: 'portfolio' },
+  { label: 'Avatar Generator', href: '/avatar', keywords: 'avatar profile picture generator themes' },
 ];
 
 /** Resources dropdown: docs, legal, support. */

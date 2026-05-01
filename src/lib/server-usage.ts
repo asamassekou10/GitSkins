@@ -222,6 +222,56 @@ export async function incrementReadmeUsage(username: string): Promise<void> {
 }
 
 /**
+ * Full usage snapshot looked up by DB userId (works for all auth providers).
+ */
+export async function getUsageSnapshotById(userId: string) {
+  if (!dbAvailable()) {
+    return {
+      plan: 'free' as const,
+      readmeGenerationsUsed: 0,
+      readmeGenerationsLimit: FREE_TIER_README_LIMIT,
+      readmeGenerationsRemaining: FREE_TIER_README_LIMIT,
+      month: currentMonth(),
+      dbAvailable: false,
+    };
+  }
+
+  try {
+    const sub = await db.subscription.findFirst({
+      where: { userId, status: 'active' },
+      select: { plan: true },
+    });
+    const plan = sub?.plan === 'pro' ? 'pro' : 'free';
+    const limit = plan === 'pro' ? PRO_TIER_README_LIMIT : FREE_TIER_README_LIMIT;
+    const month = currentMonth();
+
+    const usage = await db.usage.findUnique({
+      where: { userId_month: { userId, month } },
+      select: { readmeGenerationsUsed: true },
+    });
+    const used = usage?.readmeGenerationsUsed ?? 0;
+
+    return {
+      plan,
+      readmeGenerationsUsed: used,
+      readmeGenerationsLimit: limit,
+      readmeGenerationsRemaining: Math.max(0, limit - used),
+      month,
+      dbAvailable: true,
+    };
+  } catch {
+    return {
+      plan: 'free' as const,
+      readmeGenerationsUsed: 0,
+      readmeGenerationsLimit: FREE_TIER_README_LIMIT,
+      readmeGenerationsRemaining: FREE_TIER_README_LIMIT,
+      month: currentMonth(),
+      dbAvailable: false,
+    };
+  }
+}
+
+/**
  * Full usage snapshot for the dashboard /api/usage route.
  */
 export async function getUsageSnapshot(username: string) {

@@ -66,6 +66,18 @@ export async function POST(request: NextRequest) {
             ? session.subscription
             : session.subscription?.id ?? null;
 
+          // Idempotency: skip if this subscription is already active in the DB
+          if (subscriptionId) {
+            const existing = await db.subscription.findFirst({
+              where: { stripeSubscriptionId: subscriptionId, status: 'active' },
+              select: { id: true },
+            });
+            if (existing) {
+              console.log('[webhook] Duplicate checkout.session.completed — already active:', subscriptionId);
+              break;
+            }
+          }
+
           let cancelAt: Date | null = null;
           let priceId = process.env.STRIPE_PRICE_PRO_MONTHLY ?? '';
 
@@ -87,6 +99,18 @@ export async function POST(request: NextRequest) {
           const { email, name } = await getUserInfo(userId, username);
           sendPaymentConfirmationEmail(email, name, 'monthly').catch(() => {});
         } else if (session.mode === 'payment') {
+          // Idempotency: for one-time payments, check by customer ID
+          if (customerId) {
+            const existing = await db.subscription.findFirst({
+              where: { stripeCustomerId: customerId, plan: 'pro', stripeSubscriptionId: null },
+              select: { id: true },
+            });
+            if (existing) {
+              console.log('[webhook] Duplicate checkout.session.completed (lifetime) — already active:', customerId);
+              break;
+            }
+          }
+
           await upgradeToPro({
             userId,
             username: username || undefined,

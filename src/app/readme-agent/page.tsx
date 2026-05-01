@@ -5,6 +5,8 @@ import { useSearchParams } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import Link from 'next/link';
+import { useUserPlan } from '@/hooks/useUserPlan';
+import { ProGate } from '@/components/ProGate';
 
 type ReadmeStyle = 'minimal' | 'detailed' | 'creative';
 type CareerRole = 'frontend' | 'backend' | 'fullstack' | 'data' | 'mobile' | 'devops' | 'product';
@@ -32,6 +34,7 @@ interface StreamChunk {
 }
 
 export default function ReadmeAgentPage() {
+  const { plan, loading: planLoading } = useUserPlan();
   const searchParams = useSearchParams();
   const [username, setUsername] = useState(searchParams.get('username') || '');
   const [style, setStyle] = useState<ReadmeStyle>('detailed');
@@ -149,6 +152,31 @@ export default function ReadmeAgentPage() {
   }, [markdown]);
 
   const isComplete = status === 'Complete' && markdown.length > 0;
+
+  if (planLoading) {
+    return (
+      <div style={{ minHeight: '100vh', background: '#050505', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ width: '32px', height: '32px', border: '2px solid #22c55e', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+      </div>
+    );
+  }
+
+  if (plan !== 'pro') {
+    return (
+      <ProGate
+        feature="README Agent"
+        tagline="Let AI write your perfect GitHub README — streaming, thoughtful, and tailored to your coding identity."
+        benefits={[
+          'Multi-step AI agent with live thought stream',
+          'Career-mode for role-specific READMEs',
+          'Multiple style options (Minimal, Detailed, Creative)',
+          'Powered by Google Gemini with deep GitHub analysis',
+          'One-click copy to clipboard',
+          'Unlimited generations',
+        ]}
+      />
+    );
+  }
 
   return (
     <div style={{ minHeight: '100vh', background: '#050505', color: '#fafafa', fontFamily: 'var(--font-sans, system-ui)' }}>

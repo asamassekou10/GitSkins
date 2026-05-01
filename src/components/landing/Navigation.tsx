@@ -2,7 +2,9 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
 import { useSession, signOut } from 'next-auth/react';
+import { Avatar } from '@/components/Avatar';
 import {
   primaryNavItems,
   toolsNavItems,
@@ -391,34 +393,27 @@ export function Navigation() {
           <div style={{ width: '1px', height: '20px', background: '#1f1f1f', margin: '0 8px' }} />
 
           {status === 'loading' ? (
-            <div style={{ width: 32, height: 32, borderRadius: '8px', background: '#111' }} />
+            <div style={{ width: 32, height: 32, borderRadius: '8px', background: '#111', animation: 'pulse 1.5s ease-in-out infinite' }} />
           ) : session ? (
             <div ref={userMenuRef} style={{ position: 'relative' }}>
-              <button
+              <motion.button
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
+                whileHover={{ borderColor: '#333' }}
+                transition={{ duration: 0.15 }}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
                   gap: '8px',
-                  padding: '6px 10px 6px 6px',
+                  padding: '5px 10px 5px 5px',
                   background: '#111',
                   border: '1px solid #1f1f1f',
                   borderRadius: '10px',
                   cursor: 'pointer',
-                  transition: 'all 0.15s ease',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = '#2a2a2a';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = '#1f1f1f';
                 }}
               >
-                <img
-                  src={avatarUrl}
-                  alt={displayName}
-                  style={{ width: 26, height: 26, borderRadius: '6px' }}
-                />
+                <motion.div whileHover={{ scale: 1.08 }} transition={{ type: 'spring', stiffness: 400, damping: 20 }}>
+                  <Avatar src={avatarUrl} name={displayName} size={28} shape="square" />
+                </motion.div>
                 <span style={{ color: '#fafafa', fontSize: '13px', fontWeight: 500 }}>{displayName}</span>
                 <svg
                   width="12"
@@ -432,7 +427,7 @@ export function Navigation() {
                 >
                   <path d="M3 4.5L6 7.5L9 4.5" stroke="#666" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
-              </button>
+              </motion.button>
               {userMenuOpen && (
                 <div
                   style={{
@@ -512,6 +507,34 @@ export function Navigation() {
                       <path d="M4 20c0-4 4-6 8-6s8 2 8 6" />
                     </svg>
                     My Showcase
+                  </Link>
+                  <Link
+                    href="/avatar"
+                    onClick={() => setUserMenuOpen(false)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '10px',
+                      padding: '10px 12px',
+                      color: '#a1a1a1',
+                      textDecoration: 'none',
+                      borderRadius: '8px',
+                      fontSize: '14px',
+                      transition: 'all 0.15s ease',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = '#161616';
+                      e.currentTarget.style.color = '#fafafa';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = 'transparent';
+                      e.currentTarget.style.color = '#a1a1a1';
+                    }}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="4" />
+                    </svg>
+                    Create Avatar
                   </Link>
                   <div style={{ height: '1px', background: '#1f1f1f', margin: '6px 0' }} />
                   <button
@@ -650,7 +673,7 @@ export function Navigation() {
                 borderBottom: '1px solid #1f1f1f',
               }}
             >
-              <img src={avatarUrl} alt={displayName} style={{ width: 40, height: 40, borderRadius: '8px' }} />
+              <Avatar src={avatarUrl} name={displayName} size={40} shape="square" />
               <div>
                 <div style={{ color: '#fafafa', fontSize: '15px', fontWeight: 600 }}>{displayName}</div>
                 <div style={{ color: '#666', fontSize: '13px' }}>@{user?.username}</div>

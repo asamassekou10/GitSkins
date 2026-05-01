@@ -1,6 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
+import { useReducedMotion } from 'framer-motion';
+import { AnimatedSection } from './AnimatedSection';
 
 interface Stat {
   label: string;
@@ -14,80 +16,93 @@ interface StatsCounterProps {
 }
 
 export function StatsCounter({ stats }: StatsCounterProps) {
-  const [animatedStats, setAnimatedStats] = useState<Stat[]>(
-    stats.map((stat) => ({ ...stat, value: 0 }))
-  );
+  const prefersReducedMotion = useReducedMotion();
+  const [animatedValues, setAnimatedValues] = useState<number[]>(stats.map(() => 0));
+  const [triggered, setTriggered] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const duration = 2000; // 2 seconds
-    const steps = 60;
-    const stepDuration = duration / steps;
+    const el = containerRef.current;
+    if (!el) return;
 
-    stats.forEach((stat, index) => {
-      let currentStep = 0;
-      const increment = stat.value / steps;
-
-      const interval = setInterval(() => {
-        currentStep++;
-        const newValue = Math.min(Math.floor(increment * currentStep), stat.value);
-
-        setAnimatedStats((prev) => {
-          const updated = [...prev];
-          updated[index] = { ...updated[index], value: newValue };
-          return updated;
-        });
-
-        if (currentStep >= steps) {
-          clearInterval(interval);
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !triggered) {
+          setTriggered(true);
+          observer.disconnect();
         }
-      }, stepDuration);
+      },
+      { threshold: 0.3 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [triggered]);
+
+  useEffect(() => {
+    if (!triggered) return;
+
+    if (prefersReducedMotion) {
+      setAnimatedValues(stats.map((s) => s.value));
+      return;
+    }
+
+    const duration = 1800;
+    const steps = 60;
+    const stepMs = duration / steps;
+
+    const timers = stats.map((stat, i) => {
+      let step = 0;
+      return setInterval(() => {
+        step++;
+        const progress = step / steps;
+        // Ease out cubic
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const val = Math.round(eased * stat.value);
+        setAnimatedValues((prev) => {
+          const next = [...prev];
+          next[i] = Math.min(val, stat.value);
+          return next;
+        });
+        if (step >= steps) clearInterval(timers[i]);
+      }, stepMs);
     });
-  }, [stats]);
+
+    return () => timers.forEach(clearInterval);
+  }, [triggered, stats, prefersReducedMotion]);
 
   return (
-    <div
-      style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-        gap: '32px',
-        maxWidth: '1000px',
-        margin: '0 auto',
-        padding: '60px 20px',
-      }}
-    >
-      {animatedStats.map((stat, index) => (
-        <div
-          key={index}
-          style={{
-            textAlign: 'center',
-          }}
-        >
-          <div
-            style={{
-              fontSize: 'clamp(32px, 5vw, 48px)',
-              fontWeight: 800,
-              background: 'linear-gradient(135deg, #22c55e 0%, #4ade80 50%, #86efac 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-              marginBottom: '8px',
-            }}
-          >
-            {stat.prefix}
-            {stat.value.toLocaleString()}
-            {stat.suffix}
-          </div>
-          <div
-            style={{
-              fontSize: '16px',
-              color: '#888888',
-              fontWeight: 500,
-            }}
-          >
-            {stat.label}
-          </div>
-        </div>
-      ))}
+    <div ref={containerRef}>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+          gap: '32px',
+          maxWidth: '1000px',
+          margin: '0 auto',
+          padding: '60px 20px',
+        }}
+      >
+        {stats.map((stat, i) => (
+          <AnimatedSection key={i} delay={i * 0.08} style={{ textAlign: 'center' }}>
+            <div
+              style={{
+                fontSize: 'clamp(32px, 5vw, 48px)',
+                fontWeight: 800,
+                background: 'linear-gradient(135deg, #22c55e 0%, #4ade80 50%, #86efac 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+                marginBottom: '8px',
+              }}
+            >
+              {stat.prefix}{animatedValues[i].toLocaleString()}{stat.suffix}
+            </div>
+            <div style={{ fontSize: '16px', color: '#888888', fontWeight: 500 }}>
+              {stat.label}
+            </div>
+          </AnimatedSection>
+        ))}
+      </div>
     </div>
   );
 }

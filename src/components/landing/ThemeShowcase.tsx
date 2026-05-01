@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
 import { analytics } from '@/components/AnalyticsProvider';
 import { AnimatedSection, StaggerContainer, StaggerItem } from './AnimatedSection';
 
@@ -31,6 +32,7 @@ function ThemeCard({
   isSelected: boolean;
   onSelect: () => void;
 }) {
+  const prefersReducedMotion = useReducedMotion();
   const [isVisible, setIsVisible] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -54,31 +56,26 @@ function ThemeCard({
   }, []);
 
   return (
-    <div
+    <motion.div
       ref={cardRef}
       onClick={onSelect}
+      whileHover={prefersReducedMotion ? undefined : {
+        y: isSelected ? 0 : -3,
+        borderColor: isSelected ? theme.color : '#333',
+        boxShadow: isSelected
+          ? `0 0 0 1px ${theme.color}40`
+          : '0 6px 20px rgba(0,0,0,0.3)',
+      }}
+      whileTap={prefersReducedMotion ? undefined : { scale: 0.98 }}
+      transition={{ type: 'spring', stiffness: 350, damping: 25 }}
       style={{
         background: '#111',
-        border: isSelected ? '2px solid' : '1px solid',
-        borderColor: isSelected ? theme.color : '#1a1a1a',
+        border: isSelected ? `2px solid ${theme.color}` : '1px solid #1a1a1a',
         borderRadius: '12px',
         padding: '16px',
         cursor: 'pointer',
-        transition: 'all 0.2s ease',
         position: 'relative',
         overflow: 'hidden',
-      }}
-      onMouseEnter={(e) => {
-        if (!isSelected) {
-          e.currentTarget.style.transform = 'translateY(-2px)';
-          e.currentTarget.style.borderColor = '#2a2a2a';
-        }
-      }}
-      onMouseLeave={(e) => {
-        if (!isSelected) {
-          e.currentTarget.style.transform = 'translateY(0)';
-          e.currentTarget.style.borderColor = '#1a1a1a';
-        }
       }}
     >
       {/* Theme Header */}
@@ -166,7 +163,7 @@ function ThemeCard({
           100% { background-position: 200% 0; }
         }
       `}</style>
-    </div>
+    </motion.div>
   );
 }
 

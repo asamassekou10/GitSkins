@@ -4,17 +4,10 @@ import { useState, useCallback, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
-import {
-  checkGenerationAllowed,
-  incrementGenerationUsage,
-  formatResetDate,
-  getDaysUntilReset,
-  isPro,
-} from '@/lib/usage-tracker';
 import { FREE_THEMES } from '@/config/subscription';
-import type { GenerationCheckResult } from '@/types/subscription';
 import { ThinkingProgress } from '@/components/ThinkingProgress';
 import { useThinkingProgress } from '@/hooks/useThinkingProgress';
+import { useUserPlan } from '@/hooks/useUserPlan';
 
 type ReadmeStyle = 'minimal' | 'detailed' | 'creative';
 type SectionType = 'header' | 'about' | 'skills' | 'stats' | 'projects' | 'streak' | 'connect';
@@ -82,9 +75,9 @@ export default function ReadmeGeneratorPage() {
   const [agentReasoning, setAgentReasoning] = useState<string | null>(null);
   const [agentLogExpanded, setAgentLogExpanded] = useState(false);
 
-  // Usage tracking
-  const [usageInfo, setUsageInfo] = useState<GenerationCheckResult | null>(null);
-  const [userIsPro, setUserIsPro] = useState(false);
+  const { plan: userPlan, readmeGenerationsUsed, readmeGenerationsLimit, readmeGenerationsRemaining, loading: planLoading } = useUserPlan();
+  const userIsPro = userPlan === 'pro';
+  const usageAllowed = userIsPro || readmeGenerationsRemaining > 0;
 
   const readmeStepLabels = useMemo(
     () =>
@@ -95,12 +88,6 @@ export default function ReadmeGeneratorPage() {
   );
   const readmeProgress = useThinkingProgress(readmeStepLabels, { intervalMs: 1200 });
 
-  useEffect(() => {
-    // Load usage info on mount
-    const info = checkGenerationAllowed();
-    setUsageInfo(info);
-    setUserIsPro(isPro());
-  }, []);
 
   useEffect(() => {
     const careerParam = searchParams.get('careerMode');
@@ -112,11 +99,6 @@ export default function ReadmeGeneratorPage() {
       }
     }
   }, [searchParams]);
-
-  const refreshUsageInfo = () => {
-    const info = checkGenerationAllowed();
-    setUsageInfo(info);
-  };
 
   const toggleSection = (sectionId: SectionType) => {
     setSections((prev) =>
@@ -134,13 +116,6 @@ export default function ReadmeGeneratorPage() {
   const generateReadme = useCallback(async () => {
     if (!username.trim()) {
       setError('Please enter a GitHub username');
-      return;
-    }
-
-    // Check usage limits
-    const currentUsage = checkGenerationAllowed();
-    if (!currentUsage.allowed) {
-      setError(`You've used all ${currentUsage.limit} generations this month. Upgrade to Pro or wait until ${formatResetDate(currentUsage.resetDate)}.`);
       return;
     }
 
@@ -173,10 +148,6 @@ export default function ReadmeGeneratorPage() {
       if (!response.ok) {
         throw new Error(data.error || 'Failed to generate README');
       }
-
-      // Increment usage on successful generation
-      incrementGenerationUsage();
-      refreshUsageInfo();
 
       setRefinementNotes(Array.isArray(data.refinementNotes) ? data.refinementNotes : null);
       setAgentReasoning(typeof data.reasoning === 'string' ? data.reasoning : null);
@@ -321,12 +292,12 @@ export default function ReadmeGeneratorPage() {
         </section>
 
         {/* Usage Banner */}
-        {usageInfo && (
+        {!planLoading && (
           <section style={{ maxWidth: '1000px', margin: '0 auto 24px', padding: '0 20px' }}>
             <div
               style={{
-                background: usageInfo.remaining === 0 ? 'rgba(239, 68, 68, 0.1)' : '#161616',
-                border: `1px solid ${usageInfo.remaining === 0 ? 'rgba(239, 68, 68, 0.3)' : '#2a2a2a'}`,
+                background: !usageAllowed ? 'rgba(239, 68, 68, 0.1)' : '#161616',
+                border: `1px solid ${!usageAllowed ? 'rgba(239, 68, 68, 0.3)' : '#2a2a2a'}`,
                 borderRadius: '12px',
                 padding: '14px 20px',
                 display: 'flex',
@@ -337,36 +308,44 @@ export default function ReadmeGeneratorPage() {
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
-                <span style={{ fontSize: '14px', color: '#888' }}>
-                  Generations:{' '}
-                  <span
-                    style={{
-                      color: usageInfo.remaining > 0 ? '#22c55e' : '#ef4444',
-                      fontWeight: 600,
-                    }}
-                  >
-                    {usageInfo.remaining}/{usageInfo.limit}
+                {userIsPro ? (
+                  <span style={{ fontSize: '14px', color: '#888' }}>
+                    Generations: <span style={{ color: '#22c55e', fontWeight: 600 }}>Unlimited</span>
                   </span>
-                </span>
-                <span style={{ fontSize: '13px', color: '#666' }}>
-                  Resets {formatResetDate(usageInfo.resetDate)} ({getDaysUntilReset(usageInfo.resetDate)} days)
-                </span>
+                ) : (
+                  <>
+                    <span style={{ fontSize: '14px', color: '#888' }}>
+                      Generations this month:{' '}
+                      <span style={{ color: readmeGenerationsRemaining > 0 ? '#22c55e' : '#ef4444', fontWeight: 600 }}>
+                        {readmeGenerationsRemaining}/{readmeGenerationsLimit}
+                      </span>
+                    </span>
+                    {/* Progress bar */}
+                    <div style={{ width: '120px', height: '4px', background: '#2a2a2a', borderRadius: '2px', overflow: 'hidden' }}>
+                      <div style={{
+                        height: '100%',
+                        width: `${Math.min(100, (readmeGenerationsUsed / readmeGenerationsLimit) * 100)}%`,
+                        background: readmeGenerationsRemaining > 0 ? '#22c55e' : '#ef4444',
+                        borderRadius: '2px',
+                        transition: 'width 0.3s',
+                      }} />
+                    </div>
+                  </>
+                )}
               </div>
 
-              {userIsPro && (
-                <span
-                  style={{
-                    padding: '6px 12px',
-                    background: 'rgba(34, 197, 94, 0.15)',
-                    borderRadius: '6px',
-                    fontSize: '12px',
-                    color: '#22c55e',
-                    fontWeight: 600,
-                  }}
-                >
-                  Pro Plan
-                </span>
-              )}
+              <span
+                style={{
+                  padding: '6px 12px',
+                  background: userIsPro ? 'rgba(34, 197, 94, 0.15)' : 'rgba(255,255,255,0.05)',
+                  borderRadius: '6px',
+                  fontSize: '12px',
+                  color: userIsPro ? '#22c55e' : '#666',
+                  fontWeight: 600,
+                }}
+              >
+                {userIsPro ? 'Pro Plan' : 'Free Plan'}
+              </span>
             </div>
           </section>
         )}
@@ -763,17 +742,17 @@ export default function ReadmeGeneratorPage() {
             {/* Generate Button */}
             <button
               onClick={generateReadme}
-              disabled={isLoading || !username.trim() || (usageInfo !== null && !usageInfo.allowed)}
+              disabled={isLoading || !username.trim() || !usageAllowed}
               style={{
                 width: '100%',
                 padding: '16px 32px',
-                background: isLoading ? '#1a5f35' : usageInfo && !usageInfo.allowed ? '#333' : '#22c55e',
+                background: isLoading ? '#1a5f35' : !usageAllowed ? '#333' : '#22c55e',
                 border: 'none',
                 borderRadius: '12px',
-                color: usageInfo && !usageInfo.allowed ? '#888' : '#000',
+                color: !usageAllowed ? '#888' : '#000',
                 fontSize: '16px',
                 fontWeight: 700,
-                cursor: isLoading || !username.trim() || (usageInfo && !usageInfo.allowed) ? 'not-allowed' : 'pointer',
+                cursor: isLoading || !username.trim() || !usageAllowed ? 'not-allowed' : 'pointer',
                 opacity: !username.trim() ? 0.5 : 1,
                 transition: 'all 0.2s',
                 display: 'flex',
@@ -784,13 +763,13 @@ export default function ReadmeGeneratorPage() {
             >
               {isLoading ? (
                 <>Generating…</>
-              ) : usageInfo && !usageInfo.allowed ? (
+              ) : !usageAllowed ? (
                 <>
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
                     <path d="M7 11V7a5 5 0 0 1 10 0v4" />
                   </svg>
-                  Limit Reached - Upgrade to Pro
+                  Limit Reached — Upgrade to Pro
                 </>
               ) : (
                 <>

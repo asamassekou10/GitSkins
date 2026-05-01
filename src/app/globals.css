@@ -1,9 +1,9 @@
-@import "tailwindcss";
-
 /* Satoshi - Modern geometric sans-serif with character */
 @import url('https://fonts.cdnfonts.com/css/satoshi');
 /* Geist Mono - For code blocks */
 @import url('https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&display=swap');
+
+@import "tailwindcss";
 
 /* CSS Custom Properties - Design System */
 :root {

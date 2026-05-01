@@ -6,6 +6,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { PLANS, FREE_THEMES, PRO_THEMES } from '@/config/subscription';
 
+type BillingCycle = 'monthly' | 'annual';
+
 const FREE_FEATURES = [
   '5 README generations / month',
   `${FREE_THEMES.length} themes (Satan, Neon, Zen, GitHub Dark, Dracula)`,
@@ -16,18 +18,18 @@ const FREE_FEATURES = [
   'Portfolio Builder',
 ];
 
-const PRO_MONTHLY_FEATURES = [
+const PRO_FEATURES = [
   'Unlimited README generations',
   `All ${PRO_THEMES.length} premium themes`,
   'No watermark on widgets',
   'Priority widget rendering',
-  'All AI features',
-  'Manage or cancel anytime',
+  'All AI features (analysis, chat, portfolio)',
+  'Cancel or manage anytime',
 ];
 
 const PRO_LIFETIME_FEATURES = [
-  'Everything in Pro Monthly',
-  'Pay once, use forever',
+  'Everything in Pro — forever',
+  'Pay once, never again',
   'All future themes included',
 ];
 
@@ -54,18 +56,18 @@ export default function PricingPage() {
   const searchParams = useSearchParams();
   const upgraded = searchParams.get('upgrade') === 'success';
 
-  const [loadingMonthly, setLoadingMonthly] = useState(false);
-  const [loadingLifetime, setLoadingLifetime] = useState(false);
+  const [billing, setBilling] = useState<BillingCycle>('monthly');
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const isLoggedIn = !!session?.user;
 
-  async function handleCheckout(plan: 'monthly' | 'lifetime', setLoading: (v: boolean) => void) {
+  async function handleCheckout(plan: string) {
     if (!isLoggedIn) {
       router.push('/auth?callbackUrl=/pricing');
       return;
     }
-    setLoading(true);
+    setLoadingPlan(plan);
     setError(null);
     try {
       const res = await fetch('/api/stripe/checkout', {
@@ -78,20 +80,24 @@ export default function PricingPage() {
         window.location.href = data.url;
       } else {
         setError(data.error ?? 'Something went wrong. Please try again.');
-        setLoading(false);
+        setLoadingPlan(null);
       }
     } catch {
       setError('Something went wrong. Please try again.');
-      setLoading(false);
+      setLoadingPlan(null);
     }
   }
 
+  const proPrice = billing === 'annual' ? 79 : 9;
+  const proPlan = billing === 'annual' ? 'annual' : 'monthly';
+  const annualSavings = Math.round(((9 * 12 - 79) / (9 * 12)) * 100);
+
   return (
     <div style={{ minHeight: '100vh', background: '#050505', color: '#fafafa' }}>
-      <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '100px 24px 80px' }}>
+      <div style={{ maxWidth: '1040px', margin: '0 auto', padding: '100px 24px 80px' }}>
 
         {/* Header */}
-        <div style={{ textAlign: 'center', marginBottom: '64px' }}>
+        <div style={{ textAlign: 'center', marginBottom: '56px' }}>
           {upgraded && (
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 20px', background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.4)', borderRadius: '100px', color: '#22c55e', fontSize: '14px', fontWeight: 600, marginBottom: '32px' }}>
               <CheckIcon /> You&apos;re now on Pro!
@@ -100,13 +106,37 @@ export default function PricingPage() {
           <h1 style={{ fontSize: 'clamp(32px, 5vw, 52px)', fontWeight: 700, letterSpacing: '-0.03em', marginBottom: '16px' }}>
             Simple, honest pricing
           </h1>
-          <p style={{ fontSize: '18px', color: '#666', maxWidth: '480px', margin: '0 auto' }}>
+          <p style={{ fontSize: '18px', color: '#666', maxWidth: '480px', margin: '0 auto 32px' }}>
             Start free. Upgrade when you need more.
           </p>
+
+          {/* Billing toggle */}
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0', background: '#111', border: '1px solid #222', borderRadius: '12px', padding: '4px' }}>
+            {(['monthly', 'annual'] as BillingCycle[]).map((cycle) => (
+              <button
+                key={cycle}
+                onClick={() => setBilling(cycle)}
+                style={{
+                  padding: '8px 20px', borderRadius: '8px', border: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s',
+                  background: billing === cycle ? '#22c55e' : 'transparent',
+                  color: billing === cycle ? '#000' : '#666',
+                }}
+              >
+                {cycle === 'monthly' ? 'Monthly' : (
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    Annual
+                    <span style={{ padding: '2px 8px', background: billing === 'annual' ? 'rgba(0,0,0,0.2)' : 'rgba(34,197,94,0.15)', borderRadius: '100px', fontSize: '11px', color: billing === 'annual' ? '#000' : '#22c55e', fontWeight: 700 }}>
+                      -{annualSavings}%
+                    </span>
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Plans Grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', alignItems: 'start' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', alignItems: 'start', marginBottom: '64px' }}>
 
           {/* Free Plan */}
           <div style={{ background: '#0a0a0a', border: '1px solid #1a1a1a', borderRadius: '20px', padding: '36px', display: 'flex', flexDirection: 'column', gap: '28px' }}>
@@ -116,11 +146,8 @@ export default function PricingPage() {
                 <span style={{ fontSize: '48px', fontWeight: 700, letterSpacing: '-0.03em' }}>$0</span>
                 <span style={{ fontSize: '16px', color: '#666' }}>/ month</span>
               </div>
-              <p style={{ color: '#666', fontSize: '14px', lineHeight: 1.6, margin: 0 }}>
-                {PLANS.free.description}
-              </p>
+              <p style={{ color: '#666', fontSize: '14px', lineHeight: 1.6, margin: 0 }}>{PLANS.free.description}</p>
             </div>
-
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {FREE_FEATURES.map((f) => (
                 <li key={f} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', color: '#ccc' }}>
@@ -134,10 +161,9 @@ export default function PricingPage() {
                 <XIcon />Watermark on widgets
               </li>
             </ul>
-
             <Link
               href={isLoggedIn ? '/dashboard' : '/auth'}
-              style={{ display: 'block', padding: '14px 24px', background: 'transparent', border: '1px solid #2a2a2a', borderRadius: '12px', color: '#888', fontSize: '15px', fontWeight: 600, textDecoration: 'none', textAlign: 'center', transition: 'all 0.2s' }}
+              style={{ display: 'block', padding: '14px 24px', background: 'transparent', border: '1px solid #2a2a2a', borderRadius: '12px', color: '#888', fontSize: '15px', fontWeight: 600, textDecoration: 'none', textAlign: 'center' }}
               onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#3a3a3a'; e.currentTarget.style.color = '#fff'; }}
               onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#2a2a2a'; e.currentTarget.style.color = '#888'; }}
             >
@@ -145,43 +171,49 @@ export default function PricingPage() {
             </Link>
           </div>
 
-          {/* Pro Monthly */}
+          {/* Pro Plan */}
           <div style={{ background: 'linear-gradient(160deg, #0d1f10 0%, #0a0a0a 100%)', border: '1px solid rgba(34,197,94,0.35)', borderRadius: '20px', padding: '36px', display: 'flex', flexDirection: 'column', gap: '28px', position: 'relative', boxShadow: '0 0 40px rgba(34,197,94,0.08)' }}>
             <div style={{ position: 'absolute', top: '-12px', left: '50%', transform: 'translateX(-50%)', background: '#22c55e', color: '#000', fontSize: '11px', fontWeight: 700, padding: '4px 14px', borderRadius: '100px', textTransform: 'uppercase', letterSpacing: '0.5px', whiteSpace: 'nowrap' }}>
               Most popular
             </div>
-
             <div>
-              <div style={{ fontSize: '13px', fontWeight: 600, color: '#22c55e', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '12px' }}>Pro Monthly</div>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginBottom: '8px' }}>
-                <span style={{ fontSize: '48px', fontWeight: 700, letterSpacing: '-0.03em' }}>$9</span>
+              <div style={{ fontSize: '13px', fontWeight: 600, color: '#22c55e', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '12px' }}>
+                Pro {billing === 'annual' ? '· Annual' : '· Monthly'}
+              </div>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginBottom: '4px' }}>
+                <span style={{ fontSize: '48px', fontWeight: 700, letterSpacing: '-0.03em' }}>
+                  {billing === 'annual' ? '$6.58' : '$9'}
+                </span>
                 <span style={{ fontSize: '16px', color: '#666' }}>/ month</span>
               </div>
-              <p style={{ color: '#888', fontSize: '14px', lineHeight: 1.6, margin: 0 }}>
-                Cancel anytime. Billed monthly.
+              {billing === 'annual' && (
+                <p style={{ color: '#22c55e', fontSize: '13px', margin: '0 0 4px', fontWeight: 600 }}>
+                  Billed as $79/year — save ${9 * 12 - 79}
+                </p>
+              )}
+              <p style={{ color: '#888', fontSize: '14px', lineHeight: 1.6, margin: '4px 0 0' }}>
+                {billing === 'annual' ? 'Best value. Billed yearly.' : 'Cancel anytime. Billed monthly.'}
               </p>
             </div>
-
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {PRO_MONTHLY_FEATURES.map((f) => (
+              {PRO_FEATURES.map((f) => (
                 <li key={f} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', color: '#e5e5e5' }}>
                   <CheckIcon />{f}
                 </li>
               ))}
             </ul>
-
             <button
-              onClick={() => handleCheckout('monthly', setLoadingMonthly)}
-              disabled={loadingMonthly}
-              style={{ padding: '14px 24px', background: loadingMonthly ? '#16a34a' : '#22c55e', border: 'none', borderRadius: '12px', color: '#000', fontSize: '15px', fontWeight: 700, cursor: loadingMonthly ? 'not-allowed' : 'pointer', transition: 'all 0.2s' }}
-              onMouseEnter={(e) => { if (!loadingMonthly) e.currentTarget.style.background = '#16a34a'; }}
-              onMouseLeave={(e) => { if (!loadingMonthly) e.currentTarget.style.background = '#22c55e'; }}
+              onClick={() => handleCheckout(proPlan)}
+              disabled={loadingPlan !== null}
+              style={{ padding: '14px 24px', background: loadingPlan === proPlan ? '#16a34a' : '#22c55e', border: 'none', borderRadius: '12px', color: '#000', fontSize: '15px', fontWeight: 700, cursor: loadingPlan ? 'not-allowed' : 'pointer', transition: 'all 0.2s' }}
+              onMouseEnter={(e) => { if (!loadingPlan) e.currentTarget.style.background = '#16a34a'; }}
+              onMouseLeave={(e) => { if (!loadingPlan) e.currentTarget.style.background = '#22c55e'; }}
             >
-              {loadingMonthly ? 'Redirecting...' : 'Upgrade to Pro'}
+              {loadingPlan === proPlan ? 'Redirecting...' : `Upgrade to Pro`}
             </button>
           </div>
 
-          {/* Pro Lifetime */}
+          {/* Lifetime */}
           <div style={{ background: '#0a0a0a', border: '1px solid #2a2a2a', borderRadius: '20px', padding: '36px', display: 'flex', flexDirection: 'column', gap: '28px' }}>
             <div>
               <div style={{ fontSize: '13px', fontWeight: 600, color: '#888', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '12px' }}>Pro Lifetime</div>
@@ -189,11 +221,8 @@ export default function PricingPage() {
                 <span style={{ fontSize: '48px', fontWeight: 700, letterSpacing: '-0.03em' }}>$49</span>
                 <span style={{ fontSize: '16px', color: '#666' }}>one-time</span>
               </div>
-              <p style={{ color: '#666', fontSize: '14px', lineHeight: 1.6, margin: 0 }}>
-                Pay once, Pro forever.
-              </p>
+              <p style={{ color: '#666', fontSize: '14px', lineHeight: 1.6, margin: 0 }}>Pay once, Pro forever.</p>
             </div>
-
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {PRO_LIFETIME_FEATURES.map((f) => (
                 <li key={f} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', color: '#ccc' }}>
@@ -201,63 +230,101 @@ export default function PricingPage() {
                 </li>
               ))}
             </ul>
-
             <button
-              onClick={() => handleCheckout('lifetime', setLoadingLifetime)}
-              disabled={loadingLifetime}
-              style={{ padding: '14px 24px', background: 'transparent', border: '1px solid rgba(34,197,94,0.4)', borderRadius: '12px', color: '#22c55e', fontSize: '15px', fontWeight: 600, cursor: loadingLifetime ? 'not-allowed' : 'pointer', transition: 'all 0.2s' }}
-              onMouseEnter={(e) => { if (!loadingLifetime) { e.currentTarget.style.background = 'rgba(34,197,94,0.1)'; e.currentTarget.style.borderColor = 'rgba(34,197,94,0.6)'; } }}
+              onClick={() => handleCheckout('lifetime')}
+              disabled={loadingPlan !== null}
+              style={{ padding: '14px 24px', background: 'transparent', border: '1px solid rgba(34,197,94,0.4)', borderRadius: '12px', color: '#22c55e', fontSize: '15px', fontWeight: 600, cursor: loadingPlan ? 'not-allowed' : 'pointer', transition: 'all 0.2s' }}
+              onMouseEnter={(e) => { if (!loadingPlan) { e.currentTarget.style.background = 'rgba(34,197,94,0.1)'; e.currentTarget.style.borderColor = 'rgba(34,197,94,0.6)'; } }}
               onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'rgba(34,197,94,0.4)'; }}
             >
-              {loadingLifetime ? 'Redirecting...' : 'Buy Lifetime Access'}
+              {loadingPlan === 'lifetime' ? 'Redirecting...' : 'Buy Lifetime Access'}
             </button>
           </div>
         </div>
 
-        {/* Error */}
+        {/* Credit Packs */}
+        <div style={{ background: '#0a0a0a', border: '1px solid #1a1a1a', borderRadius: '20px', padding: '36px', marginBottom: '64px' }}>
+          <div style={{ marginBottom: '28px' }}>
+            <h2 style={{ fontSize: '22px', fontWeight: 700, margin: '0 0 8px' }}>Need more credits?</h2>
+            <p style={{ color: '#666', fontSize: '15px', margin: 0 }}>
+              Top up your README generations without a subscription. Credits never expire.
+            </p>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px' }}>
+            {[
+              { pack: 'credits-50', credits: 50, price: 5, highlight: false },
+              { pack: 'credits-150', credits: 150, price: 12, highlight: true },
+            ].map(({ pack, credits, price, highlight }) => (
+              <div
+                key={pack}
+                style={{
+                  background: highlight ? 'linear-gradient(135deg, rgba(34,197,94,0.08) 0%, transparent 100%)' : '#111',
+                  border: `1px solid ${highlight ? 'rgba(34,197,94,0.3)' : '#222'}`,
+                  borderRadius: '14px',
+                  padding: '24px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '16px',
+                  flexWrap: 'wrap',
+                }}
+              >
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px', marginBottom: '4px' }}>
+                    <span style={{ fontSize: '28px', fontWeight: 700, color: '#fff' }}>{credits}</span>
+                    <span style={{ color: '#888', fontSize: '15px' }}>README credits</span>
+                  </div>
+                  <div style={{ fontSize: '13px', color: '#666' }}>
+                    ${(price / credits).toFixed(2)} per generation · never expire
+                  </div>
+                </div>
+                <button
+                  onClick={() => handleCheckout(pack)}
+                  disabled={loadingPlan !== null}
+                  style={{
+                    padding: '10px 24px',
+                    background: highlight ? '#22c55e' : 'transparent',
+                    border: highlight ? 'none' : '1px solid rgba(34,197,94,0.4)',
+                    borderRadius: '10px',
+                    color: highlight ? '#000' : '#22c55e',
+                    fontSize: '14px', fontWeight: 700,
+                    cursor: loadingPlan ? 'not-allowed' : 'pointer',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {loadingPlan === pack ? 'Redirecting...' : `$${price} — Buy now`}
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {error && (
-          <p style={{ textAlign: 'center', color: '#ef4444', marginTop: '24px', fontSize: '14px' }}>
-            {error}
-          </p>
+          <p style={{ textAlign: 'center', color: '#ef4444', marginBottom: '24px', fontSize: '14px' }}>{error}</p>
         )}
 
         {/* FAQ */}
-        <div style={{ marginTop: '80px', maxWidth: '600px', margin: '80px auto 0' }}>
-          <h2 style={{ fontSize: '24px', fontWeight: 700, textAlign: 'center', marginBottom: '40px' }}>
-            Common questions
-          </h2>
+        <div style={{ maxWidth: '600px', margin: '0 auto' }}>
+          <h2 style={{ fontSize: '24px', fontWeight: 700, textAlign: 'center', marginBottom: '40px' }}>Common questions</h2>
           {[
-            {
-              q: 'Can I cancel at any time?',
-              a: 'Yes — cancel instantly from the customer portal (Dashboard → Manage Subscription). You keep Pro access until the end of the billing period.',
-            },
-            {
-              q: 'What counts as a README generation?',
-              a: 'Each time you click Generate in the README Generator or Live README Agent, that counts as one generation. Refreshing or copying the result does not count.',
-            },
-            {
-              q: 'Does the lifetime plan include future themes?',
-              a: 'Yes. Any new themes added to GitSkins are automatically available to lifetime Pro users.',
-            },
-            {
-              q: 'What payment methods are accepted?',
-              a: 'All major credit and debit cards via Stripe. Apple Pay and Google Pay are also available in supported browsers.',
-            },
+            { q: 'Can I cancel at any time?', a: 'Yes — cancel instantly from the customer portal (Dashboard → Manage Subscription). You keep Pro access until the end of the billing period.' },
+            { q: 'What\'s the difference between monthly and annual?', a: `Annual billing costs $79/year ($6.58/month) vs $9/month — saving you $${9 * 12 - 79} over a year. Same features, better price.` },
+            { q: 'What are credits and how do they work?', a: 'Credits are one-time README generation top-ups. Each generation costs 1 credit. Credits never expire and work alongside your monthly plan.' },
+            { q: 'What counts as a README generation?', a: 'Each time you click Generate in the README Generator or Live README Agent counts as one. Refreshing or copying does not count.' },
+            { q: 'Does the lifetime plan include future themes?', a: 'Yes. Any new themes added to GitSkins are automatically available to lifetime Pro users.' },
+            { q: 'What payment methods are accepted?', a: 'All major credit and debit cards via Stripe. Apple Pay and Google Pay are available in supported browsers.' },
           ].map(({ q, a }) => (
             <div key={q} style={{ borderBottom: '1px solid #1a1a1a', padding: '24px 0' }}>
-              <p style={{ fontWeight: 600, color: '#e5e5e5', marginBottom: '8px', margin: '0 0 8px' }}>{q}</p>
+              <p style={{ fontWeight: 600, color: '#e5e5e5', margin: '0 0 8px' }}>{q}</p>
               <p style={{ color: '#666', fontSize: '14px', lineHeight: 1.7, margin: 0 }}>{a}</p>
             </div>
           ))}
         </div>
 
-        {/* Footer note */}
         <p style={{ textAlign: 'center', color: '#444', fontSize: '13px', marginTop: '48px' }}>
           Payments handled securely by{' '}
-          <a href="https://stripe.com" target="_blank" rel="noopener noreferrer" style={{ color: '#666', textDecoration: 'none' }}>
-            Stripe
-          </a>
-          . GitSkins never stores your card details.
+          <a href="https://stripe.com" target="_blank" rel="noopener noreferrer" style={{ color: '#666', textDecoration: 'none' }}>Stripe</a>.
+          GitSkins never stores your card details.
         </p>
       </div>
     </div>

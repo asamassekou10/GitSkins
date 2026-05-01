@@ -2,12 +2,11 @@
  * GET /api/usage
  *
  * Returns the authenticated user's current plan and usage snapshot.
- * The dashboard fetches this instead of reading from localStorage.
  */
 
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
-import { getUsageSnapshot } from '@/lib/server-usage';
+import { getUsageSnapshot, getUsageSnapshotById } from '@/lib/server-usage';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -19,13 +18,17 @@ export async function GET() {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const user = session.user as { username?: string };
-  const username = user.username;
+  const user = session.user as { id?: string; username?: string };
 
-  if (!username) {
-    return NextResponse.json({ error: 'No GitHub username in session' }, { status: 400 });
+  if (user.id) {
+    const snapshot = await getUsageSnapshotById(user.id);
+    return NextResponse.json(snapshot);
   }
 
-  const snapshot = await getUsageSnapshot(username);
+  if (!user.username) {
+    return NextResponse.json({ error: 'No user identifier in session' }, { status: 400 });
+  }
+
+  const snapshot = await getUsageSnapshot(user.username);
   return NextResponse.json(snapshot);
 }
