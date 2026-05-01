@@ -52,6 +52,39 @@ function AnimatedCounter({ target, duration = 2000 }: { target: number; duration
   return <span ref={ref}>{count.toLocaleString()}</span>;
 }
 
+function CopyLinkButton({ url }: { url: string }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <button
+      onClick={async () => {
+        await navigator.clipboard.writeText(url).catch(() => {});
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }}
+      style={{
+        display: 'inline-flex', alignItems: 'center', gap: 8,
+        padding: '10px 20px',
+        background: copied ? 'rgba(34,197,94,0.1)' : 'rgba(255,255,255,0.04)',
+        border: `1px solid ${copied ? 'rgba(34,197,94,0.4)' : '#2a2a2a'}`,
+        borderRadius: 10, color: copied ? '#22c55e' : '#888',
+        fontWeight: 600, fontSize: 14, cursor: 'pointer', transition: 'all 0.2s',
+      }}
+    >
+      {copied ? (
+        <>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12" /></svg>
+          Copied!
+        </>
+      ) : (
+        <>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></svg>
+          Copy link
+        </>
+      )}
+    </button>
+  );
+}
+
 function WrappedContent() {
   const params = useParams();
   const username = (params.username as string) || '';
@@ -601,46 +634,47 @@ function WrappedContent() {
                   </div>
                   <h2
                     className="gradient-text-animated"
-                    style={{
-                      fontSize: 'clamp(24px, 4vw, 36px)',
-                      fontWeight: 700,
-                      margin: 0,
-                      marginBottom: 16,
-                      letterSpacing: '-0.02em',
-                    }}
+                    style={{ fontSize: 'clamp(24px, 4vw, 36px)', fontWeight: 700, margin: '0 0 16px', letterSpacing: '-0.02em' }}
                   >
                     That&apos;s a wrap!
                   </h2>
                   <p style={{ color: '#a1a1a1', fontSize: 16, marginBottom: 32, maxWidth: 400 }}>
-                    Share your GitHub Wrapped with your network.
+                    Share your GitHub Wrapped with your network and let others generate theirs.
                   </p>
-                  <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+
+                  {/* Primary share actions */}
+                  <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 20 }}>
+                    {/* Tweet button */}
+                    <a
+                      href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`My GitHub Wrapped 2025 — built with GitSkins AI 🚀\n\n${shareUrl}`)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '12px 24px', background: '#000', border: '1px solid #333', borderRadius: 10, color: '#fff', fontWeight: 700, fontSize: 14, textDecoration: 'none' }}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.74l7.73-8.835L1.254 2.25H8.08l4.259 5.63 5.905-5.63zm-1.161 17.52h1.833L7.084 4.126H5.117z" /></svg>
+                      Share on X
+                    </a>
                     <ShareMenu
                       shareUrl={shareUrl}
-                      shareText={`Check out my GitHub Wrapped! ${shareUrl}`}
+                      shareText={`My GitHub Wrapped 2025 — built with GitSkins AI 🚀 ${shareUrl}`}
                       context={{ username, source: 'wrapped' }}
                     />
-                    <a
-                      href={`/showcase/${username}`}
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: 8,
-                        padding: '12px 24px',
-                        background: '#161616',
-                        border: '1px solid #2a2a2a',
-                        borderRadius: 10,
-                        color: '#fafafa',
-                        fontWeight: 600,
-                        fontSize: 14,
-                        textDecoration: 'none',
-                      }}
-                    >
+                  </div>
+
+                  {/* Copy link */}
+                  <CopyLinkButton url={shareUrl} />
+
+                  <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap', marginTop: 24 }}>
+                    <a href={`/showcase/${username}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 20px', background: '#161616', border: '1px solid #2a2a2a', borderRadius: 10, color: '#fafafa', fontWeight: 600, fontSize: 14, textDecoration: 'none' }}>
                       View Showcase
                     </a>
+                    <a href="/wrapped" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 20px', background: 'transparent', border: '1px solid #1a1a1a', borderRadius: 10, color: '#666', fontWeight: 500, fontSize: 14, textDecoration: 'none' }}>
+                      Generate for another user
+                    </a>
                   </div>
+
                   <div style={{ marginTop: 32, fontSize: 13, color: '#444' }}>
-                    Generated with Gemini 3 Pro -- Extended Thinking + Google Search Grounding
+                    Generated with Gemini AI · Extended Thinking + Google Search Grounding
                   </div>
                 </div>
               )}
