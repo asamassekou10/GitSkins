@@ -48,25 +48,33 @@ export async function POST(request: NextRequest) {
 
   const existingCustomerId = await getStripeCustomerIdByUserId(userId);
 
-  const checkoutSession = await stripe.checkout.sessions.create({
-    mode,
-    ...(existingCustomerId
-      ? { customer: existingCustomerId }
-      : { customer_email: user.email ?? undefined }),
-    line_items: [{ price: priceId, quantity: 1 }],
-    metadata: {
-      userId,
-      username: user.username ?? '',
-    },
-    ...(mode === 'subscription' && {
-      subscription_data: {
-        metadata: { userId, username: user.username ?? '' },
+  try {
+    const checkoutSession = await stripe.checkout.sessions.create({
+      mode,
+      ...(existingCustomerId
+        ? { customer: existingCustomerId }
+        : { customer_email: user.email ?? undefined }),
+      line_items: [{ price: priceId, quantity: 1 }],
+      metadata: {
+        userId,
+        username: user.username ?? '',
       },
-    }),
-    success_url: `${baseUrl}/dashboard?upgrade=success`,
-    cancel_url: `${baseUrl}/pricing`,
-    allow_promotion_codes: true,
-  });
+      ...(mode === 'subscription' && {
+        subscription_data: {
+          metadata: { userId, username: user.username ?? '' },
+        },
+      }),
+      success_url: `${baseUrl}/dashboard?upgrade=success`,
+      cancel_url: `${baseUrl}/pricing`,
+      allow_promotion_codes: true,
+    });
 
-  return NextResponse.json({ url: checkoutSession.url });
+    return NextResponse.json({ url: checkoutSession.url });
+  } catch (err: any) {
+    console.error('[checkout] Stripe error:', err?.message, err?.type, { priceId, mode });
+    return NextResponse.json(
+      { error: err?.message ?? 'Failed to create checkout session' },
+      { status: err?.statusCode ?? 500 }
+    );
+  }
 }
