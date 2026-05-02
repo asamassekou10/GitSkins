@@ -8,9 +8,9 @@ import type { AvatarStyle } from '@/lib/avatar-generator';
 
 const STYLES: { id: AvatarStyle; label: string; desc: string; icon: React.ReactNode }[] = [
   {
-    id: 'orbs',
-    label: 'Aurora Orbs',
-    desc: 'Glowing gradient spheres — organic and vivid',
+    id: 'nebula',
+    label: 'Nebula',
+    desc: 'Glowing orbs with depth and specular light',
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <circle cx="12" cy="12" r="10" />
@@ -19,9 +19,9 @@ const STYLES: { id: AvatarStyle; label: string; desc: string; icon: React.ReactN
     ),
   },
   {
-    id: 'geo',
-    label: 'Geometric',
-    desc: 'Crystalline diamond grid — sharp and technical',
+    id: 'crystal',
+    label: 'Crystal',
+    desc: 'Radial diamond grid — dense centre, sparse edges',
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5" />
@@ -31,9 +31,9 @@ const STYLES: { id: AvatarStyle; label: string; desc: string; icon: React.ReactN
     ),
   },
   {
-    id: 'pixel',
-    label: 'Pixel Art',
-    desc: 'Symmetric identicon — retro and unique',
+    id: 'circuit',
+    label: 'Circuit',
+    desc: 'Symmetric pixel identicon with centre-lit ramp',
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <rect x="3" y="3" width="4" height="4" />
@@ -44,6 +44,37 @@ const STYLES: { id: AvatarStyle; label: string; desc: string; icon: React.ReactN
         <rect x="3" y="17" width="4" height="4" />
         <rect x="10" y="17" width="4" height="4" />
         <rect x="17" y="17" width="4" height="4" />
+      </svg>
+    ),
+  },
+  {
+    id: 'constellation',
+    label: 'Constellation',
+    desc: 'Star-field map with connected points — personal as a fingerprint',
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <circle cx="5" cy="5" r="1.5" fill="currentColor" stroke="none" />
+        <circle cx="19" cy="6" r="1.5" fill="currentColor" stroke="none" />
+        <circle cx="12" cy="14" r="1.5" fill="currentColor" stroke="none" />
+        <circle cx="6" cy="18" r="1.5" fill="currentColor" stroke="none" />
+        <circle cx="18" cy="17" r="1.5" fill="currentColor" stroke="none" />
+        <line x1="5" y1="5" x2="19" y2="6" strokeWidth="1" />
+        <line x1="5" y1="5" x2="12" y2="14" strokeWidth="1" />
+        <line x1="19" y1="6" x2="12" y2="14" strokeWidth="1" />
+        <line x1="12" y1="14" x2="6" y2="18" strokeWidth="1" />
+        <line x1="12" y1="14" x2="18" y2="17" strokeWidth="1" />
+      </svg>
+    ),
+  },
+  {
+    id: 'terminal',
+    label: 'Terminal',
+    desc: 'Code-grid with scanlines — built for developers',
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <rect x="2" y="3" width="20" height="18" rx="2" />
+        <polyline points="8 10 4 14 8 18" />
+        <line x1="12" y1="18" x2="20" y2="18" />
       </svg>
     ),
   },
@@ -59,7 +90,7 @@ export default function AvatarPage() {
 
   const [username, setUsername] = useState('');
   const [theme, setTheme] = useState('github-dark');
-  const [style, setStyle] = useState<AvatarStyle>('orbs');
+  const [style, setStyle] = useState<AvatarStyle>('nebula');
   const [copied, setCopied] = useState<'url' | 'md' | null>(null);
   const [downloading, setDownloading] = useState(false);
   const [previewKey, setPreviewKey] = useState(0);
