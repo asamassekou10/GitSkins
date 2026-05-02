@@ -205,6 +205,7 @@ export default function AvatarPage() {
   const base = typeof window !== 'undefined' ? window.location.origin : 'https://gitskins.com';
   const avatarUrl = buildAvatarUrl(base, username || 'octocat', theme, family, style, expression, background, 400, character, dicebearStyle);
   const exportUrl = buildAvatarUrl(base, username || 'octocat', theme, family, style, expression, background, exportSize, character, dicebearStyle);
+  const downloadUrl = family === 'dicebear' ? `${exportUrl}&format=png` : exportUrl;
   const markdownCode = `![GitSkins Avatar](${avatarUrl})`;
 
   function handleApply() {
@@ -220,7 +221,7 @@ export default function AvatarPage() {
   async function downloadPng() {
     setDownloading(true);
     try {
-      const res = await fetch(exportUrl);
+      const res = await fetch(downloadUrl);
       const blob = await res.blob();
       const objectUrl = URL.createObjectURL(blob);
       const a = document.createElement('a');

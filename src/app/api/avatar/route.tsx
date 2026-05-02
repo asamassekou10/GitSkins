@@ -24,6 +24,7 @@ import {
 } from '@dicebear/collection';
 import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
+import sharp from 'sharp';
 import { getPremiumTheme } from '@/registry/themes/premium-registry';
 import {
   hashStr,
@@ -53,6 +54,7 @@ const VALID_EXPRESSIONS: AvatarExpression[] = ['focused', 'happy', 'mysterious']
 const VALID_BACKGROUNDS: AvatarBackground[] = ['gradient', 'solid', 'pattern'];
 const VALID_SIZES: AvatarExportSize[] = [400, 800, 1024];
 const VALID_DICEBEAR_STYLES: DiceBearStyle[] = ['open-peeps', 'avataaars', 'lorelei', 'micah', 'adventurer', 'personas', 'notionists'];
+const VALID_FORMATS = ['svg', 'png'] as const;
 const VALID_CHARACTERS: AvatarCharacter[] = [
   'terminal-mage',
   'ai-alchemist',
@@ -1371,6 +1373,7 @@ export async function GET(req: NextRequest) {
   const rawCharacter = searchParams.get('character') ?? 'indie-builder';
   const rawDiceBearStyle = searchParams.get('dicebearStyle') ?? 'open-peeps';
   const rawSize = Number(searchParams.get('size') ?? 400);
+  const rawFormat = searchParams.get('format') ?? 'svg';
 
   // Resolve legacy aliases
   const resolvedStyle = (STYLE_ALIASES[rawStyle] ?? rawStyle) as AvatarStyle;
@@ -1381,6 +1384,7 @@ export async function GET(req: NextRequest) {
   const character = VALID_CHARACTERS.includes(rawCharacter as AvatarCharacter) ? rawCharacter as AvatarCharacter : 'indie-builder';
   const dicebearStyle = VALID_DICEBEAR_STYLES.includes(rawDiceBearStyle as DiceBearStyle) ? rawDiceBearStyle as DiceBearStyle : 'open-peeps';
   const size = VALID_SIZES.includes(rawSize as AvatarExportSize) ? rawSize as AvatarExportSize : 400;
+  const format = VALID_FORMATS.includes(rawFormat as typeof VALID_FORMATS[number]) ? rawFormat as typeof VALID_FORMATS[number] : 'svg';
 
   if (family === 'dicebear') {
     const theme = safeTheme(rawTheme);
@@ -1393,6 +1397,18 @@ export async function GET(req: NextRequest) {
       radius: 50,
       backgroundColor: [bg, accent, primary],
     }).toString();
+
+    if (format === 'png') {
+      const png = await sharp(Buffer.from(svg)).resize(size, size).png().toBuffer();
+      const body = new Uint8Array(png);
+      return new Response(body, {
+        headers: {
+          'Content-Type': 'image/png',
+          'Cache-Control': 'public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800',
+          'Access-Control-Allow-Origin': '*',
+        },
+      });
+    }
 
     return new Response(svg, {
       headers: {
