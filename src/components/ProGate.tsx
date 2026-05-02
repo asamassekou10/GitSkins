@@ -1,6 +1,8 @@
 'use client';
 
+import { useEffect } from 'react';
 import Link from 'next/link';
+import { analytics } from './AnalyticsProvider';
 
 interface ProGateProps {
   feature: string;
@@ -9,6 +11,10 @@ interface ProGateProps {
 }
 
 export function ProGate({ feature, tagline, benefits }: ProGateProps) {
+  useEffect(() => {
+    analytics.track('pro_gate_viewed', { feature });
+  }, [feature]);
+
   return (
     <div style={{
       minHeight: '100vh',
@@ -87,6 +93,7 @@ export function ProGate({ feature, tagline, benefits }: ProGateProps) {
       <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
         <Link
           href="/pricing"
+          onClick={() => analytics.trackConversion('pro_gate_upgrade_clicked', { feature })}
           style={{
             padding: '14px 32px', background: '#22c55e', borderRadius: '12px',
             color: '#000', fontSize: '16px', fontWeight: 700, textDecoration: 'none',
@@ -99,6 +106,7 @@ export function ProGate({ feature, tagline, benefits }: ProGateProps) {
         </Link>
         <Link
           href="/dashboard"
+          onClick={() => analytics.track('pro_gate_back_clicked', { feature })}
           style={{
             padding: '14px 24px', background: 'transparent',
             border: '1px solid #2a2a2a', borderRadius: '12px',

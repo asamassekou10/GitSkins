@@ -18,6 +18,7 @@ export interface NavItemWithHash extends NavItem {
 export const primaryNavItems: NavItemWithHash[] = [
   { label: 'Features', href: '/#features', isHashLink: true },
   { label: 'Themes', href: '/#themes', isHashLink: true },
+  { label: 'Examples', href: '/examples', isHashLink: false },
   { label: 'AI Features', href: '/ai', isHashLink: false },
   { label: 'Pricing', href: '/pricing', isHashLink: false },
 ];
@@ -38,6 +39,7 @@ export const toolsNavItems: NavItem[] = [
 /** Resources dropdown: docs, legal, support. */
 export const resourcesNavItems: NavItem[] = [
   { label: 'Getting Started', href: '/getting-started', keywords: 'getting started' },
+  { label: 'Examples Gallery', href: '/examples', keywords: 'examples gallery cards avatars themes' },
   { label: 'Docs / Themes', href: '/docs/themes', keywords: 'docs themes' },
   { label: 'Support', href: '/support', keywords: 'support help' },
   { label: 'Privacy', href: '/privacy', keywords: 'privacy' },

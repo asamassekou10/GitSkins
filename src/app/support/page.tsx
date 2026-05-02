@@ -4,230 +4,111 @@ import Link from 'next/link';
 
 const faqs = [
   {
-    question: 'How do I add a widget to my GitHub profile?',
-    answer: 'Copy the markdown code from the widget generator and paste it into your GitHub profile README.md file. The widget will automatically update with your latest GitHub stats.',
+    question: 'How do I add a card to my GitHub profile?',
+    answer: 'Open Card Studio, choose a card and theme, copy the Markdown, then paste it into the README.md file for your GitHub profile repository.',
   },
   {
-    question: 'Are the widgets free to use?',
-    answer: 'Yes — core widgets and the free tier are available at no cost. Pro unlocks all premium themes, removes watermarks, and gives you unlimited README generations. See /pricing for details.',
+    question: 'What is free and what requires Pro?',
+    answer: 'Free users get the core card tools, the original free themes, and limited README generations. Pro unlocks all premium themes, premium avatars, AI profile tools, high-resolution exports, and unlimited README generations.',
   },
   {
-    question: 'How often do the widgets update?',
-    answer: 'Widgets are cached for 24 hours to ensure fast loading. Your stats will update automatically within 24 hours of any changes to your GitHub activity.',
+    question: 'Why are some themes or avatar styles locked?',
+    answer: 'Premium themes, character avatars, real character styles, project personas, and high-resolution downloads are Pro features. Locked controls should send you to Pricing with the correct upgrade options.',
   },
   {
-    question: 'How many themes are available?',
-    answer: 'Free accounts get 5 themes (Satan, Neon, Zen, GitHub Dark, and Dracula). Pro users unlock all 20 premium themes. New themes are added regularly and automatically available to Pro users.',
+    question: 'Why is my widget not showing on GitHub?',
+    answer: 'Check that the username in the URL is correct, that the Markdown image syntax is complete, and that GitHub can access the image URL publicly. If GitHub cached a broken image, wait a few minutes and refresh.',
   },
   {
-    question: 'What widgets are available?',
-    answer: 'We offer Profile Cards (with contribution graph), Stats, Languages, Streak, Repos, and Animated Cards. Each widget can be customized with different themes.',
+    question: 'How do billing and cancellations work?',
+    answer: 'Payments are handled by Stripe. Pro subscribers can manage or cancel from Dashboard → Manage subscription. Lifetime Pro is a one-time purchase.',
   },
   {
-    question: 'Do I need a GitHub account?',
-    answer: 'No account needed! Just enter any GitHub username to generate widgets. However, to use widgets in your own profile, you\'ll need a GitHub account.',
+    question: 'How do I get support?',
+    answer: 'Email gitskinspro@gmail.com for account or billing help. For bugs and feature requests, GitHub issues are the best place.',
+  },
+];
+
+const contactCards = [
+  {
+    title: 'Account & billing',
+    copy: 'Payment, subscription, login, and Pro access questions.',
+    href: 'mailto:gitskinspro@gmail.com',
+    label: 'Email support',
   },
   {
-    question: 'Why is my widget not showing?',
-    answer: 'Make sure you\'ve saved your README.md file and that the markdown syntax is correct. Also check that the username in the URL matches your GitHub username.',
+    title: 'Bugs & feature requests',
+    copy: 'Report rendering issues, broken cards, or ideas for new themes.',
+    href: 'https://github.com/asamassekou10/GitSkins/issues',
+    label: 'Open GitHub issues',
   },
   {
-    question: 'Can I use multiple widgets?',
-    answer: 'Absolutely! You can add as many widgets as you want to your README. Mix and match different widget types and themes to create your perfect profile.',
+    title: 'Get oriented',
+    copy: 'Learn how to create cards, avatars, and README assets.',
+    href: '/getting-started',
+    label: 'Read the guide',
   },
 ];
 
 export default function SupportPage() {
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        background: 'linear-gradient(180deg, #0a0a0a 0%, #111111 50%, #0a0a0a 100%)',
-        color: '#ffffff',
-        fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
-      }}
-    >
-      <div
-        style={{
-          maxWidth: '900px',
-          margin: '0 auto',
-          padding: '100px 20px 60px',
-        }}
-      >
-        {/* Header */}
-        <div
-          style={{
-            textAlign: 'center',
-            marginBottom: '60px',
-          }}
-        >
-          <h1
-            style={{
-              fontSize: 'clamp(40px, 8vw, 64px)',
-              fontWeight: 800,
-              marginBottom: '16px',
-              background: 'linear-gradient(135deg, #ff4500 0%, #ff6b35 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-            }}
-          >
-            Help & Support
+    <main style={{ minHeight: '100vh', background: '#050505', color: '#fafafa' }}>
+      <section style={{ maxWidth: 980, margin: '0 auto', padding: '120px 24px 80px' }}>
+        <div style={{ textAlign: 'center', marginBottom: 54 }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '7px 12px', borderRadius: 999, background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.24)', color: '#4ade80', fontSize: 12, fontWeight: 850, letterSpacing: 0.4, marginBottom: 20 }}>
+            Support
+          </div>
+          <h1 style={{ margin: '0 auto 16px', maxWidth: 720, fontSize: 'clamp(40px, 7vw, 72px)', lineHeight: 0.95, letterSpacing: '-0.055em', fontWeight: 900 }}>
+            Get unstuck fast.
           </h1>
-          <p
-            style={{
-              fontSize: '20px',
-              color: '#888888',
-            }}
-          >
-            Find answers to common questions and get help
+          <p style={{ color: '#9b9b9b', fontSize: 18, lineHeight: 1.65, margin: '0 auto', maxWidth: 620 }}>
+            Answers for cards, avatars, billing, Pro access, and GitHub README embeds.
           </p>
         </div>
 
-        {/* FAQ Section */}
-        <div
-          style={{
-            marginBottom: '60px',
-          }}
-        >
-          <h2
-            style={{
-              fontSize: '32px',
-              fontWeight: 700,
-              marginBottom: '32px',
-            }}
-          >
-            Frequently Asked Questions
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 250px), 1fr))', gap: 16, marginBottom: 58 }}>
+          {contactCards.map((card) => {
+            const external = card.href.startsWith('http') || card.href.startsWith('mailto:');
+            const styles = { minHeight: 190, padding: 22, borderRadius: 22, border: '1px solid #1d1d1d', background: '#0b0b0b', color: '#fafafa', textDecoration: 'none', display: 'flex', flexDirection: 'column' as const, justifyContent: 'space-between' };
+            const content = (
+              <>
+                <div>
+                  <h2 style={{ margin: '0 0 8px', fontSize: 21, letterSpacing: '-0.02em' }}>{card.title}</h2>
+                  <p style={{ margin: 0, color: '#777', fontSize: 14, lineHeight: 1.55 }}>{card.copy}</p>
+                </div>
+                <span style={{ color: '#22c55e', fontSize: 13, fontWeight: 850 }}>{card.label} →</span>
+              </>
+            );
+            return external ? (
+              <a key={card.title} href={card.href} target={card.href.startsWith('http') ? '_blank' : undefined} rel={card.href.startsWith('http') ? 'noopener noreferrer' : undefined} style={styles}>
+                {content}
+              </a>
+            ) : (
+              <Link key={card.title} href={card.href} style={styles}>
+                {content}
+              </Link>
+            );
+          })}
+        </div>
+
+        <section>
+          <h2 style={{ fontSize: 'clamp(28px, 4vw, 42px)', lineHeight: 1, letterSpacing: '-0.045em', margin: '0 0 24px' }}>
+            Common questions
           </h2>
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '20px',
-            }}
-          >
-            {faqs.map((faq, index) => (
-              <details
-                key={index}
-                style={{
-                  background: '#161616',
-                  border: '1px solid #2a2a2a',
-                  borderRadius: '12px',
-                  padding: '24px',
-                  cursor: 'pointer',
-                }}
-              >
-                <summary
-                  style={{
-                    fontSize: '18px',
-                    fontWeight: 600,
-                    color: '#ffffff',
-                    marginBottom: '12px',
-                    listStyle: 'none',
-                  }}
-                >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            {faqs.map((faq) => (
+              <details key={faq.question} style={{ background: '#0b0b0b', border: '1px solid #1d1d1d', borderRadius: 16, padding: 22 }}>
+                <summary style={{ fontSize: 16, fontWeight: 850, color: '#fff', cursor: 'pointer' }}>
                   {faq.question}
                 </summary>
-                <p
-                  style={{
-                    fontSize: '16px',
-                    color: '#888888',
-                    lineHeight: 1.6,
-                    marginTop: '12px',
-                  }}
-                >
+                <p style={{ fontSize: 15, color: '#888', lineHeight: 1.65, margin: '14px 0 0' }}>
                   {faq.answer}
                 </p>
               </details>
             ))}
           </div>
-        </div>
-
-        {/* Contact Section */}
-        <div
-          style={{
-            background: 'linear-gradient(135deg, rgba(255, 69, 0, 0.1) 0%, rgba(255, 107, 53, 0.1) 100%)',
-            border: '1px solid rgba(255, 69, 0, 0.2)',
-            borderRadius: '20px',
-            padding: '40px',
-            textAlign: 'center',
-          }}
-        >
-          <h2
-            style={{
-              fontSize: '28px',
-              fontWeight: 700,
-              marginBottom: '16px',
-            }}
-          >
-            Still Need Help?
-          </h2>
-          <p
-            style={{
-              fontSize: '16px',
-              color: '#888888',
-              marginBottom: '32px',
-            }}
-          >
-            Check out our resources or get in touch
-          </p>
-          <div
-            style={{
-              display: 'flex',
-              gap: '16px',
-              justifyContent: 'center',
-              flexWrap: 'wrap',
-            }}
-          >
-            <a
-              href="https://github.com/gitskins/gitskins"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                padding: '12px 24px',
-                background: '#161616',
-                border: '1px solid #2a2a2a',
-                borderRadius: '8px',
-                color: '#ffffff',
-                textDecoration: 'none',
-                fontSize: '16px',
-                fontWeight: 600,
-                transition: 'border-color 0.2s',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = '#ff4500';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = '#2a2a2a';
-              }}
-            >
-              GitHub Repository
-            </a>
-            <Link
-              href="/getting-started"
-              style={{
-                padding: '12px 24px',
-                background: 'linear-gradient(135deg, #ff4500 0%, #ff6b35 100%)',
-                border: 'none',
-                borderRadius: '8px',
-                color: '#ffffff',
-                textDecoration: 'none',
-                fontSize: '16px',
-                fontWeight: 600,
-                transition: 'opacity 0.2s',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.opacity = '0.9';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.opacity = '1';
-              }}
-            >
-              Getting Started Guide
-            </Link>
-          </div>
-        </div>
-      </div>
-    </div>
+        </section>
+      </section>
+    </main>
   );
 }

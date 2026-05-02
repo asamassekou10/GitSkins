@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { PLANS, FREE_THEMES, PRO_THEMES } from '@/config/subscription';
+import { analytics } from '@/components/AnalyticsProvider';
 
 type BillingCycle = 'monthly' | 'annual';
 
@@ -65,11 +66,13 @@ export default function PricingPage() {
 
   async function handleCheckout(plan: string) {
     if (!isLoggedIn) {
+      analytics.trackConversion('pricing_auth_required', { plan });
       router.push('/auth?callbackUrl=/pricing');
       return;
     }
     setLoadingPlan(plan);
     setError(null);
+    analytics.trackConversion('checkout_started', { plan, billing });
     try {
       const res = await fetch('/api/stripe/checkout', {
         method: 'POST',

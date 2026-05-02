@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import { Geist, Geist_Mono, Space_Grotesk } from 'next/font/google';
 import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { Suspense } from 'react';
@@ -9,6 +10,24 @@ import { Navigation } from '@/components/landing/Navigation';
 import { CommandPaletteWrapper } from '@/components/CommandPaletteWrapper';
 import { siteConfig } from '@/config/site';
 import './globals.css';
+
+const geistSans = Geist({
+  subsets: ['latin'],
+  variable: '--font-sans',
+  display: 'swap',
+});
+
+const geistMono = Geist_Mono({
+  subsets: ['latin'],
+  variable: '--font-mono',
+  display: 'swap',
+});
+
+const spaceGrotesk = Space_Grotesk({
+  subsets: ['latin'],
+  variable: '--font-display',
+  display: 'swap',
+});
 
 export const viewport: Viewport = {
   themeColor: '#050505',
@@ -21,7 +40,7 @@ export const metadata: Metadata = {
     default: 'GitSkins - AI-Powered GitHub Profile Tools',
     template: '%s | GitSkins',
   },
-  description: 'Transform your GitHub profile with AI. Dynamic widgets, AI-generated READMEs, profile intelligence, and portfolio case studies. Powered by Google Gemini.',
+  description: 'Transform your GitHub profile with premium widgets, AI-generated READMEs, profile intelligence, avatars, and portfolio case studies.',
   keywords: ['GitHub', 'README', 'widgets', 'profile', 'stats', 'themes', 'developer', 'open source', 'GitHub profile', 'contribution graph'],
   authors: [{ name: 'GitSkins' }],
   creator: 'GitSkins',
@@ -39,7 +58,7 @@ export const metadata: Metadata = {
     description: 'Transform your GitHub profile with AI. Dynamic widgets, AI-generated READMEs, profile intelligence, and portfolio case studies.',
     images: [
       {
-        url: '/og-image.png',
+        url: '/opengraph-image',
         width: 1200,
         height: 630,
         alt: 'GitSkins - GitHub Profile Widgets',
@@ -50,7 +69,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'GitSkins - AI-Powered GitHub Profile Tools',
     description: 'Transform your GitHub profile with AI. Widgets, READMEs, profile intelligence, and portfolio case studies.',
-    images: ['/og-image.png'],
+    images: ['/opengraph-image'],
     creator: '@gitskins',
   },
   robots: {
@@ -75,12 +94,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        <link rel="preconnect" href="https://fonts.cdnfonts.com" crossOrigin="anonymous" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-      </head>
+    <html lang="en" suppressHydrationWarning className={`${geistSans.variable} ${geistMono.variable} ${spaceGrotesk.variable}`}>
       <body>
         <SessionProvider>
           <PostHogProvider>

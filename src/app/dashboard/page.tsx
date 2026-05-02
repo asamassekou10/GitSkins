@@ -17,6 +17,15 @@ interface UsageSnapshot {
   dbAvailable: boolean;
 }
 
+interface SavedKit {
+  type: 'card' | 'avatar';
+  label: string;
+  username: string;
+  theme: string;
+  url: string;
+  savedAt: string;
+}
+
 const WIDGETS = [
   { id: 'stats', label: 'Stats Card', path: '/api/stats' },
   { id: 'languages', label: 'Top Languages', path: '/api/languages' },
@@ -66,6 +75,7 @@ export default function DashboardPage() {
   const [loadingUsage, setLoadingUsage] = useState(true);
   const [activeWidget, setActiveWidget] = useState<string>('stats');
   const [onboardingDismissed, setOnboardingDismissed] = useState(true);
+  const [savedKits, setSavedKits] = useState<SavedKit[]>([]);
 
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/auth?callbackUrl=/dashboard');
@@ -73,6 +83,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (status !== 'authenticated') return;
+    setSavedKits(JSON.parse(localStorage.getItem('gitskins_saved_kits') || '[]'));
     fetch('/api/usage')
       .then((r) => r.json())
       .then((data) => {
@@ -116,6 +127,12 @@ export default function DashboardPage() {
   function dismissOnboarding() {
     localStorage.setItem('gitskins_onboarding_dismissed', '1');
     setOnboardingDismissed(true);
+  }
+
+  function removeSavedKit(savedAt: string) {
+    const next = savedKits.filter((item) => item.savedAt !== savedAt);
+    setSavedKits(next);
+    localStorage.setItem('gitskins_saved_kits', JSON.stringify(next));
   }
 
   if (status === 'loading') {
@@ -316,6 +333,42 @@ export default function DashboardPage() {
               </>
             )}
           </div>
+        </div>
+
+        {/* Saved Kit */}
+        <div style={{ ...cardStyle, marginBottom: '24px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, alignItems: 'center', flexWrap: 'wrap', marginBottom: 18 }}>
+            <div>
+              <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#fff', margin: '0 0 4px' }}>Saved profile kit</h3>
+              <p style={{ color: '#666', fontSize: 14, margin: 0 }}>Cards and avatars you saved from the studios.</p>
+            </div>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <Link href="/cards" style={{ padding: '9px 12px', borderRadius: 10, background: 'rgba(255,255,255,0.05)', border: '1px solid #262626', color: '#fafafa', textDecoration: 'none', fontSize: 13, fontWeight: 750 }}>Add card</Link>
+              <Link href="/avatar" style={{ padding: '9px 12px', borderRadius: 10, background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.3)', color: '#4ade80', textDecoration: 'none', fontSize: 13, fontWeight: 750 }}>Add avatar</Link>
+            </div>
+          </div>
+          {savedKits.length === 0 ? (
+            <div style={{ padding: 22, borderRadius: 14, background: '#0b0b0b', border: '1px dashed #2a2a2a', color: '#777', fontSize: 14 }}>
+              Nothing saved yet. Create a card or avatar, then use “Save to dashboard.”
+            </div>
+          ) : (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))', gap: 14 }}>
+              {savedKits.slice(0, 6).map((item) => (
+                <div key={item.savedAt} style={{ borderRadius: 16, border: '1px solid #242424', background: '#0b0b0b', padding: 12 }}>
+                  <div style={{ minHeight: item.type === 'avatar' ? 150 : 112, display: 'grid', placeItems: 'center', background: '#070707', borderRadius: 12, overflow: 'hidden', marginBottom: 12 }}>
+                    <img src={item.url} alt={item.label} style={{ width: item.type === 'avatar' ? 128 : '100%', height: item.type === 'avatar' ? 128 : 'auto', borderRadius: item.type === 'avatar' ? 28 : 10, objectFit: 'cover' }} />
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, alignItems: 'start' }}>
+                    <div>
+                      <div style={{ color: '#fff', fontSize: 13, fontWeight: 850 }}>{item.label}</div>
+                      <div style={{ color: '#666', fontSize: 12 }}>@{item.username} · {item.theme}</div>
+                    </div>
+                    <button onClick={() => removeSavedKit(item.savedAt)} style={{ color: '#666', fontSize: 12, cursor: 'pointer' }}>Remove</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Credit top-up for free users at or near limit */}

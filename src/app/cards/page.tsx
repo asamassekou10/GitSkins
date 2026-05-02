@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { landingThemes } from '@/lib/landing-themes';
 import { isFreeTierTheme } from '@/config/subscription';
 import { useUserPlan } from '@/hooks/useUserPlan';
+import { analytics } from '@/components/AnalyticsProvider';
 
 type CardType = {
   id: string;
@@ -96,6 +97,7 @@ export default function CardsPage() {
   const [avatarMode, setAvatarMode] = useState<AvatarMode>('github');
   const [cardType, setCardType] = useState<CardType>(CARD_TYPES[0]);
   const [copied, setCopied] = useState<'markdown' | 'html' | 'url' | null>(null);
+  const [saved, setSaved] = useState(false);
 
   const origin = typeof window !== 'undefined' ? window.location.origin : 'https://gitskins.com';
   const cardUrl = useMemo(() => buildCardUrl(origin, cardType, username, theme, avatarMode), [avatarMode, cardType, origin, theme, username]);
@@ -108,10 +110,36 @@ export default function CardsPage() {
     await navigator.clipboard.writeText(text).catch(() => {});
     setCopied(kind);
     setTimeout(() => setCopied(null), 1600);
+    analytics.track(kind === 'url' ? 'card_url_copied' : 'card_embed_copied', {
+      card_type: cardType.id,
+      theme,
+      avatar_mode: avatarMode,
+      username,
+      format: kind,
+    });
   }
 
   function goToPricing() {
+    analytics.trackConversion('pro_gate_clicked', { source: 'cards', theme, card_type: cardType.id });
     window.location.href = '/pricing';
+  }
+
+  function saveCardKit() {
+    const item = {
+      type: 'card',
+      label: cardType.label,
+      username: username || 'octocat',
+      theme,
+      cardType: cardType.id,
+      avatarMode,
+      url: publicUrl,
+      savedAt: new Date().toISOString(),
+    };
+    const existing = JSON.parse(localStorage.getItem('gitskins_saved_kits') || '[]') as unknown[];
+    localStorage.setItem('gitskins_saved_kits', JSON.stringify([item, ...existing].slice(0, 12)));
+    setSaved(true);
+    setTimeout(() => setSaved(false), 1800);
+    analytics.track('kit_saved', { type: 'card', card_type: cardType.id, theme, avatar_mode: avatarMode });
   }
 
   return (
@@ -313,6 +341,13 @@ export default function CardsPage() {
                 </pre>
               </div>
             ))}
+
+            <button
+              onClick={saveCardKit}
+              style={{ padding: '14px 18px', background: saved ? 'rgba(34,197,94,0.14)' : '#151515', border: `1px solid ${saved ? 'rgba(34,197,94,0.4)' : '#242424'}`, borderRadius: 14, color: saved ? '#22c55e' : '#fafafa', fontSize: 14, fontWeight: 850, cursor: 'pointer' }}
+            >
+              {saved ? 'Saved to dashboard' : 'Save card to dashboard'}
+            </button>
           </div>
         </motion.div>
       </section>

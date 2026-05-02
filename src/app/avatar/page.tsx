@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { landingThemes } from '@/lib/landing-themes';
 import { isFreeTierTheme } from '@/config/subscription';
 import { useUserPlan } from '@/hooks/useUserPlan';
+import { analytics } from '@/components/AnalyticsProvider';
 import type { AvatarBackground, AvatarCharacter, AvatarExportSize, AvatarExpression, AvatarFamily, AvatarStyle, DiceBearStyle } from '@/lib/avatar-generator';
 
 const FAMILIES: { id: AvatarFamily; label: string; desc: string }[] = [
@@ -198,6 +199,7 @@ export default function AvatarPage() {
   const [copied, setCopied] = useState<'url' | 'md' | null>(null);
   const [downloading, setDownloading] = useState(false);
   const [previewKey, setPreviewKey] = useState(0);
+  const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     if (user?.username && !username) setUsername(user.username);
@@ -218,12 +220,20 @@ export default function AvatarPage() {
 
   function handleApply() {
     setPreviewKey((k) => k + 1);
+    analytics.track('avatar_preview_applied', { family, theme, style, character, dicebear_style: dicebearStyle });
   }
 
   async function copyText(text: string, kind: 'url' | 'md') {
     await navigator.clipboard.writeText(text).catch(() => {});
     setCopied(kind);
     setTimeout(() => setCopied(null), 1800);
+    analytics.track(kind === 'url' ? 'avatar_url_copied' : 'avatar_markdown_copied', {
+      family,
+      theme,
+      style,
+      character,
+      dicebear_style: dicebearStyle,
+    });
   }
 
   async function downloadPng() {
@@ -239,6 +249,7 @@ export default function AvatarPage() {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(objectUrl);
+      analytics.track('avatar_downloaded', { family, theme, style, export_size: exportSize, character, dicebear_style: dicebearStyle });
     } catch {
       // silently fail
     } finally {
@@ -249,7 +260,30 @@ export default function AvatarPage() {
   const selectedTheme = landingThemes.find((t) => t.id === theme);
 
   function goToPricing() {
+    analytics.trackConversion('pro_gate_clicked', { source: 'avatar', family, theme, export_size: exportSize });
     window.location.href = '/pricing';
+  }
+
+  function saveAvatarKit() {
+    const item = {
+      type: 'avatar',
+      label: `${family} avatar`,
+      username: username || 'octocat',
+      theme,
+      family,
+      style,
+      expression,
+      background,
+      character,
+      dicebearStyle,
+      url: avatarUrl.replace(base, 'https://gitskins.com'),
+      savedAt: new Date().toISOString(),
+    };
+    const existing = JSON.parse(localStorage.getItem('gitskins_saved_kits') || '[]') as unknown[];
+    localStorage.setItem('gitskins_saved_kits', JSON.stringify([item, ...existing].slice(0, 12)));
+    setSaved(true);
+    setTimeout(() => setSaved(false), 1800);
+    analytics.track('kit_saved', { type: 'avatar', family, theme, style, character, dicebear_style: dicebearStyle });
   }
 
   return (
@@ -690,6 +724,13 @@ export default function AvatarPage() {
                   <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" />
                 </svg>
                 {copied === 'md' ? 'Copied!' : 'Copy Markdown'}
+              </button>
+
+              <button
+                onClick={saveAvatarKit}
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '11px 20px', background: saved ? 'rgba(34,197,94,0.1)' : '#111', border: `1px solid ${saved ? 'rgba(34,197,94,0.4)' : '#1a1a1a'}`, borderRadius: '10px', color: saved ? '#22c55e' : '#888', fontSize: '14px', fontWeight: 700, cursor: 'pointer' }}
+              >
+                {saved ? 'Saved to dashboard' : 'Save avatar to dashboard'}
               </button>
 
               {/* URL preview */}

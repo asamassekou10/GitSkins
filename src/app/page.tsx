@@ -337,6 +337,43 @@ export default function Home() {
           </div>
         </section>
 
+        {/* How It Works */}
+        <section style={{ padding: '110px 24px', background: '#080808', borderTop: '1px solid #111' }}>
+          <div style={{ maxWidth: 1120, margin: '0 auto' }}>
+            <AnimatedSection style={{ display: 'flex', justifyContent: 'space-between', gap: 24, alignItems: 'end', marginBottom: 38, flexWrap: 'wrap' }}>
+              <div>
+                <div style={{ color: '#22c55e', fontSize: 12, fontWeight: 850, textTransform: 'uppercase', letterSpacing: 1.4, marginBottom: 12 }}>
+                  How it works
+                </div>
+                <h2 style={{ fontSize: 'clamp(30px, 4.8vw, 56px)', lineHeight: 1, letterSpacing: '-0.045em', fontWeight: 900, margin: 0, maxWidth: 720 }}>
+                  From GitHub username to profile kit in minutes.
+                </h2>
+              </div>
+              <Link href="/examples" style={{ color: '#050505', background: '#22c55e', borderRadius: 12, padding: '13px 18px', textDecoration: 'none', fontWeight: 850 }}>
+                Browse examples
+              </Link>
+            </AnimatedSection>
+            <StaggerContainer style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 230px), 1fr))', gap: 16 }}>
+              {[
+                ['01', 'Enter a username', 'Preview cards, stats, avatars, and themes from a public GitHub profile.'],
+                ['02', 'Choose the identity', 'Pick the card style, avatar family, and theme that match the developer brand.'],
+                ['03', 'Copy or save', 'Use Markdown/HTML embeds in a README or save the configuration to your workspace.'],
+                ['04', 'Upgrade when ready', 'Unlock premium themes, high-res avatars, Pro AI tools, and unlimited README generation.'],
+              ].map(([step, title, copy]) => (
+                <StaggerItem key={step}>
+                  <div style={{ minHeight: 220, borderRadius: 22, border: '1px solid #1d1d1d', background: '#0b0b0b', padding: 22, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                    <div style={{ color: '#22c55e', fontSize: 13, fontWeight: 900, letterSpacing: 1 }}>{step}</div>
+                    <div>
+                      <h3 style={{ margin: '0 0 8px', fontSize: 20, lineHeight: 1.05 }}>{title}</h3>
+                      <p style={{ margin: 0, color: '#777', fontSize: 14, lineHeight: 1.55 }}>{copy}</p>
+                    </div>
+                  </div>
+                </StaggerItem>
+              ))}
+            </StaggerContainer>
+          </div>
+        </section>
+
         {/* Themes Section */}
         <section id="themes">
           <ThemeShowcase
@@ -466,6 +503,7 @@ export default function Home() {
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                     <a href="#features" style={{ fontSize: '14px', color: '#a1a1a1' }}>Features</a>
                     <a href="#themes" style={{ fontSize: '14px', color: '#a1a1a1' }}>Themes</a>
+                    <Link href="/examples" style={{ fontSize: '14px', color: '#a1a1a1' }}>Examples</Link>
                     <Link href="/readme-generator" style={{ fontSize: '14px', color: '#a1a1a1' }}>README Generator</Link>
                     <Link href="/readme-agent" style={{ fontSize: '14px', color: '#22c55e' }}>Live Agent</Link>
                     <Link href="/ai" style={{ fontSize: '14px', color: '#a1a1a1' }}>AI Features</Link>
