@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { analytics } from '@/components/AnalyticsProvider';
 
 interface HeroSectionProps {
@@ -12,374 +12,186 @@ interface HeroSectionProps {
   onThemeChange: (theme: string) => void;
 }
 
-const CYCLING_WORDS = ['profile stand out', 'README unforgettable', 'brand consistent', 'story compelling'];
+function cardUrl(username: string, theme: string) {
+  return `/api/premium-card?username=${encodeURIComponent(username)}&theme=${theme}&variant=glass&avatar=persona`;
+}
 
-export function HeroSection({ username, onUsernameChange }: HeroSectionProps) {
+function avatarUrl(username: string, theme: string, style = 'open-peeps') {
+  return `/api/avatar?username=${encodeURIComponent(username)}&theme=${theme}&family=dicebear&dicebearStyle=${style}&size=400`;
+}
+
+export function HeroSection({ username, selectedTheme, onUsernameChange, onThemeChange }: HeroSectionProps) {
   const [inputValue, setInputValue] = useState(username);
-  const [wordIndex, setWordIndex] = useState(0);
   const prefersReducedMotion = useReducedMotion();
-
-  useEffect(() => {
-    if (prefersReducedMotion) return;
-    const interval = setInterval(() => {
-      setWordIndex((prev) => (prev + 1) % CYCLING_WORDS.length);
-    }, 2500);
-    return () => clearInterval(interval);
-  }, [prefersReducedMotion]);
-
-  const handleTryIt = () => {
-    if (inputValue.trim()) {
-      onUsernameChange(inputValue.trim());
-      analytics.trackConversion('landing_view', { action: 'try_username', username: inputValue.trim() });
-
-      const element = document.getElementById('create');
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth' });
-      }
-    }
-  };
-
   const ease = [0.25, 0.1, 0.25, 1] as const;
 
-  const fadeUp = (delay: number) =>
-    prefersReducedMotion
-      ? {}
-      : {
-          initial: { opacity: 0, y: 20 },
-          animate: { opacity: 1, y: 0 },
-          transition: { duration: 0.6, delay, ease },
-        };
+  function previewUsername() {
+    const next = inputValue.trim().replace(/^@/, '');
+    if (!next) return;
+    onUsernameChange(next);
+    analytics.trackConversion('landing_view', { action: 'hero_preview', username: next });
+    document.getElementById('live-preview')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
 
   return (
     <section
       style={{
         position: 'relative',
-        padding: '160px 24px 100px',
-        overflow: 'hidden',
         minHeight: '100vh',
+        overflow: 'hidden',
+        padding: '140px 24px 88px',
         display: 'flex',
         alignItems: 'center',
       }}
     >
-      {/* Modern grid background */}
       <div className="grid-background" />
-
-      {/* Subtle gradient glow */}
-      <div
+      <motion.div
+        animate={prefersReducedMotion ? undefined : { opacity: [0.35, 0.65, 0.35], scale: [1, 1.08, 1] }}
+        transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
         style={{
           position: 'absolute',
-          top: 0,
-          left: '50%',
+          inset: '0 auto auto 50%',
           transform: 'translateX(-50%)',
-          width: '100%',
-          maxWidth: '1400px',
-          height: '600px',
-          background: 'radial-gradient(ellipse at top, rgba(34, 197, 94, 0.08) 0%, transparent 60%)',
+          width: 'min(1200px, 95vw)',
+          height: 620,
+          background: 'radial-gradient(ellipse at top, rgba(34,197,94,0.16), rgba(45,212,191,0.08) 34%, transparent 68%)',
           pointerEvents: 'none',
-          zIndex: 0,
         }}
       />
 
       <div
         style={{
-          maxWidth: '900px',
-          margin: '0 auto',
           position: 'relative',
-          textAlign: 'center',
           zIndex: 1,
+          width: '100%',
+          maxWidth: 1220,
+          margin: '0 auto',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 460px), 1fr))',
+          gap: 42,
+          alignItems: 'center',
         }}
       >
-        {/* Main Headline */}
-        <h1
-          style={{
-            fontSize: 'clamp(36px, 7vw, 64px)',
-            fontWeight: 700,
-            margin: 0,
-            marginBottom: '20px',
-            letterSpacing: '-0.03em',
-            lineHeight: 1.2,
-            color: '#fafafa',
-          }}
-        >
-          <motion.span
-            {...fadeUp(0.4)}
-            style={{ display: 'block' }}
-          >
-            Make your GitHub
-          </motion.span>
-          <motion.span
-            {...fadeUp(0.6)}
-            style={{ display: 'block', minHeight: '1.2em', position: 'relative' }}
-          >
-            {prefersReducedMotion ? (
-              <span className="gradient-text-animated">{CYCLING_WORDS[0]}</span>
-            ) : (
-              <AnimatePresence mode="wait">
-                <motion.span
-                  key={wordIndex}
-                  className="gradient-text-animated"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.4, ease }}
-                  style={{ display: 'inline-block' }}
-                >
-                  {CYCLING_WORDS[wordIndex]}
-                </motion.span>
-              </AnimatePresence>
-            )}
-          </motion.span>
-        </h1>
-
-        {/* Subtitle */}
-        <motion.p
-          {...fadeUp(0.8)}
-          style={{
-            fontSize: 'clamp(16px, 2vw, 18px)',
-            color: '#a1a1a1',
-            margin: '0 auto',
-            marginBottom: '40px',
-            maxWidth: '580px',
-            lineHeight: 1.7,
-          }}
-        >
-          20 themes, AI-powered widgets, live README agent, GitHub Wrapped, and more — all free.
-        </motion.p>
-
-        {/* CTA Buttons */}
         <motion.div
-          {...fadeUp(1.0)}
-          style={{
-            display: 'flex',
-            gap: '12px',
-            justifyContent: 'center',
-            flexWrap: 'wrap',
-            marginBottom: '48px',
-          }}
+          initial={prefersReducedMotion ? false : { opacity: 0, y: 22 }}
+          animate={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, ease }}
         >
-          <motion.div
-            whileHover={prefersReducedMotion ? undefined : { scale: 1.03, y: -2 }}
-            whileTap={prefersReducedMotion ? undefined : { scale: 0.98 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 15 }}
-          >
-            <Link
-              href="/readme-agent"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '14px 28px',
-                fontSize: '15px',
-                fontWeight: 600,
-                background: '#22c55e',
-                border: 'none',
-                borderRadius: '10px',
-                color: '#050505',
-                textDecoration: 'none',
-                transition: 'background 0.2s ease, box-shadow 0.2s ease',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = '#4ade80';
-                e.currentTarget.style.boxShadow = '0 8px 24px rgba(34, 197, 94, 0.3)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = '#22c55e';
-                e.currentTarget.style.boxShadow = 'none';
-              }}
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-              </svg>
-              Try Live Agent
-            </Link>
-          </motion.div>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '7px 12px', borderRadius: 999, background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.24)', color: '#4ade80', fontSize: 12, fontWeight: 800, letterSpacing: 0.4, marginBottom: 22 }}>
+            <span style={{ width: 7, height: 7, borderRadius: 999, background: '#22c55e', boxShadow: '0 0 18px #22c55e', display: 'inline-flex' }} />
+            Premium GitHub identity kit
+          </div>
 
-          <motion.div
-            whileHover={prefersReducedMotion ? undefined : { scale: 1.03, y: -2 }}
-            whileTap={prefersReducedMotion ? undefined : { scale: 0.98 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 15 }}
-          >
-            <Link
-              href="/readme-generator"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '14px 28px',
-                fontSize: '15px',
-                fontWeight: 600,
-                background: 'transparent',
-                border: '1px solid #2a2a2a',
-                borderRadius: '10px',
-                color: '#fafafa',
-                textDecoration: 'none',
-                transition: 'border-color 0.2s ease, background 0.2s ease',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = '#404040';
-                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = '#2a2a2a';
-                e.currentTarget.style.background = 'transparent';
-              }}
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                <polyline points="14 2 14 8 20 8" />
-              </svg>
-              Generate README
-            </Link>
-          </motion.div>
-        </motion.div>
-
-        {/* Quick Input */}
-        <motion.div
-          {...fadeUp(1.2)}
-          style={{
-            maxWidth: '420px',
-            margin: '0 auto',
-          }}
-        >
-          <p
+          <h1
             style={{
-              fontSize: '13px',
-              color: '#666',
-              marginBottom: '12px',
-              fontWeight: 500,
+              fontSize: 'clamp(44px, 6.8vw, 82px)',
+              lineHeight: 0.93,
+              letterSpacing: '-0.06em',
+              fontWeight: 900,
+              color: '#fff',
+              margin: '0 0 22px',
+              maxWidth: 650,
             }}
           >
-            Try with your GitHub username
+            Make your GitHub profile look paid for.
+          </h1>
+          <p style={{ color: '#a3a3a3', fontSize: 'clamp(17px, 2vw, 20px)', lineHeight: 1.65, margin: '0 0 30px', maxWidth: 570 }}>
+            GitSkins turns your profile into a complete developer brand: premium README cards, themed avatars, AI profile tools, and copy-ready embeds.
           </p>
-          <div
-            style={{
-              display: 'flex',
-              gap: '8px',
-            }}
-          >
+
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 26 }}>
+            <Link
+              href="/auth"
+              style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 9, padding: '15px 24px', borderRadius: 12, background: '#22c55e', color: '#031007', textDecoration: 'none', fontSize: 15, fontWeight: 850, boxShadow: '0 14px 38px rgba(34,197,94,0.28)' }}
+            >
+              Create your GitSkin
+              <span>→</span>
+            </Link>
+            <Link
+              href="/pricing"
+              style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', padding: '15px 22px', borderRadius: 12, background: 'rgba(255,255,255,0.04)', color: '#f5f5f5', border: '1px solid #242424', textDecoration: 'none', fontSize: 15, fontWeight: 750 }}
+            >
+              See Pro plans
+            </Link>
+          </div>
+
+          <div style={{ padding: 8, borderRadius: 16, background: 'rgba(255,255,255,0.045)', border: '1px solid #202020', display: 'flex', gap: 8, maxWidth: 480 }}>
             <input
-              type="text"
-              placeholder="username"
               value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleTryIt()}
-              style={{
-                flex: 1,
-                padding: '12px 16px',
-                background: '#111',
-                border: '1px solid #1f1f1f',
-                borderRadius: '10px',
-                color: '#fafafa',
-                fontSize: '15px',
-                outline: 'none',
-                transition: 'border-color 0.15s ease',
-              }}
-              onFocus={(e) => {
-                e.currentTarget.style.borderColor = '#22c55e';
-              }}
-              onBlur={(e) => {
-                e.currentTarget.style.borderColor = '#1f1f1f';
-              }}
+              onChange={(event) => setInputValue(event.target.value)}
+              onKeyDown={(event) => event.key === 'Enter' && previewUsername()}
+              placeholder="GitHub username"
+              style={{ flex: 1, minWidth: 0, background: '#0c0c0c', border: '1px solid #1d1d1d', borderRadius: 11, color: '#fff', padding: '12px 14px', fontSize: 15, outline: 'none' }}
             />
             <button
-              onClick={handleTryIt}
-              style={{
-                padding: '12px 24px',
-                background: '#161616',
-                border: '1px solid #1f1f1f',
-                borderRadius: '10px',
-                color: '#fafafa',
-                fontSize: '15px',
-                fontWeight: 600,
-                cursor: 'pointer',
-                transition: 'all 0.15s ease',
-                whiteSpace: 'nowrap',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = '#22c55e';
-                e.currentTarget.style.color = '#22c55e';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = '#1f1f1f';
-                e.currentTarget.style.color = '#fafafa';
-              }}
+              onClick={previewUsername}
+              style={{ border: 0, borderRadius: 11, background: '#f5f5f5', color: '#050505', padding: '0 16px', fontWeight: 850, cursor: 'pointer' }}
             >
               Preview
             </button>
           </div>
+
+          <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', marginTop: 28 }}>
+            {[
+              ['20+', 'themes'],
+              ['15+', 'avatar styles'],
+              ['4', 'premium cards'],
+              ['AI', 'profile tools'],
+            ].map(([value, label]) => (
+              <div key={label}>
+                <div style={{ color: '#fff', fontSize: 24, fontWeight: 900 }}>{value}</div>
+                <div style={{ color: '#666', fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.9 }}>{label}</div>
+              </div>
+            ))}
+          </div>
         </motion.div>
 
-        {/* Floating Widget Preview */}
         <motion.div
-          animate={prefersReducedMotion ? undefined : { y: [0, -8, 0] }}
-          transition={{ duration: 4, ease: 'easeInOut', repeat: Infinity }}
-          style={{
-            maxWidth: '420px',
-            margin: '40px auto 0',
-            display: 'flex',
-            justifyContent: 'center',
-          }}
+          initial={prefersReducedMotion ? false : { opacity: 0, x: 28, scale: 0.97 }}
+          animate={prefersReducedMotion ? undefined : { opacity: 1, x: 0, scale: 1 }}
+          transition={{ duration: 0.8, delay: 0.15, ease }}
+          style={{ position: 'relative', minHeight: 560 }}
         >
-          <img
-            src="/api/stats?username=octocat&theme=midnight"
-            alt="widget preview"
-            style={{
-              width: '100%',
-              maxWidth: '340px',
-              borderRadius: '12px',
-              boxShadow: '0 20px 60px rgba(34,197,94,0.15), 0 0 0 1px rgba(34,197,94,0.1)',
-            }}
-          />
-        </motion.div>
+          <motion.div
+            animate={prefersReducedMotion ? undefined : { y: [0, -10, 0], rotate: [-1.2, -0.4, -1.2] }}
+            transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+            style={{ position: 'absolute', left: 8, top: 28, width: '86%', borderRadius: 24, overflow: 'hidden', boxShadow: '0 34px 90px rgba(0,0,0,0.55), 0 0 0 1px rgba(34,197,94,0.18)' }}
+          >
+            <img src={cardUrl(username, selectedTheme)} alt="GitSkins premium profile card" style={{ width: '100%', display: 'block' }} />
+          </motion.div>
 
-        {/* Stats Row */}
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            gap: '48px',
-            marginTop: '64px',
-            flexWrap: 'wrap',
-          }}
-        >
-          {[
-            { value: '20+', label: 'Themes' },
-            { value: '7', label: 'AI Tools' },
-            { value: '∞', label: 'Widgets' },
-            { value: '100%', label: 'Free' },
-          ].map((stat, i) => (
-            <motion.div
-              key={stat.label}
-              {...(prefersReducedMotion ? {} : {
-                initial: { opacity: 0, y: 15 },
-                animate: { opacity: 1, y: 0 },
-                transition: { duration: 0.5, delay: 1.3 + i * 0.1, ease },
-              })}
-              style={{ textAlign: 'center' }}
-            >
-              <div
-                style={{
-                  fontSize: '32px',
-                  fontWeight: 700,
-                  color: '#fafafa',
-                  letterSpacing: '-0.02em',
-                }}
-              >
-                {stat.value}
-              </div>
-              <div
-                style={{
-                  fontSize: '13px',
-                  color: '#666',
-                  fontWeight: 500,
-                  marginTop: '4px',
-                }}
-              >
-                {stat.label}
-              </div>
-            </motion.div>
-          ))}
-        </div>
+          <motion.div
+            animate={prefersReducedMotion ? undefined : { y: [0, 12, 0], rotate: [2.5, 1.4, 2.5] }}
+            transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
+            style={{ position: 'absolute', right: 0, top: 250, width: '58%', borderRadius: 18, overflow: 'hidden', boxShadow: '0 24px 70px rgba(0,0,0,0.45), 0 0 0 1px rgba(88,166,255,0.22)' }}
+          >
+            <img src={`/api/stats?username=${encodeURIComponent(username)}&theme=${selectedTheme}`} alt="GitSkins stats card" style={{ width: '100%', display: 'block' }} />
+          </motion.div>
+
+          <motion.div
+            animate={prefersReducedMotion ? undefined : { y: [0, -14, 0], rotate: [-3, -1.8, -3] }}
+            transition={{ duration: 6.5, repeat: Infinity, ease: 'easeInOut' }}
+            style={{ position: 'absolute', left: 30, bottom: 0, width: 156, height: 156, borderRadius: 36, padding: 8, background: 'linear-gradient(135deg, rgba(34,197,94,0.24), rgba(255,255,255,0.06))', border: '1px solid rgba(255,255,255,0.12)', boxShadow: '0 24px 70px rgba(0,0,0,0.48)' }}
+          >
+            <img src={avatarUrl(username, selectedTheme, 'open-peeps')} alt="Theme-matched avatar" style={{ width: '100%', height: '100%', borderRadius: 28, display: 'block' }} />
+          </motion.div>
+
+          <div style={{ position: 'absolute', right: 36, bottom: 36, padding: '13px 16px', borderRadius: 16, background: 'rgba(5,5,5,0.78)', border: '1px solid rgba(255,255,255,0.12)', backdropFilter: 'blur(16px)', color: '#d4d4d4', fontSize: 13, lineHeight: 1.5, maxWidth: 230 }}>
+            <strong style={{ color: '#fff' }}>Live assets, not mockups.</strong><br />
+            Every preview is generated by GitSkins APIs.
+          </div>
+
+          <div style={{ position: 'absolute', top: 0, right: 58, display: 'flex', gap: 8 }}>
+            {['github-dark', 'matrix', 'dracula'].map((theme) => (
+              <button
+                key={theme}
+                onClick={() => onThemeChange(theme)}
+                aria-label={`Use ${theme}`}
+                style={{ width: 28, height: 28, borderRadius: 999, border: selectedTheme === theme ? '2px solid #fff' : '1px solid rgba(255,255,255,0.18)', background: theme === 'matrix' ? '#22c55e' : theme === 'dracula' ? '#bd93f9' : '#58a6ff', cursor: 'pointer', boxShadow: selectedTheme === theme ? '0 0 20px rgba(255,255,255,0.25)' : 'none' }}
+              />
+            ))}
+          </div>
+        </motion.div>
       </div>
     </section>
   );
