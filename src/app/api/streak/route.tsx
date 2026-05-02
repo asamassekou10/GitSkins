@@ -139,86 +139,61 @@ async function generateStreakImage(streak: StreakData, theme: Theme): Promise<Ne
           </div>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'row', gap: 14, flex: 1, position: 'relative' }}>
-          <div
-            style={{
-              width: 180,
-              borderRadius: 20,
-              background: `linear-gradient(145deg, ${theme.streakColors.fire}24, ${theme.bg}80)`,
-              border: `1px solid ${theme.streakColors.fire}38`,
-              padding: 18,
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
-            }}
-          >
-            <div style={{ width: 72, height: 72, borderRadius: 24, background: `${theme.streakColors.fire}18`, border: `1px solid ${theme.streakColors.fire}38`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ position: 'relative', flex: 1, display: 'flex' }}>
+          <div style={{ position: 'absolute', left: 0, top: 0, width: 180, height: 94, borderRadius: 20, background: `linear-gradient(145deg, ${theme.streakColors.fire}24, ${theme.bg}80)`, border: `1px solid ${theme.streakColors.fire}38`, display: 'flex' }} />
+          <div style={{ position: 'absolute', left: 20, top: 18, width: 58, height: 58, borderRadius: 20, background: `${theme.streakColors.fire}18`, border: `1px solid ${theme.streakColors.fire}38`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <svg width="38" height="38" viewBox="0 0 24 24" fill="none">
                 <path d="M12 22c4 0 7-2.7 7-6.7 0-2.3-1.2-4.2-2.6-5.9-.6 1.7-1.8 2.7-3.1 3.2.5-3.5-.7-6.2-3.5-8.6.2 3.1-1.2 4.7-2.7 6.4C5.9 11.8 5 13.2 5 15.4 5 19.3 8 22 12 22z" fill={theme.streakColors.fire}/>
               </svg>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <div style={{ color: theme.streakColors.fire, fontSize: 54, fontWeight: 950, letterSpacing: -2, display: 'flex' }}>
-                <span>{streak.currentStreak}</span>
-              </div>
-              <div style={{ color: theme.secondaryText, fontSize: 12, fontWeight: 750, textTransform: 'uppercase', letterSpacing: 1, display: 'flex' }}>
-                <span>current days</span>
-              </div>
-            </div>
+          </div>
+          <div style={{ position: 'absolute', left: 98, top: 16, color: theme.streakColors.fire, fontSize: 54, fontWeight: 950, letterSpacing: -2, display: 'flex' }}>
+            <span>{streak.currentStreak}</span>
+          </div>
+          <div style={{ position: 'absolute', left: 100, top: 70, color: theme.secondaryText, fontSize: 12, fontWeight: 750, textTransform: 'uppercase', letterSpacing: 1, display: 'flex' }}>
+            <span>current days</span>
           </div>
 
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {streakItems.slice(1).map((item) => {
-              const pct = Math.max(6, Math.round((item.value / maxValue) * 100));
-              return (
-                <div
-                  key={item.label}
-                  style={{
-                    flex: 1,
-                    borderRadius: 16,
-                    background: 'rgba(255,255,255,0.035)',
-                    border: `1px solid ${theme.borderColor}`,
-                    padding: '12px 14px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 12,
-                  }}
-                >
-                  <div style={{ width: 38, height: 38, borderRadius: 13, background: `${item.color}18`, border: `1px solid ${item.color}30`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          {streakItems.slice(1).map((item, index) => {
+            const y = index * 48;
+            const pct = Math.max(6, Math.round((item.value / maxValue) * 100));
+            return (
+              <div key={item.label}>
+                <div style={{ position: 'absolute', left: 204, top: y, width: 350, height: 38, borderRadius: 16, background: 'rgba(255,255,255,0.035)', border: `1px solid ${theme.borderColor}`, display: 'flex' }} />
+                <div style={{ position: 'absolute', left: 218, top: y + 8, width: 22, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                       {item.icon === 'trophy' && <path d="M7 4h10v3a5 5 0 0 1-10 0V4zm0 2H4c0 3 1.2 5 4.3 5M17 6h3c0 3-1.2 5-4.3 5M12 12v4m-4 4h8" stroke={item.color} strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" />}
                       {item.icon === 'calendar' && <path d="M5 5h14v15H5V5zm0 5h14M8 3v4m8-4v4" stroke={item.color} strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" />}
                     </svg>
-                  </div>
-                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                      <span style={{ color: theme.secondaryText, fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 0.8 }}>{item.label}</span>
-                      <span style={{ color: theme.primaryText, fontSize: 28, fontWeight: 900 }}>{item.value.toLocaleString()}</span>
-                    </div>
-                    <div style={{ height: 8, borderRadius: 999, background: `${theme.primaryText}12`, overflow: 'hidden', display: 'flex' }}>
-                      <div style={{ width: `${pct}%`, borderRadius: 999, background: `linear-gradient(90deg, ${item.color}, ${theme.primaryText}99)`, display: 'flex' }} />
-                    </div>
-                  </div>
                 </div>
-              );
-            })}
+                <div style={{ position: 'absolute', left: 256, top: y + 8, color: theme.secondaryText, fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 0.8, display: 'flex' }}>
+                  <span>{item.label}</span>
+                </div>
+                <div style={{ position: 'absolute', right: 40, top: y + 2, color: theme.primaryText, fontSize: 28, fontWeight: 900, display: 'flex' }}>
+                  <span>{item.value.toLocaleString()}</span>
+                </div>
+                <div style={{ position: 'absolute', left: 256, top: y + 28, width: 254, height: 7, borderRadius: 999, background: `${theme.primaryText}12`, overflow: 'hidden', display: 'flex' }}>
+                  <div style={{ width: `${pct}%`, height: 7, borderRadius: 999, background: `linear-gradient(90deg, ${item.color}, ${theme.primaryText}99)`, display: 'flex' }} />
+                </div>
+              </div>
+            );
+          })}
 
-            <div style={{ height: 28, display: 'flex', gap: 4, alignItems: 'center' }}>
-              {heatCells.map((active, index) => (
-                <div
-                  key={index}
-                  style={{
-                    flex: 1,
-                    height: active ? 20 : 12,
-                    borderRadius: 6,
-                    background: active ? theme.streakColors.fire : `${theme.primaryText}14`,
-                    opacity: active ? 0.35 + (index / heatCells.length) * 0.6 : 1,
-                    display: 'flex',
-                  }}
-                />
-              ))}
-            </div>
-          </div>
+          {heatCells.map((active, index) => (
+            <div
+              key={index}
+              style={{
+                position: 'absolute',
+                left: 204 + index * 20,
+                top: 104,
+                width: 14,
+                height: active ? 20 : 12,
+                borderRadius: 6,
+                background: active ? theme.streakColors.fire : `${theme.primaryText}14`,
+                opacity: active ? 0.35 + (index / heatCells.length) * 0.6 : 1,
+                display: 'flex',
+              }}
+            />
+          ))}
         </div>
       </div>
     ),

@@ -136,80 +136,38 @@ async function generateLanguagesImage(
           ) : null}
         </div>
 
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'row',
-            gap: 18,
-            flex: 1,
-            position: 'relative',
-          }}
-        >
-          {languages.length > 0 ? (
-            <>
-              <div
-                style={{
-                  width: 132,
-                  borderRadius: 20,
-                  background: `linear-gradient(145deg, ${(topLanguage?.color || theme.accentColor)}22, ${theme.bg}80)`,
-                  border: `1px solid ${(topLanguage?.color || theme.accentColor)}38`,
-                  padding: 16,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'space-between',
-                }}
-              >
-                <div style={{ width: 84, height: 84, borderRadius: '50%', border: `14px solid ${(topLanguage?.color || theme.accentColor)}55`, background: `${theme.cardBg}cc`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <div style={{ width: 46, height: 46, borderRadius: '50%', background: topLanguage?.color || theme.accentColor, opacity: 0.82, display: 'flex' }} />
-                </div>
-                <div
-                  style={{
-                    color: theme.primaryText,
-                    fontSize: 34,
-                    fontWeight: 900,
-                    letterSpacing: -1,
-                    display: 'flex',
-                  }}
-                >
-                  <span>{topLanguage?.percentage ?? 0}%</span>
-                </div>
-                <div style={{ color: theme.secondaryText, fontSize: 12, display: 'flex' }}>
-                  <span>{Math.round(totalBytes / 1000).toLocaleString()} KB indexed</span>
-                </div>
-              </div>
+        {languages.length > 0 ? (
+          <div style={{ position: 'relative', flex: 1, display: 'flex' }}>
+            <div style={{ position: 'absolute', left: 0, top: 0, width: 132, height: 142, borderRadius: 20, background: `linear-gradient(145deg, ${(topLanguage?.color || theme.accentColor)}22, ${theme.bg}80)`, border: `1px solid ${(topLanguage?.color || theme.accentColor)}38`, display: 'flex' }} />
+            <div style={{ position: 'absolute', left: 39, top: 18, width: 72, height: 72, borderRadius: '50%', border: `12px solid ${(topLanguage?.color || theme.accentColor)}55`, background: `${theme.cardBg}cc`, display: 'flex' }} />
+            <div style={{ position: 'absolute', left: 65, top: 44, width: 32, height: 32, borderRadius: '50%', background: topLanguage?.color || theme.accentColor, opacity: 0.82, display: 'flex' }} />
+            <div style={{ position: 'absolute', left: 16, top: 94, color: theme.primaryText, fontSize: 34, fontWeight: 900, letterSpacing: -1, display: 'flex' }}>
+              <span>{topLanguage?.percentage ?? 0}%</span>
+            </div>
+            <div style={{ position: 'absolute', left: 16, top: 130, color: theme.secondaryText, fontSize: 12, display: 'flex' }}>
+              <span>{Math.round(totalBytes / 1000).toLocaleString()} KB indexed</span>
+            </div>
 
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 9 }}>
-                {languages.map((lang, index) => (
-                  <div
-                    key={index}
-                    style={{
-                      flex: 1,
-                      minHeight: 0,
-                      borderRadius: 14,
-                      background: 'rgba(255,255,255,0.035)',
-                      border: `1px solid ${theme.borderColor}`,
-                      padding: '8px 10px',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent: 'center',
-                      gap: 6,
-                    }}
-                  >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <div style={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: lang.color, boxShadow: `0 0 10px ${lang.color}80`, display: 'flex' }} />
-                        <span style={{ fontSize: 13, fontWeight: 750, color: theme.primaryText }}>{lang.name}</span>
-                      </div>
-                      <span style={{ fontSize: 13, fontWeight: 850, color: lang.color }}>{lang.percentage}%</span>
-                    </div>
-                    <div style={{ height: 8, borderRadius: 999, backgroundColor: `${theme.primaryText}12`, display: 'flex', overflow: 'hidden' }}>
-                      <div style={{ width: `${Math.max(4, lang.percentage)}%`, height: '100%', borderRadius: 999, background: `linear-gradient(90deg, ${lang.color}, ${lang.color}99)`, display: 'flex' }} />
-                    </div>
+            {languages.map((lang, index) => {
+              const y = index * 45;
+              return (
+                <div key={index}>
+                  <div style={{ position: 'absolute', left: 154, top: y, width: 252, height: 36, borderRadius: 14, background: 'rgba(255,255,255,0.035)', border: `1px solid ${theme.borderColor}`, display: 'flex' }} />
+                  <div style={{ position: 'absolute', left: 170, top: y + 11, width: 10, height: 10, borderRadius: '50%', backgroundColor: lang.color, boxShadow: `0 0 10px ${lang.color}80`, display: 'flex' }} />
+                  <div style={{ position: 'absolute', left: 190, top: y + 8, color: theme.primaryText, fontSize: 13, fontWeight: 750, display: 'flex' }}>
+                    <span>{lang.name}</span>
                   </div>
-                ))}
-              </div>
-            </>
-          ) : (
+                  <div style={{ position: 'absolute', right: 12, top: y + 8, color: lang.color, fontSize: 13, fontWeight: 850, display: 'flex' }}>
+                    <span>{lang.percentage}%</span>
+                  </div>
+                  <div style={{ position: 'absolute', left: 190, top: y + 27, width: 172, height: 7, borderRadius: 999, backgroundColor: `${theme.primaryText}12`, display: 'flex', overflow: 'hidden' }}>
+                    <div style={{ width: `${Math.max(4, lang.percentage)}%`, height: 7, borderRadius: 999, background: `linear-gradient(90deg, ${lang.color}, ${lang.color}99)`, display: 'flex' }} />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
             <div
               style={{
                 display: 'flex',
@@ -229,8 +187,7 @@ async function generateLanguagesImage(
                 <span>No languages detected</span>
               </div>
             </div>
-          )}
-        </div>
+        )}
 
         {languages.length > 0 ? (
           <div style={{ display: 'flex', gap: 6, marginTop: 14 }}>
