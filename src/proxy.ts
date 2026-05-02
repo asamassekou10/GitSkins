@@ -30,8 +30,29 @@ const AI_ROUTE_PREFIXES = [
   '/api/visualize',
 ];
 
+const memoryRateLimit = new Map<string, { count: number; resetAt: number }>();
+
 function isAiRoute(pathname: string): boolean {
   return AI_ROUTE_PREFIXES.some((p) => pathname.startsWith(p));
+}
+
+function checkMemoryRateLimit(identifier: string, limit: number, windowSecs: number): boolean {
+  const now = Date.now();
+  const key = `memory:${identifier}`;
+  const bucket = memoryRateLimit.get(key);
+
+  if (!bucket || bucket.resetAt <= now) {
+    memoryRateLimit.set(key, { count: 1, resetAt: now + windowSecs * 1000 });
+    return true;
+  }
+
+  if (bucket.count >= limit) {
+    return false;
+  }
+
+  bucket.count += 1;
+  memoryRateLimit.set(key, bucket);
+  return true;
 }
 
 /**
@@ -51,9 +72,10 @@ async function checkRateLimit(
     return true;
   }
 
-  // If KV is not configured, skip rate limiting
+  // If KV is not configured, use a process-local fallback. This is not as
+  // strong as shared KV on serverless/edge, but still protects each warm isolate.
   if (!process.env.KV_REST_API_URL || !process.env.KV_REST_API_TOKEN) {
-    return true;
+    return checkMemoryRateLimit(identifier, limit, windowSecs);
   }
 
   try {
@@ -80,9 +102,9 @@ async function checkRateLimit(
     return true;
   } catch (error: any) {
     if (error?.code === 'MODULE_NOT_FOUND' || error?.message?.includes('Cannot find module')) {
-      return true;
+      return checkMemoryRateLimit(identifier, limit, windowSecs);
     }
-    return true;
+    return checkMemoryRateLimit(identifier, limit, windowSecs);
   }
 }
 
@@ -194,8 +216,8 @@ export async function proxy(request: NextRequest) {
     
     if (origin && securityConfig.allowedOrigins.includes(origin)) {
       response.headers.set('Access-Control-Allow-Origin', origin);
-      response.headers.set('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
-      response.headers.set('Access-Control-Allow-Headers', 'Content-Type');
+      response.headers.set('Access-Control-Allow-Methods', 'GET, POST, HEAD, OPTIONS');
+      response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Stripe-Signature');
       response.headers.set('Access-Control-Max-Age', '86400');
     }
 

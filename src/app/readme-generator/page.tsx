@@ -75,9 +75,9 @@ export default function ReadmeGeneratorPage() {
   const [agentReasoning, setAgentReasoning] = useState<string | null>(null);
   const [agentLogExpanded, setAgentLogExpanded] = useState(false);
 
-  const { plan: userPlan, readmeGenerationsUsed, readmeGenerationsLimit, readmeGenerationsRemaining, loading: planLoading } = useUserPlan();
+  const { plan: userPlan, readmeGenerationsUsed, readmeGenerationsLimit, readmeGenerationsRemaining, loading: planLoading, authenticated } = useUserPlan();
   const userIsPro = userPlan === 'pro';
-  const usageAllowed = userIsPro || readmeGenerationsRemaining > 0;
+  const usageAllowed = authenticated && (userIsPro || readmeGenerationsRemaining > 0);
 
   const readmeStepLabels = useMemo(
     () =>
@@ -114,6 +114,11 @@ export default function ReadmeGeneratorPage() {
   };
 
   const generateReadme = useCallback(async () => {
+    if (!authenticated) {
+      window.location.href = '/auth';
+      return;
+    }
+
     if (!username.trim()) {
       setError('Please enter a GitHub username');
       return;
@@ -161,7 +166,7 @@ export default function ReadmeGeneratorPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [username, sections, style, theme, careerMode, careerRole, agentLoop, useAI, readmeProgress.start, readmeProgress.complete, readmeProgress.reset]);
+  }, [authenticated, username, sections, style, theme, careerMode, careerRole, agentLoop, useAI, readmeProgress.start, readmeProgress.complete, readmeProgress.reset]);
 
   const copyToClipboard = async () => {
     if (!generatedReadme) return;
@@ -287,8 +292,8 @@ export default function ReadmeGeneratorPage() {
           <section style={{ maxWidth: '1000px', margin: '0 auto 24px', padding: '0 20px' }}>
             <div
               style={{
-                background: !usageAllowed ? 'rgba(239, 68, 68, 0.1)' : '#161616',
-                border: `1px solid ${!usageAllowed ? 'rgba(239, 68, 68, 0.3)' : '#2a2a2a'}`,
+                background: !authenticated ? 'rgba(34, 197, 94, 0.08)' : !usageAllowed ? 'rgba(239, 68, 68, 0.1)' : '#161616',
+                border: `1px solid ${!authenticated ? 'rgba(34, 197, 94, 0.22)' : !usageAllowed ? 'rgba(239, 68, 68, 0.3)' : '#2a2a2a'}`,
                 borderRadius: '12px',
                 padding: '14px 20px',
                 display: 'flex',
@@ -299,7 +304,11 @@ export default function ReadmeGeneratorPage() {
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
-                {userIsPro ? (
+                {!authenticated ? (
+                  <span style={{ fontSize: '14px', color: '#aaa' }}>
+                    Sign in to use your 5 free README generations.
+                  </span>
+                ) : userIsPro ? (
                   <span style={{ fontSize: '14px', color: '#888' }}>
                     Generations: <span style={{ color: '#22c55e', fontWeight: 600 }}>Unlimited</span>
                   </span>
@@ -315,7 +324,7 @@ export default function ReadmeGeneratorPage() {
                     <div style={{ width: '120px', height: '4px', background: '#2a2a2a', borderRadius: '2px', overflow: 'hidden' }}>
                       <div style={{
                         height: '100%',
-                        width: `${Math.min(100, (readmeGenerationsUsed / readmeGenerationsLimit) * 100)}%`,
+                        width: `${readmeGenerationsLimit > 0 ? Math.min(100, (readmeGenerationsUsed / readmeGenerationsLimit) * 100) : 0}%`,
                         background: readmeGenerationsRemaining > 0 ? '#22c55e' : '#ef4444',
                         borderRadius: '2px',
                         transition: 'width 0.3s',
@@ -328,14 +337,14 @@ export default function ReadmeGeneratorPage() {
               <span
                 style={{
                   padding: '6px 12px',
-                  background: userIsPro ? 'rgba(34, 197, 94, 0.15)' : 'rgba(255,255,255,0.05)',
+                  background: userIsPro || !authenticated ? 'rgba(34, 197, 94, 0.15)' : 'rgba(255,255,255,0.05)',
                   borderRadius: '6px',
                   fontSize: '12px',
-                  color: userIsPro ? '#22c55e' : '#666',
+                  color: userIsPro || !authenticated ? '#22c55e' : '#666',
                   fontWeight: 600,
                 }}
               >
-                {userIsPro ? 'Pro Plan' : 'Free Plan'}
+                {!authenticated ? 'Sign in required' : userIsPro ? 'Pro Plan' : 'Free Plan'}
               </span>
             </div>
           </section>
@@ -733,17 +742,17 @@ export default function ReadmeGeneratorPage() {
             {/* Generate Button */}
             <button
               onClick={generateReadme}
-              disabled={isLoading || !username.trim() || !usageAllowed}
+              disabled={isLoading || !username.trim() || (authenticated && !usageAllowed)}
               style={{
                 width: '100%',
                 padding: '16px 32px',
-                background: isLoading ? '#1a5f35' : !usageAllowed ? '#333' : '#22c55e',
+                background: isLoading ? '#1a5f35' : authenticated && !usageAllowed ? '#333' : '#22c55e',
                 border: 'none',
                 borderRadius: '12px',
-                color: !usageAllowed ? '#888' : '#000',
+                color: authenticated && !usageAllowed ? '#888' : '#000',
                 fontSize: '16px',
                 fontWeight: 700,
-                cursor: isLoading || !username.trim() || !usageAllowed ? 'not-allowed' : 'pointer',
+                cursor: isLoading || !username.trim() || (authenticated && !usageAllowed) ? 'not-allowed' : 'pointer',
                 opacity: !username.trim() ? 0.5 : 1,
                 transition: 'all 0.2s',
                 display: 'flex',
@@ -754,6 +763,15 @@ export default function ReadmeGeneratorPage() {
             >
               {isLoading ? (
                 <>Generating…</>
+              ) : !authenticated ? (
+                <>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+                    <polyline points="10 17 15 12 10 7" />
+                    <line x1="15" y1="12" x2="3" y2="12" />
+                  </svg>
+                  Sign in for 5 free generations
+                </>
               ) : !usageAllowed ? (
                 <>
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

@@ -14,7 +14,7 @@ import {
   parseGeneratedReadme,
 } from '@/lib/readme-generator';
 import { generateReadmeWithGemini, isGeminiConfigured } from '@/lib/gemini';
-import { checkReadmeAllowed, incrementReadmeUsage } from '@/lib/server-usage';
+import { checkReadmeAllowed, checkReadmeAllowedById, incrementReadmeUsage, incrementReadmeUsageById } from '@/lib/server-usage';
 import type { ReadmeConfig, ReadmeSectionType, ReadmeStyle } from '@/types/readme';
 
 export const runtime = 'nodejs';
@@ -44,16 +44,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const sessionUser = session.user as { username?: string };
-    const sessionUsername = sessionUser.username;
-    if (!sessionUsername) {
+    const sessionUser = session.user as { id?: string; username?: string };
+    if (!sessionUser.id && !sessionUser.username) {
       return NextResponse.json(
-        { error: 'No GitHub username in session', code: 'UNAUTHORIZED' },
+        { error: 'No user identifier in session', code: 'UNAUTHORIZED' },
         { status: 401 }
       );
     }
 
-    const usageCheck = await checkReadmeAllowed(sessionUsername);
+    const usageCheck = sessionUser.id
+      ? await checkReadmeAllowedById(sessionUser.id)
+      : await checkReadmeAllowed(sessionUser.username!);
     if (!usageCheck.allowed) {
       return NextResponse.json(
         {
@@ -181,7 +182,11 @@ export async function POST(request: NextRequest) {
       result = generateReadmeTemplate(profileData, config);
     }
 
-    await incrementReadmeUsage(sessionUsername);
+    if (sessionUser.id) {
+      await incrementReadmeUsageById(sessionUser.id);
+    } else {
+      await incrementReadmeUsage(sessionUser.username!);
+    }
 
     return NextResponse.json({
       success: true,

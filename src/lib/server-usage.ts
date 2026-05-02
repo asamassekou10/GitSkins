@@ -160,6 +160,37 @@ export interface UsageCheckResult {
   plan: 'free' | 'pro';
 }
 
+async function checkReadmeAllowedForUserId(userId: string): Promise<UsageCheckResult> {
+  const plan = await getUserPlanById(userId);
+  const limit = plan === 'pro' ? PRO_TIER_README_LIMIT : FREE_TIER_README_LIMIT;
+
+  if (plan === 'pro') {
+    return { allowed: true, remaining: limit, limit, plan };
+  }
+
+  const month = currentMonth();
+  const usage = await db.usage.findUnique({
+    where: { userId_month: { userId, month } },
+    select: { readmeGenerationsUsed: true },
+  });
+
+  const used = usage?.readmeGenerationsUsed ?? 0;
+  const remaining = Math.max(0, limit - used);
+  return { allowed: remaining > 0, remaining, limit, plan };
+}
+
+export async function checkReadmeAllowedById(userId: string): Promise<UsageCheckResult> {
+  if (!dbAvailable()) {
+    return { allowed: true, remaining: 9999, limit: 9999, plan: 'free' };
+  }
+
+  try {
+    return await checkReadmeAllowedForUserId(userId);
+  } catch {
+    return { allowed: false, remaining: 0, limit: FREE_TIER_README_LIMIT, plan: 'free' };
+  }
+}
+
 /**
  * Check whether a user is allowed to generate a README.
  * Falls back to a lenient in-memory limit when DB is unavailable.
@@ -196,6 +227,21 @@ export async function checkReadmeAllowed(username: string): Promise<UsageCheckRe
   } catch {
     // On any DB error, fail open so users aren't blocked
     return { allowed: true, remaining: FREE_TIER_README_LIMIT, limit: FREE_TIER_README_LIMIT, plan: 'free' };
+  }
+}
+
+export async function incrementReadmeUsageById(userId: string): Promise<void> {
+  if (!dbAvailable()) return;
+
+  try {
+    const month = currentMonth();
+    await db.usage.upsert({
+      where: { userId_month: { userId, month } },
+      update: { readmeGenerationsUsed: { increment: 1 } },
+      create: { userId, month, readmeGenerationsUsed: 1 },
+    });
+  } catch (err) {
+    console.error('[server-usage] incrementReadmeUsageById failed:', err);
   }
 }
 

@@ -11,7 +11,7 @@ import { z } from 'zod';
 import { auth } from '@/auth';
 import { fetchProfileForReadme } from '@/lib/github';
 import { streamReadmeWithGemini, isGeminiConfigured } from '@/lib/gemini';
-import { checkReadmeAllowed, incrementReadmeUsage } from '@/lib/server-usage';
+import { checkReadmeAllowedById, getUserPlanById, incrementReadmeUsageById } from '@/lib/server-usage';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -38,16 +38,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const sessionUser = session.user as { username?: string };
-    const sessionUsername = sessionUser.username;
-    if (!sessionUsername) {
+    const sessionUser = session.user as { id?: string };
+    if (!sessionUser.id) {
       return new Response(
-        JSON.stringify({ error: 'No GitHub username in session', code: 'UNAUTHORIZED' }),
+        JSON.stringify({ error: 'No user identifier in session', code: 'UNAUTHORIZED' }),
         { status: 401, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
-    const usageCheck = await checkReadmeAllowed(sessionUsername);
+    const plan = await getUserPlanById(sessionUser.id);
+    if (plan !== 'pro') {
+      return new Response(
+        JSON.stringify({ error: 'Pro plan required for README Agent', code: 'UPGRADE_REQUIRED' }),
+        { status: 403, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const usageCheck = await checkReadmeAllowedById(sessionUser.id);
     if (!usageCheck.allowed) {
       return new Response(
         JSON.stringify({
@@ -82,7 +89,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Count the generation before streaming starts
-    await incrementReadmeUsage(sessionUsername);
+    await incrementReadmeUsageById(sessionUser.id);
 
     const encoder = new TextEncoder();
 

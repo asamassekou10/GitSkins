@@ -10,6 +10,7 @@ export interface UserPlanData {
   readmeGenerationsRemaining: number;
   month: string;
   loading: boolean;
+  authenticated: boolean;
 }
 
 const DEFAULT: UserPlanData = {
@@ -19,6 +20,15 @@ const DEFAULT: UserPlanData = {
   readmeGenerationsRemaining: 5,
   month: '',
   loading: true,
+  authenticated: false,
+};
+
+const UNAUTHENTICATED: UserPlanData = {
+  ...DEFAULT,
+  readmeGenerationsLimit: 0,
+  readmeGenerationsRemaining: 0,
+  loading: false,
+  authenticated: false,
 };
 
 // Module-level cache: key → { data, fetchedAt }
@@ -34,7 +44,7 @@ export function useUserPlan(): UserPlanData {
     if (status === 'loading') return;
 
     if (status === 'unauthenticated') {
-      setResult({ ...DEFAULT, loading: false });
+      setResult(UNAUTHENTICATED);
       return;
     }
 
@@ -52,14 +62,14 @@ export function useUserPlan(): UserPlanData {
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
         if (!data) {
-          setResult({ ...DEFAULT, loading: false });
+          setResult(UNAUTHENTICATED);
           return;
         }
-        const resolved: UserPlanData = { ...data, loading: false };
+        const resolved: UserPlanData = { ...data, loading: false, authenticated: true };
         cache.set(key, { data: resolved, fetchedAt: Date.now() });
         setResult(resolved);
       })
-      .catch(() => setResult({ ...DEFAULT, loading: false }))
+      .catch(() => setResult(UNAUTHENTICATED))
       .finally(() => { fetchingRef.current = false; });
   }, [status]);
 
