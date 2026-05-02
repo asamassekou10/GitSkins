@@ -157,7 +157,7 @@ async function generateStreakImage(streak: StreakData, theme: Theme): Promise<Ne
             const y = index * 48;
             const pct = Math.max(6, Math.round((item.value / maxValue) * 100));
             return (
-              <div key={item.label}>
+              <div key={item.label} style={{ display: 'flex' }}>
                 <div style={{ position: 'absolute', left: 204, top: y, width: 350, height: 38, borderRadius: 16, background: 'rgba(255,255,255,0.035)', border: `1px solid ${theme.borderColor}`, display: 'flex' }} />
                 <div style={{ position: 'absolute', left: 218, top: y + 8, width: 22, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none">

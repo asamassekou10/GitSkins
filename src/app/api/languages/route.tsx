@@ -151,7 +151,7 @@ async function generateLanguagesImage(
             {languages.map((lang, index) => {
               const y = index * 45;
               return (
-                <div key={index}>
+                <div key={index} style={{ display: 'flex' }}>
                   <div style={{ position: 'absolute', left: 154, top: y, width: 252, height: 36, borderRadius: 14, background: 'rgba(255,255,255,0.035)', border: `1px solid ${theme.borderColor}`, display: 'flex' }} />
                   <div style={{ position: 'absolute', left: 170, top: y + 11, width: 10, height: 10, borderRadius: '50%', backgroundColor: lang.color, boxShadow: `0 0 10px ${lang.color}80`, display: 'flex' }} />
                   <div style={{ position: 'absolute', left: 190, top: y + 8, color: theme.primaryText, fontSize: 13, fontWeight: 750, display: 'flex' }}>

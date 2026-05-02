@@ -156,7 +156,7 @@ async function generateStatsImage(stats: CompactStats, theme: Theme): Promise<Ne
           const y = 88 + index * 34;
           const pct = Math.max(9, Math.round((item.value / maxValue) * 100));
           return (
-            <div key={item.label}>
+            <div key={item.label} style={{ display: 'flex' }}>
               <div style={{ position: 'absolute', left: 232, top: y, width: 344, height: 28, borderRadius: 14, background: 'rgba(255,255,255,0.035)', border: `1px solid ${theme.accentColor}55`, display: 'flex' }} />
               <div style={{ position: 'absolute', left: 248, top: y + 4, width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
