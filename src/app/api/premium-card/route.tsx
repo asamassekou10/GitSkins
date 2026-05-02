@@ -16,6 +16,7 @@ import { apiConfig, siteConfig } from '@/config/site';
 import { trackCardGeneration } from '@/lib/analytics';
 import type { GitHubData } from '@/types';
 import type { PremiumThemeName } from '@/types/premium-theme';
+import type { AvatarCharacter, AvatarExpression } from '@/lib/avatar-generator';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -23,7 +24,9 @@ export const dynamic = 'force-dynamic';
 const WIDTH = 1200;
 const HEIGHT = 630;
 type PremiumCardVariant = 'classic' | 'glass' | 'persona';
+type PremiumCardAvatar = 'github' | 'gitskins' | 'persona';
 const VALID_VARIANTS: PremiumCardVariant[] = ['classic', 'glass', 'persona'];
+const VALID_AVATARS: PremiumCardAvatar[] = ['github', 'gitskins', 'persona'];
 
 function esc(str: string): string {
   return str.replace(/[<>"&']/g, (c) =>
@@ -106,6 +109,54 @@ function languageChipsSvg(data: GitHubData, x: number, y: number, fallbackColor:
   }).join('');
 }
 
+function inferCardCharacter(data: GitHubData): { character: AvatarCharacter; expression: AvatarExpression } {
+  const languages = data.topLanguages.map((language) => language.name.toLowerCase());
+  const bio = (data.bio ?? '').toLowerCase();
+  const signal = `${languages.join(' ')} ${bio}`;
+
+  if (signal.match(/\b(ai|ml|llm|openai|gemini|agent|model|prompt)\b/)) return { character: 'ai-alchemist', expression: 'focused' };
+  if (languages.some((language) => ['typescript', 'javascript', 'html', 'css', 'vue', 'svelte'].includes(language))) return { character: 'interface-architect', expression: 'happy' };
+  if (languages.some((language) => ['go', 'rust', 'c', 'c++', 'zig'].includes(language))) return { character: 'systems-ranger', expression: 'focused' };
+  if (languages.some((language) => ['python', 'jupyter notebook', 'r', 'matlab'].includes(language))) return { character: 'data-oracle', expression: 'focused' };
+  if (languages.some((language) => ['shell', 'powershell', 'perl'].includes(language))) return { character: 'terminal-mage', expression: 'mysterious' };
+  if (signal.match(/\b(game|pixel|canvas|webgl|three)\b/)) return { character: 'pixel-adventurer', expression: 'happy' };
+  if (signal.match(/\b(api|server|backend|database|cloud|deploy)\b/)) return { character: 'cloud-pilot', expression: 'focused' };
+  if (data.totalStars > 50 || data.totalContributions > 1000) return { character: 'indie-builder', expression: 'happy' };
+  return { character: 'docs-sage', expression: 'happy' };
+}
+
+function resolveAvatarUrl(
+  data: GitHubData,
+  username: string,
+  themeName: PremiumThemeName,
+  origin: string,
+  avatarMode: PremiumCardAvatar
+): string {
+  if (avatarMode === 'github') return data.avatarUrl;
+
+  if (avatarMode === 'gitskins') {
+    return `${origin}/api/avatar?${new URLSearchParams({
+      username,
+      family: 'dicebear',
+      dicebearStyle: 'open-peeps',
+      theme: themeName,
+      size: '400',
+      format: 'png',
+    }).toString()}`;
+  }
+
+  const persona = inferCardCharacter(data);
+  return `${origin}/api/avatar?${new URLSearchParams({
+    username,
+    family: 'character',
+    character: persona.character,
+    theme: themeName,
+    expression: persona.expression,
+    bg: 'gradient',
+    size: '400',
+  }).toString()}`;
+}
+
 /**
  * Generate error SVG response
  */
@@ -132,13 +183,14 @@ function generateErrorSvg(message: string, subtitle?: string): NextResponse {
 async function generatePremiumCardSvg(
   data: GitHubData,
   username: string,
-  themeName: PremiumThemeName
+  themeName: PremiumThemeName,
+  avatarUrl: string
 ): Promise<NextResponse> {
   const theme = getPremiumTheme(themeName);
   const c = theme.colors;
   
   // Embed avatar
-  const avatarBase64 = await fetchImageAsBase64(data.avatarUrl);
+  const avatarBase64 = await fetchImageAsBase64(avatarUrl);
 
   // Stats
   const stars = data.totalStars.toLocaleString();
@@ -229,11 +281,12 @@ async function generatePremiumCardSvg(
 async function generateGlassCardSvg(
   data: GitHubData,
   username: string,
-  themeName: PremiumThemeName
+  themeName: PremiumThemeName,
+  avatarUrl: string
 ): Promise<NextResponse> {
   const theme = getPremiumTheme(themeName);
   const c = theme.colors;
-  const avatarBase64 = await fetchImageAsBase64(data.avatarUrl);
+  const avatarBase64 = await fetchImageAsBase64(avatarUrl);
   const stars = data.totalStars.toLocaleString();
   const contributions = data.totalContributions.toLocaleString();
   const activeDays = activeDayCount(data).toLocaleString();
@@ -305,11 +358,12 @@ async function generateGlassCardSvg(
 async function generatePersonaCardSvg(
   data: GitHubData,
   username: string,
-  themeName: PremiumThemeName
+  themeName: PremiumThemeName,
+  avatarUrl: string
 ): Promise<NextResponse> {
   const theme = getPremiumTheme(themeName);
   const c = theme.colors;
-  const avatarBase64 = await fetchImageAsBase64(data.avatarUrl);
+  const avatarBase64 = await fetchImageAsBase64(avatarUrl);
   const personaTitle = data.totalStars > 500
     ? 'Open Source Builder'
     : data.totalContributions > 1000
@@ -380,10 +434,14 @@ export async function GET(request: NextRequest) {
     const usernameParam = searchParams.get('username');
     const themeParam = searchParams.get('theme');
     const variantParam = searchParams.get('variant');
+    const avatarParam = searchParams.get('avatar');
     theme = themeParam || 'satan';
     const variant = VALID_VARIANTS.includes(variantParam as PremiumCardVariant)
       ? variantParam as PremiumCardVariant
       : 'classic';
+    const avatarMode = VALID_AVATARS.includes(avatarParam as PremiumCardAvatar)
+      ? avatarParam as PremiumCardAvatar
+      : 'github';
 
     // Basic validation
     if (!process.env.GITHUB_TOKEN?.trim()) {
@@ -441,15 +499,18 @@ export async function GET(request: NextRequest) {
       duration: Date.now() - startTime,
     });
 
+    const themeName = (theme as PremiumThemeName) || 'satan';
+    const avatarUrl = resolveAvatarUrl(data, username, themeName, request.nextUrl.origin, avatarMode);
+
     if (variant === 'glass') {
-      return await generateGlassCardSvg(data, username, (theme as PremiumThemeName) || 'satan');
+      return await generateGlassCardSvg(data, username, themeName, avatarUrl);
     }
 
     if (variant === 'persona') {
-      return await generatePersonaCardSvg(data, username, (theme as PremiumThemeName) || 'satan');
+      return await generatePersonaCardSvg(data, username, themeName, avatarUrl);
     }
 
-    return await generatePremiumCardSvg(data, username, (theme as PremiumThemeName) || 'satan');
+    return await generatePremiumCardSvg(data, username, themeName, avatarUrl);
 
   } catch (error) {
     console.error('Unexpected error:', error);

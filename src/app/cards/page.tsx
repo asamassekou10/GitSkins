@@ -16,6 +16,8 @@ type CardType = {
   height: number;
 };
 
+type AvatarMode = 'github' | 'gitskins' | 'persona';
+
 const CARD_TYPES: CardType[] = [
   {
     id: 'premium-card',
@@ -77,9 +79,10 @@ const CARD_TYPES: CardType[] = [
   },
 ];
 
-function buildCardUrl(origin: string, cardType: CardType, username: string, theme: string) {
+function buildCardUrl(origin: string, cardType: CardType, username: string, theme: string, avatarMode: AvatarMode) {
   const params = new URLSearchParams({ username: username || 'octocat', theme });
   if (cardType.variant) params.set('variant', cardType.variant);
+  if (cardType.path === '/api/premium-card') params.set('avatar', avatarMode);
   return `${origin}${cardType.path}?${params.toString()}`;
 }
 
@@ -88,11 +91,12 @@ export default function CardsPage() {
   const userIsPro = plan === 'pro';
   const [username, setUsername] = useState('octocat');
   const [theme, setTheme] = useState('github-dark');
+  const [avatarMode, setAvatarMode] = useState<AvatarMode>('github');
   const [cardType, setCardType] = useState<CardType>(CARD_TYPES[0]);
   const [copied, setCopied] = useState<'markdown' | 'html' | 'url' | null>(null);
 
   const origin = typeof window !== 'undefined' ? window.location.origin : 'https://gitskins.com';
-  const cardUrl = useMemo(() => buildCardUrl(origin, cardType, username, theme), [cardType, origin, theme, username]);
+  const cardUrl = useMemo(() => buildCardUrl(origin, cardType, username, theme, avatarMode), [avatarMode, cardType, origin, theme, username]);
   const publicUrl = cardUrl.replace(origin, 'https://gitskins.com');
   const markdown = `![GitSkins ${cardType.label}](${publicUrl})`;
   const html = `<img src="${publicUrl}" alt="GitSkins ${cardType.label}" width="${cardType.width}" />`;
@@ -210,6 +214,42 @@ export default function CardsPage() {
                   })}
                 </div>
               </div>
+
+              {cardType.path === '/api/premium-card' && (
+                <div>
+                  <label style={{ display: 'block', color: '#666', fontSize: 12, fontWeight: 750, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 10 }}>
+                    Avatar Source
+                  </label>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+                    {[
+                      { id: 'github' as const, label: 'GitHub', desc: 'Current profile photo' },
+                      { id: 'gitskins' as const, label: 'GitSkins', desc: 'Theme-matched character' },
+                      { id: 'persona' as const, label: 'Persona', desc: 'Developer archetype' },
+                    ].map((option) => (
+                      <button
+                        key={option.id}
+                        onClick={() => setAvatarMode(option.id)}
+                        style={{
+                          minHeight: 72,
+                          padding: '10px 9px',
+                          borderRadius: 12,
+                          border: `1px solid ${avatarMode === option.id ? 'rgba(34,197,94,0.45)' : '#1a1a1a'}`,
+                          background: avatarMode === option.id ? 'rgba(34,197,94,0.1)' : '#111',
+                          cursor: 'pointer',
+                          textAlign: 'left',
+                        }}
+                      >
+                        <div style={{ color: avatarMode === option.id ? '#fff' : '#aaa', fontSize: 13, fontWeight: 800, marginBottom: 4 }}>
+                          {option.label}
+                        </div>
+                        <div style={{ color: '#555', fontSize: 11, lineHeight: 1.35 }}>
+                          {option.desc}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
