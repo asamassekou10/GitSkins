@@ -7,7 +7,7 @@
  * Families: abstract | mascot | character | dicebear
  * Abstract styles: nebula | crystal | circuit | constellation | terminal
  * Character archetypes: terminal-mage | ai-alchemist | interface-architect | systems-ranger | pixel-adventurer | cloud-pilot | data-oracle | docs-sage | indie-builder
- * DiceBear styles: open-peeps | avataaars | lorelei | micah | adventurer | personas | notionists
+ * DiceBear styles: open-peeps | avataaars | lorelei | micah | adventurer | personas | notionists | bottts | bottts-neutral | big-smile | croodles | dylan | fun-emoji | pixel-art | toon-head
  * Export sizes: 400 | 800 | 1024
  * Legacy aliases: orbs→nebula, geo→crystal, pixel→circuit
  */
@@ -16,11 +16,19 @@ import { createAvatar } from '@dicebear/core';
 import {
   adventurer,
   avataaars,
+  bigSmile,
+  bottts,
+  botttsNeutral,
+  croodles,
+  dylan,
+  funEmoji,
   lorelei,
   micah,
   notionists,
   openPeeps,
   personas,
+  pixelArt,
+  toonHead,
 } from '@dicebear/collection';
 import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
@@ -53,7 +61,23 @@ const VALID_FAMILIES: AvatarFamily[] = ['abstract', 'mascot', 'character', 'dice
 const VALID_EXPRESSIONS: AvatarExpression[] = ['focused', 'happy', 'mysterious'];
 const VALID_BACKGROUNDS: AvatarBackground[] = ['gradient', 'solid', 'pattern'];
 const VALID_SIZES: AvatarExportSize[] = [400, 800, 1024];
-const VALID_DICEBEAR_STYLES: DiceBearStyle[] = ['open-peeps', 'avataaars', 'lorelei', 'micah', 'adventurer', 'personas', 'notionists'];
+const VALID_DICEBEAR_STYLES: DiceBearStyle[] = [
+  'open-peeps',
+  'avataaars',
+  'lorelei',
+  'micah',
+  'adventurer',
+  'personas',
+  'notionists',
+  'bottts',
+  'bottts-neutral',
+  'big-smile',
+  'croodles',
+  'dylan',
+  'fun-emoji',
+  'pixel-art',
+  'toon-head',
+];
 const VALID_FORMATS = ['svg', 'png'] as const;
 const VALID_CHARACTERS: AvatarCharacter[] = [
   'terminal-mage',
@@ -80,6 +104,14 @@ function getDiceBearCollection(style: DiceBearStyle) {
   if (style === 'adventurer') return adventurer;
   if (style === 'personas') return personas;
   if (style === 'notionists') return notionists;
+  if (style === 'bottts') return bottts;
+  if (style === 'bottts-neutral') return botttsNeutral;
+  if (style === 'big-smile') return bigSmile;
+  if (style === 'croodles') return croodles;
+  if (style === 'dylan') return dylan;
+  if (style === 'fun-emoji') return funEmoji;
+  if (style === 'pixel-art') return pixelArt;
+  if (style === 'toon-head') return toonHead;
   return openPeeps;
 }
 

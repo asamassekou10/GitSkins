@@ -25,6 +25,7 @@ export const primaryNavItems: NavItemWithHash[] = [
 /** Tools dropdown: product/tool pages. */
 export const toolsNavItems: NavItem[] = [
   { label: 'README Generator', href: '/readme-generator', keywords: 'readme' },
+  { label: 'Card Builder', href: '/cards', keywords: 'cards widgets readme markdown stats languages streak profile' },
   { label: 'Live Agent', href: '/readme-agent', keywords: 'live agent gemini' },
   { label: 'GitHub Wrapped', href: '/wrapped', keywords: 'wrapped year review' },
   { label: 'Repo Visualizer', href: '/visualize', keywords: 'visualize architecture diagram mermaid' },

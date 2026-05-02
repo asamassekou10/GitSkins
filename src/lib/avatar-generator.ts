@@ -81,7 +81,22 @@ export type AvatarExpression = 'focused' | 'happy' | 'mysterious';
 export type AvatarBackground = 'gradient' | 'solid' | 'pattern';
 export type AvatarExportSize = 400 | 800 | 1024;
 export type AvatarStyle = 'nebula' | 'crystal' | 'circuit' | 'constellation' | 'terminal';
-export type DiceBearStyle = 'open-peeps' | 'avataaars' | 'lorelei' | 'micah' | 'adventurer' | 'personas' | 'notionists';
+export type DiceBearStyle =
+  | 'open-peeps'
+  | 'avataaars'
+  | 'lorelei'
+  | 'micah'
+  | 'adventurer'
+  | 'personas'
+  | 'notionists'
+  | 'bottts'
+  | 'bottts-neutral'
+  | 'big-smile'
+  | 'croodles'
+  | 'dylan'
+  | 'fun-emoji'
+  | 'pixel-art'
+  | 'toon-head';
 export type AvatarCharacter =
   | 'terminal-mage'
   | 'ai-alchemist'

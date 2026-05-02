@@ -39,6 +39,14 @@ const DICEBEAR_STYLES: { id: DiceBearStyle; label: string; desc: string }[] = [
   { id: 'adventurer', label: 'Adventurer', desc: 'Expressive playful character heads' },
   { id: 'personas', label: 'Personas', desc: 'Professional persona-style avatars' },
   { id: 'notionists', label: 'Notionists', desc: 'Notion-inspired human characters' },
+  { id: 'bottts', label: 'Bottts', desc: 'Robotic mascots for automation-heavy profiles' },
+  { id: 'bottts-neutral', label: 'Bottts Neutral', desc: 'Cleaner bot portraits with calmer expressions' },
+  { id: 'big-smile', label: 'Big Smile', desc: 'Bold friendly faces for social profiles' },
+  { id: 'croodles', label: 'Croodles', desc: 'Loose hand-drawn characters with playful motion' },
+  { id: 'dylan', label: 'Dylan', desc: 'Editorial portrait style with sharp personality' },
+  { id: 'fun-emoji', label: 'Fun Emoji', desc: 'Expressive emoji-like character heads' },
+  { id: 'pixel-art', label: 'Pixel Art', desc: 'Retro game-style avatars for builders and gamers' },
+  { id: 'toon-head', label: 'Toon Head', desc: 'Cartoon portrait silhouettes with strong shapes' },
 ];
 
 const CHARACTERS: { id: AvatarCharacter; label: string; desc: string }[] = [
