@@ -1,10 +1,12 @@
 /**
- * GET /api/avatar?username=xxx&theme=halloween&style=nebula
+ * GET /api/avatar?username=xxx&theme=halloween&style=nebula&family=abstract
  *
  * Generates a 400×400 themed avatar PNG.
  * Deterministic: same username+theme+style always produces the same image.
  *
- * Styles: nebula | crystal | circuit | constellation | terminal
+ * Families: abstract | mascot
+ * Abstract styles: nebula | crystal | circuit | constellation | terminal
+ * Export sizes: 400 | 800 | 1024
  * Legacy aliases: orbs→nebula, geo→crystal, pixel→circuit
  */
 
@@ -17,9 +19,14 @@ import {
   extractBg,
   hexRgba,
   hexLighten,
+  hexDarken,
   getBestAccentColor,
   isRare,
   AVATAR_SIZE as S,
+  type AvatarBackground,
+  type AvatarExpression,
+  type AvatarExportSize,
+  type AvatarFamily,
   type AvatarStyle,
 } from '@/lib/avatar-generator';
 
@@ -27,12 +34,177 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 const VALID_STYLES: AvatarStyle[] = ['nebula', 'crystal', 'circuit', 'constellation', 'terminal'];
+const VALID_FAMILIES: AvatarFamily[] = ['abstract', 'mascot'];
+const VALID_EXPRESSIONS: AvatarExpression[] = ['focused', 'happy', 'mysterious'];
+const VALID_BACKGROUNDS: AvatarBackground[] = ['gradient', 'solid', 'pattern'];
+const VALID_SIZES: AvatarExportSize[] = [400, 800, 1024];
 
 const STYLE_ALIASES: Record<string, AvatarStyle> = {
   orbs: 'nebula',
   geo: 'crystal',
   pixel: 'circuit',
 };
+
+type AvatarRenderOptions = {
+  username: string;
+  themeId: string;
+  expression: AvatarExpression;
+  background: AvatarBackground;
+};
+
+function ScaledAvatar({ children, size }: { children: JSX.Element; size: AvatarExportSize }) {
+  if (size === S) return children;
+
+  return (
+    <div
+      style={{
+        width: size,
+        height: size,
+        display: 'flex',
+        overflow: 'hidden',
+        position: 'relative',
+      }}
+    >
+      <div
+        style={{
+          width: S,
+          height: S,
+          transform: `scale(${size / S})`,
+          transformOrigin: '0 0',
+        }}
+      >
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function safeTheme(themeId: string) {
+  try {
+    return getPremiumTheme(themeId);
+  } catch {
+    return getPremiumTheme('github-dark');
+  }
+}
+
+function initials(username: string): string {
+  return username
+    .split(/[-_\s.]+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2) || '?';
+}
+
+function themeBackdrop(themeId: string, background: AvatarBackground) {
+  const theme = safeTheme(themeId);
+  const bg = extractBg(theme.colors.bg);
+  const accent = theme.colors.accent;
+  const secondary = theme.graphColors[theme.graphColors.length - 2] ?? theme.colors.primary;
+
+  if (background === 'solid') return bg;
+  if (background === 'pattern') {
+    return `
+      radial-gradient(circle at 18% 18%, ${hexRgba(accent, 0.28)} 0 2px, transparent 2px 42px),
+      radial-gradient(circle at 78% 72%, ${hexRgba(secondary, 0.22)} 0 2px, transparent 2px 38px),
+      linear-gradient(135deg, ${hexDarken(bg, 0.05)} 0%, ${hexDarken(bg, 0.45)} 100%)
+    `;
+  }
+
+  return `
+    radial-gradient(circle at 22% 18%, ${hexRgba(accent, 0.55)} 0%, transparent 34%),
+    radial-gradient(circle at 78% 76%, ${hexRgba(secondary, 0.42)} 0%, transparent 34%),
+    linear-gradient(135deg, ${bg} 0%, ${hexDarken(bg, 0.42)} 100%)
+  `;
+}
+
+function getMascotPreset(themeId: string) {
+  const id = themeId.toLowerCase();
+
+  if (id.includes('dracula') || id.includes('satan')) {
+    return {
+      archetype: 'gothic',
+      skin: '#f7d9df',
+      hair: '#17121f',
+      outfit: '#25111d',
+      accessory: 'cape',
+      motif: 'moon',
+      eye: '#ff4d6d',
+    };
+  }
+
+  if (id.includes('neon') || id.includes('retro') || id.includes('sunset')) {
+    return {
+      archetype: 'cyber',
+      skin: '#ffd7bd',
+      hair: '#15111f',
+      outfit: '#17172f',
+      accessory: 'visor',
+      motif: 'grid',
+      eye: '#22d3ee',
+    };
+  }
+
+  if (id.includes('ocean') || id.includes('winter') || id.includes('aurora')) {
+    return {
+      archetype: 'explorer',
+      skin: '#d8f3ff',
+      hair: '#18324a',
+      outfit: '#0c4a6e',
+      accessory: 'helmet',
+      motif: 'bubbles',
+      eye: '#38bdf8',
+    };
+  }
+
+  if (id.includes('halloween') || id.includes('autumn') || id.includes('summer')) {
+    return {
+      archetype: 'pumpkin',
+      skin: '#fb923c',
+      hair: '#3b1d0d',
+      outfit: '#2a1510',
+      accessory: 'hood',
+      motif: 'sparks',
+      eye: '#fef3c7',
+    };
+  }
+
+  if (id.includes('zen') || id.includes('spring') || id.includes('pastel')) {
+    return {
+      archetype: 'calm',
+      skin: '#ffe4e6',
+      hair: '#334155',
+      outfit: '#355e3b',
+      accessory: 'leaves',
+      motif: 'petals',
+      eye: '#4ade80',
+    };
+  }
+
+  if (id.includes('matrix') || id.includes('terminal') || id.includes('github') || id.includes('minimal') || id.includes('midnight')) {
+    return {
+      archetype: 'terminal',
+      skin: '#d1fae5',
+      hair: '#07130b',
+      outfit: '#0b1f12',
+      accessory: 'hood',
+      motif: 'code',
+      eye: '#22c55e',
+    };
+  }
+
+  return {
+    archetype: 'builder',
+    skin: '#ffd7bd',
+    hair: '#1f2937',
+    outfit: '#102016',
+    accessory: 'badge',
+    motif: 'stars',
+    eye: '#22c55e',
+  };
+}
 
 // ─── Nebula (upgraded aurora/orbs style) ─────────────────────────────────────
 
@@ -545,6 +717,386 @@ function TerminalAvatar({ username, themeId }: { username: string; themeId: stri
   );
 }
 
+// ─── Mascot (original character portrait style) ──────────────────────────────
+
+function BackgroundMotif({
+  themeId,
+  motif,
+  accent,
+  primary,
+}: {
+  themeId: string;
+  motif: string;
+  accent: string;
+  primary: string;
+}) {
+  const seed = hashStr(themeId + motif + 'mascot-bg');
+  const rng = seededRng(seed);
+  const particles = Array.from({ length: 14 }, (_, i) => ({
+    x: 22 + Math.round(rng() * 356),
+    y: 22 + Math.round(rng() * 356),
+    size: 4 + Math.round(rng() * 8),
+    opacity: 0.12 + rng() * 0.22,
+    rotate: Math.round(rng() * 45),
+    key: i,
+  }));
+
+  if (motif === 'grid') {
+    return (
+      <>
+        {Array.from({ length: 9 }, (_, i) => (
+          <div
+            key={`g-v-${i}`}
+            style={{
+              position: 'absolute',
+              left: 40 + i * 40,
+              top: 0,
+              width: 1,
+              height: S,
+              background: hexRgba(accent, 0.12),
+            }}
+          />
+        ))}
+        {Array.from({ length: 9 }, (_, i) => (
+          <div
+            key={`g-h-${i}`}
+            style={{
+              position: 'absolute',
+              left: 0,
+              top: 40 + i * 40,
+              width: S,
+              height: 1,
+              background: hexRgba(primary, 0.1),
+            }}
+          />
+        ))}
+      </>
+    );
+  }
+
+  if (motif === 'moon') {
+    return (
+      <>
+        <div style={{ position: 'absolute', right: 44, top: 42, width: 58, height: 58, borderRadius: '50%', background: hexRgba(primary, 0.18) }} />
+        <div style={{ position: 'absolute', right: 28, top: 31, width: 58, height: 58, borderRadius: '50%', background: 'rgba(0,0,0,0.22)' }} />
+        {particles.slice(0, 8).map((dot) => (
+          <div key={dot.key} style={{ position: 'absolute', left: dot.x, top: dot.y, width: 2, height: 2, borderRadius: '50%', background: primary, opacity: dot.opacity }} />
+        ))}
+      </>
+    );
+  }
+
+  if (motif === 'code') {
+    return (
+      <>
+        {Array.from({ length: 16 }, (_, i) => (
+          <div
+            key={`code-${i}`}
+            style={{
+              position: 'absolute',
+              left: 24 + (i % 4) * 92,
+              top: 28 + Math.floor(i / 4) * 62,
+              fontFamily: 'monospace',
+              fontSize: 18,
+              fontWeight: 800,
+              color: i % 3 === 0 ? accent : primary,
+              opacity: 0.12,
+            }}
+          >
+            {i % 2 === 0 ? '</>' : '{}'}
+          </div>
+        ))}
+      </>
+    );
+  }
+
+  return (
+    <>
+      {particles.map((dot) => (
+        <div
+          key={dot.key}
+          style={{
+            position: 'absolute',
+            left: dot.x,
+            top: dot.y,
+            width: dot.size,
+            height: dot.size,
+            borderRadius: motif === 'sparks' ? 2 : '50%',
+            background: dot.key % 2 === 0 ? accent : primary,
+            opacity: dot.opacity,
+            transform: `rotate(${dot.rotate}deg)`,
+          }}
+        />
+      ))}
+    </>
+  );
+}
+
+function MascotMouth({ expression, color }: { expression: AvatarExpression; color: string }) {
+  if (expression === 'happy') {
+    return (
+      <div
+        style={{
+          position: 'absolute',
+          left: 173,
+          top: 235,
+          width: 54,
+          height: 24,
+          borderBottom: `5px solid ${color}`,
+          borderRadius: '0 0 54px 54px',
+        }}
+      />
+    );
+  }
+
+  if (expression === 'mysterious') {
+    return (
+      <div
+        style={{
+          position: 'absolute',
+          left: 178,
+          top: 240,
+          width: 44,
+          height: 4,
+          borderRadius: 999,
+          background: hexRgba(color, 0.75),
+        }}
+      />
+    );
+  }
+
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        left: 184,
+        top: 240,
+        width: 32,
+        height: 4,
+        borderRadius: 999,
+        background: hexRgba(color, 0.75),
+      }}
+    />
+  );
+}
+
+function MascotAvatar({ username, themeId, expression, background }: AvatarRenderOptions) {
+  const theme = safeTheme(themeId);
+  const seed = hashStr(username + themeId + expression + 'mascot');
+  const rng = seededRng(seed);
+  const rare = isRare(username, themeId);
+  const preset = getMascotPreset(themeId);
+  const accent = theme.colors.accent;
+  const primary = theme.colors.primary;
+  const bg = themeBackdrop(themeId, background);
+  const mark = initials(username);
+  const faceColor = preset.archetype === 'pumpkin' ? '#fb923c' : preset.skin;
+  const faceShadow = preset.archetype === 'pumpkin' ? '#7c2d12' : hexDarken(faceColor, 0.18);
+  const eyeColor = expression === 'mysterious' ? accent : preset.eye;
+  const tilt = Math.round((rng() - 0.5) * 8);
+
+  return (
+    <div
+      style={{
+        width: S,
+        height: S,
+        background: bg,
+        position: 'relative',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        overflow: 'hidden',
+      }}
+    >
+      <BackgroundMotif themeId={themeId} motif={preset.motif} accent={accent} primary={primary} />
+
+      <div
+        style={{
+          position: 'absolute',
+          left: 42,
+          bottom: -2,
+          width: 316,
+          height: 150,
+          borderRadius: '120px 120px 42px 42px',
+          background: `linear-gradient(135deg, ${preset.outfit}, ${hexDarken(preset.outfit, 0.35)})`,
+          border: `2px solid ${hexRgba(accent, 0.35)}`,
+          boxShadow: `0 -8px 34px ${hexRgba(accent, 0.14)}`,
+        }}
+      />
+
+      {preset.accessory === 'cape' && (
+        <>
+          <div style={{ position: 'absolute', left: 72, top: 179, width: 88, height: 176, background: '#3b0b1b', borderRadius: '50px 10px 20px 50px', transform: 'rotate(16deg)' }} />
+          <div style={{ position: 'absolute', right: 72, top: 179, width: 88, height: 176, background: '#3b0b1b', borderRadius: '10px 50px 50px 20px', transform: 'rotate(-16deg)' }} />
+        </>
+      )}
+
+      {preset.accessory === 'hood' && (
+        <div
+          style={{
+            position: 'absolute',
+            left: 96,
+            top: 82,
+            width: 208,
+            height: 232,
+            borderRadius: '105px 105px 72px 72px',
+            background: `linear-gradient(180deg, ${hexLighten(preset.outfit, 0.12)}, ${preset.outfit})`,
+            boxShadow: `0 0 34px ${hexRgba(accent, 0.13)}`,
+          }}
+        />
+      )}
+
+      {preset.accessory === 'helmet' && (
+        <div
+          style={{
+            position: 'absolute',
+            left: 72,
+            top: 68,
+            width: 256,
+            height: 256,
+            borderRadius: '50%',
+            border: `18px solid ${hexRgba(primary, 0.36)}`,
+            boxShadow: `inset 0 0 24px ${hexRgba(accent, 0.16)}, 0 0 32px ${hexRgba(primary, 0.15)}`,
+          }}
+        />
+      )}
+
+      <div
+        style={{
+          position: 'absolute',
+          left: 118,
+          top: 92,
+          width: 164,
+          height: 176,
+          borderRadius: preset.archetype === 'pumpkin' ? '44% 44% 50% 50%' : '48% 48% 44% 44%',
+          background: `radial-gradient(circle at 32% 25%, ${hexLighten(faceColor, 0.32)}, ${faceColor} 48%, ${faceShadow} 100%)`,
+          border: `2px solid ${hexRgba(accent, 0.2)}`,
+          boxShadow: `0 16px 36px rgba(0,0,0,0.28), 0 0 28px ${hexRgba(accent, 0.16)}`,
+          transform: `rotate(${tilt}deg)`,
+          overflow: 'hidden',
+        }}
+      >
+        {preset.archetype === 'pumpkin' && (
+          <>
+            <div style={{ position: 'absolute', left: 50, top: -8, width: 9, height: 184, background: hexRgba('#7c2d12', 0.16), borderRadius: 999 }} />
+            <div style={{ position: 'absolute', right: 50, top: -8, width: 9, height: 184, background: hexRgba('#7c2d12', 0.16), borderRadius: 999 }} />
+          </>
+        )}
+      </div>
+
+      {preset.accessory !== 'hood' && preset.accessory !== 'helmet' && preset.archetype !== 'pumpkin' && (
+        <div
+          style={{
+            position: 'absolute',
+            left: 112,
+            top: 78,
+            width: 176,
+            height: 84,
+            borderRadius: '90px 90px 26px 26px',
+            background: `linear-gradient(135deg, ${preset.hair}, ${hexDarken(preset.hair, 0.28)})`,
+            transform: `rotate(${tilt}deg)`,
+          }}
+        />
+      )}
+
+      {preset.accessory === 'visor' && (
+        <div
+          style={{
+            position: 'absolute',
+            left: 124,
+            top: 169,
+            width: 152,
+            height: 42,
+            borderRadius: 999,
+            background: `linear-gradient(90deg, ${hexRgba(accent, 0.85)}, ${hexRgba(primary, 0.78)})`,
+            border: `2px solid ${hexRgba('#ffffff', 0.32)}`,
+            boxShadow: `0 0 24px ${hexRgba(accent, 0.42)}`,
+          }}
+        />
+      )}
+
+      {preset.accessory !== 'visor' && (
+        <>
+          <div
+            style={{
+              position: 'absolute',
+              left: 149,
+              top: expression === 'mysterious' ? 190 : 183,
+              width: expression === 'mysterious' ? 38 : 18,
+              height: expression === 'mysterious' ? 5 : 18,
+              borderRadius: 999,
+              background: eyeColor,
+              boxShadow: `0 0 12px ${hexRgba(eyeColor, 0.45)}`,
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              right: 149,
+              top: expression === 'mysterious' ? 190 : 183,
+              width: expression === 'mysterious' ? 38 : 18,
+              height: expression === 'mysterious' ? 5 : 18,
+              borderRadius: 999,
+              background: eyeColor,
+              boxShadow: `0 0 12px ${hexRgba(eyeColor, 0.45)}`,
+            }}
+          />
+        </>
+      )}
+
+      <MascotMouth expression={expression} color={preset.archetype === 'pumpkin' ? '#431407' : '#1f2937'} />
+
+      <div
+        style={{
+          position: 'absolute',
+          left: 158,
+          bottom: 74,
+          width: 84,
+          height: 44,
+          borderRadius: 12,
+          background: `linear-gradient(135deg, ${hexRgba(primary, 0.96)}, ${hexRgba(accent, 0.86)})`,
+          border: `1px solid ${hexRgba('#ffffff', 0.28)}`,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: '#050505',
+          fontFamily: 'system-ui, sans-serif',
+          fontSize: mark.length > 1 ? 24 : 28,
+          fontWeight: 900,
+          letterSpacing: 0,
+          boxShadow: `0 0 20px ${hexRgba(accent, 0.22)}`,
+        }}
+      >
+        {mark}
+      </div>
+
+      {rare && (
+        <div
+          style={{
+            position: 'absolute',
+            left: 7,
+            top: 7,
+            width: S - 14,
+            height: S - 14,
+            borderRadius: '50%',
+            border: `2px solid ${hexRgba(accent, 0.55)}`,
+            boxShadow: `inset 0 0 28px ${hexRgba(accent, 0.12)}, 0 0 26px ${hexRgba(accent, 0.18)}`,
+          }}
+        />
+      )}
+
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'radial-gradient(circle at 50% 30%, transparent 38%, rgba(0,0,0,0.26) 100%)',
+          pointerEvents: 'none',
+        }}
+      />
+    </div>
+  );
+}
+
 // ─── Route handler ────────────────────────────────────────────────────────────
 
 export async function GET(req: NextRequest) {
@@ -553,13 +1105,23 @@ export async function GET(req: NextRequest) {
   const rawUsername = (searchParams.get('username') ?? 'user').trim().slice(0, 39) || 'user';
   const rawTheme = searchParams.get('theme') ?? 'github-dark';
   const rawStyle = searchParams.get('style') ?? 'nebula';
+  const rawFamily = searchParams.get('family') ?? 'abstract';
+  const rawExpression = searchParams.get('expression') ?? 'focused';
+  const rawBackground = searchParams.get('bg') ?? 'gradient';
+  const rawSize = Number(searchParams.get('size') ?? 400);
 
   // Resolve legacy aliases
   const resolvedStyle = (STYLE_ALIASES[rawStyle] ?? rawStyle) as AvatarStyle;
   const style: AvatarStyle = VALID_STYLES.includes(resolvedStyle) ? resolvedStyle : 'nebula';
+  const family = VALID_FAMILIES.includes(rawFamily as AvatarFamily) ? rawFamily as AvatarFamily : 'abstract';
+  const expression = VALID_EXPRESSIONS.includes(rawExpression as AvatarExpression) ? rawExpression as AvatarExpression : 'focused';
+  const background = VALID_BACKGROUNDS.includes(rawBackground as AvatarBackground) ? rawBackground as AvatarBackground : 'gradient';
+  const size = VALID_SIZES.includes(rawSize as AvatarExportSize) ? rawSize as AvatarExportSize : 400;
 
   let jsx: JSX.Element;
-  if (style === 'crystal') {
+  if (family === 'mascot') {
+    jsx = <MascotAvatar username={rawUsername} themeId={rawTheme} expression={expression} background={background} />;
+  } else if (style === 'crystal') {
     jsx = <CrystalAvatar username={rawUsername} themeId={rawTheme} />;
   } else if (style === 'circuit') {
     jsx = <CircuitAvatar username={rawUsername} themeId={rawTheme} />;
@@ -571,9 +1133,9 @@ export async function GET(req: NextRequest) {
     jsx = <NebulaAvatar username={rawUsername} themeId={rawTheme} />;
   }
 
-  return new ImageResponse(jsx, {
-    width: S,
-    height: S,
+  return new ImageResponse(<ScaledAvatar size={size}>{jsx}</ScaledAvatar>, {
+    width: size,
+    height: size,
     headers: {
       'Content-Type': 'image/png',
       'Cache-Control': 'public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800',

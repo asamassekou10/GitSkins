@@ -4,7 +4,40 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { landingThemes } from '@/lib/landing-themes';
-import type { AvatarStyle } from '@/lib/avatar-generator';
+import { isFreeTierTheme } from '@/config/subscription';
+import { useUserPlan } from '@/hooks/useUserPlan';
+import type { AvatarBackground, AvatarExportSize, AvatarExpression, AvatarFamily, AvatarStyle } from '@/lib/avatar-generator';
+
+const FAMILIES: { id: AvatarFamily; label: string; desc: string }[] = [
+  {
+    id: 'mascot',
+    label: 'Mascot',
+    desc: 'Original character portraits matched to each theme',
+  },
+  {
+    id: 'abstract',
+    label: 'Abstract',
+    desc: 'Deterministic visual systems built from your username',
+  },
+];
+
+const EXPRESSIONS: { id: AvatarExpression; label: string }[] = [
+  { id: 'focused', label: 'Focused' },
+  { id: 'happy', label: 'Happy' },
+  { id: 'mysterious', label: 'Mysterious' },
+];
+
+const BACKGROUNDS: { id: AvatarBackground; label: string }[] = [
+  { id: 'gradient', label: 'Gradient' },
+  { id: 'pattern', label: 'Pattern' },
+  { id: 'solid', label: 'Solid' },
+];
+
+const EXPORT_SIZES: { id: AvatarExportSize; label: string; pro: boolean }[] = [
+  { id: 400, label: '400px', pro: false },
+  { id: 800, label: '800px', pro: true },
+  { id: 1024, label: '1024px', pro: true },
+];
 
 const STYLES: { id: AvatarStyle; label: string; desc: string; icon: React.ReactNode }[] = [
   {
@@ -80,17 +113,42 @@ const STYLES: { id: AvatarStyle; label: string; desc: string; icon: React.ReactN
   },
 ];
 
-function buildAvatarUrl(base: string, username: string, theme: string, style: AvatarStyle) {
-  return `${base}/api/avatar?username=${encodeURIComponent(username)}&theme=${encodeURIComponent(theme)}&style=${style}`;
+function buildAvatarUrl(
+  base: string,
+  username: string,
+  theme: string,
+  family: AvatarFamily,
+  style: AvatarStyle,
+  expression: AvatarExpression,
+  background: AvatarBackground,
+  size: AvatarExportSize = 400
+) {
+  const params = new URLSearchParams({
+    username,
+    theme,
+    family,
+    style,
+    expression,
+    bg: background,
+    size: String(size),
+  });
+
+  return `${base}/api/avatar?${params.toString()}`;
 }
 
 export default function AvatarPage() {
   const { data: session } = useSession();
+  const { plan, loading: planLoading } = useUserPlan();
   const user = session?.user as { username?: string; name?: string } | undefined;
+  const userIsPro = plan === 'pro';
 
   const [username, setUsername] = useState('');
   const [theme, setTheme] = useState('github-dark');
+  const [family, setFamily] = useState<AvatarFamily>('mascot');
   const [style, setStyle] = useState<AvatarStyle>('nebula');
+  const [expression, setExpression] = useState<AvatarExpression>('focused');
+  const [background, setBackground] = useState<AvatarBackground>('gradient');
+  const [exportSize, setExportSize] = useState<AvatarExportSize>(400);
   const [copied, setCopied] = useState<'url' | 'md' | null>(null);
   const [downloading, setDownloading] = useState(false);
   const [previewKey, setPreviewKey] = useState(0);
@@ -99,8 +157,16 @@ export default function AvatarPage() {
     if (user?.username && !username) setUsername(user.username);
   }, [user?.username]);
 
+  useEffect(() => {
+    if (planLoading || userIsPro) return;
+    if (family === 'mascot') setFamily('abstract');
+    if (!isFreeTierTheme(theme)) setTheme('github-dark');
+    if (exportSize !== 400) setExportSize(400);
+  }, [exportSize, family, planLoading, theme, userIsPro]);
+
   const base = typeof window !== 'undefined' ? window.location.origin : 'https://gitskins.com';
-  const avatarUrl = buildAvatarUrl(base, username || 'octocat', theme, style);
+  const avatarUrl = buildAvatarUrl(base, username || 'octocat', theme, family, style, expression, background);
+  const exportUrl = buildAvatarUrl(base, username || 'octocat', theme, family, style, expression, background, exportSize);
   const markdownCode = `![GitSkins Avatar](${avatarUrl})`;
 
   function handleApply() {
@@ -116,12 +182,12 @@ export default function AvatarPage() {
   async function downloadPng() {
     setDownloading(true);
     try {
-      const res = await fetch(avatarUrl);
+      const res = await fetch(exportUrl);
       const blob = await res.blob();
       const objectUrl = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = objectUrl;
-      a.download = `gitskins-avatar-${username || 'user'}-${theme}-${style}.png`;
+      a.download = `gitskins-avatar-${username || 'user'}-${theme}-${family}-${exportSize}.png`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -134,6 +200,10 @@ export default function AvatarPage() {
   }
 
   const selectedTheme = landingThemes.find((t) => t.id === theme);
+
+  function goToPricing() {
+    window.location.href = '/pricing';
+  }
 
   return (
     <div style={{ minHeight: '100vh', background: '#050505', color: '#fafafa' }}>
@@ -150,13 +220,13 @@ export default function AvatarPage() {
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="4" />
             </svg>
-            Free for everyone
+            Abstract avatars free · Mascots for Pro
           </div>
           <h1 style={{ fontSize: 'clamp(32px, 5vw, 52px)', fontWeight: 800, letterSpacing: '-0.03em', marginBottom: '16px', background: 'linear-gradient(135deg, #fff 0%, #22c55e 60%, #4ade80 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-            Themed Avatars
+            Theme-Matched Avatar Builder
           </h1>
           <p style={{ color: '#888', fontSize: '17px', maxWidth: '520px', margin: '0 auto', lineHeight: 1.6 }}>
-            Generate a unique profile picture that matches your GitSkins theme. Every username produces a different, deterministic design.
+            Generate an original profile picture that matches your GitSkins theme. Build a mascot character or deterministic abstract mark from your username.
           </p>
         </motion.div>
 
@@ -194,11 +264,111 @@ export default function AvatarPage() {
               </div>
             </div>
 
+            {/* Family picker */}
+            <div style={{ background: '#0d0d0d', border: '1px solid #1a1a1a', borderRadius: '16px', padding: '20px' }}>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#666', textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: '12px' }}>
+                Avatar Family
+              </label>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                {FAMILIES.map((f) => (
+                  <motion.button
+                    key={f.id}
+                    onClick={() => {
+                      if (f.id === 'mascot' && !userIsPro) {
+                        goToPricing();
+                        return;
+                      }
+                      setFamily(f.id);
+                    }}
+                    whileHover={{ y: -2 }}
+                    whileTap={{ scale: 0.98 }}
+                    transition={{ type: 'spring', stiffness: 420, damping: 28 }}
+                    style={{
+                      minHeight: 96,
+                      padding: '14px',
+                      background: family === f.id ? 'rgba(34,197,94,0.1)' : '#111',
+                      border: `1px solid ${family === f.id ? 'rgba(34,197,94,0.4)' : '#1a1a1a'}`,
+                      borderRadius: '12px',
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                      opacity: f.id === 'mascot' && !userIsPro ? 0.72 : 1,
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center', fontSize: '14px', fontWeight: 700, color: family === f.id ? '#fff' : '#aaa', marginBottom: '6px' }}>
+                      <span>{f.label}</span>
+                      {f.id === 'mascot' && !userIsPro && (
+                        <span style={{ color: '#facc15', fontSize: 10, fontWeight: 800, letterSpacing: 0.4 }}>PRO</span>
+                      )}
+                    </div>
+                    <div style={{ fontSize: '12px', color: '#555', lineHeight: 1.45 }}>{f.desc}</div>
+                  </motion.button>
+                ))}
+              </div>
+            </div>
+
+            {/* Character controls */}
+            {family === 'mascot' && (
+              <div style={{ background: '#0d0d0d', border: '1px solid #1a1a1a', borderRadius: '16px', padding: '20px' }}>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#666', textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: '12px' }}>
+                  Character Mood
+                </label>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
+                  {EXPRESSIONS.map((mood) => (
+                    <button
+                      key={mood.id}
+                      onClick={() => setExpression(mood.id)}
+                      style={{
+                        padding: '8px 11px',
+                        borderRadius: 999,
+                        border: `1px solid ${expression === mood.id ? 'rgba(34,197,94,0.45)' : '#1a1a1a'}`,
+                        background: expression === mood.id ? 'rgba(34,197,94,0.1)' : '#111',
+                        color: expression === mood.id ? '#22c55e' : '#777',
+                        fontSize: 13,
+                        fontWeight: 650,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {mood.label}
+                    </button>
+                  ))}
+                </div>
+
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#666', textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: '12px' }}>
+                  Background
+                </label>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                  {BACKGROUNDS.map((bg) => (
+                    <button
+                      key={bg.id}
+                      onClick={() => setBackground(bg.id)}
+                      style={{
+                        padding: '8px 11px',
+                        borderRadius: 999,
+                        border: `1px solid ${background === bg.id ? 'rgba(34,197,94,0.45)' : '#1a1a1a'}`,
+                        background: background === bg.id ? 'rgba(34,197,94,0.1)' : '#111',
+                        color: background === bg.id ? '#22c55e' : '#777',
+                        fontSize: 13,
+                        fontWeight: 650,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {bg.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Style picker */}
             <div style={{ background: '#0d0d0d', border: '1px solid #1a1a1a', borderRadius: '16px', padding: '20px' }}>
               <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#666', textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: '12px' }}>
-                Style
+                {family === 'mascot' ? 'Abstract Style Fallback' : 'Style'}
               </label>
+              {family === 'mascot' && (
+                <p style={{ margin: '0 0 12px', color: '#555', fontSize: 12, lineHeight: 1.5 }}>
+                  Mascot avatars use the selected theme and mood. Pick an abstract style too so your copied URL can be switched back later.
+                </p>
+              )}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {STYLES.map((s) => (
                   <motion.button
@@ -243,10 +413,16 @@ export default function AvatarPage() {
                 {landingThemes.map((t) => (
                   <motion.button
                     key={t.id}
-                    onClick={() => setTheme(t.id)}
+                    onClick={() => {
+                      if (!userIsPro && !isFreeTierTheme(t.id)) {
+                        goToPricing();
+                        return;
+                      }
+                      setTheme(t.id);
+                    }}
                     whileHover={{ scale: 1.15 }}
                     whileTap={{ scale: 0.9 }}
-                    title={t.name}
+                    title={!userIsPro && !isFreeTierTheme(t.id) ? `${t.name} requires Pro` : t.name}
                     style={{
                       width: 28,
                       height: 28,
@@ -257,6 +433,7 @@ export default function AvatarPage() {
                       outline: theme === t.id ? `2px solid ${t.color}` : 'none',
                       outlineOffset: '2px',
                       boxShadow: theme === t.id ? `0 0 10px ${t.color}60` : 'none',
+                      opacity: !userIsPro && !isFreeTierTheme(t.id) ? 0.35 : 1,
                     }}
                   />
                 ))}
@@ -276,7 +453,7 @@ export default function AvatarPage() {
               <div style={{ position: 'relative' }}>
                 <AnimatePresence mode="wait">
                   <motion.div
-                    key={`${previewKey}-${username}-${theme}-${style}`}
+                    key={`${previewKey}-${username}-${theme}-${family}-${style}-${expression}-${background}`}
                     initial={{ opacity: 0, scale: 0.92 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.96 }}
@@ -311,13 +488,49 @@ export default function AvatarPage() {
               </div>
 
               <p style={{ fontSize: '13px', color: '#555', textAlign: 'center', margin: 0 }}>
-                Each username produces a unique design. Try different usernames to explore.
+                Each username produces a unique design. Mascots are original theme archetypes, not copied characters.
               </p>
             </div>
 
             {/* Actions */}
             <div style={{ background: '#0d0d0d', border: '1px solid #1a1a1a', borderRadius: '16px', padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <div style={{ fontSize: '12px', fontWeight: 600, color: '#666', textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: '4px' }}>Export & Share</div>
+
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
+                  <span style={{ fontSize: 12, fontWeight: 650, color: '#666', textTransform: 'uppercase', letterSpacing: 0.5 }}>PNG Size</span>
+                  {!userIsPro && <span style={{ color: '#777', fontSize: 11 }}>High-res is Pro</span>}
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+                  {EXPORT_SIZES.map((size) => {
+                    const locked = size.pro && !userIsPro;
+                    return (
+                      <button
+                        key={size.id}
+                        onClick={() => {
+                          if (locked) {
+                            goToPricing();
+                            return;
+                          }
+                          setExportSize(size.id);
+                        }}
+                        style={{
+                          padding: '10px 8px',
+                          borderRadius: 10,
+                          border: `1px solid ${exportSize === size.id ? 'rgba(34,197,94,0.45)' : '#1a1a1a'}`,
+                          background: exportSize === size.id ? 'rgba(34,197,94,0.1)' : '#111',
+                          color: locked ? '#555' : exportSize === size.id ? '#22c55e' : '#888',
+                          fontSize: 13,
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        {size.label}{locked ? ' · Pro' : ''}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
 
               {/* Download */}
               <motion.button

@@ -67,6 +67,19 @@ export function isRare(username: string, themeId: string): boolean {
   return hashStr(username + themeId + 'rare') % 20 === 0;
 }
 
+/** Lerp a hex colour toward black by factor (0=same, 1=black) */
+export function hexDarken(hex: string, factor: number): string {
+  const h = hex.replace('#', '');
+  const nr = Math.round(parseInt(h.slice(0, 2), 16) * (1 - factor));
+  const ng = Math.round(parseInt(h.slice(2, 4), 16) * (1 - factor));
+  const nb = Math.round(parseInt(h.slice(4, 6), 16) * (1 - factor));
+  return `#${nr.toString(16).padStart(2, '0')}${ng.toString(16).padStart(2, '0')}${nb.toString(16).padStart(2, '0')}`;
+}
+
+export type AvatarFamily = 'abstract' | 'mascot';
+export type AvatarExpression = 'focused' | 'happy' | 'mysterious';
+export type AvatarBackground = 'gradient' | 'solid' | 'pattern';
+export type AvatarExportSize = 400 | 800 | 1024;
 export type AvatarStyle = 'nebula' | 'crystal' | 'circuit' | 'constellation' | 'terminal';
 
 export const AVATAR_SIZE = 400;
