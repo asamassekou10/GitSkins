@@ -6,6 +6,7 @@
  *
  * Families: abstract | mascot
  * Abstract styles: nebula | crystal | circuit | constellation | terminal
+ * Character archetypes: terminal-mage | ai-alchemist | interface-architect | systems-ranger | pixel-adventurer | cloud-pilot | data-oracle | docs-sage | indie-builder
  * Export sizes: 400 | 800 | 1024
  * Legacy aliases: orbs→nebula, geo→crystal, pixel→circuit
  */
@@ -24,6 +25,7 @@ import {
   isRare,
   AVATAR_SIZE as S,
   type AvatarBackground,
+  type AvatarCharacter,
   type AvatarExpression,
   type AvatarExportSize,
   type AvatarFamily,
@@ -34,10 +36,21 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 const VALID_STYLES: AvatarStyle[] = ['nebula', 'crystal', 'circuit', 'constellation', 'terminal'];
-const VALID_FAMILIES: AvatarFamily[] = ['abstract', 'mascot'];
+const VALID_FAMILIES: AvatarFamily[] = ['abstract', 'mascot', 'character'];
 const VALID_EXPRESSIONS: AvatarExpression[] = ['focused', 'happy', 'mysterious'];
 const VALID_BACKGROUNDS: AvatarBackground[] = ['gradient', 'solid', 'pattern'];
 const VALID_SIZES: AvatarExportSize[] = [400, 800, 1024];
+const VALID_CHARACTERS: AvatarCharacter[] = [
+  'terminal-mage',
+  'ai-alchemist',
+  'interface-architect',
+  'systems-ranger',
+  'pixel-adventurer',
+  'cloud-pilot',
+  'data-oracle',
+  'docs-sage',
+  'indie-builder',
+];
 
 const STYLE_ALIASES: Record<string, AvatarStyle> = {
   orbs: 'nebula',
@@ -50,6 +63,7 @@ type AvatarRenderOptions = {
   themeId: string;
   expression: AvatarExpression;
   background: AvatarBackground;
+  character?: AvatarCharacter;
 };
 
 function ScaledAvatar({ children, size }: { children: JSX.Element; size: AvatarExportSize }) {
@@ -204,6 +218,94 @@ function getMascotPreset(themeId: string) {
     motif: 'stars',
     eye: '#22c55e',
   };
+}
+
+function getCharacterPreset(character: AvatarCharacter) {
+  const presets: Record<AvatarCharacter, ReturnType<typeof getMascotPreset>> = {
+    'terminal-mage': {
+      archetype: 'terminal',
+      skin: '#d1fae5',
+      hair: '#07130b',
+      outfit: '#08140c',
+      accessory: 'hood',
+      motif: 'code',
+      eye: '#22c55e',
+    },
+    'ai-alchemist': {
+      archetype: 'alchemist',
+      skin: '#e0f2fe',
+      hair: '#172554',
+      outfit: '#111827',
+      accessory: 'visor',
+      motif: 'stars',
+      eye: '#2dd4bf',
+    },
+    'interface-architect': {
+      archetype: 'architect',
+      skin: '#ffd7bd',
+      hair: '#18181b',
+      outfit: '#1e1b4b',
+      accessory: 'visor',
+      motif: 'grid',
+      eye: '#38bdf8',
+    },
+    'systems-ranger': {
+      archetype: 'ranger',
+      skin: '#dbeafe',
+      hair: '#0f172a',
+      outfit: '#111827',
+      accessory: 'helmet',
+      motif: 'code',
+      eye: '#818cf8',
+    },
+    'pixel-adventurer': {
+      archetype: 'adventurer',
+      skin: '#fed7aa',
+      hair: '#451a03',
+      outfit: '#3b0764',
+      accessory: 'badge',
+      motif: 'sparks',
+      eye: '#f472b6',
+    },
+    'cloud-pilot': {
+      archetype: 'pilot',
+      skin: '#d8f3ff',
+      hair: '#18324a',
+      outfit: '#0c4a6e',
+      accessory: 'helmet',
+      motif: 'bubbles',
+      eye: '#38bdf8',
+    },
+    'data-oracle': {
+      archetype: 'oracle',
+      skin: '#fce7f3',
+      hair: '#312e81',
+      outfit: '#312e81',
+      accessory: 'badge',
+      motif: 'stars',
+      eye: '#a78bfa',
+    },
+    'docs-sage': {
+      archetype: 'sage',
+      skin: '#ffe4e6',
+      hair: '#334155',
+      outfit: '#355e3b',
+      accessory: 'leaves',
+      motif: 'petals',
+      eye: '#4ade80',
+    },
+    'indie-builder': {
+      archetype: 'builder',
+      skin: '#ffd7bd',
+      hair: '#1f2937',
+      outfit: '#102016',
+      accessory: 'badge',
+      motif: 'stars',
+      eye: '#22c55e',
+    },
+  };
+
+  return presets[character];
 }
 
 // ─── Nebula (upgraded aurora/orbs style) ─────────────────────────────────────
@@ -880,12 +982,12 @@ function MascotMouth({ expression, color }: { expression: AvatarExpression; colo
   );
 }
 
-function MascotAvatar({ username, themeId, expression, background }: AvatarRenderOptions) {
+function MascotAvatar({ username, themeId, expression, background, character }: AvatarRenderOptions) {
   const theme = safeTheme(themeId);
-  const seed = hashStr(username + themeId + expression + 'mascot');
+  const seed = hashStr(username + themeId + expression + (character ?? 'mascot'));
   const rng = seededRng(seed);
   const rare = isRare(username, themeId);
-  const preset = getMascotPreset(themeId);
+  const preset = character ? getCharacterPreset(character) : getMascotPreset(themeId);
   const accent = theme.colors.accent;
   const primary = theme.colors.primary;
   const bg = themeBackdrop(themeId, background);
@@ -1108,6 +1210,7 @@ export async function GET(req: NextRequest) {
   const rawFamily = searchParams.get('family') ?? 'abstract';
   const rawExpression = searchParams.get('expression') ?? 'focused';
   const rawBackground = searchParams.get('bg') ?? 'gradient';
+  const rawCharacter = searchParams.get('character') ?? 'indie-builder';
   const rawSize = Number(searchParams.get('size') ?? 400);
 
   // Resolve legacy aliases
@@ -1116,10 +1219,13 @@ export async function GET(req: NextRequest) {
   const family = VALID_FAMILIES.includes(rawFamily as AvatarFamily) ? rawFamily as AvatarFamily : 'abstract';
   const expression = VALID_EXPRESSIONS.includes(rawExpression as AvatarExpression) ? rawExpression as AvatarExpression : 'focused';
   const background = VALID_BACKGROUNDS.includes(rawBackground as AvatarBackground) ? rawBackground as AvatarBackground : 'gradient';
+  const character = VALID_CHARACTERS.includes(rawCharacter as AvatarCharacter) ? rawCharacter as AvatarCharacter : 'indie-builder';
   const size = VALID_SIZES.includes(rawSize as AvatarExportSize) ? rawSize as AvatarExportSize : 400;
 
   let jsx: JSX.Element;
-  if (family === 'mascot') {
+  if (family === 'character') {
+    jsx = <MascotAvatar username={rawUsername} themeId={rawTheme} expression={expression} background={background} character={character} />;
+  } else if (family === 'mascot') {
     jsx = <MascotAvatar username={rawUsername} themeId={rawTheme} expression={expression} background={background} />;
   } else if (style === 'crystal') {
     jsx = <CrystalAvatar username={rawUsername} themeId={rawTheme} />;

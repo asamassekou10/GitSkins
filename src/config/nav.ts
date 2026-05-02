@@ -31,6 +31,7 @@ export const toolsNavItems: NavItem[] = [
   { label: 'Daily Dev Card', href: '/daily', keywords: 'daily card buildinpublic share social' },
   { label: 'Portfolio Builder', href: '/portfolio/octocat', keywords: 'portfolio' },
   { label: 'Avatar Generator', href: '/avatar', keywords: 'avatar profile picture generator themes' },
+  { label: 'Project Persona', href: '/avatar/persona', keywords: 'avatar character persona projects github' },
 ];
 
 /** Resources dropdown: docs, legal, support. */
