@@ -1051,9 +1051,9 @@ function CharacterFaceDetails({
   if (character === 'docs-sage' || character === 'data-oracle') {
     return (
       <>
-        <div style={{ position: 'absolute', left: 136, top: 178, width: 48, height: 30, borderRadius: 999, border: `3px solid ${hexRgba(accent, 0.75)}` }} />
-        <div style={{ position: 'absolute', right: 136, top: 178, width: 48, height: 30, borderRadius: 999, border: `3px solid ${hexRgba(accent, 0.75)}` }} />
-        <div style={{ position: 'absolute', left: 184, top: 191, width: 32, height: 3, background: hexRgba(accent, 0.75) }} />
+        <div style={{ position: 'absolute', left: 136, top: 178, width: 48, height: 30, borderRadius: 999, border: `3px solid ${hexRgba(accent, 0.9)}` }} />
+        <div style={{ position: 'absolute', right: 136, top: 178, width: 48, height: 30, borderRadius: 999, border: `3px solid ${hexRgba(accent, 0.9)}` }} />
+        <div style={{ position: 'absolute', left: 184, top: 191, width: 32, height: 3, background: hexRgba(accent, 0.9) }} />
       </>
     );
   }
@@ -1069,7 +1069,7 @@ function CharacterFaceDetails({
 
   if (character === 'terminal-mage') {
     return (
-      <div style={{ position: 'absolute', left: 130, top: 164, width: 140, height: 64, borderRadius: 20, border: `1px solid ${hexRgba(accent, 0.18)}`, background: 'radial-gradient(circle at 50% 50%, rgba(0,0,0,0.12), transparent 65%)' }} />
+      <div style={{ position: 'absolute', left: 130, top: 164, width: 140, height: 64, borderRadius: 20, border: `1px solid ${hexRgba(accent, 0.28)}`, background: 'radial-gradient(circle at 50% 50%, rgba(0,0,0,0.12), transparent 65%)' }} />
     );
   }
 
@@ -1123,6 +1123,7 @@ function MascotAvatar({ username, themeId, expression, background, character }: 
   const faceColor = preset.archetype === 'pumpkin' ? '#fb923c' : preset.skin;
   const faceShadow = preset.archetype === 'pumpkin' ? '#7c2d12' : hexDarken(faceColor, 0.18);
   const eyeColor = expression === 'mysterious' ? accent : preset.eye;
+  const pupilColor = preset.archetype === 'pumpkin' ? '#431407' : '#111827';
   const tilt = Math.round((rng() - 0.5) * 8);
 
   return (
@@ -1205,12 +1206,43 @@ function MascotAvatar({ username, themeId, expression, background, character }: 
           boxShadow: `0 16px 36px rgba(0,0,0,0.28), 0 0 28px ${hexRgba(accent, 0.16)}`,
           transform: `rotate(${tilt}deg)`,
           overflow: 'hidden',
+          display: 'flex',
         }}
       >
         {preset.archetype === 'pumpkin' && (
           <>
             <div style={{ position: 'absolute', left: 50, top: -8, width: 9, height: 184, background: hexRgba('#7c2d12', 0.16), borderRadius: 999 }} />
             <div style={{ position: 'absolute', right: 50, top: -8, width: 9, height: 184, background: hexRgba('#7c2d12', 0.16), borderRadius: 999 }} />
+          </>
+        )}
+        {preset.accessory !== 'visor' && (
+          <>
+            <div
+              style={{
+                position: 'absolute',
+                left: expression === 'mysterious' ? 28 : 36,
+                top: expression === 'mysterious' ? 92 : 84,
+                width: expression === 'mysterious' ? 42 : 22,
+                height: expression === 'mysterious' ? 8 : 22,
+                borderRadius: 999,
+                background: pupilColor,
+                border: `2px solid ${hexRgba(eyeColor, 0.72)}`,
+                boxShadow: `0 0 10px ${hexRgba(eyeColor, 0.25)}`,
+              }}
+            />
+            <div
+              style={{
+                position: 'absolute',
+                left: expression === 'mysterious' ? 94 : 106,
+                top: expression === 'mysterious' ? 92 : 84,
+                width: expression === 'mysterious' ? 42 : 22,
+                height: expression === 'mysterious' ? 8 : 22,
+                borderRadius: 999,
+                background: pupilColor,
+                border: `2px solid ${hexRgba(eyeColor, 0.72)}`,
+                boxShadow: `0 0 10px ${hexRgba(eyeColor, 0.25)}`,
+              }}
+            />
           </>
         )}
       </div>
@@ -1247,35 +1279,6 @@ function MascotAvatar({ username, themeId, expression, background, character }: 
       )}
 
       <CharacterFaceDetails character={character} accent={accent} primary={primary} />
-
-      {preset.accessory !== 'visor' && (
-        <>
-          <div
-            style={{
-              position: 'absolute',
-              left: 149,
-              top: expression === 'mysterious' ? 190 : 183,
-              width: expression === 'mysterious' ? 38 : 18,
-              height: expression === 'mysterious' ? 5 : 18,
-              borderRadius: 999,
-              background: eyeColor,
-              boxShadow: `0 0 12px ${hexRgba(eyeColor, 0.45)}`,
-            }}
-          />
-          <div
-            style={{
-              position: 'absolute',
-              right: 149,
-              top: expression === 'mysterious' ? 190 : 183,
-              width: expression === 'mysterious' ? 38 : 18,
-              height: expression === 'mysterious' ? 5 : 18,
-              borderRadius: 999,
-              background: eyeColor,
-              boxShadow: `0 0 12px ${hexRgba(eyeColor, 0.45)}`,
-            }}
-          />
-        </>
-      )}
 
       <MascotMouth expression={expression} color={preset.archetype === 'pumpkin' ? '#431407' : '#1f2937'} />
       <CharacterProp character={character} accent={accent} primary={primary} />
