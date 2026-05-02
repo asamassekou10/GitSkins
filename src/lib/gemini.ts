@@ -11,7 +11,8 @@
  */
 
 import { GoogleGenAI, HarmCategory, HarmBlockThreshold, ThinkingLevel, type GenerateContentConfig } from '@google/genai';
-import type { ExtendedProfileData } from '@/types/readme';
+import type { ExtendedProfileData, ReadmeGoal, ReadmeStructure, ReadmeTone } from '@/types/readme';
+import { buildReadmeStrategy } from '@/lib/readme-generator';
 
 // Safety settings for content generation
 const safetySettings: GenerateContentConfig['safetySettings'] = [
@@ -137,12 +138,25 @@ export async function generateReadmeWithGemini(
     careerMode?: boolean;
     careerRole?: string;
     agentLoop?: boolean;
+    goal?: ReadmeGoal;
+    structure?: ReadmeStructure;
+    tone?: ReadmeTone;
   }
 ): Promise<{ markdown: string; refinementNotes?: string[]; reasoning?: string }> {
   const topLanguages = profileData.languages.slice(0, 5).map((l) => l.name).join(', ');
   const pinnedReposText = profileData.pinnedRepos
     .map((r) => `- ${r.name}: ${r.description || 'No description'} (${r.stars} stars, ${r.language || 'Unknown'})`)
     .join('\n');
+  const strategy = buildReadmeStrategy(profileData, {
+    username: config.username,
+    sections: config.sections as any,
+    style: config.style,
+    theme: config.theme,
+    includeGitSkins: true,
+    goal: config.goal,
+    structure: config.structure,
+    tone: config.tone,
+  });
 
   let reasoning: string | undefined;
   if (config.careerMode) {
@@ -180,8 +194,16 @@ ${pinnedReposText || 'No pinned repositories'}
 
 **Generation Settings:**
 - Style: ${config.style} (${config.style === 'minimal' ? 'clean and concise' : config.style === 'creative' ? 'fun, engaging with emojis and personality' : 'professional and comprehensive'})
+- Goal: ${strategy.profileGoal}
+- Structure: ${config.structure || 'visual'}
+- Tone: ${strategy.suggestedTone}
 - Sections to include: ${config.sections.join(', ')}
 - Widget theme: ${config.theme}
+
+**Profile Strategy:**
+- Primary role: ${strategy.primaryRole}
+- Strongest signals: ${strategy.strongestSignals.join(', ')}
+- Weak signals to compensate for: ${strategy.weakSignals.join(', ')}
 
 **IMPORTANT - Include these GitSkins widgets:**
 \`\`\`markdown
@@ -208,6 +230,8 @@ ${pinnedReposText || 'No pinned repositories'}
 7. Use proper markdown formatting (headers, alignment, badges)
 8. Match the requested style (${config.style})
 9. End with a footer mentioning GitSkins
+10. Do not invent jobs, education, metrics, links, or project claims not supported by the profile data
+11. Write featured project blurbs as outcome-oriented proof, not plain repository descriptions
 
 Output ONLY the markdown content. No explanations or code blocks around it.`;
 

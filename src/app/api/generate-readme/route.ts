@@ -12,10 +12,13 @@ import { fetchProfileForReadme } from '@/lib/github';
 import {
   generateReadmeTemplate,
   parseGeneratedReadme,
+  buildReadmeStrategy,
+  scoreReadme,
 } from '@/lib/readme-generator';
 import { generateReadmeWithGemini, isGeminiConfigured } from '@/lib/gemini';
 import { checkReadmeAllowed, checkReadmeAllowedById, incrementReadmeUsage, incrementReadmeUsageById } from '@/lib/server-usage';
 import type { ReadmeConfig, ReadmeSectionType, ReadmeStyle } from '@/types/readme';
+import { db } from '@/lib/db';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -32,6 +35,9 @@ const requestSchema = z.object({
   careerRole: z.string().optional().default('fullstack'),
   agentLoop: z.boolean().optional().default(false),
   useAI: z.boolean().optional().default(true),
+  goal: z.enum(['get-hired', 'open-source', 'freelance', 'indie-hacker', 'student', 'founder', 'personal-brand']).optional().default('personal-brand'),
+  structure: z.enum(['portfolio', 'hiring', 'open-source', 'founder', 'minimal', 'visual', 'technical']).optional().default('visual'),
+  tone: z.enum(['concise', 'confident', 'friendly', 'senior', 'founder', 'playful', 'recruiter']).optional().default('confident'),
 });
 
 export async function POST(request: NextRequest) {
@@ -71,7 +77,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const validatedData = requestSchema.parse(body);
 
-    const { username, sections, style, theme, careerMode, careerRole, agentLoop, useAI } = validatedData;
+    const { username, sections, style, theme, careerMode, careerRole, agentLoop, useAI, goal, structure, tone } = validatedData;
 
     // Fetch GitHub profile data
     const profileData = await fetchProfileForReadme(username);
@@ -89,6 +95,9 @@ export async function POST(request: NextRequest) {
       style: style as ReadmeStyle,
       theme,
       includeGitSkins: true,
+      goal,
+      structure,
+      tone,
     };
 
     let result;
@@ -107,6 +116,9 @@ export async function POST(request: NextRequest) {
           careerMode,
           careerRole,
           agentLoop,
+          goal,
+          structure,
+          tone,
         });
 
         if (geminiResult?.markdown) {
@@ -182,8 +194,30 @@ export async function POST(request: NextRequest) {
       result = generateReadmeTemplate(profileData, config);
     }
 
+    const strategy = buildReadmeStrategy(profileData, config);
+    const score = scoreReadme(result.markdown, profileData, config);
+    result.metadata = {
+      ...result.metadata,
+      strategy,
+      score,
+    };
+
     if (sessionUser.id) {
       await incrementReadmeUsageById(sessionUser.id);
+      await db.readmeGeneration.create({
+        data: {
+          userId: sessionUser.id,
+          username,
+          title: `${username} README`,
+          goal,
+          structure,
+          tone,
+          style,
+          theme,
+          score: score.overall,
+          markdown: result.markdown,
+        },
+      }).catch((err) => console.error('[readme] save generation failed:', err));
     } else {
       await incrementReadmeUsage(sessionUser.username!);
     }
@@ -196,6 +230,8 @@ export async function POST(request: NextRequest) {
       aiProvider,
       refinementNotes,
       reasoning,
+      strategy,
+      score,
       profile: {
         name: profileData.name,
         avatarUrl: profileData.avatarUrl,

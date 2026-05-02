@@ -12,6 +12,9 @@ import { useUserPlan } from '@/hooks/useUserPlan';
 type ReadmeStyle = 'minimal' | 'detailed' | 'creative';
 type SectionType = 'header' | 'about' | 'skills' | 'stats' | 'projects' | 'streak' | 'connect';
 type CareerRole = 'frontend' | 'backend' | 'fullstack' | 'data' | 'mobile' | 'devops' | 'product';
+type ReadmeGoal = 'get-hired' | 'open-source' | 'freelance' | 'indie-hacker' | 'student' | 'founder' | 'personal-brand';
+type ReadmeStructure = 'portfolio' | 'hiring' | 'open-source' | 'founder' | 'minimal' | 'visual' | 'technical';
+type ReadmeTone = 'concise' | 'confident' | 'friendly' | 'senior' | 'founder' | 'playful' | 'recruiter';
 
 const themes = [
   { id: 'satan', name: 'Satan', color: '#ff4500', free: true },
@@ -37,6 +40,36 @@ const styleOptions: { id: ReadmeStyle; label: string; description: string }[] = 
   { id: 'creative', label: 'Creative', description: 'Fun with animations' },
 ];
 
+const goalOptions: { id: ReadmeGoal; label: string; description: string }[] = [
+  { id: 'get-hired', label: 'Get Hired', description: 'Recruiter-friendly proof and contact path' },
+  { id: 'open-source', label: 'Open Source', description: 'Maintainer credibility and contributor clarity' },
+  { id: 'freelance', label: 'Freelance', description: 'Services, outcomes, and conversion' },
+  { id: 'indie-hacker', label: 'Indie Hacker', description: 'Products, launches, and builder momentum' },
+  { id: 'student', label: 'Student', description: 'Learning velocity and project potential' },
+  { id: 'founder', label: 'Founder', description: 'Product vision and technical ownership' },
+  { id: 'personal-brand', label: 'Personal Brand', description: 'Memorable developer positioning' },
+];
+
+const structureOptions: { id: ReadmeStructure; label: string; description: string }[] = [
+  { id: 'visual', label: 'Visual Kit', description: 'GitSkins card, widgets, and polished sections' },
+  { id: 'portfolio', label: 'Portfolio', description: 'Featured work and clear project proof' },
+  { id: 'hiring', label: 'Hiring', description: 'Fast scan for recruiters and teams' },
+  { id: 'open-source', label: 'OSS', description: 'Community and contributor oriented' },
+  { id: 'founder', label: 'Founder', description: 'Products, direction, and outcomes' },
+  { id: 'minimal', label: 'Minimal', description: 'Short, clean, low-badge layout' },
+  { id: 'technical', label: 'Technical', description: 'Systems, stack, and deeper proof' },
+];
+
+const toneOptions: { id: ReadmeTone; label: string }[] = [
+  { id: 'confident', label: 'Confident' },
+  { id: 'concise', label: 'Concise' },
+  { id: 'friendly', label: 'Friendly' },
+  { id: 'senior', label: 'Senior' },
+  { id: 'founder', label: 'Founder' },
+  { id: 'playful', label: 'Playful' },
+  { id: 'recruiter', label: 'Recruiter' },
+];
+
 const careerRoles: { id: CareerRole; label: string; description: string }[] = [
   { id: 'frontend', label: 'Frontend Engineer', description: 'UI/UX, performance, design systems' },
   { id: 'backend', label: 'Backend Engineer', description: 'APIs, scalability, data reliability' },
@@ -59,6 +92,9 @@ export default function ReadmeGeneratorPage() {
   const [careerRole, setCareerRole] = useState<CareerRole>('fullstack');
   const [agentLoop, setAgentLoop] = useState(true);
   const [useAI, setUseAI] = useState(true);
+  const [goal, setGoal] = useState<ReadmeGoal>('get-hired');
+  const [structure, setStructure] = useState<ReadmeStructure>('visual');
+  const [tone, setTone] = useState<ReadmeTone>('confident');
 
   const [isLoading, setIsLoading] = useState(false);
   const [generatedReadme, setGeneratedReadme] = useState<string | null>(null);
@@ -74,6 +110,21 @@ export default function ReadmeGeneratorPage() {
   const [refinementNotes, setRefinementNotes] = useState<string[] | null>(null);
   const [agentReasoning, setAgentReasoning] = useState<string | null>(null);
   const [agentLogExpanded, setAgentLogExpanded] = useState(false);
+  const [readmeScore, setReadmeScore] = useState<{
+    overall: number;
+    profileClarity: number;
+    projectProof: number;
+    visualConsistency: number;
+    recruiterScanability: number;
+    suggestions: string[];
+  } | null>(null);
+  const [strategy, setStrategy] = useState<{
+    primaryRole: string;
+    strongestSignals: string[];
+    weakSignals: string[];
+    suggestedTone: string;
+    profileGoal: string;
+  } | null>(null);
 
   const { plan: userPlan, readmeGenerationsUsed, readmeGenerationsLimit, readmeGenerationsRemaining, loading: planLoading, authenticated } = useUserPlan();
   const userIsPro = userPlan === 'pro';
@@ -130,6 +181,8 @@ export default function ReadmeGeneratorPage() {
     setAiProvider(null);
     setRefinementNotes(null);
     setAgentReasoning(null);
+    setReadmeScore(null);
+    setStrategy(null);
     readmeProgress.start();
 
     try {
@@ -145,6 +198,9 @@ export default function ReadmeGeneratorPage() {
           careerRole,
           agentLoop,
           useAI,
+          goal,
+          structure,
+          tone,
         }),
       });
 
@@ -159,6 +215,8 @@ export default function ReadmeGeneratorPage() {
       setGeneratedReadme(data.readme);
       setAiProvider(data.aiProvider || null);
       setProfileData(data.profile);
+      setReadmeScore(data.score ?? null);
+      setStrategy(data.strategy ?? null);
       readmeProgress.complete();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
@@ -166,7 +224,7 @@ export default function ReadmeGeneratorPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [authenticated, username, sections, style, theme, careerMode, careerRole, agentLoop, useAI, readmeProgress.start, readmeProgress.complete, readmeProgress.reset]);
+  }, [authenticated, username, sections, style, theme, careerMode, careerRole, agentLoop, useAI, goal, structure, tone, readmeProgress.start, readmeProgress.complete, readmeProgress.reset]);
 
   const copyToClipboard = async () => {
     if (!generatedReadme) return;
@@ -422,6 +480,86 @@ export default function ReadmeGeneratorPage() {
                 >
                   Use demo username
                 </button>
+              </div>
+            </div>
+
+            {/* Strategy Controls */}
+            <div style={{ marginBottom: '32px' }}>
+              <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: '#fff', marginBottom: '12px' }}>
+                README Goal
+              </label>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(190px, 1fr))', gap: '10px' }}>
+                {goalOptions.map((option) => (
+                  <button
+                    key={option.id}
+                    onClick={() => setGoal(option.id)}
+                    style={{
+                      padding: '12px 14px',
+                      background: goal === option.id ? 'rgba(34, 197, 94, 0.15)' : '#0d0d0d',
+                      border: `1px solid ${goal === option.id ? '#22c55e' : '#2a2a2a'}`,
+                      borderRadius: '10px',
+                      color: goal === option.id ? '#22c55e' : '#aaa',
+                      fontSize: '13px',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                    }}
+                  >
+                    {option.label}
+                    <span style={{ display: 'block', marginTop: 5, color: '#666', fontSize: 11, fontWeight: 400, lineHeight: 1.35 }}>
+                      {option.description}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div style={{ marginBottom: '32px' }}>
+              <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: '#fff', marginBottom: '12px' }}>
+                Structure & Tone
+              </label>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: 14 }}>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  {structureOptions.map((option) => (
+                    <button
+                      key={option.id}
+                      onClick={() => setStructure(option.id)}
+                      title={option.description}
+                      style={{
+                        padding: '9px 12px',
+                        background: structure === option.id ? 'rgba(34, 197, 94, 0.15)' : '#0d0d0d',
+                        border: `1px solid ${structure === option.id ? '#22c55e' : '#2a2a2a'}`,
+                        borderRadius: '999px',
+                        color: structure === option.id ? '#22c55e' : '#888',
+                        fontSize: '12px',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  {toneOptions.map((option) => (
+                    <button
+                      key={option.id}
+                      onClick={() => setTone(option.id)}
+                      style={{
+                        padding: '9px 12px',
+                        background: tone === option.id ? 'rgba(34, 197, 94, 0.15)' : '#0d0d0d',
+                        border: `1px solid ${tone === option.id ? '#22c55e' : '#2a2a2a'}`,
+                        borderRadius: '999px',
+                        color: tone === option.id ? '#22c55e' : '#888',
+                        fontSize: '12px',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 
@@ -947,6 +1085,35 @@ export default function ReadmeGeneratorPage() {
                     Profile Agent focus
                   </div>
                   <p style={{ margin: 0, color: '#a1a1a1', fontSize: '13px', lineHeight: 1.5 }}>{agentReasoning}</p>
+                </div>
+              )}
+
+              {/* Strategy and score */}
+              {(strategy || readmeScore) && (
+                <div style={{ padding: '18px 20px', borderBottom: '1px solid #1f1f1f', background: '#0d0d0d' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))', gap: 14 }}>
+                    {readmeScore && (
+                      <div style={{ padding: 16, borderRadius: 14, background: '#151515', border: '1px solid #242424' }}>
+                        <div style={{ color: '#777', fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 6 }}>README Score</div>
+                        <div style={{ color: '#22c55e', fontSize: 42, lineHeight: 1, fontWeight: 900, letterSpacing: '-0.06em' }}>{readmeScore.overall}</div>
+                        <div style={{ color: '#888', fontSize: 12, marginTop: 8 }}>
+                          Clarity {readmeScore.profileClarity} · Proof {readmeScore.projectProof} · Visual {readmeScore.visualConsistency} · Scan {readmeScore.recruiterScanability}
+                        </div>
+                      </div>
+                    )}
+                    {strategy && (
+                      <div style={{ padding: 16, borderRadius: 14, background: '#151515', border: '1px solid #242424' }}>
+                        <div style={{ color: '#777', fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 8 }}>Profile Strategy</div>
+                        <div style={{ color: '#fff', fontSize: 15, fontWeight: 800, marginBottom: 8 }}>{strategy.primaryRole}</div>
+                        <div style={{ color: '#999', fontSize: 13, lineHeight: 1.55 }}>{strategy.profileGoal}</div>
+                      </div>
+                    )}
+                  </div>
+                  {readmeScore?.suggestions?.length ? (
+                    <ul style={{ margin: '14px 0 0', paddingLeft: 18, color: '#a1a1a1', fontSize: 13, lineHeight: 1.6 }}>
+                      {readmeScore.suggestions.map((suggestion) => <li key={suggestion}>{suggestion}</li>)}
+                    </ul>
+                  ) : null}
                 </div>
               )}
 

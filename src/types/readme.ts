@@ -4,6 +4,33 @@
 
 export type ReadmeStyle = 'minimal' | 'detailed' | 'creative';
 
+export type ReadmeGoal =
+  | 'get-hired'
+  | 'open-source'
+  | 'freelance'
+  | 'indie-hacker'
+  | 'student'
+  | 'founder'
+  | 'personal-brand';
+
+export type ReadmeStructure =
+  | 'portfolio'
+  | 'hiring'
+  | 'open-source'
+  | 'founder'
+  | 'minimal'
+  | 'visual'
+  | 'technical';
+
+export type ReadmeTone =
+  | 'concise'
+  | 'confident'
+  | 'friendly'
+  | 'senior'
+  | 'founder'
+  | 'playful'
+  | 'recruiter';
+
 export type ReadmeSectionType =
   | 'header'
   | 'about'
@@ -29,6 +56,9 @@ export interface ReadmeConfig {
   style: ReadmeStyle;
   theme: string;
   includeGitSkins: boolean;
+  goal?: ReadmeGoal;
+  structure?: ReadmeStructure;
+  tone?: ReadmeTone;
 }
 
 export interface GeneratedReadme {
@@ -44,7 +74,26 @@ export interface GeneratedReadme {
     languages: string[];
     repoCount: number;
     totalStars: number;
+    score?: ReadmeScore;
+    strategy?: ReadmeStrategy;
   };
+}
+
+export interface ReadmeStrategy {
+  primaryRole: string;
+  strongestSignals: string[];
+  weakSignals: string[];
+  suggestedTone: string;
+  profileGoal: string;
+}
+
+export interface ReadmeScore {
+  overall: number;
+  profileClarity: number;
+  projectProof: number;
+  visualConsistency: number;
+  recruiterScanability: number;
+  suggestions: string[];
 }
 
 export interface ReadmeGeneratorRequest {
@@ -56,6 +105,9 @@ export interface ReadmeGeneratorRequest {
   careerMode?: boolean;
   careerRole?: string;
   agentLoop?: boolean;
+  goal?: ReadmeGoal;
+  structure?: ReadmeStructure;
+  tone?: ReadmeTone;
 }
 
 export interface ExtendedProfileData {

@@ -22,6 +22,7 @@ model User {
   accounts      Account[]
   creditBalance CreditBalance?
   creditTransactions CreditTransaction[]
+  readmeGenerations ReadmeGeneration[]
 }
 
 model Account {
@@ -101,4 +102,22 @@ model StripeEvent {
   id        String   @id
   type      String
   createdAt DateTime @default(now())
+}
+
+model ReadmeGeneration {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  username  String
+  title     String
+  goal      String?
+  structure String?
+  tone      String?
+  style     String?
+  theme     String?
+  score     Int?
+  markdown  String   @db.Text
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
 }

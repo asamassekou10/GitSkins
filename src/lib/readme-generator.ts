@@ -10,6 +10,11 @@ import type {
   ReadmeSectionType,
   GeneratedReadme,
   ExtendedProfileData,
+  ReadmeGoal,
+  ReadmeStructure,
+  ReadmeTone,
+  ReadmeStrategy,
+  ReadmeScore,
 } from '@/types/readme';
 
 /**
@@ -38,6 +43,104 @@ const languageBadges: Record<string, string> = {
   Svelte: 'https://img.shields.io/badge/Svelte-FF3E00?style=for-the-badge&logo=svelte&logoColor=white',
 };
 
+const goalLabels: Record<ReadmeGoal, string> = {
+  'get-hired': 'get hired or attract recruiters',
+  'open-source': 'grow open-source trust and contributor confidence',
+  freelance: 'win freelance or consulting opportunities',
+  'indie-hacker': 'show builder momentum and product taste',
+  student: 'show learning velocity and project potential',
+  founder: 'present as a technical founder',
+  'personal-brand': 'build a memorable developer brand',
+};
+
+const structureLabels: Record<ReadmeStructure, string> = {
+  portfolio: 'portfolio README with featured proof and clear CTAs',
+  hiring: 'hiring README optimized for recruiter scanning',
+  'open-source': 'open-source maintainer README with contribution clarity',
+  founder: 'founder README emphasizing products, traction, and direction',
+  minimal: 'minimal badge-light README',
+  visual: 'visual GitSkins README with profile card and widgets',
+  technical: 'technical deep-dive README emphasizing systems and stack',
+};
+
+const toneLabels: Record<ReadmeTone, string> = {
+  concise: 'concise and direct',
+  confident: 'confident without hype',
+  friendly: 'friendly and approachable',
+  senior: 'senior engineer with judgment and ownership',
+  founder: 'founder-style, outcome-focused, product-minded',
+  playful: 'playful but still professional',
+  recruiter: 'recruiter-focused and easy to scan',
+};
+
+export function buildReadmeStrategy(data: ExtendedProfileData, config: ReadmeConfig): ReadmeStrategy {
+  const languages = data.languages.slice(0, 3).map((l) => l.name);
+  const primaryRole = inferPrimaryRole(languages, config);
+  const strongestSignals = [
+    ...languages.map((language) => `${language} work`),
+    data.totalStars > 0 ? `${data.totalStars} earned stars` : '',
+    data.totalRepos > 0 ? `${data.totalRepos} public repositories` : '',
+    data.streak.current > 0 ? `${data.streak.current}-day current streak` : '',
+  ].filter(Boolean).slice(0, 4);
+  const weakSignals = [
+    data.pinnedRepos.length === 0 ? 'No pinned repositories detected' : '',
+    !data.bio ? 'Bio is missing or too thin' : '',
+    !data.websiteUrl ? 'No portfolio or website link detected' : '',
+    data.totalStars === 0 ? 'Limited external project proof from stars' : '',
+  ].filter(Boolean).slice(0, 4);
+
+  return {
+    primaryRole,
+    strongestSignals: strongestSignals.length ? strongestSignals : ['Consistent GitHub presence'],
+    weakSignals: weakSignals.length ? weakSignals : ['Keep the README concise and proof-driven'],
+    suggestedTone: toneLabels[config.tone ?? 'confident'],
+    profileGoal: goalLabels[config.goal ?? 'personal-brand'],
+  };
+}
+
+export function scoreReadme(markdown: string, data: ExtendedProfileData, config: ReadmeConfig): ReadmeScore {
+  const hasProfileCard = markdown.includes('/api/premium-card');
+  const hasProjects = /## .*project|## .*work|### \[/.test(markdown.toLowerCase());
+  const hasContact = /connect|contact|twitter|website|linkedin|github\.com/.test(markdown.toLowerCase());
+  const length = markdown.length;
+  const profileClarity = clampScore(55 + (data.bio ? 15 : 0) + (markdown.startsWith('#') || markdown.includes('<h1') ? 15 : 0) + (config.goal ? 10 : 0));
+  const projectProof = clampScore(45 + Math.min(25, data.pinnedRepos.length * 6) + (hasProjects ? 20 : 0) + (data.totalStars > 0 ? 10 : 0));
+  const visualConsistency = clampScore(55 + (hasProfileCard ? 25 : 0) + (markdown.includes(`theme=${config.theme}`) ? 15 : 0));
+  const recruiterScanability = clampScore(45 + (hasContact ? 15 : 0) + (length < 5000 ? 20 : 5) + (markdown.split('\n## ').length >= 4 ? 15 : 0));
+  const overall = Math.round((profileClarity + projectProof + visualConsistency + recruiterScanability) / 4);
+
+  const suggestions = [
+    !data.bio ? 'Add a clearer GitHub bio so the README can open with a sharper positioning line.' : '',
+    data.pinnedRepos.length < 3 ? 'Pin or feature at least three strong repositories for better project proof.' : '',
+    !hasContact ? 'Add a clear contact or portfolio link so visitors know what to do next.' : '',
+    !hasProfileCard ? 'Include a GitSkins profile card near the top for a stronger visual first impression.' : '',
+    length > 6500 ? 'Shorten the README so the strongest projects remain above the fold.' : '',
+  ].filter(Boolean).slice(0, 3);
+
+  return {
+    overall,
+    profileClarity,
+    projectProof,
+    visualConsistency,
+    recruiterScanability,
+    suggestions: suggestions.length ? suggestions : ['Strong structure. Keep project descriptions specific and outcome-focused.'],
+  };
+}
+
+function inferPrimaryRole(languages: string[], config: ReadmeConfig): string {
+  if (config.goal === 'founder') return 'Technical founder';
+  if (config.goal === 'freelance') return 'Freelance developer or consultant';
+  if (config.goal === 'open-source') return 'Open-source maintainer';
+  const normalized = languages.map((l) => l.toLowerCase());
+  if (normalized.some((l) => ['typescript', 'javascript', 'html', 'css', 'vue', 'svelte'].includes(l))) return 'Frontend or full-stack engineer';
+  if (normalized.some((l) => ['go', 'rust', 'java', 'c#', 'python'].includes(l))) return 'Backend or systems engineer';
+  return 'Product-minded developer';
+}
+
+function clampScore(value: number): number {
+  return Math.max(0, Math.min(100, Math.round(value)));
+}
+
 /**
  * Build AI prompt for README generation
  */
@@ -47,6 +150,7 @@ export function buildReadmePrompt(
 ): string {
   const sectionsToInclude = config.sections.join(', ');
   const topLanguages = data.languages.slice(0, 5).map(l => l.name).join(', ');
+  const strategy = buildReadmeStrategy(data, config);
 
   const pinnedReposText = data.pinnedRepos
     .map(r => `- ${r.name}: ${r.description || 'No description'} (${r.stars} stars)`)
@@ -74,8 +178,17 @@ ${pinnedReposText || 'No pinned repositories'}
 
 **Generation Settings:**
 - Style: ${config.style}
+- Goal: ${goalLabels[config.goal ?? 'personal-brand']}
+- Structure: ${structureLabels[config.structure ?? 'visual']}
+- Tone: ${toneLabels[config.tone ?? 'confident']}
 - Sections to include: ${sectionsToInclude}
 - Theme for GitSkins widgets: ${config.theme}
+
+**Profile Strategy:**
+- Primary role: ${strategy.primaryRole}
+- Strongest signals: ${strategy.strongestSignals.join(', ')}
+- Weak signals to compensate for: ${strategy.weakSignals.join(', ')}
+- Profile goal: ${strategy.profileGoal}
 
 **Instructions:**
 1. Generate a professional, well-structured README.md
@@ -84,11 +197,12 @@ ${pinnedReposText || 'No pinned repositories'}
    - Profile Card: ![GitHub Stats](https://gitskins.com/api/premium-card?username=${config.username}&theme=${config.theme})
    - Languages: ![Top Languages](https://gitskins.com/api/languages?username=${config.username}&theme=${config.theme})
    - Streak: ![Streak Stats](https://gitskins.com/api/streak?username=${config.username}&theme=${config.theme})
-4. Keep the tone ${config.style === 'creative' ? 'fun and engaging' : config.style === 'detailed' ? 'professional and comprehensive' : 'clean and minimal'}
-5. ${config.style === 'minimal' ? 'Keep content brief and focused' : 'Include detailed descriptions'}
+4. Keep the tone ${toneLabels[config.tone ?? 'confident']}
+5. ${config.structure === 'minimal' || config.style === 'minimal' ? 'Keep content brief and focused' : 'Include specific project proof and clear descriptions'}
 6. Use badges for technologies/languages when appropriate
 7. Include a proper header with the developer's name
 8. End with social links/contact info if available
+9. Do not invent employers, degrees, metrics, links, or project claims that are not supported by the profile data
 
 Generate ONLY the markdown content, no explanations.`;
 }
@@ -157,6 +271,8 @@ export function generateReadmeTemplate(
   // Footer
   markdown += '---\n\n';
   markdown += `<p align="center">Profile README generated with <a href="https://gitskins.com/readme-generator">GitSkins</a></p>\n`;
+  const strategy = buildReadmeStrategy(data, config);
+  const score = scoreReadme(markdown, data, config);
 
   return {
     markdown: markdown.trim(),
@@ -167,6 +283,8 @@ export function generateReadmeTemplate(
       languages: data.languages.map(l => l.name),
       repoCount: data.totalRepos,
       totalStars: data.totalStars,
+      strategy,
+      score,
     },
   };
 }
