@@ -105,9 +105,13 @@ export default function Home() {
             name: 'GitSkins',
             applicationCategory: 'DeveloperApplication',
             operatingSystem: 'Web',
-            description: 'Generate dynamic, custom-themed widgets for your GitHub profile.',
             url: 'https://gitskins.com',
-            offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+            description: 'Premium GitHub profile cards, avatars, README assets, and AI profile tools.',
+            offers: [
+              { '@type': 'Offer', price: '0', priceCurrency: 'USD', name: 'Free' },
+              { '@type': 'Offer', price: '9', priceCurrency: 'USD', name: 'Pro Monthly' },
+              { '@type': 'Offer', price: '49', priceCurrency: 'USD', name: 'Pro Lifetime' },
+            ],
           }),
         }}
       />

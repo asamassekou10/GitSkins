@@ -8,6 +8,7 @@ export interface UserPlanData {
   readmeGenerationsUsed: number;
   readmeGenerationsLimit: number;
   readmeGenerationsRemaining: number;
+  creditsRemaining?: number;
   month: string;
   loading: boolean;
   authenticated: boolean;

@@ -158,6 +158,45 @@ export interface UsageCheckResult {
   remaining: number;
   limit: number;
   plan: 'free' | 'pro';
+  creditsRemaining?: number;
+}
+
+export async function getCreditBalance(userId: string): Promise<number> {
+  if (!dbAvailable()) return 0;
+  try {
+    const balance = await db.creditBalance.findUnique({
+      where: { userId },
+      select: { credits: true },
+    });
+    return balance?.credits ?? 0;
+  } catch {
+    return 0;
+  }
+}
+
+export async function grantCredits(params: {
+  userId: string;
+  amount: number;
+  reason: string;
+  stripeSessionId?: string;
+}): Promise<void> {
+  if (!dbAvailable() || params.amount <= 0) return;
+
+  await db.$transaction([
+    db.creditBalance.upsert({
+      where: { userId: params.userId },
+      update: { credits: { increment: params.amount } },
+      create: { userId: params.userId, credits: params.amount },
+    }),
+    db.creditTransaction.create({
+      data: {
+        userId: params.userId,
+        amount: params.amount,
+        reason: params.reason,
+        stripeSessionId: params.stripeSessionId,
+      },
+    }),
+  ]);
 }
 
 async function checkReadmeAllowedForUserId(userId: string): Promise<UsageCheckResult> {
@@ -175,8 +214,15 @@ async function checkReadmeAllowedForUserId(userId: string): Promise<UsageCheckRe
   });
 
   const used = usage?.readmeGenerationsUsed ?? 0;
-  const remaining = Math.max(0, limit - used);
-  return { allowed: remaining > 0, remaining, limit, plan };
+  const freeRemaining = Math.max(0, limit - used);
+  const creditsRemaining = await getCreditBalance(userId);
+  return {
+    allowed: freeRemaining > 0 || creditsRemaining > 0,
+    remaining: freeRemaining > 0 ? freeRemaining : creditsRemaining,
+    limit,
+    plan,
+    creditsRemaining,
+  };
 }
 
 export async function checkReadmeAllowedById(userId: string): Promise<UsageCheckResult> {
@@ -222,8 +268,15 @@ export async function checkReadmeAllowed(username: string): Promise<UsageCheckRe
     });
 
     const used = usage?.readmeGenerationsUsed ?? 0;
-    const remaining = Math.max(0, limit - used);
-    return { allowed: remaining > 0, remaining, limit, plan };
+    const freeRemaining = Math.max(0, limit - used);
+    const creditsRemaining = await getCreditBalance(userId);
+    return {
+      allowed: freeRemaining > 0 || creditsRemaining > 0,
+      remaining: freeRemaining > 0 ? freeRemaining : creditsRemaining,
+      limit,
+      plan,
+      creditsRemaining,
+    };
   } catch {
     // On any DB error, fail open so users aren't blocked
     return { allowed: true, remaining: FREE_TIER_README_LIMIT, limit: FREE_TIER_README_LIMIT, plan: 'free' };
@@ -234,11 +287,42 @@ export async function incrementReadmeUsageById(userId: string): Promise<void> {
   if (!dbAvailable()) return;
 
   try {
+    const plan = await getUserPlanById(userId);
+    if (plan === 'pro') return;
+
     const month = currentMonth();
-    await db.usage.upsert({
-      where: { userId_month: { userId, month } },
-      update: { readmeGenerationsUsed: { increment: 1 } },
-      create: { userId, month, readmeGenerationsUsed: 1 },
+    await db.$transaction(async (tx) => {
+      const usage = await tx.usage.upsert({
+        where: { userId_month: { userId, month } },
+        update: {},
+        create: { userId, month, readmeGenerationsUsed: 0 },
+        select: { readmeGenerationsUsed: true },
+      });
+
+      if (usage.readmeGenerationsUsed < FREE_TIER_README_LIMIT) {
+        await tx.usage.update({
+          where: { userId_month: { userId, month } },
+          data: { readmeGenerationsUsed: { increment: 1 } },
+        });
+        return;
+      }
+
+      const balance = await tx.creditBalance.findUnique({
+        where: { userId },
+        select: { credits: true },
+      });
+
+      if ((balance?.credits ?? 0) <= 0) {
+        throw new Error('No README credits available');
+      }
+
+      await tx.creditBalance.update({
+        where: { userId },
+        data: { credits: { decrement: 1 } },
+      });
+      await tx.creditTransaction.create({
+        data: { userId, amount: -1, reason: 'readme_generation' },
+      });
     });
   } catch (err) {
     console.error('[server-usage] incrementReadmeUsageById failed:', err);
@@ -256,12 +340,7 @@ export async function incrementReadmeUsage(username: string): Promise<void> {
     const userId = await getUserId(username);
     if (!userId) return;
 
-    const month = currentMonth();
-    await db.usage.upsert({
-      where: { userId_month: { userId, month } },
-      update: { readmeGenerationsUsed: { increment: 1 } },
-      create: { userId, month, readmeGenerationsUsed: 1 },
-    });
+    await incrementReadmeUsageById(userId);
   } catch (err) {
     console.error('[server-usage] incrementReadmeUsage failed:', err);
   }
@@ -296,12 +375,14 @@ export async function getUsageSnapshotById(userId: string) {
       select: { readmeGenerationsUsed: true },
     });
     const used = usage?.readmeGenerationsUsed ?? 0;
+    const creditsRemaining = await getCreditBalance(userId);
 
     return {
       plan,
       readmeGenerationsUsed: used,
       readmeGenerationsLimit: limit,
-      readmeGenerationsRemaining: Math.max(0, limit - used),
+      readmeGenerationsRemaining: plan === 'pro' ? limit : Math.max(0, limit - used) + creditsRemaining,
+      creditsRemaining,
       month,
       dbAvailable: true,
     };
@@ -339,19 +420,22 @@ export async function getUsageSnapshot(username: string) {
     const month = currentMonth();
 
     let used = 0;
+    let creditsRemaining = 0;
     if (userId) {
       const usage = await db.usage.findUnique({
         where: { userId_month: { userId, month } },
         select: { readmeGenerationsUsed: true },
       });
       used = usage?.readmeGenerationsUsed ?? 0;
+      creditsRemaining = await getCreditBalance(userId);
     }
 
     return {
       plan,
       readmeGenerationsUsed: used,
       readmeGenerationsLimit: limit,
-      readmeGenerationsRemaining: Math.max(0, limit - used),
+      readmeGenerationsRemaining: plan === 'pro' ? limit : Math.max(0, limit - used) + creditsRemaining,
+      creditsRemaining,
       month,
       dbAvailable: true,
     };

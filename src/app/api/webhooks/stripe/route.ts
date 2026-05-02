@@ -17,12 +17,18 @@ import {
   upgradeToPro,
   updateSubscriptionFromStripe,
   cancelSubscription,
+  grantCredits,
 } from '@/lib/server-usage';
 import { sendPaymentConfirmationEmail } from '@/lib/email';
 import { db } from '@/lib/db';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
+
+const CREDIT_PACKS = {
+  [process.env.STRIPE_PRICE_CREDITS_50 ?? '']: 50,
+  [process.env.STRIPE_PRICE_CREDITS_150 ?? '']: 150,
+};
 
 export async function POST(request: NextRequest) {
   const body = await request.text();
@@ -46,6 +52,14 @@ export async function POST(request: NextRequest) {
   }
 
   try {
+    const existingEvent = await db.stripeEvent.findUnique({
+      where: { id: event.id },
+      select: { id: true },
+    });
+    if (existingEvent) {
+      return NextResponse.json({ received: true, duplicate: true });
+    }
+
     switch (event.type) {
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session;
@@ -99,16 +113,18 @@ export async function POST(request: NextRequest) {
           const { email, name } = await getUserInfo(userId, username);
           sendPaymentConfirmationEmail(email, name, 'monthly').catch(() => {});
         } else if (session.mode === 'payment') {
-          // Idempotency: for one-time payments, check by customer ID
-          if (customerId) {
-            const existing = await db.subscription.findFirst({
-              where: { stripeCustomerId: customerId, plan: 'pro', stripeSubscriptionId: null },
-              select: { id: true },
+          const lineItems = await stripe.checkout.sessions.listLineItems(session.id, { limit: 1 });
+          const priceId = lineItems.data[0]?.price?.id ?? '';
+          const credits = CREDIT_PACKS[priceId] ?? 0;
+
+          if (credits > 0 && userId) {
+            await grantCredits({
+              userId,
+              amount: credits,
+              reason: 'stripe_credit_pack',
+              stripeSessionId: session.id,
             });
-            if (existing) {
-              console.log('[webhook] Duplicate checkout.session.completed (lifetime) — already active:', customerId);
-              break;
-            }
+            break;
           }
 
           await upgradeToPro({
@@ -116,7 +132,7 @@ export async function POST(request: NextRequest) {
             username: username || undefined,
             stripeCustomerId: customerId,
             stripeSubscriptionId: null,
-            stripePriceId: process.env.STRIPE_PRICE_PRO_LIFETIME ?? '',
+            stripePriceId: priceId || (process.env.STRIPE_PRICE_PRO_LIFETIME ?? ''),
             stripeCurrentPeriodEnd: null,
           });
 
@@ -145,6 +161,10 @@ export async function POST(request: NextRequest) {
       default:
         break;
     }
+
+    await db.stripeEvent.create({
+      data: { id: event.id, type: event.type },
+    });
   } catch (err) {
     console.error(`[webhook] Error handling ${event.type}:`, err);
     // Return 200 so Stripe doesn't retry

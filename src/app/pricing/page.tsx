@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
@@ -9,6 +9,13 @@ import { PLANS, FREE_THEMES, PRO_THEMES } from '@/config/subscription';
 import { analytics } from '@/components/AnalyticsProvider';
 
 type BillingCycle = 'monthly' | 'annual';
+type AvailablePlans = {
+  monthly: boolean;
+  annual: boolean;
+  lifetime: boolean;
+  credits50: boolean;
+  credits150: boolean;
+};
 
 const FREE_FEATURES = [
   '5 README generations / month',
@@ -61,10 +68,44 @@ export default function PricingPage() {
   const [billing, setBilling] = useState<BillingCycle>('monthly');
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [availablePlans, setAvailablePlans] = useState<AvailablePlans>({
+    monthly: true,
+    annual: false,
+    lifetime: true,
+    credits50: false,
+    credits150: false,
+  });
 
   const isLoggedIn = !!session?.user;
 
+  useEffect(() => {
+    fetch('/api/stripe/plans')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data) setAvailablePlans(data);
+      })
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (billing === 'annual' && !availablePlans.annual) {
+      setBilling('monthly');
+    }
+  }, [availablePlans.annual, billing]);
+
   async function handleCheckout(plan: string) {
+    const planAvailable =
+      (plan === 'monthly' && availablePlans.monthly) ||
+      (plan === 'annual' && availablePlans.annual) ||
+      (plan === 'lifetime' && availablePlans.lifetime) ||
+      (plan === 'credits-50' && availablePlans.credits50) ||
+      (plan === 'credits-150' && availablePlans.credits150);
+
+    if (!planAvailable) {
+      setError('This plan is not available yet.');
+      return;
+    }
+
     if (!isLoggedIn) {
       analytics.trackConversion('pricing_auth_required', { plan });
       router.push('/auth?callbackUrl=/pricing');
@@ -123,10 +164,12 @@ export default function PricingPage() {
               <button
                 key={cycle}
                 onClick={() => setBilling(cycle)}
+                disabled={cycle === 'annual' && !availablePlans.annual}
                 style={{
-                  padding: '8px 20px', borderRadius: '8px', border: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s',
+                  padding: '8px 20px', borderRadius: '8px', border: 'none', fontSize: '14px', fontWeight: 600, transition: 'all 0.15s',
                   background: billing === cycle ? '#22c55e' : 'transparent',
-                  color: billing === cycle ? '#000' : '#666',
+                  color: cycle === 'annual' && !availablePlans.annual ? '#333' : billing === cycle ? '#000' : '#666',
+                  cursor: cycle === 'annual' && !availablePlans.annual ? 'not-allowed' : 'pointer',
                 }}
               >
                 {cycle === 'monthly' ? 'Monthly' : (
@@ -241,7 +284,7 @@ export default function PricingPage() {
             </ul>
             <button
               onClick={() => handleCheckout(proPlan)}
-              disabled={loadingPlan !== null}
+              disabled={loadingPlan !== null || !availablePlans[proPlan]}
               style={{ padding: '14px 24px', background: loadingPlan === proPlan ? '#16a34a' : '#22c55e', border: 'none', borderRadius: '12px', color: '#000', fontSize: '15px', fontWeight: 700, cursor: loadingPlan ? 'not-allowed' : 'pointer', transition: 'all 0.2s' }}
               onMouseEnter={(e) => { if (!loadingPlan) e.currentTarget.style.background = '#16a34a'; }}
               onMouseLeave={(e) => { if (!loadingPlan) e.currentTarget.style.background = '#22c55e'; }}
@@ -269,7 +312,7 @@ export default function PricingPage() {
             </ul>
             <button
               onClick={() => handleCheckout('lifetime')}
-              disabled={loadingPlan !== null}
+              disabled={loadingPlan !== null || !availablePlans.lifetime}
               style={{ padding: '14px 24px', background: 'transparent', border: '1px solid rgba(34,197,94,0.4)', borderRadius: '12px', color: '#22c55e', fontSize: '15px', fontWeight: 600, cursor: loadingPlan ? 'not-allowed' : 'pointer', transition: 'all 0.2s' }}
               onMouseEnter={(e) => { if (!loadingPlan) { e.currentTarget.style.background = 'rgba(34,197,94,0.1)'; e.currentTarget.style.borderColor = 'rgba(34,197,94,0.6)'; } }}
               onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'rgba(34,197,94,0.4)'; }}
@@ -280,6 +323,7 @@ export default function PricingPage() {
         </div>
 
         {/* Credit Packs */}
+        {(availablePlans.credits50 || availablePlans.credits150) && (
         <div style={{ background: '#0a0a0a', border: '1px solid #1a1a1a', borderRadius: '20px', padding: '36px', marginBottom: '64px' }}>
           <div style={{ marginBottom: '28px' }}>
             <h2 style={{ fontSize: '22px', fontWeight: 700, margin: '0 0 8px' }}>Need more credits?</h2>
@@ -291,7 +335,7 @@ export default function PricingPage() {
             {[
               { pack: 'credits-50', credits: 50, price: 5, highlight: false },
               { pack: 'credits-150', credits: 150, price: 12, highlight: true },
-            ].map(({ pack, credits, price, highlight }) => (
+            ].filter(({ pack }) => pack === 'credits-50' ? availablePlans.credits50 : availablePlans.credits150).map(({ pack, credits, price, highlight }) => (
               <div
                 key={pack}
                 style={{
@@ -335,6 +379,7 @@ export default function PricingPage() {
             ))}
           </div>
         </div>
+        )}
 
         {error && (
           <p style={{ textAlign: 'center', color: '#ef4444', marginBottom: '24px', fontSize: '14px' }}>{error}</p>

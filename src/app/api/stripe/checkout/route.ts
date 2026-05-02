@@ -79,10 +79,10 @@ export async function POST(request: NextRequest) {
         ? { customer: existingCustomerId }
         : { customer_email: user.email ?? undefined }),
       line_items: [{ price: priceId, quantity: 1 }],
-      metadata: { userId, username: user.username ?? '' },
+      metadata: { userId, username: user.username ?? '', plan },
       ...(mode === 'subscription' && {
         subscription_data: {
-          metadata: { userId, username: user.username ?? '' },
+          metadata: { userId, username: user.username ?? '', plan },
         },
       }),
       success_url: `${baseUrl}/dashboard?upgrade=success`,

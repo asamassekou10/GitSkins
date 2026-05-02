@@ -40,9 +40,24 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   }
 
   const related = blogPosts.filter((item) => item.slug !== post.slug).slice(0, 3);
+  const articleJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: post.title,
+    description: post.description,
+    dateModified: post.updated,
+    datePublished: post.updated,
+    author: { '@type': 'Organization', name: 'GitSkins' },
+    publisher: { '@type': 'Organization', name: 'GitSkins' },
+    mainEntityOfPage: `https://gitskins.com/blog/${post.slug}`,
+  };
 
   return (
     <main style={{ minHeight: '100vh', background: '#050505', color: '#fafafa' }}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+      />
       <article>
         <header style={{ maxWidth: 1040, margin: '0 auto', padding: '126px 24px 54px' }}>
           <Link href="/blog" style={{ color: '#22c55e', fontSize: 14, fontWeight: 850, textDecoration: 'none' }}>

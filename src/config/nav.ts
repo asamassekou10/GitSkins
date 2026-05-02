@@ -34,6 +34,7 @@ export const toolsNavItems: NavItem[] = [
   { label: 'Portfolio Builder', href: '/portfolio/octocat', keywords: 'portfolio' },
   { label: 'Avatar Generator', href: '/avatar', keywords: 'avatar profile picture generator themes' },
   { label: 'Project Persona', href: '/avatar/persona', keywords: 'avatar character persona projects github' },
+  { label: 'Settings', href: '/settings', keywords: 'settings account billing subscription credits' },
 ];
 
 /** Resources dropdown: docs, legal, support. */

@@ -20,6 +20,8 @@ model User {
   subscription  Subscription?
   usage         Usage[]
   accounts      Account[]
+  creditBalance CreditBalance?
+  creditTransactions CreditTransaction[]
 }
 
 model Account {
@@ -72,4 +74,31 @@ model Usage {
   updatedAt             DateTime @updatedAt
 
   @@unique([userId, month])
+}
+
+model CreditBalance {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  credits   Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CreditTransaction {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  amount          Int
+  reason          String
+  stripeSessionId String?  @unique
+  createdAt       DateTime @default(now())
+
+  @@index([userId])
+}
+
+model StripeEvent {
+  id        String   @id
+  type      String
+  createdAt DateTime @default(now())
 }
