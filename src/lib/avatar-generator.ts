@@ -76,11 +76,12 @@ export function hexDarken(hex: string, factor: number): string {
   return `#${nr.toString(16).padStart(2, '0')}${ng.toString(16).padStart(2, '0')}${nb.toString(16).padStart(2, '0')}`;
 }
 
-export type AvatarFamily = 'abstract' | 'mascot' | 'character';
+export type AvatarFamily = 'abstract' | 'mascot' | 'character' | 'dicebear';
 export type AvatarExpression = 'focused' | 'happy' | 'mysterious';
 export type AvatarBackground = 'gradient' | 'solid' | 'pattern';
 export type AvatarExportSize = 400 | 800 | 1024;
 export type AvatarStyle = 'nebula' | 'crystal' | 'circuit' | 'constellation' | 'terminal';
+export type DiceBearStyle = 'open-peeps' | 'avataaars' | 'lorelei' | 'micah' | 'adventurer' | 'personas' | 'notionists';
 export type AvatarCharacter =
   | 'terminal-mage'
   | 'ai-alchemist'

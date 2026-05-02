@@ -13,6 +13,8 @@
     "@ai-sdk/google": "^3.0.13",
     "@ai-sdk/openai": "^3.0.18",
     "@auth/prisma-adapter": "^2.11.2",
+    "@dicebear/collection": "^9.4.2",
+    "@dicebear/core": "^9.4.2",
     "@google/genai": "^1.39.0",
     "@neondatabase/serverless": "^1.1.0",
     "@octokit/core": "^5.0.0",

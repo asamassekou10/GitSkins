@@ -4,13 +4,24 @@
  * Generates a 400×400 themed avatar PNG.
  * Deterministic: same username+theme+style always produces the same image.
  *
- * Families: abstract | mascot | character
+ * Families: abstract | mascot | character | dicebear
  * Abstract styles: nebula | crystal | circuit | constellation | terminal
  * Character archetypes: terminal-mage | ai-alchemist | interface-architect | systems-ranger | pixel-adventurer | cloud-pilot | data-oracle | docs-sage | indie-builder
+ * DiceBear styles: open-peeps | avataaars | lorelei | micah | adventurer | personas | notionists
  * Export sizes: 400 | 800 | 1024
  * Legacy aliases: orbs→nebula, geo→crystal, pixel→circuit
  */
 
+import { createAvatar } from '@dicebear/core';
+import {
+  adventurer,
+  avataaars,
+  lorelei,
+  micah,
+  notionists,
+  openPeeps,
+  personas,
+} from '@dicebear/collection';
 import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
 import { getPremiumTheme } from '@/registry/themes/premium-registry';
@@ -26,6 +37,7 @@ import {
   AVATAR_SIZE as S,
   type AvatarBackground,
   type AvatarCharacter,
+  type DiceBearStyle,
   type AvatarExpression,
   type AvatarExportSize,
   type AvatarFamily,
@@ -36,10 +48,11 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 const VALID_STYLES: AvatarStyle[] = ['nebula', 'crystal', 'circuit', 'constellation', 'terminal'];
-const VALID_FAMILIES: AvatarFamily[] = ['abstract', 'mascot', 'character'];
+const VALID_FAMILIES: AvatarFamily[] = ['abstract', 'mascot', 'character', 'dicebear'];
 const VALID_EXPRESSIONS: AvatarExpression[] = ['focused', 'happy', 'mysterious'];
 const VALID_BACKGROUNDS: AvatarBackground[] = ['gradient', 'solid', 'pattern'];
 const VALID_SIZES: AvatarExportSize[] = [400, 800, 1024];
+const VALID_DICEBEAR_STYLES: DiceBearStyle[] = ['open-peeps', 'avataaars', 'lorelei', 'micah', 'adventurer', 'personas', 'notionists'];
 const VALID_CHARACTERS: AvatarCharacter[] = [
   'terminal-mage',
   'ai-alchemist',
@@ -57,6 +70,16 @@ const STYLE_ALIASES: Record<string, AvatarStyle> = {
   geo: 'crystal',
   pixel: 'circuit',
 };
+
+function getDiceBearCollection(style: DiceBearStyle) {
+  if (style === 'avataaars') return avataaars;
+  if (style === 'lorelei') return lorelei;
+  if (style === 'micah') return micah;
+  if (style === 'adventurer') return adventurer;
+  if (style === 'personas') return personas;
+  if (style === 'notionists') return notionists;
+  return openPeeps;
+}
 
 type AvatarRenderOptions = {
   username: string;
@@ -1346,6 +1369,7 @@ export async function GET(req: NextRequest) {
   const rawExpression = searchParams.get('expression') ?? 'focused';
   const rawBackground = searchParams.get('bg') ?? 'gradient';
   const rawCharacter = searchParams.get('character') ?? 'indie-builder';
+  const rawDiceBearStyle = searchParams.get('dicebearStyle') ?? 'open-peeps';
   const rawSize = Number(searchParams.get('size') ?? 400);
 
   // Resolve legacy aliases
@@ -1355,7 +1379,29 @@ export async function GET(req: NextRequest) {
   const expression = VALID_EXPRESSIONS.includes(rawExpression as AvatarExpression) ? rawExpression as AvatarExpression : 'focused';
   const background = VALID_BACKGROUNDS.includes(rawBackground as AvatarBackground) ? rawBackground as AvatarBackground : 'gradient';
   const character = VALID_CHARACTERS.includes(rawCharacter as AvatarCharacter) ? rawCharacter as AvatarCharacter : 'indie-builder';
+  const dicebearStyle = VALID_DICEBEAR_STYLES.includes(rawDiceBearStyle as DiceBearStyle) ? rawDiceBearStyle as DiceBearStyle : 'open-peeps';
   const size = VALID_SIZES.includes(rawSize as AvatarExportSize) ? rawSize as AvatarExportSize : 400;
+
+  if (family === 'dicebear') {
+    const theme = safeTheme(rawTheme);
+    const bg = extractBg(theme.colors.bg).replace('#', '');
+    const accent = theme.colors.accent.replace('#', '');
+    const primary = theme.colors.primary.replace('#', '');
+    const svg = createAvatar(getDiceBearCollection(dicebearStyle) as Parameters<typeof createAvatar>[0], {
+      seed: `${rawUsername}:${rawTheme}:${dicebearStyle}`,
+      size,
+      radius: 50,
+      backgroundColor: [bg, accent, primary],
+    }).toString();
+
+    return new Response(svg, {
+      headers: {
+        'Content-Type': 'image/svg+xml; charset=utf-8',
+        'Cache-Control': 'public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800',
+        'Access-Control-Allow-Origin': '*',
+      },
+    });
+  }
 
   let jsx: JSX.Element;
   if (family === 'character') {

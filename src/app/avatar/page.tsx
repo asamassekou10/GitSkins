@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { landingThemes } from '@/lib/landing-themes';
 import { isFreeTierTheme } from '@/config/subscription';
 import { useUserPlan } from '@/hooks/useUserPlan';
-import type { AvatarBackground, AvatarCharacter, AvatarExportSize, AvatarExpression, AvatarFamily, AvatarStyle } from '@/lib/avatar-generator';
+import type { AvatarBackground, AvatarCharacter, AvatarExportSize, AvatarExpression, AvatarFamily, AvatarStyle, DiceBearStyle } from '@/lib/avatar-generator';
 
 const FAMILIES: { id: AvatarFamily; label: string; desc: string }[] = [
   {
@@ -20,10 +20,25 @@ const FAMILIES: { id: AvatarFamily; label: string; desc: string }[] = [
     desc: 'Developer archetypes like Terminal Mage and AI Alchemist',
   },
   {
+    id: 'dicebear',
+    label: 'Real Character',
+    desc: 'Open-source character styles powered by DiceBear',
+  },
+  {
     id: 'abstract',
     label: 'Abstract',
     desc: 'Deterministic visual systems built from your username',
   },
+];
+
+const DICEBEAR_STYLES: { id: DiceBearStyle; label: string; desc: string }[] = [
+  { id: 'open-peeps', label: 'Open Peeps', desc: 'Hand-drawn modular people, CC0' },
+  { id: 'avataaars', label: 'Avataaars', desc: 'Classic profile-picture character style' },
+  { id: 'lorelei', label: 'Lorelei', desc: 'Modern friendly illustrated faces' },
+  { id: 'micah', label: 'Micah', desc: 'Clean minimal character portraits' },
+  { id: 'adventurer', label: 'Adventurer', desc: 'Expressive playful character heads' },
+  { id: 'personas', label: 'Personas', desc: 'Professional persona-style avatars' },
+  { id: 'notionists', label: 'Notionists', desc: 'Notion-inspired human characters' },
 ];
 
 const CHARACTERS: { id: AvatarCharacter; label: string; desc: string }[] = [
@@ -139,7 +154,8 @@ function buildAvatarUrl(
   expression: AvatarExpression,
   background: AvatarBackground,
   size: AvatarExportSize = 400,
-  character?: AvatarCharacter
+  character?: AvatarCharacter,
+  dicebearStyle?: DiceBearStyle
 ) {
   const params = new URLSearchParams({
     username,
@@ -151,6 +167,7 @@ function buildAvatarUrl(
     size: String(size),
   });
   if (character) params.set('character', character);
+  if (dicebearStyle) params.set('dicebearStyle', dicebearStyle);
 
   return `${base}/api/avatar?${params.toString()}`;
 }
@@ -165,6 +182,7 @@ export default function AvatarPage() {
   const [theme, setTheme] = useState('github-dark');
   const [family, setFamily] = useState<AvatarFamily>('mascot');
   const [character, setCharacter] = useState<AvatarCharacter>('terminal-mage');
+  const [dicebearStyle, setDicebearStyle] = useState<DiceBearStyle>('open-peeps');
   const [style, setStyle] = useState<AvatarStyle>('nebula');
   const [expression, setExpression] = useState<AvatarExpression>('focused');
   const [background, setBackground] = useState<AvatarBackground>('gradient');
@@ -179,14 +197,14 @@ export default function AvatarPage() {
 
   useEffect(() => {
     if (planLoading || userIsPro) return;
-    if (family === 'mascot' || family === 'character') setFamily('abstract');
+    if (family === 'mascot' || family === 'character' || family === 'dicebear') setFamily('abstract');
     if (!isFreeTierTheme(theme)) setTheme('github-dark');
     if (exportSize !== 400) setExportSize(400);
   }, [exportSize, family, planLoading, theme, userIsPro]);
 
   const base = typeof window !== 'undefined' ? window.location.origin : 'https://gitskins.com';
-  const avatarUrl = buildAvatarUrl(base, username || 'octocat', theme, family, style, expression, background, 400, character);
-  const exportUrl = buildAvatarUrl(base, username || 'octocat', theme, family, style, expression, background, exportSize, character);
+  const avatarUrl = buildAvatarUrl(base, username || 'octocat', theme, family, style, expression, background, 400, character, dicebearStyle);
+  const exportUrl = buildAvatarUrl(base, username || 'octocat', theme, family, style, expression, background, exportSize, character, dicebearStyle);
   const markdownCode = `![GitSkins Avatar](${avatarUrl})`;
 
   function handleApply() {
@@ -294,7 +312,7 @@ export default function AvatarPage() {
                   <motion.button
                     key={f.id}
                     onClick={() => {
-                      if ((f.id === 'mascot' || f.id === 'character') && !userIsPro) {
+                      if ((f.id === 'mascot' || f.id === 'character' || f.id === 'dicebear') && !userIsPro) {
                         goToPricing();
                         return;
                       }
@@ -311,12 +329,12 @@ export default function AvatarPage() {
                       borderRadius: '12px',
                       cursor: 'pointer',
                       textAlign: 'left',
-                      opacity: (f.id === 'mascot' || f.id === 'character') && !userIsPro ? 0.72 : 1,
+                      opacity: (f.id === 'mascot' || f.id === 'character' || f.id === 'dicebear') && !userIsPro ? 0.72 : 1,
                     }}
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center', fontSize: '14px', fontWeight: 700, color: family === f.id ? '#fff' : '#aaa', marginBottom: '6px' }}>
                       <span>{f.label}</span>
-                      {(f.id === 'mascot' || f.id === 'character') && !userIsPro && (
+                      {(f.id === 'mascot' || f.id === 'character' || f.id === 'dicebear') && !userIsPro && (
                         <span style={{ color: '#facc15', fontSize: 10, fontWeight: 800, letterSpacing: 0.4 }}>PRO</span>
                       )}
                     </div>
@@ -352,6 +370,38 @@ export default function AvatarPage() {
                       }}
                     >
                       <div style={{ color: character === option.id ? '#fff' : '#aaa', fontSize: 13, fontWeight: 750, marginBottom: 3 }}>
+                        {option.label}
+                      </div>
+                      <div style={{ color: '#555', fontSize: 12, lineHeight: 1.4 }}>
+                        {option.desc}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* DiceBear style picker */}
+            {family === 'dicebear' && (
+              <div style={{ background: '#0d0d0d', border: '1px solid #1a1a1a', borderRadius: '16px', padding: '20px' }}>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#666', textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: '12px' }}>
+                  Real Character Style
+                </label>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: 300, overflow: 'auto', paddingRight: 2 }}>
+                  {DICEBEAR_STYLES.map((option) => (
+                    <button
+                      key={option.id}
+                      onClick={() => setDicebearStyle(option.id)}
+                      style={{
+                        padding: '11px 12px',
+                        borderRadius: 11,
+                        border: `1px solid ${dicebearStyle === option.id ? 'rgba(34,197,94,0.45)' : '#1a1a1a'}`,
+                        background: dicebearStyle === option.id ? 'rgba(34,197,94,0.1)' : '#111',
+                        textAlign: 'left',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      <div style={{ color: dicebearStyle === option.id ? '#fff' : '#aaa', fontSize: 13, fontWeight: 750, marginBottom: 3 }}>
                         {option.label}
                       </div>
                       <div style={{ color: '#555', fontSize: 12, lineHeight: 1.4 }}>
@@ -419,11 +469,11 @@ export default function AvatarPage() {
             {/* Style picker */}
             <div style={{ background: '#0d0d0d', border: '1px solid #1a1a1a', borderRadius: '16px', padding: '20px' }}>
               <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#666', textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: '12px' }}>
-                {family === 'mascot' || family === 'character' ? 'Abstract Style Fallback' : 'Style'}
+                {family === 'mascot' || family === 'character' || family === 'dicebear' ? 'Abstract Style Fallback' : 'Style'}
               </label>
-              {(family === 'mascot' || family === 'character') && (
+              {(family === 'mascot' || family === 'character' || family === 'dicebear') && (
                 <p style={{ margin: '0 0 12px', color: '#555', fontSize: 12, lineHeight: 1.5 }}>
-                  Character avatars use the selected theme and mood. Pick an abstract style too so your copied URL can be switched back later.
+                  Character avatars use their own renderer. Pick an abstract style too so your copied URL can be switched back later.
                 </p>
               )}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -510,7 +560,7 @@ export default function AvatarPage() {
               <div style={{ position: 'relative' }}>
                 <AnimatePresence mode="wait">
                   <motion.div
-                    key={`${previewKey}-${username}-${theme}-${family}-${character}-${style}-${expression}-${background}`}
+                    key={`${previewKey}-${username}-${theme}-${family}-${character}-${dicebearStyle}-${style}-${expression}-${background}`}
                     initial={{ opacity: 0, scale: 0.92 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.96 }}
@@ -545,7 +595,7 @@ export default function AvatarPage() {
               </div>
 
               <p style={{ fontSize: '13px', color: '#555', textAlign: 'center', margin: 0 }}>
-                Each username produces a unique design. Mascots are original theme archetypes, not copied characters.
+                Each username produces a unique design. Real Character styles use open-source DiceBear SVG avatars.
               </p>
             </div>
 
