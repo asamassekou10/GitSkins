@@ -14,6 +14,7 @@ import {
   parseGeneratedReadme,
   buildReadmeStrategy,
   scoreReadme,
+  applyReadmeAnimationPack,
 } from '@/lib/readme-generator';
 import { generateReadmeWithGemini, isGeminiConfigured } from '@/lib/gemini';
 import { checkReadmeAllowed, checkReadmeAllowedById, incrementReadmeUsage, incrementReadmeUsageById } from '@/lib/server-usage';
@@ -38,6 +39,15 @@ const requestSchema = z.object({
   goal: z.enum(['get-hired', 'open-source', 'freelance', 'indie-hacker', 'student', 'founder', 'personal-brand']).optional().default('personal-brand'),
   structure: z.enum(['portfolio', 'hiring', 'open-source', 'founder', 'minimal', 'visual', 'technical']).optional().default('visual'),
   tone: z.enum(['concise', 'confident', 'friendly', 'senior', 'founder', 'playful', 'recruiter']).optional().default('confident'),
+  motionStyle: z.enum(['none', 'subtle', 'animated', 'playful']).optional().default('none'),
+  typingHeadline: z.boolean().optional().default(false),
+  typingLines: z.array(z.string().min(1).max(90)).max(4).optional().default([]),
+  animatedDivider: z.boolean().optional().default(false),
+  contributionSnake: z.boolean().optional().default(false),
+  skillBadges: z.boolean().optional().default(true),
+  visitorCounter: z.boolean().optional().default(false),
+  githubTrophies: z.boolean().optional().default(false),
+  avatarBlock: z.boolean().optional().default(false),
 });
 
 export async function POST(request: NextRequest) {
@@ -77,7 +87,28 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const validatedData = requestSchema.parse(body);
 
-    const { username, sections, style, theme, careerMode, careerRole, agentLoop, useAI, goal, structure, tone } = validatedData;
+    const {
+      username,
+      sections,
+      style,
+      theme,
+      careerMode,
+      careerRole,
+      agentLoop,
+      useAI,
+      goal,
+      structure,
+      tone,
+      motionStyle,
+      typingHeadline,
+      typingLines,
+      animatedDivider,
+      contributionSnake,
+      skillBadges,
+      visitorCounter,
+      githubTrophies,
+      avatarBlock,
+    } = validatedData;
 
     // Fetch GitHub profile data
     const profileData = await fetchProfileForReadme(username);
@@ -98,6 +129,15 @@ export async function POST(request: NextRequest) {
       goal,
       structure,
       tone,
+      motionStyle,
+      typingHeadline,
+      typingLines,
+      animatedDivider,
+      contributionSnake,
+      skillBadges,
+      visitorCounter,
+      githubTrophies,
+      avatarBlock,
     };
 
     let result;
@@ -119,6 +159,15 @@ export async function POST(request: NextRequest) {
           goal,
           structure,
           tone,
+          motionStyle,
+          typingHeadline,
+          typingLines,
+          animatedDivider,
+          contributionSnake,
+          skillBadges,
+          visitorCounter,
+          githubTrophies,
+          avatarBlock,
         });
 
         if (geminiResult?.markdown) {
@@ -194,6 +243,9 @@ export async function POST(request: NextRequest) {
       result = generateReadmeTemplate(profileData, config);
     }
 
+    const animationPack = applyReadmeAnimationPack(result.markdown, profileData, config);
+    result.markdown = animationPack.markdown;
+
     const strategy = buildReadmeStrategy(profileData, config);
     const score = scoreReadme(result.markdown, profileData, config);
     result.metadata = {
@@ -232,6 +284,8 @@ export async function POST(request: NextRequest) {
       reasoning,
       strategy,
       score,
+      animationBlocks: animationPack.blocks,
+      setupInstructions: animationPack.setupInstructions,
       profile: {
         name: profileData.name,
         avatarUrl: profileData.avatarUrl,

@@ -15,6 +15,7 @@ type CareerRole = 'frontend' | 'backend' | 'fullstack' | 'data' | 'mobile' | 'de
 type ReadmeGoal = 'get-hired' | 'open-source' | 'freelance' | 'indie-hacker' | 'student' | 'founder' | 'personal-brand';
 type ReadmeStructure = 'portfolio' | 'hiring' | 'open-source' | 'founder' | 'minimal' | 'visual' | 'technical';
 type ReadmeTone = 'concise' | 'confident' | 'friendly' | 'senior' | 'founder' | 'playful' | 'recruiter';
+type MotionStyle = 'none' | 'subtle' | 'animated' | 'playful';
 
 const themes = [
   { id: 'satan', name: 'Satan', color: '#ff4500', free: true },
@@ -70,6 +71,13 @@ const toneOptions: { id: ReadmeTone; label: string }[] = [
   { id: 'recruiter', label: 'Recruiter' },
 ];
 
+const motionOptions: { id: MotionStyle; label: string; description: string }[] = [
+  { id: 'none', label: 'None', description: 'Static, professional README' },
+  { id: 'subtle', label: 'Subtle', description: 'Typing headline and clean motion' },
+  { id: 'animated', label: 'Animated', description: 'Typing, divider, and live widgets' },
+  { id: 'playful', label: 'Playful', description: 'More personality and GitHub flair' },
+];
+
 const careerRoles: { id: CareerRole; label: string; description: string }[] = [
   { id: 'frontend', label: 'Frontend Engineer', description: 'UI/UX, performance, design systems' },
   { id: 'backend', label: 'Backend Engineer', description: 'APIs, scalability, data reliability' },
@@ -95,6 +103,14 @@ export default function ReadmeGeneratorPage() {
   const [goal, setGoal] = useState<ReadmeGoal>('get-hired');
   const [structure, setStructure] = useState<ReadmeStructure>('visual');
   const [tone, setTone] = useState<ReadmeTone>('confident');
+  const [motionStyle, setMotionStyle] = useState<MotionStyle>('subtle');
+  const [typingHeadline, setTypingHeadline] = useState(true);
+  const [typingLines, setTypingLines] = useState('Building developer tools\nFull-stack product engineer\nOpen-source enthusiast');
+  const [animatedDivider, setAnimatedDivider] = useState(true);
+  const [contributionSnake, setContributionSnake] = useState(false);
+  const [visitorCounter, setVisitorCounter] = useState(false);
+  const [githubTrophies, setGithubTrophies] = useState(false);
+  const [avatarBlock, setAvatarBlock] = useState(false);
 
   const [isLoading, setIsLoading] = useState(false);
   const [generatedReadme, setGeneratedReadme] = useState<string | null>(null);
@@ -106,6 +122,7 @@ export default function ReadmeGeneratorPage() {
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [copiedSetupPath, setCopiedSetupPath] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'code' | 'preview'>('preview');
   const [refinementNotes, setRefinementNotes] = useState<string[] | null>(null);
   const [agentReasoning, setAgentReasoning] = useState<string | null>(null);
@@ -124,6 +141,11 @@ export default function ReadmeGeneratorPage() {
     weakSignals: string[];
     suggestedTone: string;
     profileGoal: string;
+  } | null>(null);
+  const [setupInstructions, setSetupInstructions] = useState<{
+    title: string;
+    description: string;
+    files: { path: string; content: string }[];
   } | null>(null);
 
   const { plan: userPlan, readmeGenerationsUsed, readmeGenerationsLimit, readmeGenerationsRemaining, loading: planLoading, authenticated } = useUserPlan();
@@ -183,6 +205,7 @@ export default function ReadmeGeneratorPage() {
     setAgentReasoning(null);
     setReadmeScore(null);
     setStrategy(null);
+    setSetupInstructions(null);
     readmeProgress.start();
 
     try {
@@ -201,6 +224,15 @@ export default function ReadmeGeneratorPage() {
           goal,
           structure,
           tone,
+          motionStyle,
+          typingHeadline: motionStyle !== 'none' && typingHeadline,
+          typingLines: typingLines.split('\n').map((line) => line.trim()).filter(Boolean),
+          animatedDivider: motionStyle !== 'none' && animatedDivider,
+          contributionSnake: motionStyle !== 'none' && contributionSnake,
+          skillBadges: true,
+          visitorCounter: motionStyle !== 'none' && visitorCounter,
+          githubTrophies: motionStyle === 'playful' && githubTrophies,
+          avatarBlock: motionStyle !== 'none' && avatarBlock,
         }),
       });
 
@@ -217,6 +249,7 @@ export default function ReadmeGeneratorPage() {
       setProfileData(data.profile);
       setReadmeScore(data.score ?? null);
       setStrategy(data.strategy ?? null);
+      setSetupInstructions(data.setupInstructions ?? null);
       readmeProgress.complete();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
@@ -224,7 +257,7 @@ export default function ReadmeGeneratorPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [authenticated, username, sections, style, theme, careerMode, careerRole, agentLoop, useAI, goal, structure, tone, readmeProgress.start, readmeProgress.complete, readmeProgress.reset]);
+  }, [authenticated, username, sections, style, theme, careerMode, careerRole, agentLoop, useAI, goal, structure, tone, motionStyle, typingHeadline, typingLines, animatedDivider, contributionSnake, visitorCounter, githubTrophies, avatarBlock, readmeProgress.start, readmeProgress.complete, readmeProgress.reset]);
 
   const copyToClipboard = async () => {
     if (!generatedReadme) return;
@@ -243,6 +276,12 @@ export default function ReadmeGeneratorPage() {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
+  };
+
+  const copySetupFile = async (path: string, content: string) => {
+    await navigator.clipboard.writeText(content);
+    setCopiedSetupPath(path);
+    setTimeout(() => setCopiedSetupPath(null), 2000);
   };
 
   const downloadReadme = () => {
@@ -561,6 +600,73 @@ export default function ReadmeGeneratorPage() {
                   ))}
                 </div>
               </div>
+            </div>
+
+            {/* Motion & Visuals */}
+            <div style={{ marginBottom: '32px' }}>
+              <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: '#fff', marginBottom: '12px' }}>
+                Motion & Visuals
+              </label>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '10px', marginBottom: '14px' }}>
+                {motionOptions.map((option) => (
+                  <button
+                    key={option.id}
+                    onClick={() => setMotionStyle(option.id)}
+                    style={{
+                      padding: '12px 14px',
+                      background: motionStyle === option.id ? 'rgba(34, 197, 94, 0.15)' : '#0d0d0d',
+                      border: `1px solid ${motionStyle === option.id ? '#22c55e' : '#2a2a2a'}`,
+                      borderRadius: '10px',
+                      color: motionStyle === option.id ? '#22c55e' : '#aaa',
+                      fontSize: '13px',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                    }}
+                  >
+                    {option.label}
+                    <span style={{ display: 'block', marginTop: 5, color: '#666', fontSize: 11, fontWeight: 400, lineHeight: 1.35 }}>
+                      {option.description}
+                    </span>
+                  </button>
+                ))}
+              </div>
+
+              {motionStyle !== 'none' && (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: 14 }}>
+                  <div style={{ padding: 14, background: '#0d0d0d', border: '1px solid #2a2a2a', borderRadius: 12 }}>
+                    <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, color: '#ddd', fontSize: 13, fontWeight: 700, marginBottom: 10 }}>
+                      Typing headline
+                      <input type="checkbox" checked={typingHeadline} onChange={(e) => setTypingHeadline(e.target.checked)} />
+                    </label>
+                    <textarea
+                      value={typingLines}
+                      onChange={(e) => setTypingLines(e.target.value)}
+                      rows={4}
+                      placeholder="One line per typing phrase"
+                      disabled={!typingHeadline}
+                      style={{ width: '100%', resize: 'vertical', padding: 12, background: '#080808', border: '1px solid #242424', borderRadius: 10, color: '#fff', fontSize: 13, lineHeight: 1.5, opacity: typingHeadline ? 1 : 0.55 }}
+                    />
+                  </div>
+                  <div style={{ padding: 14, background: '#0d0d0d', border: '1px solid #2a2a2a', borderRadius: 12 }}>
+                    {[
+                      ['Animated divider', animatedDivider, setAnimatedDivider],
+                      ['Theme avatar block', avatarBlock, setAvatarBlock],
+                      ['Visitor counter', visitorCounter, setVisitorCounter],
+                      ['Contribution snake', contributionSnake, setContributionSnake],
+                      ['GitHub trophies', githubTrophies, setGithubTrophies],
+                    ].map(([label, checked, setter]) => (
+                      <label key={label as string} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, color: '#bbb', fontSize: 13, fontWeight: 650, padding: '8px 0', borderBottom: label === 'GitHub trophies' ? 'none' : '1px solid #1f1f1f' }}>
+                        <span>
+                          {label as string}
+                          {label === 'Contribution snake' && <span style={{ color: '#666', fontSize: 11, marginLeft: 6 }}>setup required</span>}
+                        </span>
+                        <input type="checkbox" checked={checked as boolean} onChange={(e) => (setter as (value: boolean) => void)(e.target.checked)} />
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Style Selection */}
@@ -1114,6 +1220,34 @@ export default function ReadmeGeneratorPage() {
                       {readmeScore.suggestions.map((suggestion) => <li key={suggestion}>{suggestion}</li>)}
                     </ul>
                   ) : null}
+                </div>
+              )}
+
+              {/* Setup files for animations that require GitHub Actions */}
+              {setupInstructions && (
+                <div style={{ padding: '18px 20px', borderBottom: '1px solid #1f1f1f', background: 'rgba(88, 166, 255, 0.06)' }}>
+                  <div style={{ fontSize: '13px', fontWeight: 700, color: '#58a6ff', marginBottom: 6 }}>
+                    {setupInstructions.title}
+                  </div>
+                  <p style={{ margin: '0 0 14px', color: '#a1a1a1', fontSize: 13, lineHeight: 1.55 }}>
+                    {setupInstructions.description}
+                  </p>
+                  {setupInstructions.files.map((file) => (
+                    <div key={file.path} style={{ border: '1px solid #223044', borderRadius: 12, overflow: 'hidden', background: '#071019' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '10px 12px', borderBottom: '1px solid #223044' }}>
+                        <code style={{ color: '#c9d1d9', fontSize: 12 }}>{file.path}</code>
+                        <button
+                          onClick={() => copySetupFile(file.path, file.content)}
+                          style={{ padding: '6px 10px', background: copiedSetupPath === file.path ? '#22c55e' : '#102033', color: copiedSetupPath === file.path ? '#050505' : '#dbeafe', border: '1px solid #28466b', borderRadius: 8, fontSize: 12, fontWeight: 800, cursor: 'pointer' }}
+                        >
+                          {copiedSetupPath === file.path ? 'Copied' : 'Copy file'}
+                        </button>
+                      </div>
+                      <pre style={{ margin: 0, padding: 14, overflowX: 'auto', color: '#c9d1d9', fontSize: 12, lineHeight: 1.55 }}>
+                        <code>{file.content}</code>
+                      </pre>
+                    </div>
+                  ))}
                 </div>
               )}
 

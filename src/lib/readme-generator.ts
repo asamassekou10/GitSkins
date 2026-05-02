@@ -15,6 +15,8 @@ import type {
   ReadmeTone,
   ReadmeStrategy,
   ReadmeScore,
+  ReadmeAnimationBlocks,
+  ReadmeSetupInstructions,
 } from '@/types/readme';
 
 /**
@@ -41,6 +43,15 @@ const languageBadges: Record<string, string> = {
   Vue: 'https://img.shields.io/badge/Vue.js-4FC08D?style=for-the-badge&logo=vuedotjs&logoColor=white',
   React: 'https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=black',
   Svelte: 'https://img.shields.io/badge/Svelte-FF3E00?style=for-the-badge&logo=svelte&logoColor=white',
+};
+
+const themeAccent: Record<string, string> = {
+  satan: 'FF4500',
+  neon: '00FFFF',
+  zen: '00FF88',
+  'github-dark': '22C55E',
+  dracula: 'FF79C6',
+  matrix: '22C55E',
 };
 
 const goalLabels: Record<ReadmeGoal, string> = {
@@ -125,6 +136,125 @@ export function scoreReadme(markdown: string, data: ExtendedProfileData, config:
     recruiterScanability,
     suggestions: suggestions.length ? suggestions : ['Strong structure. Keep project descriptions specific and outcome-focused.'],
   };
+}
+
+export function buildReadmeAnimationPack(
+  data: ExtendedProfileData,
+  config: ReadmeConfig
+): {
+  markdown: string;
+  blocks: ReadmeAnimationBlocks;
+  setupInstructions?: ReadmeSetupInstructions;
+} {
+  if (!config.motionStyle || config.motionStyle === 'none') {
+    return { markdown: '', blocks: {} };
+  }
+
+  const color = themeAccent[config.theme] ?? '22C55E';
+  const displayName = data.name || config.username;
+  const defaultLines = [
+    `Hi, I'm ${displayName}`,
+    buildReadmeStrategy(data, config).primaryRole,
+    data.bio || `Building with ${data.languages[0]?.name || 'code'}`,
+  ];
+  const typingLines = (config.typingLines?.filter(Boolean).length ? config.typingLines : defaultLines)
+    .slice(0, 4)
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  const blocks: ReadmeAnimationBlocks = {};
+  const parts: string[] = [];
+
+  if (config.typingHeadline && typingLines.length > 0) {
+    const lines = typingLines.map((line) => line.replace(/\s+/g, '+')).join(';');
+    const typingUrl = `https://readme-typing-svg.demolab.com?font=Fira+Code&weight=700&size=28&duration=2800&pause=900&color=${color}&center=true&vCenter=true&width=820&lines=${encodeURIComponent(lines).replace(/%3B/g, ';').replace(/%2B/g, '+')}`;
+    blocks.typingSvg = `<p align="center">\n  <img src="${typingUrl}" alt="Typing SVG" />\n</p>`;
+    parts.push(blocks.typingSvg);
+  }
+
+  if (config.avatarBlock) {
+    parts.push(`<p align="center">\n  <img src="https://gitskins.com/api/avatar?username=${config.username}&theme=${config.theme}&family=character&size=240" width="140" alt="${config.username}'s GitSkins avatar" />\n</p>`);
+  }
+
+  if (config.visitorCounter) {
+    blocks.visitorCounter = `<p align="center">\n  <img src="https://komarev.com/ghpvc/?username=${config.username}&label=Profile%20views&color=${color.toLowerCase()}&style=flat" alt="${config.username} profile views" />\n</p>`;
+    parts.push(blocks.visitorCounter);
+  }
+
+  if (config.githubTrophies) {
+    blocks.trophies = `<p align="center">\n  <img src="https://github-profile-trophy.vercel.app/?username=${config.username}&theme=onedark&no-frame=true&row=1&column=6" alt="${config.username}'s GitHub trophies" />\n</p>`;
+    parts.push(blocks.trophies);
+  }
+
+  if (config.animatedDivider) {
+    blocks.divider = `<p align="center">\n  <img src="https://capsule-render.vercel.app/api?type=rect&height=2&color=gradient&customColorList=12,20,24&section=footer" width="100%" alt="" />\n</p>`;
+    parts.push(blocks.divider);
+  }
+
+  let setupInstructions: ReadmeSetupInstructions | undefined;
+  if (config.contributionSnake) {
+    blocks.snake = `<p align="center">\n  <img src="https://raw.githubusercontent.com/${config.username}/${config.username}/output/github-snake.svg" alt="Contribution snake animation" />\n</p>`;
+    parts.push(`## Contribution Snake\n\n${blocks.snake}`);
+    setupInstructions = {
+      title: 'Contribution snake setup',
+      description: 'Create this workflow file in your profile repository. It generates the animated contribution snake daily on the output branch.',
+      files: [
+        {
+          path: '.github/workflows/github-snake.yml',
+          content: buildSnakeWorkflow(config.username),
+        },
+      ],
+    };
+  }
+
+  return {
+    markdown: parts.length ? `${parts.join('\n\n')}\n\n` : '',
+    blocks,
+    setupInstructions,
+  };
+}
+
+export function applyReadmeAnimationPack(
+  markdown: string,
+  data: ExtendedProfileData,
+  config: ReadmeConfig
+) {
+  const pack = buildReadmeAnimationPack(data, config);
+  if (!pack.markdown) return { ...pack, markdown };
+
+  return {
+    ...pack,
+    markdown: `${pack.markdown}${markdown}`.trim(),
+  };
+}
+
+function buildSnakeWorkflow(username: string): string {
+  return `name: Generate contribution snake
+
+on:
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: Platane/snk/svg-only@v3
+        with:
+          github_user_name: ${username}
+          outputs: dist/github-snake.svg
+
+      - name: Push snake
+        uses: crazy-max/ghaction-github-pages@v4
+        with:
+          target_branch: output
+          build_dir: dist
+        env:
+          GITHUB_TOKEN: \${{ secrets.GITHUB_TOKEN }}
+`;
 }
 
 function inferPrimaryRole(languages: string[], config: ReadmeConfig): string {

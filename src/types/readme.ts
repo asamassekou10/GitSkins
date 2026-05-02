@@ -31,6 +31,8 @@ export type ReadmeTone =
   | 'playful'
   | 'recruiter';
 
+export type ReadmeMotionStyle = 'none' | 'subtle' | 'animated' | 'playful';
+
 export type ReadmeSectionType =
   | 'header'
   | 'about'
@@ -59,6 +61,15 @@ export interface ReadmeConfig {
   goal?: ReadmeGoal;
   structure?: ReadmeStructure;
   tone?: ReadmeTone;
+  motionStyle?: ReadmeMotionStyle;
+  typingHeadline?: boolean;
+  typingLines?: string[];
+  animatedDivider?: boolean;
+  contributionSnake?: boolean;
+  skillBadges?: boolean;
+  visitorCounter?: boolean;
+  githubTrophies?: boolean;
+  avatarBlock?: boolean;
 }
 
 export interface GeneratedReadme {
@@ -96,6 +107,25 @@ export interface ReadmeScore {
   suggestions: string[];
 }
 
+export interface ReadmeSetupFile {
+  path: string;
+  content: string;
+}
+
+export interface ReadmeSetupInstructions {
+  title: string;
+  description: string;
+  files: ReadmeSetupFile[];
+}
+
+export interface ReadmeAnimationBlocks {
+  typingSvg?: string;
+  divider?: string;
+  snake?: string;
+  visitorCounter?: string;
+  trophies?: string;
+}
+
 export interface ReadmeGeneratorRequest {
   username: string;
   sections?: ReadmeSectionType[];
@@ -108,6 +138,15 @@ export interface ReadmeGeneratorRequest {
   goal?: ReadmeGoal;
   structure?: ReadmeStructure;
   tone?: ReadmeTone;
+  motionStyle?: ReadmeMotionStyle;
+  typingHeadline?: boolean;
+  typingLines?: string[];
+  animatedDivider?: boolean;
+  contributionSnake?: boolean;
+  skillBadges?: boolean;
+  visitorCounter?: boolean;
+  githubTrophies?: boolean;
+  avatarBlock?: boolean;
 }
 
 export interface ExtendedProfileData {

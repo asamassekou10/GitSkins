@@ -11,7 +11,7 @@
  */
 
 import { GoogleGenAI, HarmCategory, HarmBlockThreshold, ThinkingLevel, type GenerateContentConfig } from '@google/genai';
-import type { ExtendedProfileData, ReadmeGoal, ReadmeStructure, ReadmeTone } from '@/types/readme';
+import type { ExtendedProfileData, ReadmeGoal, ReadmeStructure, ReadmeTone, ReadmeMotionStyle } from '@/types/readme';
 import { buildReadmeStrategy } from '@/lib/readme-generator';
 
 // Safety settings for content generation
@@ -141,6 +141,15 @@ export async function generateReadmeWithGemini(
     goal?: ReadmeGoal;
     structure?: ReadmeStructure;
     tone?: ReadmeTone;
+    motionStyle?: ReadmeMotionStyle;
+    typingHeadline?: boolean;
+    typingLines?: string[];
+    animatedDivider?: boolean;
+    contributionSnake?: boolean;
+    skillBadges?: boolean;
+    visitorCounter?: boolean;
+    githubTrophies?: boolean;
+    avatarBlock?: boolean;
   }
 ): Promise<{ markdown: string; refinementNotes?: string[]; reasoning?: string }> {
   const topLanguages = profileData.languages.slice(0, 5).map((l) => l.name).join(', ');
@@ -156,6 +165,15 @@ export async function generateReadmeWithGemini(
     goal: config.goal,
     structure: config.structure,
     tone: config.tone,
+    motionStyle: config.motionStyle,
+    typingHeadline: config.typingHeadline,
+    typingLines: config.typingLines,
+    animatedDivider: config.animatedDivider,
+    contributionSnake: config.contributionSnake,
+    skillBadges: config.skillBadges,
+    visitorCounter: config.visitorCounter,
+    githubTrophies: config.githubTrophies,
+    avatarBlock: config.avatarBlock,
   });
 
   let reasoning: string | undefined;
@@ -197,6 +215,7 @@ ${pinnedReposText || 'No pinned repositories'}
 - Goal: ${strategy.profileGoal}
 - Structure: ${config.structure || 'visual'}
 - Tone: ${strategy.suggestedTone}
+- Motion style: ${config.motionStyle || 'none'}
 - Sections to include: ${config.sections.join(', ')}
 - Widget theme: ${config.theme}
 
@@ -232,6 +251,7 @@ ${pinnedReposText || 'No pinned repositories'}
 9. End with a footer mentioning GitSkins
 10. Do not invent jobs, education, metrics, links, or project claims not supported by the profile data
 11. Write featured project blurbs as outcome-oriented proof, not plain repository descriptions
+12. If motion is enabled, leave room for animation blocks near the top and avoid duplicating typing/snake/divider widgets yourself. GitSkins will inject validated animation markdown.
 
 Output ONLY the markdown content. No explanations or code blocks around it.`;
 
