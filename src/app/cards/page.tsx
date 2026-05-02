@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { landingThemes } from '@/lib/landing-themes';
 import { isFreeTierTheme } from '@/config/subscription';
@@ -120,19 +121,29 @@ export default function CardsPage() {
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
-          style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 0.92fr) minmax(320px, 1.08fr)', gap: 34, alignItems: 'start' }}
+          style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 360px), 1fr))', gap: 34, alignItems: 'start' }}
         >
           <div style={{ position: 'sticky', top: 96, display: 'flex', flexDirection: 'column', gap: 18 }}>
             <div>
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '6px 12px', borderRadius: 999, background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.18)', color: '#22c55e', fontSize: 12, fontWeight: 750, marginBottom: 18 }}>
-                README card builder
+                Card Studio
               </div>
-              <h1 style={{ margin: 0, fontSize: 'clamp(34px, 5vw, 58px)', lineHeight: 0.95, letterSpacing: '-0.045em', fontWeight: 850 }}>
-                Build your GitHub cards without editing URLs.
+              <h1 style={{ margin: 0, fontSize: 'clamp(38px, 5.8vw, 66px)', lineHeight: 0.94, letterSpacing: '-0.055em', fontWeight: 900 }}>
+                Design the card people notice first.
               </h1>
               <p style={{ margin: '18px 0 0', color: '#8a8a8a', fontSize: 17, lineHeight: 1.65, maxWidth: 520 }}>
-                Pick a card, choose a theme, preview it live, then copy Markdown or HTML straight into your GitHub profile README.
+                Pick a format, match it with your avatar and theme, then copy a production-ready embed for your GitHub profile README.
               </p>
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 22 }}>
+                <Link href="/avatar" style={{ padding: '11px 14px', borderRadius: 12, background: 'rgba(255,255,255,0.05)', border: '1px solid #262626', color: '#fafafa', textDecoration: 'none', fontSize: 13, fontWeight: 800 }}>
+                  Match an avatar
+                </Link>
+                {!userIsPro && (
+                  <Link href="/pricing" style={{ padding: '11px 14px', borderRadius: 12, background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.3)', color: '#4ade80', textDecoration: 'none', fontSize: 13, fontWeight: 800 }}>
+                    Unlock premium themes
+                  </Link>
+                )}
+              </div>
             </div>
 
             <div style={{ background: '#0d0d0d', border: '1px solid #1a1a1a', borderRadius: 18, padding: 20, display: 'flex', flexDirection: 'column', gap: 18 }}>
@@ -255,7 +266,7 @@ export default function CardsPage() {
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-            <div style={{ background: 'radial-gradient(circle at top left, rgba(34,197,94,0.1), transparent 32%), #0b0b0b', border: '1px solid #1a1a1a', borderRadius: 22, padding: 18, overflow: 'hidden' }}>
+            <div style={{ background: 'radial-gradient(circle at top left, rgba(34,197,94,0.16), transparent 34%), #0b0b0b', border: '1px solid #1a1a1a', borderRadius: 24, padding: 18, overflow: 'hidden', boxShadow: '0 24px 80px rgba(0,0,0,0.28)' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 16 }}>
                 <div>
                   <div style={{ color: '#fff', fontSize: 15, fontWeight: 760 }}>{cardType.label} Preview</div>

@@ -320,7 +320,7 @@ export default function PortfolioBuildPage() {
           <div style={{ textAlign: 'center', marginBottom: '32px' }}>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 12px', background: 'rgba(255, 255, 255, 0.1)', border: '1px solid rgba(255, 255, 255, 0.2)', borderRadius: '100px', fontSize: '12px', fontWeight: 500, color: '#fff', marginBottom: '16px' }}>
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
-              Gemini 3 Pro · Coder Edition
+              AI Portfolio Builder
             </div>
             <h1 style={baseStyles.title}>Portfolio Website Builder</h1>
             <p style={baseStyles.subtitle}>

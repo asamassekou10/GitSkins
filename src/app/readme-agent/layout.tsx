@@ -3,11 +3,11 @@ import type { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'Live README Agent',
   description:
-    'Watch Gemini 3 Pro think, draft, and refine your GitHub README in real-time with Extended Thinking and streaming.',
+    'Watch GitSkins draft, refine, and stream a polished GitHub README in real time.',
   openGraph: {
     title: 'Live README Agent | GitSkins',
     description:
-      'AI-powered README generation with real-time streaming. Watch Gemini 3 reason through your profile and generate a polished README.',
+      'AI-powered README generation with real-time streaming and profile-aware refinement.',
   },
 };
 

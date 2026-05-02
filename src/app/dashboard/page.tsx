@@ -205,8 +205,38 @@ export default function DashboardPage() {
           </div>
         )}
 
-        <h1 style={{ fontSize: '32px', fontWeight: 700, color: '#fff', marginBottom: '8px' }}>Dashboard</h1>
-        <p style={{ color: '#888', marginBottom: '32px' }}>Manage your account, subscription, and usage</p>
+        <section style={{ position: 'relative', overflow: 'hidden', background: 'radial-gradient(circle at 82% 12%, rgba(34,197,94,0.18), transparent 34%), #0b0b0b', border: '1px solid #1d1d1d', borderRadius: 28, padding: 'clamp(24px, 5vw, 38px)', marginBottom: 24 }}>
+          <div style={{ position: 'relative', zIndex: 1, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 310px), 1fr))', gap: 28, alignItems: 'center' }}>
+            <div>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '7px 12px', borderRadius: 999, background: isPro ? 'rgba(34,197,94,0.12)' : 'rgba(255,255,255,0.05)', border: isPro ? '1px solid rgba(34,197,94,0.3)' : '1px solid #242424', color: isPro ? '#4ade80' : '#aaa', fontSize: 12, fontWeight: 850, letterSpacing: 0.4, marginBottom: 18 }}>
+                {isPro ? 'Pro profile kit' : 'Free profile kit'}
+              </div>
+              <h1 style={{ fontSize: 'clamp(34px, 5vw, 58px)', lineHeight: 0.96, letterSpacing: '-0.05em', fontWeight: 900, color: '#fff', margin: '0 0 16px' }}>
+                Welcome back, {displayName.split(' ')[0]}.
+              </h1>
+              <p style={{ color: '#9b9b9b', margin: '0 0 24px', fontSize: 16, lineHeight: 1.65, maxWidth: 520 }}>
+                This is your GitSkins workspace: build your card, create matching avatars, generate README assets, and manage your Pro access.
+              </p>
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                <Link href="/cards" style={{ padding: '12px 16px', background: '#22c55e', color: '#050505', borderRadius: 12, fontWeight: 850, fontSize: 14, textDecoration: 'none' }}>
+                  Build a card
+                </Link>
+                <Link href="/avatar" style={{ padding: '12px 16px', background: 'rgba(255,255,255,0.05)', border: '1px solid #262626', color: '#fafafa', borderRadius: 12, fontWeight: 800, fontSize: 14, textDecoration: 'none' }}>
+                  Create avatar
+                </Link>
+                {!isPro && (
+                  <Link href="/pricing" style={{ padding: '12px 16px', background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.3)', color: '#4ade80', borderRadius: 12, fontWeight: 800, fontSize: 14, textDecoration: 'none' }}>
+                    Unlock Pro
+                  </Link>
+                )}
+              </div>
+            </div>
+            <div style={{ position: 'relative', minHeight: 250 }}>
+              <img src={buildWidgetUrl('', WIDGETS[3], user.username || 'octocat', widgetTheme)} alt="Your GitSkins profile card" style={{ width: '100%', borderRadius: 16, display: 'block', boxShadow: '0 28px 80px rgba(0,0,0,0.46)' }} />
+              <img src={`/api/avatar?username=${encodeURIComponent(user.username || 'octocat')}&theme=${widgetTheme}&family=dicebear&dicebearStyle=open-peeps&size=400`} alt="Your GitSkins avatar" style={{ position: 'absolute', right: 10, bottom: -18, width: 112, height: 112, borderRadius: 26, border: '1px solid rgba(255,255,255,0.16)', boxShadow: '0 20px 60px rgba(0,0,0,0.48)' }} />
+            </div>
+          </div>
+        </section>
 
         {/* Profile Card */}
         <div style={{ ...cardStyle, marginBottom: '24px' }}>

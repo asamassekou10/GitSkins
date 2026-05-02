@@ -254,7 +254,7 @@ export default function AvatarPage() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#050505', color: '#fafafa' }}>
-      <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '100px clamp(16px, 4vw, 24px) 80px' }}>
+      <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '100px clamp(16px, 4vw, 24px) 80px' }}>
 
         {/* Header */}
         <motion.div
@@ -263,21 +263,29 @@ export default function AvatarPage() {
           transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
           style={{ textAlign: 'center', marginBottom: '56px' }}
         >
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '6px 14px', background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.2)', borderRadius: '100px', fontSize: '13px', fontWeight: 500, color: '#22c55e', marginBottom: '24px' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '7px 14px', background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.2)', borderRadius: '100px', fontSize: '13px', fontWeight: 850, color: '#22c55e', marginBottom: '24px' }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="4" />
             </svg>
-            Abstract avatars free · Mascots for Pro
+            Avatar Studio
           </div>
-          <h1 style={{ fontSize: 'clamp(32px, 5vw, 52px)', fontWeight: 800, letterSpacing: '-0.03em', marginBottom: '16px', background: 'linear-gradient(135deg, #fff 0%, #22c55e 60%, #4ade80 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-            Theme-Matched Avatar Builder
+          <h1 style={{ fontSize: 'clamp(38px, 6vw, 72px)', lineHeight: 0.95, fontWeight: 900, letterSpacing: '-0.055em', marginBottom: '16px', background: 'linear-gradient(135deg, #fff 0%, #22c55e 60%, #4ade80 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+            Create a profile picture that matches your developer brand.
           </h1>
-          <p style={{ color: '#888', fontSize: '17px', maxWidth: '520px', margin: '0 auto', lineHeight: 1.6 }}>
-            Generate an original profile picture that matches your GitSkins theme. Build a mascot character or deterministic abstract mark from your username.
+          <p style={{ color: '#888', fontSize: '17px', maxWidth: '650px', margin: '0 auto', lineHeight: 1.6 }}>
+            Generate abstract marks for free, or unlock Pro character families, real avatar styles, high-resolution exports, and project-based personas.
           </p>
+          <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap', marginTop: 24 }}>
+            <a href="#avatar-preview" style={{ padding: '12px 16px', borderRadius: 12, background: '#22c55e', color: '#050505', textDecoration: 'none', fontSize: 14, fontWeight: 850 }}>
+              Start designing
+            </a>
+            <a href="/cards" style={{ padding: '12px 16px', borderRadius: 12, background: 'rgba(255,255,255,0.05)', border: '1px solid #262626', color: '#fafafa', textDecoration: 'none', fontSize: 14, fontWeight: 800 }}>
+              Match with a card
+            </a>
+          </div>
         </motion.div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'clamp(280px, 35%, 340px) 1fr', gap: '32px', alignItems: 'start' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 340px), 1fr))', gap: '32px', alignItems: 'start' }}>
 
           {/* Left: Controls */}
           <motion.div
@@ -565,7 +573,7 @@ export default function AvatarPage() {
             style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}
           >
             {/* Avatar Preview */}
-            <div style={{ background: '#0d0d0d', border: '1px solid #1a1a1a', borderRadius: '20px', padding: '32px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px' }}>
+            <div id="avatar-preview" style={{ background: 'radial-gradient(circle at 50% 0%, rgba(34,197,94,0.12), transparent 42%), #0d0d0d', border: '1px solid #1a1a1a', borderRadius: '24px', padding: '32px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px', boxShadow: '0 24px 80px rgba(0,0,0,0.28)' }}>
               <div style={{ position: 'relative' }}>
                 <AnimatePresence mode="wait">
                   <motion.div

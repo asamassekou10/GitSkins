@@ -82,8 +82,8 @@ export default function ReadmeGeneratorPage() {
   const readmeStepLabels = useMemo(
     () =>
       careerMode && agentLoop
-        ? ['Fetching GitHub profile', 'Gemini 3 is thinking', `Refining for ${careerRole}`]
-        : ['Fetching GitHub profile', 'Gemini 3 is thinking'],
+        ? ['Fetching GitHub profile', 'Drafting README', `Refining for ${careerRole}`]
+        : ['Fetching GitHub profile', 'Drafting README'],
     [careerMode, agentLoop, careerRole]
   );
   const readmeProgress = useThinkingProgress(readmeStepLabels, { intervalMs: 1200 });
@@ -231,29 +231,20 @@ export default function ReadmeGeneratorPage() {
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
               </svg>
-              Powered by Gemini 3 Pro · Extended Thinking
+              AI profile writing studio
             </div>
 
             <h1
               style={{
-                fontSize: 'clamp(32px, 5vw, 48px)',
-                fontWeight: 700,
+                fontSize: 'clamp(38px, 6vw, 66px)',
+                fontWeight: 900,
                 margin: 0,
                 marginBottom: '16px',
-                letterSpacing: '-0.02em',
+                letterSpacing: '-0.055em',
+                lineHeight: 0.96,
               }}
             >
-              README{' '}
-              <span
-                style={{
-                  background: 'linear-gradient(135deg, #22c55e 0%, #4ade80 100%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                }}
-              >
-                Generator
-              </span>
+              Build a README that reads like a product story.
             </h1>
 
             <p
@@ -261,11 +252,11 @@ export default function ReadmeGeneratorPage() {
                 fontSize: '17px',
                 color: '#a1a1a1',
                 margin: '0 auto',
-                maxWidth: '460px',
+                maxWidth: '620px',
                 lineHeight: 1.6,
               }}
             >
-              The Profile Agent creates a professional GitHub profile README in seconds with AI assistance.
+              Turn your repositories, skills, and profile signal into a polished GitHub README with themed cards, sections, and copy-ready Markdown.
             </p>
             <a
               href="/readme-agent"
@@ -285,7 +276,7 @@ export default function ReadmeGeneratorPage() {
                 transition: 'all 0.15s ease',
               }}
             >
-              Try Live Agent — watch Gemini 3 think in real-time
+              Open the Live README Agent
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
             </a>
           </div>
@@ -884,7 +875,7 @@ export default function ReadmeGeneratorPage() {
                         fontWeight: 500,
                       }}
                     >
-                      {aiProvider === 'gemini_refined' ? 'Gemini (refined)' : aiProvider}
+                      {aiProvider === 'gemini_refined' ? 'AI refined' : aiProvider === 'gemini' ? 'AI generated' : aiProvider}
                     </span>
                   )}
                 </div>
@@ -1133,7 +1124,7 @@ export default function ReadmeGeneratorPage() {
                     }}
                   >
                     <div>1. Fetched GitHub profile.</div>
-                    <div>2. Generated README with Gemini.</div>
+                    <div>2. Generated README draft.</div>
                     {aiProvider === 'gemini_refined' && refinementNotes && refinementNotes.length > 0 && (
                       <>
                         <div>3. Critiqued for {careerRole}.</div>

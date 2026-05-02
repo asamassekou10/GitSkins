@@ -182,9 +182,14 @@ export default function Home() {
                   See your GitHub identity come to life.
                 </h2>
               </div>
-              <Link href="/cards" style={{ color: '#050505', background: '#22c55e', borderRadius: 12, padding: '13px 18px', textDecoration: 'none', fontWeight: 850 }}>
-                Open Card Builder
-              </Link>
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                <Link href="/cards" style={{ color: '#050505', background: '#22c55e', borderRadius: 12, padding: '13px 18px', textDecoration: 'none', fontWeight: 850 }}>
+                  Open Card Builder
+                </Link>
+                <Link href="/auth" style={{ color: '#fafafa', background: 'rgba(255,255,255,0.04)', border: '1px solid #262626', borderRadius: 12, padding: '13px 18px', textDecoration: 'none', fontWeight: 850 }}>
+                  Save my kit
+                </Link>
+              </div>
             </AnimatedSection>
 
             <AnimatedSection delay={0.08}>
@@ -272,6 +277,14 @@ export default function Home() {
                   </button>
                 ))}
               </div>
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 24 }}>
+                <Link href="/avatar" style={{ color: '#050505', background: '#22c55e', borderRadius: 12, padding: '13px 18px', textDecoration: 'none', fontWeight: 850 }}>
+                  Build an avatar
+                </Link>
+                <Link href="/avatar/persona" style={{ color: '#fafafa', background: 'rgba(255,255,255,0.04)', border: '1px solid #262626', borderRadius: 12, padding: '13px 18px', textDecoration: 'none', fontWeight: 850 }}>
+                  Generate a persona
+                </Link>
+              </div>
             </AnimatedSection>
             <AnimatedSection delay={0.08}>
               <div style={{ position: 'relative', minHeight: 430 }}>
@@ -294,13 +307,18 @@ export default function Home() {
         {/* Premium Product Bento */}
         <section id="features" style={{ padding: '110px 24px', background: '#050505', borderTop: '1px solid #111' }}>
           <div style={{ maxWidth: 1120, margin: '0 auto' }}>
-            <AnimatedSection style={{ marginBottom: 42 }}>
-              <div style={{ color: '#22c55e', fontSize: 12, fontWeight: 850, textTransform: 'uppercase', letterSpacing: 1.4, marginBottom: 12 }}>
-                Premium toolkit
+            <AnimatedSection style={{ display: 'flex', justifyContent: 'space-between', gap: 24, alignItems: 'end', marginBottom: 42, flexWrap: 'wrap' }}>
+              <div>
+                <div style={{ color: '#22c55e', fontSize: 12, fontWeight: 850, textTransform: 'uppercase', letterSpacing: 1.4, marginBottom: 12 }}>
+                  Premium toolkit
+                </div>
+                <h2 style={{ fontSize: 'clamp(30px, 4.8vw, 56px)', lineHeight: 1, letterSpacing: '-0.045em', fontWeight: 900, margin: 0, maxWidth: 760 }}>
+                  Every surface a developer needs to look intentional.
+                </h2>
               </div>
-              <h2 style={{ fontSize: 'clamp(30px, 4.8vw, 56px)', lineHeight: 1, letterSpacing: '-0.045em', fontWeight: 900, margin: 0, maxWidth: 760 }}>
-                Every surface a developer needs to look intentional.
-              </h2>
+              <Link href="/pricing" style={{ color: '#050505', background: '#22c55e', borderRadius: 12, padding: '13px 18px', textDecoration: 'none', fontWeight: 850 }}>
+                Unlock Pro tools
+              </Link>
             </AnimatedSection>
             <StaggerContainer style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 250px), 1fr))', gap: 16 }}>
               {productTiles.map((tile, index) => (

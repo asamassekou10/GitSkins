@@ -112,7 +112,7 @@ export default function WaitlistPage() {
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
           </svg>
-          Powered by Gemini 3 Pro
+          Developer profile brand suite
         </div>
 
         {/* Headline */}
@@ -153,7 +153,7 @@ export default function WaitlistPage() {
           }}
         >
           AI-powered profile cards, GitHub Wrapped, daily dev cards,
-          repo visualizer, and 20 premium themes. All built on Gemini 3.
+          repo visualizer, and 20 premium themes in one visual system.
         </p>
         <p
           style={{
@@ -287,7 +287,7 @@ export default function WaitlistPage() {
           {[
             { value: '20', label: 'Themes' },
             { value: '7', label: 'AI Tools' },
-            { value: 'Gemini 3', label: 'AI Engine' },
+            { value: 'Pro', label: 'AI Engine' },
           ].map((stat) => (
             <div
               key={stat.label}

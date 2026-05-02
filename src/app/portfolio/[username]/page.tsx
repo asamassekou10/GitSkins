@@ -75,7 +75,7 @@ export default function PortfolioPage() {
               AI Portfolio for @{username}
             </h1>
             <p style={{ color: '#888', fontSize: '18px', marginBottom: '24px' }}>
-              Gemini 3 Pro-generated case studies highlighting your most impactful work.
+              AI-generated case studies highlighting your most impactful work.
             </p>
             <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', flexWrap: 'wrap' }}>
               <Link

@@ -32,7 +32,7 @@ const TABS: { id: TabId; label: string }[] = [
 
 const INITIAL_CHAT: ChatMessage[] = [{
   role: 'assistant',
-  content: 'Hi! I\'m GitSkins AI Assistant powered by Google Gemini. I can help you customize your GitHub profile widgets, recommend themes, and answer questions about GitSkins features. What would you like to know?',
+  content: 'Hi! I am the GitSkins AI Assistant. I can help you sharpen your profile, choose themes, improve your cards, and turn your repositories into a stronger developer story. What would you like to work on?',
   timestamp: new Date(),
 }];
 
@@ -66,7 +66,7 @@ export default function AIFeaturesPage() {
   const [chatLoading, setChatLoading] = useState(false);
 
   // Progress hooks
-  const analyzeProgress = useThinkingProgress(['Fetching profile', 'Analyzing with Gemini'], { intervalMs: 1200 });
+  const analyzeProgress = useThinkingProgress(['Fetching profile', 'Analyzing profile signal'], { intervalMs: 1200 });
   const themesProgress = useThinkingProgress(['Fetching profile', 'Matching themes'], { intervalMs: 1200 });
   const intelProgress = useThinkingProgress(['Fetching profile', 'Searching benchmarks', 'Generating insights'], { intervalMs: 1400 });
   const portfolioProgress = useThinkingProgress(['Fetching profile', 'Analyzing repos', 'Writing case studies'], { intervalMs: 1500 });
@@ -87,7 +87,7 @@ export default function AIFeaturesPage() {
         feature="AI Profile Tools"
         tagline="Unlock AI-powered analysis, theme recommendations, portfolio case studies, and more — all driven by your GitHub data."
         benefits={[
-          'Profile personality analysis with Gemini AI',
+          'Profile personality analysis',
           'AI-matched theme recommendations',
           'Deep profile intelligence & benchmarks',
           'Auto-generated portfolio case studies',
@@ -215,13 +215,13 @@ export default function AIFeaturesPage() {
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2">
               <path d="M12 2L2 7l10 5 10-5-10-5z" /><path d="M2 17l10 5 10-5" /><path d="M2 12l10 5 10-5" />
             </svg>
-            <span style={{ color: '#22c55e', fontSize: '14px', fontWeight: 500 }}>Powered by Gemini 3 Pro · Extended Thinking</span>
+            <span style={{ color: '#22c55e', fontSize: '14px', fontWeight: 700 }}>Pro AI Profile Lab</span>
           </div>
-          <h1 style={{ fontSize: 'clamp(32px, 5vw, 48px)', fontWeight: 800, background: 'linear-gradient(135deg, #fff 0%, #22c55e 50%, #4ade80 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', marginBottom: '16px' }}>
-            AI-Powered Features
+          <h1 style={{ fontSize: 'clamp(38px, 6vw, 66px)', lineHeight: 0.96, fontWeight: 900, letterSpacing: '-0.055em', background: 'linear-gradient(135deg, #fff 0%, #22c55e 50%, #4ade80 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', marginBottom: '16px' }}>
+            Turn GitHub activity into profile strategy.
           </h1>
           <p style={{ color: '#888', fontSize: '18px', maxWidth: '600px', margin: '0 auto' }}>
-            The Profile Agent discovers your coding personality, recommends themes, and powers the AI assistant.
+            Analyze your developer identity, find stronger positioning, recommend visual themes, and draft portfolio-ready stories from your public work.
           </p>
         </div>
 
@@ -320,8 +320,8 @@ export default function AIFeaturesPage() {
 
         <div style={{ textAlign: 'center', marginTop: '48px' }}>
           <p style={{ color: '#666', fontSize: '14px' }}>
-            AI features powered by <span style={{ color: '#22c55e', fontWeight: 600 }}>Gemini 3 Pro</span>
-            <span style={{ color: '#444', fontSize: '12px', display: 'block', marginTop: '4px' }}>Extended Thinking · Google Search Grounding · Streaming</span>
+            Pro AI tools for profile strategy, portfolio storytelling, and GitHub positioning.
+            <span style={{ color: '#444', fontSize: '12px', display: 'block', marginTop: '4px' }}>Analysis · Recommendations · Chat · Case studies</span>
           </p>
         </div>
       </div>

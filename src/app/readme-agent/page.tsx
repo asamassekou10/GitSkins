@@ -170,7 +170,7 @@ export default function ReadmeAgentPage() {
           'Multi-step AI agent with live thought stream',
           'Career-mode for role-specific READMEs',
           'Multiple style options (Minimal, Detailed, Creative)',
-          'Powered by Google Gemini with deep GitHub analysis',
+          'Deep GitHub analysis for stronger profile positioning',
           'One-click copy to clipboard',
           'Unlimited generations',
         ]}
@@ -189,16 +189,16 @@ export default function ReadmeAgentPage() {
               <Link href="/readme-generator" style={{ color: '#666', textDecoration: 'none', fontSize: '14px' }}>
                 ← README Generator
               </Link>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 10px', background: 'rgba(34, 197, 94, 0.1)', border: '1px solid rgba(34, 197, 94, 0.25)', borderRadius: '100px', fontSize: '12px', fontWeight: 500, color: '#22c55e' }}>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 10px', background: 'rgba(34, 197, 94, 0.1)', border: '1px solid rgba(34, 197, 94, 0.25)', borderRadius: '100px', fontSize: '12px', fontWeight: 700, color: '#22c55e' }}>
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
-                Gemini 3 Pro · Extended Thinking
+                Pro AI writing agent
               </span>
             </div>
-            <h1 style={{ fontSize: 'clamp(24px, 4vw, 36px)', fontWeight: 700, letterSpacing: '-0.02em', marginBottom: '8px' }}>
-              Live README Agent
+            <h1 style={{ fontSize: 'clamp(36px, 5.5vw, 62px)', lineHeight: 0.96, fontWeight: 900, letterSpacing: '-0.055em', marginBottom: '12px' }}>
+              Watch your README take shape in real time.
             </h1>
-            <p style={{ color: '#666', fontSize: '15px', maxWidth: '600px' }}>
-              Watch Gemini 3 think, draft, and refine your README in real-time. Extended Thinking lets you see the AI's reasoning process.
+            <p style={{ color: '#888', fontSize: '16px', maxWidth: '680px', lineHeight: 1.65 }}>
+              The agent analyzes your GitHub profile, drafts the README, refines the structure, and streams the writing process as it works.
             </p>
           </div>
 
@@ -365,7 +365,7 @@ export default function ReadmeAgentPage() {
                 <path d="M10 22h4" />
               </svg>
               <p style={{ fontSize: '15px', marginBottom: '8px' }}>Enter a GitHub username and click Generate</p>
-              <p style={{ fontSize: '13px', color: '#333' }}>Watch Gemini 3 think through your profile and generate a README in real-time</p>
+              <p style={{ fontSize: '13px', color: '#333' }}>Watch the agent analyze your profile and generate a README in real time</p>
             </div>
           )}
 
@@ -377,7 +377,7 @@ export default function ReadmeAgentPage() {
                 <polyline points="22 4 12 14.01 9 11.01" />
               </svg>
               <span>
-                Generated with <strong style={{ color: '#22c55e' }}>Gemini 3 Pro</strong> (Extended Thinking)
+                Generated with the <strong style={{ color: '#22c55e' }}>GitSkins README Agent</strong>
                 {thoughts.length > 0 && ` · ${thoughts.length} thought${thoughts.length === 1 ? '' : 's'} surfaced`}
               </span>
             </div>

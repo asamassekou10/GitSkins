@@ -29,7 +29,7 @@ export function AnalyzeTab({ username, analyzing, analysis, profileData, analyze
           cursor: analyzing ? 'not-allowed' : 'pointer',
         }}
       >
-        {analyzing ? 'Analyzing with Gemini...' : 'Analyze Profile'}
+        {analyzing ? 'Analyzing profile...' : 'Analyze Profile'}
       </button>
 
       {analyzing && (

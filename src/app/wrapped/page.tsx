@@ -61,7 +61,7 @@ export default function WrappedEntryPage() {
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
           </svg>
-          Powered by Gemini 3 Pro
+          AI year-in-code story
         </div>
 
         {/* Title */}
@@ -92,8 +92,8 @@ export default function WrappedEntryPage() {
             lineHeight: 1.7,
           }}
         >
-          Your AI-narrated year in code. Gemini 3 analyzes your profile with Extended Thinking
-          and compares you against real industry benchmarks.
+          Your year in code, translated into a shareable developer story with stats,
+          personality signals, and real industry benchmarks.
         </p>
         <p style={{ fontSize: 14, color: '#737373', marginBottom: 48 }}>
           Contributions, languages, streaks, personality, and a full AI narrative.

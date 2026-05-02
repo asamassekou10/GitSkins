@@ -1,7 +1,7 @@
 /**
- * GitSkins - Middleware
+ * GitSkins - Proxy
  * 
- * Security headers, CORS, and rate limiting middleware.
+ * Security headers, CORS, and rate limiting proxy.
  * Runs on Edge Runtime for optimal performance.
  */
 
@@ -159,9 +159,9 @@ function checkWaitlistAccess(request: NextRequest): NextResponse | null {
 }
 
 /**
- * Main middleware function
+ * Main proxy function
  */
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   // Waitlist gate check (runs before everything else)
   const waitlistResponse = checkWaitlistAccess(request);
   if (waitlistResponse) return waitlistResponse;

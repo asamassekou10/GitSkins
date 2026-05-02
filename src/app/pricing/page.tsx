@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
 import { PLANS, FREE_THEMES, PRO_THEMES } from '@/config/subscription';
 
 type BillingCycle = 'monthly' | 'annual';
@@ -97,17 +98,20 @@ export default function PricingPage() {
       <div style={{ maxWidth: '1040px', margin: '0 auto', padding: '100px 24px 80px' }}>
 
         {/* Header */}
-        <div style={{ textAlign: 'center', marginBottom: '56px' }}>
+        <div style={{ textAlign: 'center', marginBottom: '56px', position: 'relative' }}>
           {upgraded && (
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 20px', background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.4)', borderRadius: '100px', color: '#22c55e', fontSize: '14px', fontWeight: 600, marginBottom: '32px' }}>
               <CheckIcon /> You&apos;re now on Pro!
             </div>
           )}
-          <h1 style={{ fontSize: 'clamp(32px, 5vw, 52px)', fontWeight: 700, letterSpacing: '-0.03em', marginBottom: '16px' }}>
-            Simple, honest pricing
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '7px 12px', borderRadius: 999, background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.24)', color: '#4ade80', fontSize: 12, fontWeight: 850, letterSpacing: 0.4, marginBottom: 20 }}>
+            Profile brand pricing
+          </div>
+          <h1 style={{ fontSize: 'clamp(38px, 6vw, 72px)', fontWeight: 900, letterSpacing: '-0.055em', lineHeight: 0.95, margin: '0 auto 18px', maxWidth: 780 }}>
+            Start free. Upgrade when your profile needs the full kit.
           </h1>
-          <p style={{ fontSize: '18px', color: '#666', maxWidth: '480px', margin: '0 auto 32px' }}>
-            Start free. Upgrade when you need more.
+          <p style={{ fontSize: '18px', color: '#888', maxWidth: '620px', margin: '0 auto 32px', lineHeight: 1.65 }}>
+            Free gives you the essentials. Pro unlocks the premium themes, avatars, AI profile tools, and unlimited README generations that make GitSkins feel like a complete identity system.
           </p>
 
           {/* Billing toggle */}
@@ -133,6 +137,36 @@ export default function PricingPage() {
               </button>
             ))}
           </div>
+        </div>
+
+        {/* Visual proof */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 310px), 1fr))', gap: '18px', alignItems: 'stretch', marginBottom: '56px' }}>
+          <motion.div
+            initial={{ opacity: 0, y: 14 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            style={{ minHeight: 320, borderRadius: 24, border: '1px solid #1d1d1d', background: 'radial-gradient(circle at 80% 18%, rgba(34,197,94,0.2), transparent 38%), #0b0b0b', padding: 22, display: 'grid', placeItems: 'center', overflow: 'hidden' }}
+          >
+            <img src="/api/premium-card?username=octocat&theme=matrix&variant=glass&avatar=persona" alt="Premium GitSkins card preview" style={{ width: '100%', maxWidth: 720, borderRadius: 16, boxShadow: '0 28px 90px rgba(0,0,0,0.48)' }} />
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 14 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.08 }}
+            style={{ borderRadius: 24, border: '1px solid #1d1d1d', background: '#0b0b0b', padding: 22, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 20 }}
+          >
+            <div>
+              <div style={{ color: '#22c55e', fontSize: 12, fontWeight: 850, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 10 }}>Pro unlocks</div>
+              <h2 style={{ margin: '0 0 12px', fontSize: 28, lineHeight: 1, letterSpacing: '-0.035em' }}>The parts people actually notice.</h2>
+              <p style={{ color: '#888', lineHeight: 1.6, margin: 0, fontSize: 14 }}>Premium cards, character avatars, advanced themes, AI profile intelligence, and the tools that make everything match.</p>
+            </div>
+            <div style={{ display: 'flex', gap: 10 }}>
+              {['open-peeps', 'bottts', 'pixel-art'].map((style) => (
+                <img key={style} src={`/api/avatar?username=octocat-${style}&theme=matrix&family=dicebear&dicebearStyle=${style}&size=400`} alt="" style={{ width: 70, height: 70, borderRadius: 18, border: '1px solid rgba(255,255,255,0.12)' }} />
+              ))}
+            </div>
+          </motion.div>
         </div>
 
         {/* Plans Grid */}
