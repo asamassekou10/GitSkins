@@ -8,7 +8,6 @@ import { Avatar } from '@/components/Avatar';
 import {
   primaryNavItems,
   toolsNavItems,
-  resourcesNavItems,
 } from '@/config/nav';
 import type { NavItem, NavItemWithHash } from '@/config/nav';
 
@@ -148,12 +147,9 @@ export function Navigation() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [toolsOpen, setToolsOpen] = useState(false);
-  const [resourcesOpen, setResourcesOpen] = useState(false);
   const [mobileToolsOpen, setMobileToolsOpen] = useState(false);
-  const [mobileResourcesOpen, setMobileResourcesOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const toolsRef = useRef<HTMLDivElement>(null);
-  const resourcesRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -166,10 +162,8 @@ export function Navigation() {
       const target = event.target as Node;
       if (userMenuRef.current?.contains(target)) return;
       if (toolsRef.current?.contains(target)) return;
-      if (resourcesRef.current?.contains(target)) return;
       setUserMenuOpen(false);
       setToolsOpen(false);
-      setResourcesOpen(false);
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -179,7 +173,6 @@ export function Navigation() {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         setToolsOpen(false);
-        setResourcesOpen(false);
         setUserMenuOpen(false);
       }
     };
@@ -264,7 +257,6 @@ export function Navigation() {
               type="button"
               onClick={() => {
                 setToolsOpen(!toolsOpen);
-                setResourcesOpen(false);
               }}
               aria-haspopup="true"
               aria-expanded={toolsOpen}
@@ -285,7 +277,7 @@ export function Navigation() {
                 e.currentTarget.style.background = 'transparent';
               }}
             >
-              Tools
+              Create
               <svg
                 width="12"
                 height="12"
@@ -306,59 +298,6 @@ export function Navigation() {
               <div style={dropdownPanelStyle} role="menu">
                 {toolsNavItems.map((item) => (
                   <DropdownLink key={item.label} item={item} onClose={() => setToolsOpen(false)} />
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Resources dropdown */}
-          <div ref={resourcesRef} style={{ position: 'relative' }}>
-            <button
-              type="button"
-              onClick={() => {
-                setResourcesOpen(!resourcesOpen);
-                setToolsOpen(false);
-              }}
-              aria-haspopup="true"
-              aria-expanded={resourcesOpen}
-              aria-label="Resources menu"
-              style={{
-                ...linkStyle,
-                background: 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-                fontFamily: 'inherit',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.color = '#fafafa';
-                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.06)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.color = '#a1a1a1';
-                e.currentTarget.style.background = 'transparent';
-              }}
-            >
-              Resources
-              <svg
-                width="12"
-                height="12"
-                viewBox="0 0 12 12"
-                fill="none"
-                style={{
-                  marginLeft: '4px',
-                  display: 'inline-block',
-                  verticalAlign: 'middle',
-                  transform: resourcesOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-                  transition: 'transform 0.2s ease',
-                }}
-              >
-                <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </button>
-            {resourcesOpen && (
-              <div style={dropdownPanelStyle} role="menu">
-                {resourcesNavItems.map((item) => (
-                  <DropdownLink key={item.label} item={item} onClose={() => setResourcesOpen(false)} />
                 ))}
               </div>
             )}
@@ -727,7 +666,7 @@ export function Navigation() {
                 textAlign: 'left',
               }}
             >
-              Tools
+              Create
               <svg
                 width="16"
                 height="16"
@@ -746,64 +685,6 @@ export function Navigation() {
             {mobileToolsOpen && (
               <div style={{ paddingLeft: '12px', paddingBottom: '8px' }}>
                 {toolsNavItems.map((item) => (
-                  <Link
-                    key={item.label}
-                    href={item.href}
-                    onClick={() => setMobileMenuOpen(false)}
-                    style={{
-                      display: 'block',
-                      color: '#a1a1a1',
-                      textDecoration: 'none',
-                      fontSize: '14px',
-                      padding: '10px 0',
-                    }}
-                  >
-                    {item.label}
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Mobile Resources section */}
-          <div style={{ borderBottom: '1px solid #1f1f1f' }}>
-            <button
-              type="button"
-              onClick={() => setMobileResourcesOpen(!mobileResourcesOpen)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                width: '100%',
-                padding: '14px 0',
-                background: 'transparent',
-                border: 'none',
-                color: '#a1a1a1',
-                fontSize: '15px',
-                fontWeight: 500,
-                cursor: 'pointer',
-                textAlign: 'left',
-              }}
-            >
-              Resources
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                style={{
-                  transform: mobileResourcesOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-                  transition: 'transform 0.2s ease',
-                }}
-              >
-                <path d="M6 9l6 6 6-6" />
-              </svg>
-            </button>
-            {mobileResourcesOpen && (
-              <div style={{ paddingLeft: '12px', paddingBottom: '8px' }}>
-                {resourcesNavItems.map((item) => (
                   <Link
                     key={item.label}
                     href={item.href}

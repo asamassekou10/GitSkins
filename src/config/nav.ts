@@ -16,25 +16,19 @@ export interface NavItemWithHash extends NavItem {
 
 /** Primary links shown on the bar (no dropdown). */
 export const primaryNavItems: NavItemWithHash[] = [
-  { label: 'Features', href: '/#features', isHashLink: true },
-  { label: 'Themes', href: '/#themes', isHashLink: true },
   { label: 'Examples', href: '/examples', isHashLink: false },
-  { label: 'AI Features', href: '/ai', isHashLink: false },
+  { label: 'Blog', href: '/blog', isHashLink: false },
   { label: 'Pricing', href: '/pricing', isHashLink: false },
 ];
 
 /** Tools dropdown: product/tool pages. */
 export const toolsNavItems: NavItem[] = [
-  { label: 'README Generator', href: '/readme-generator', keywords: 'readme' },
-  { label: 'Card Builder', href: '/cards', keywords: 'cards widgets readme markdown stats languages streak profile' },
-  { label: 'Live Agent', href: '/readme-agent', keywords: 'live agent gemini' },
-  { label: 'GitHub Wrapped', href: '/wrapped', keywords: 'wrapped year review' },
-  { label: 'Repo Visualizer', href: '/visualize', keywords: 'visualize architecture diagram mermaid' },
-  { label: 'Daily Dev Card', href: '/daily', keywords: 'daily card buildinpublic share social' },
-  { label: 'Portfolio Builder', href: '/portfolio/octocat', keywords: 'portfolio' },
-  { label: 'Avatar Generator', href: '/avatar', keywords: 'avatar profile picture generator themes' },
+  { label: 'README Studio', href: '/readme-generator', keywords: 'readme generator animations markdown' },
+  { label: 'Profile Cards', href: '/cards', keywords: 'cards widgets readme markdown stats languages streak profile' },
+  { label: 'Theme Avatars', href: '/avatar', keywords: 'avatar profile picture generator themes characters' },
   { label: 'Project Persona', href: '/avatar/persona', keywords: 'avatar character persona projects github' },
-  { label: 'Settings', href: '/settings', keywords: 'settings account billing subscription credits' },
+  { label: 'AI Toolkit', href: '/ai', keywords: 'ai analyze themes portfolio chat profile intel' },
+  { label: 'Portfolio Builder', href: '/portfolio/octocat', keywords: 'portfolio website' },
 ];
 
 /** Resources dropdown: docs, legal, support. */
