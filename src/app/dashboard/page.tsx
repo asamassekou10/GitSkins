@@ -13,8 +13,23 @@ interface UsageSnapshot {
   readmeGenerationsUsed: number;
   readmeGenerationsLimit: number;
   readmeGenerationsRemaining: number;
+  creditsRemaining?: number;
   month: string;
   dbAvailable: boolean;
+}
+
+interface ReadmeHistoryItem {
+  id: string;
+  username: string;
+  title: string;
+  goal: string | null;
+  structure: string | null;
+  tone: string | null;
+  style: string | null;
+  theme: string | null;
+  score: number | null;
+  markdown: string;
+  createdAt: string;
 }
 
 interface SavedKit {
@@ -76,6 +91,7 @@ export default function DashboardPage() {
   const [activeWidget, setActiveWidget] = useState<string>('stats');
   const [onboardingDismissed, setOnboardingDismissed] = useState(true);
   const [savedKits, setSavedKits] = useState<SavedKit[]>([]);
+  const [readmeHistory, setReadmeHistory] = useState<ReadmeHistoryItem[]>([]);
 
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/auth?callbackUrl=/dashboard');
@@ -96,6 +112,10 @@ export default function DashboardPage() {
       })
       .catch(() => setUsage(null))
       .finally(() => setLoadingUsage(false));
+    fetch('/api/readme-history')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => setReadmeHistory(data?.items ?? []))
+      .catch(() => setReadmeHistory([]));
   }, [status]);
 
   async function openPortal() {
@@ -151,6 +171,7 @@ export default function DashboardPage() {
   const isPro = usage?.plan === 'pro';
   const remaining = usage?.readmeGenerationsRemaining ?? 0;
   const limit = usage?.readmeGenerationsLimit ?? PLANS.free.limits.readmeGenerations;
+  const creditsRemaining = usage?.creditsRemaining ?? 0;
   const atLimit = !isPro && remaining === 0;
 
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://gitskins.com';
@@ -328,11 +349,72 @@ export default function DashboardPage() {
                   </div>
                 )}
                 <p style={{ color: '#666', fontSize: '13px', margin: 0 }}>
-                  {isPro ? 'Unlimited with Pro' : 'Resets on the 1st of next month'}
+                  {isPro ? 'Unlimited with Pro' : creditsRemaining > 0 ? `${creditsRemaining} paid credit${creditsRemaining === 1 ? '' : 's'} available` : 'Resets on the 1st of next month'}
                 </p>
               </>
             )}
           </div>
+        </div>
+
+        {/* Saved READMEs */}
+        <div style={{ ...cardStyle, marginBottom: '24px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, alignItems: 'center', flexWrap: 'wrap', marginBottom: 18 }}>
+            <div>
+              <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#fff', margin: '0 0 4px' }}>Saved README generations</h3>
+              <p style={{ color: '#666', fontSize: 14, margin: 0 }}>Recent README drafts generated from your account.</p>
+            </div>
+            <Link href="/readme-generator" style={{ padding: '9px 12px', borderRadius: 10, background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.3)', color: '#4ade80', textDecoration: 'none', fontSize: 13, fontWeight: 750 }}>
+              New README
+            </Link>
+          </div>
+          {readmeHistory.length === 0 ? (
+            <div style={{ padding: 22, borderRadius: 14, background: '#0b0b0b', border: '1px dashed #2a2a2a', color: '#777', fontSize: 14 }}>
+              No saved README drafts yet. Generate one and it will appear here automatically.
+            </div>
+          ) : (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 240px), 1fr))', gap: 14 }}>
+              {readmeHistory.map((item) => (
+                <div key={item.id} style={{ borderRadius: 16, border: '1px solid #242424', background: '#0b0b0b', padding: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+                      <div style={{ color: '#fff', fontSize: 14, fontWeight: 850 }}>@{item.username}</div>
+                      {item.score !== null && (
+                        <span style={{ color: '#22c55e', fontSize: 12, fontWeight: 900 }}>{item.score}/100</span>
+                      )}
+                    </div>
+                    <div style={{ color: '#666', fontSize: 12, marginTop: 5 }}>
+                      {[item.goal, item.structure, item.tone].filter(Boolean).join(' · ') || 'README draft'}
+                    </div>
+                    <div style={{ color: '#555', fontSize: 11, marginTop: 5 }}>
+                      {new Date(item.createdAt).toLocaleDateString()}
+                    </div>
+                  </div>
+                  <div style={{ maxHeight: 84, overflow: 'hidden', color: '#777', fontSize: 12, lineHeight: 1.45, borderTop: '1px solid #1d1d1d', paddingTop: 10 }}>
+                    {item.markdown.replace(/[#*_`<>\[\]()!-]/g, '').slice(0, 190)}...
+                  </div>
+                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 'auto' }}>
+                    <CopyButton text={item.markdown} />
+                    <button
+                      onClick={() => {
+                        const blob = new Blob([item.markdown], { type: 'text/markdown' });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `${item.username}-README.md`;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                      }}
+                      style={{ padding: '4px 10px', background: 'rgba(255,255,255,0.06)', border: '1px solid #2a2a2a', borderRadius: '6px', color: '#888', fontSize: '11px', fontWeight: 600, cursor: 'pointer' }}
+                    >
+                      Download
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Saved Kit */}

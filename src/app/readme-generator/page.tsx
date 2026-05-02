@@ -78,6 +78,14 @@ const motionOptions: { id: MotionStyle; label: string; description: string }[] =
   { id: 'playful', label: 'Playful', description: 'More personality and GitHub flair' },
 ];
 
+const themeAccent: Record<string, string> = {
+  satan: 'FF4500',
+  neon: '00FFFF',
+  zen: '00FF88',
+  'github-dark': '22C55E',
+  dracula: 'FF79C6',
+};
+
 const careerRoles: { id: CareerRole; label: string; description: string }[] = [
   { id: 'frontend', label: 'Frontend Engineer', description: 'UI/UX, performance, design systems' },
   { id: 'backend', label: 'Backend Engineer', description: 'APIs, scalability, data reliability' },
@@ -148,7 +156,7 @@ export default function ReadmeGeneratorPage() {
     files: { path: string; content: string }[];
   } | null>(null);
 
-  const { plan: userPlan, readmeGenerationsUsed, readmeGenerationsLimit, readmeGenerationsRemaining, loading: planLoading, authenticated } = useUserPlan();
+  const { plan: userPlan, readmeGenerationsUsed, readmeGenerationsLimit, readmeGenerationsRemaining, creditsRemaining, loading: planLoading, authenticated } = useUserPlan();
   const userIsPro = userPlan === 'pro';
   const usageAllowed = authenticated && (userIsPro || readmeGenerationsRemaining > 0);
 
@@ -160,6 +168,24 @@ export default function ReadmeGeneratorPage() {
     [careerMode, agentLoop, careerRole]
   );
   const readmeProgress = useThinkingProgress(readmeStepLabels, { intervalMs: 1200 });
+  const animationPreview = useMemo(() => {
+    const color = themeAccent[theme] ?? '22C55E';
+    const lines = typingLines
+      .split('\n')
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .slice(0, 4);
+    const typingUrl = lines.length
+      ? `https://readme-typing-svg.demolab.com?font=Fira+Code&weight=700&size=28&duration=2800&pause=900&color=${color}&center=true&vCenter=true&width=820&lines=${lines.map((line) => line.replace(/\s+/g, '+')).join(';')}`
+      : '';
+    return {
+      color,
+      typingUrl,
+      avatarUrl: `/api/avatar?username=${encodeURIComponent(username || 'octocat')}&theme=${theme}&family=character&size=240`,
+      dividerUrl: 'https://capsule-render.vercel.app/api?type=rect&height=2&color=gradient&customColorList=12,20,24&section=footer',
+      snakeUrl: `https://raw.githubusercontent.com/${username || 'octocat'}/${username || 'octocat'}/output/github-snake.svg`,
+    };
+  }, [theme, typingLines, username]);
 
 
   useEffect(() => {
@@ -416,6 +442,11 @@ export default function ReadmeGeneratorPage() {
                       <span style={{ color: readmeGenerationsRemaining > 0 ? '#22c55e' : '#ef4444', fontWeight: 600 }}>
                         {readmeGenerationsRemaining}/{readmeGenerationsLimit}
                       </span>
+                      {creditsRemaining ? (
+                        <span style={{ color: '#58a6ff', marginLeft: 8 }}>
+                          + {creditsRemaining} paid credit{creditsRemaining === 1 ? '' : 's'}
+                        </span>
+                      ) : null}
                     </span>
                     {/* Progress bar */}
                     <div style={{ width: '120px', height: '4px', background: '#2a2a2a', borderRadius: '2px', overflow: 'hidden' }}>
@@ -664,6 +695,32 @@ export default function ReadmeGeneratorPage() {
                         <input type="checkbox" checked={checked as boolean} onChange={(e) => (setter as (value: boolean) => void)(e.target.checked)} />
                       </label>
                     ))}
+                  </div>
+                  <div style={{ padding: 14, background: '#080808', border: '1px solid #2a2a2a', borderRadius: 12 }}>
+                    <div style={{ color: '#aaa', fontSize: 13, fontWeight: 800, marginBottom: 12 }}>Animation preview</div>
+                    <div style={{ display: 'grid', gap: 10 }}>
+                      {typingHeadline && animationPreview.typingUrl && (
+                        <div style={{ padding: 10, borderRadius: 10, background: '#0d1117', border: '1px solid #1f2937', overflow: 'hidden' }}>
+                          <img src={animationPreview.typingUrl} alt="Typing headline preview" style={{ width: '100%', height: 'auto', display: 'block' }} />
+                        </div>
+                      )}
+                      {avatarBlock && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 10, borderRadius: 10, background: '#0d1117', border: '1px solid #1f2937' }}>
+                          <img src={animationPreview.avatarUrl} alt="Avatar block preview" width={58} height={58} style={{ borderRadius: 16 }} />
+                          <span style={{ color: '#888', fontSize: 12 }}>Theme-matched avatar block</span>
+                        </div>
+                      )}
+                      {animatedDivider && (
+                        <div style={{ padding: 10, borderRadius: 10, background: '#0d1117', border: '1px solid #1f2937' }}>
+                          <img src={animationPreview.dividerUrl} alt="Animated divider preview" style={{ width: '100%', height: 10, objectFit: 'cover', display: 'block' }} />
+                        </div>
+                      )}
+                      {contributionSnake && (
+                        <div style={{ padding: 10, borderRadius: 10, background: 'rgba(88,166,255,0.08)', border: '1px solid rgba(88,166,255,0.24)', color: '#9cc9ff', fontSize: 12, lineHeight: 1.5 }}>
+                          Contribution snake will include a README image block and a GitHub Actions workflow file after generation.
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               )}

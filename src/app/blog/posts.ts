@@ -196,6 +196,67 @@ export const blogPosts: BlogPost[] = [
       },
     ],
   },
+  {
+    slug: 'best-github-readme-animations',
+    title: 'Best GitHub README Animations and How to Use Them Tastefully',
+    description: 'A practical guide to typing SVGs, contribution snakes, animated dividers, visitor counters, and when motion helps or hurts a GitHub profile.',
+    category: 'README Motion',
+    readTime: '8 min read',
+    updated: '2026-05-02',
+    hero: '/api/premium-card?username=octocat&theme=neon&variant=glass&avatar=persona',
+    sections: [
+      {
+        heading: 'Use motion to guide attention, not decorate everything',
+        body: [
+          'Animated GitHub READMEs can look memorable, but the best ones use motion sparingly. The goal is to make the profile easier to understand, not to turn it into a page full of competing effects.',
+          'A typing headline, one visual card, and a clean project section usually beats five animated widgets stacked together.',
+        ],
+        bullets: [
+          'Use one hero animation near the top.',
+          'Keep project proof readable and mostly static.',
+          'Avoid animations that push important links below the fold.',
+        ],
+        cta: { label: 'Generate an animated README', href: '/readme-generator' },
+      },
+      {
+        heading: 'Typing SVGs work best as positioning',
+        body: [
+          'A typing SVG is most useful when it cycles through your role, current focus, and strongest signal. It should not be a random slogan carousel.',
+          'Good lines are specific: "Full-stack product engineer", "Building developer tools", or "Open-source maintainer". Weak lines are vague: "I love coding" or "Welcome to my profile".',
+        ],
+        bullets: [
+          'Use two to four short lines.',
+          'Match the text color to your README theme.',
+          'Keep the animation speed readable.',
+        ],
+      },
+      {
+        heading: 'Contribution snakes need setup',
+        body: [
+          'The contribution snake is popular because it turns a GitHub graph into a playful visual. It usually requires a GitHub Actions workflow that generates an SVG into an output branch.',
+          'That means the README block alone is not enough. You also need the workflow file in your profile repository.',
+        ],
+        bullets: [
+          'Add the generated workflow under .github/workflows.',
+          'Make sure the workflow has contents: write permission.',
+          'Use it as a lower-page flourish, not the main proof of skill.',
+        ],
+      },
+      {
+        heading: 'Avoid animation overload',
+        body: [
+          'Trophies, counters, badges, typing headers, GIFs, and stats can all be useful in isolation. Together, they can make a profile feel noisy and less professional.',
+          'If the profile is for hiring, use motion like seasoning: enough to create personality, not enough to distract from projects and contact paths.',
+        ],
+        bullets: [
+          'Job seeker: typing header, profile card, project proof.',
+          'Open-source maintainer: stats, contribution snake, contributor links.',
+          'Indie builder: product links, profile card, currently building section.',
+          'Student: learning focus, small animation, project progression.',
+        ],
+      },
+    ],
+  },
 ];
 
 export function getBlogPost(slug: string) {
