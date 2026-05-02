@@ -70,176 +70,145 @@ async function generateLanguagesImage(
   languages: LanguageStat[],
   theme: Theme
 ): Promise<NextResponse> {
+  const topLanguage = languages[0];
+  const totalBytes = languages.reduce((sum, lang) => sum + lang.bytes, 0);
   const imageResponse = new ImageResponse(
     (
       <div
         style={{
           width,
           height,
-          background: `linear-gradient(165deg, ${theme.cardBg}dd 0%, ${theme.bg}dd 50%, ${theme.cardBg}aa 100%)`,
+          background: `linear-gradient(135deg, ${theme.bg} 0%, ${theme.cardBg} 58%, ${theme.bg} 100%)`,
           display: 'flex',
           flexDirection: 'column',
           fontFamily: 'system-ui',
-          border: `1px solid ${theme.borderColor}`,
-          borderRadius: 20,
-          padding: 24,
+          border: `1px solid ${theme.accentColor}36`,
+          borderRadius: 22,
+          padding: 22,
           position: 'relative',
           overflow: 'hidden',
-          boxShadow: '0 16px 48px rgba(0, 0, 0, 0.5), 0 8px 16px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.15)',
         }}
       >
-        {/* Enhanced glow effects */}
         <div
           style={{
             position: 'absolute',
-            bottom: -40,
-            left: -40,
-            width: 150,
-            height: 150,
-            background: `radial-gradient(circle, ${theme.accentColor}15 0%, ${theme.accentColor}08 40%, transparent 70%)`,
+            top: -70,
+            right: -50,
+            width: 220,
+            height: 220,
+            background: `radial-gradient(circle, ${(topLanguage?.color || theme.accentColor)}30 0%, transparent 70%)`,
             display: 'flex',
           }}
         />
         <div
           style={{
             position: 'absolute',
-            top: -40,
-            right: -40,
-            width: 150,
-            height: 150,
-            background: `radial-gradient(circle, ${theme.accentColor}10 0%, transparent 70%)`,
+            bottom: -80,
+            left: -60,
+            width: 210,
+            height: 210,
+            background: `radial-gradient(circle, ${theme.accentColor}22 0%, transparent 70%)`,
             display: 'flex',
           }}
         />
 
-        {/* Title with accent bar */}
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'flex-start',
+            marginBottom: 18,
+            position: 'relative',
+          }}
+        >
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <div style={{ color: theme.primaryText, fontSize: 22, fontWeight: 850, letterSpacing: -0.4, display: 'flex' }}>
+              <span>Language Mix</span>
+            </div>
+            <div style={{ color: theme.secondaryText, fontSize: 12, fontWeight: 650, letterSpacing: 1.1, textTransform: 'uppercase', marginTop: 3, display: 'flex' }}>
+              <span>{languages.length > 0 ? `${languages.length} technologies detected` : 'No language signal yet'}</span>
+            </div>
+          </div>
+          {topLanguage ? (
+            <div style={{ padding: '7px 11px', borderRadius: 999, background: `${topLanguage.color}18`, border: `1px solid ${topLanguage.color}40`, color: topLanguage.color, fontSize: 11, fontWeight: 850, letterSpacing: 1, textTransform: 'uppercase', display: 'flex' }}>
+              <span>{topLanguage.name}</span>
+            </div>
+          ) : null}
+        </div>
+
         <div
           style={{
             display: 'flex',
             flexDirection: 'row',
-            alignItems: 'center',
-            marginBottom: 20,
-            gap: 12,
-          }}
-        >
-          <div
-            style={{
-              width: 3,
-              height: 22,
-              background: `linear-gradient(180deg, ${theme.accentColor} 0%, ${theme.accentColor}60 100%)`,
-              borderRadius: 3,
-              display: 'flex',
-              boxShadow: `0 0 10px ${theme.accentColor}40`,
-            }}
-          />
-          <div
-            style={{
-              fontSize: 13,
-              fontWeight: 700,
-              color: theme.primaryText,
-              letterSpacing: 1.5,
-              textTransform: 'uppercase',
-              display: 'flex',
-            }}
-          >
-            <span>Top Languages</span>
-          </div>
-        </div>
-
-        {/* Language bars */}
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 12,
+            gap: 18,
             flex: 1,
+            position: 'relative',
           }}
         >
           {languages.length > 0 ? (
-            languages.map((lang, index) => (
+            <>
               <div
-                key={index}
                 style={{
+                  width: 132,
+                  borderRadius: 20,
+                  background: `linear-gradient(145deg, ${(topLanguage?.color || theme.accentColor)}22, ${theme.bg}80)`,
+                  border: `1px solid ${(topLanguage?.color || theme.accentColor)}38`,
+                  padding: 16,
                   display: 'flex',
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  gap: 12,
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
                 }}
               >
-                {/* Language dot and name */}
-                <div
-                  style={{
-                    width: 100,
-                    display: 'flex',
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    gap: 8,
-                  }}
-                >
-                  <div
-                    style={{
-                      width: 10,
-                      height: 10,
-                      borderRadius: '50%',
-                      backgroundColor: lang.color,
-                      boxShadow: `0 0 8px ${lang.color}60`,
-                      display: 'flex',
-                    }}
-                  />
-                  <div
-                    style={{
-                      fontSize: 12,
-                      fontWeight: 500,
-                      color: theme.primaryText,
-                      display: 'flex',
-                    }}
-                  >
-                    <span>{lang.name}</span>
-                  </div>
+                <div style={{ width: 84, height: 84, borderRadius: '50%', border: `14px solid ${(topLanguage?.color || theme.accentColor)}55`, background: `${theme.cardBg}cc`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <div style={{ width: 46, height: 46, borderRadius: '50%', background: topLanguage?.color || theme.accentColor, opacity: 0.82, display: 'flex' }} />
                 </div>
-
-                {/* Progress bar background with glassmorphism */}
                 <div
                   style={{
-                    flex: 1,
-                    height: 10,
-                    backgroundColor: theme.progressBg,
-                    borderRadius: 5,
+                    color: theme.primaryText,
+                    fontSize: 34,
+                    fontWeight: 900,
+                    letterSpacing: -1,
                     display: 'flex',
-                    overflow: 'hidden',
-                    border: `1px solid ${theme.borderColor}`,
-                    boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.1)',
                   }}
                 >
-                  {/* Progress bar fill with enhanced gradient and glow */}
-                  <div
-                    style={{
-                      width: `${lang.percentage}%`,
-                      height: '100%',
-                      background: `linear-gradient(90deg, ${lang.color} 0%, ${lang.color}dd 50%, ${lang.color}aa 100%)`,
-                      borderRadius: 5,
-                      display: 'flex',
-                      boxShadow: `0 0 10px ${lang.color}40, inset 0 1px 0 rgba(255, 255, 255, 0.2)`,
-                    }}
-                  />
+                  <span>{topLanguage?.percentage ?? 0}%</span>
                 </div>
-
-                {/* Percentage */}
-                <div
-                  style={{
-                    width: 45,
-                    fontSize: 12,
-                    fontWeight: 600,
-                    color: theme.secondaryText,
-                    textAlign: 'right',
-                    display: 'flex',
-                    justifyContent: 'flex-end',
-                  }}
-                >
-                  <span>{lang.percentage}%</span>
+                <div style={{ color: theme.secondaryText, fontSize: 12, display: 'flex' }}>
+                  <span>{Math.round(totalBytes / 1000).toLocaleString()} KB indexed</span>
                 </div>
               </div>
-            ))
+
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 9 }}>
+                {languages.map((lang, index) => (
+                  <div
+                    key={index}
+                    style={{
+                      flex: 1,
+                      minHeight: 0,
+                      borderRadius: 14,
+                      background: 'rgba(255,255,255,0.035)',
+                      border: `1px solid ${theme.borderColor}`,
+                      padding: '8px 10px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'center',
+                      gap: 6,
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <div style={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: lang.color, boxShadow: `0 0 10px ${lang.color}80`, display: 'flex' }} />
+                        <span style={{ fontSize: 13, fontWeight: 750, color: theme.primaryText }}>{lang.name}</span>
+                      </div>
+                      <span style={{ fontSize: 13, fontWeight: 850, color: lang.color }}>{lang.percentage}%</span>
+                    </div>
+                    <div style={{ height: 8, borderRadius: 999, backgroundColor: `${theme.primaryText}12`, display: 'flex', overflow: 'hidden' }}>
+                      <div style={{ width: `${Math.max(4, lang.percentage)}%`, height: '100%', borderRadius: 999, background: `linear-gradient(90deg, ${lang.color}, ${lang.color}99)`, display: 'flex' }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
           ) : (
             <div
               style={{
@@ -262,6 +231,23 @@ async function generateLanguagesImage(
             </div>
           )}
         </div>
+
+        {languages.length > 0 ? (
+          <div style={{ display: 'flex', gap: 6, marginTop: 14 }}>
+            {languages.map((lang, index) => (
+              <div
+                key={index}
+                style={{
+                  height: 7,
+                  width: `${Math.max(10, lang.percentage)}%`,
+                  borderRadius: 999,
+                  background: lang.color,
+                  display: 'flex',
+                }}
+              />
+            ))}
+          </div>
+        ) : null}
       </div>
     ),
     { width, height }

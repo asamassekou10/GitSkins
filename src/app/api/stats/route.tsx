@@ -67,447 +67,177 @@ async function generateErrorImage(message: string, theme: Theme): Promise<NextRe
  * Generate stats widget image with premium design
  */
 async function generateStatsImage(stats: CompactStats, theme: Theme): Promise<NextResponse> {
+  const statItems = [
+    { label: 'Stars', value: stats.totalStars, accent: theme.accentColor, icon: 'star' },
+    { label: 'Contributions', value: stats.totalContributions, accent: theme.accentColor, icon: 'pulse' },
+    { label: 'Repositories', value: stats.totalRepos, accent: theme.iconColor || theme.accentColor, icon: 'repo' },
+    { label: 'Followers', value: stats.followers, accent: theme.secondaryText, icon: 'user' },
+  ];
+  const maxValue = Math.max(...statItems.map((item) => item.value), 1);
+
   const imageResponse = new ImageResponse(
     (
       <div
         style={{
           width,
           height,
-          background: `linear-gradient(165deg, ${theme.cardBg}dd 0%, ${theme.bg}dd 50%, ${theme.cardBg}aa 100%)`,
+          background: `linear-gradient(135deg, ${theme.bg} 0%, ${theme.cardBg} 58%, ${theme.bg} 100%)`,
           display: 'flex',
-          flexDirection: 'column',
           fontFamily: 'system-ui',
-          border: `1px solid ${theme.borderColor}`,
-          borderRadius: 20,
-          padding: 28,
+          border: `1px solid ${theme.accentColor}36`,
+          borderRadius: 22,
+          padding: 22,
           position: 'relative',
           overflow: 'hidden',
-          boxShadow: '0 16px 48px rgba(0, 0, 0, 0.5), 0 8px 16px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.15)',
         }}
       >
-        {/* Enhanced glow effects in corners */}
         <div
           style={{
             position: 'absolute',
-            top: -50,
-            right: -50,
-            width: 200,
-            height: 200,
-            background: `radial-gradient(circle, ${theme.accentColor}20 0%, ${theme.accentColor}10 40%, transparent 70%)`,
+            top: -90,
+            right: -70,
+            width: 260,
+            height: 260,
+            background: `radial-gradient(circle, ${theme.accentColor}30 0%, ${theme.accentColor}10 42%, transparent 72%)`,
             display: 'flex',
           }}
         />
         <div
           style={{
             position: 'absolute',
-            bottom: -50,
-            left: -50,
-            width: 200,
-            height: 200,
-            background: `radial-gradient(circle, ${theme.accentColor}15 0%, transparent 70%)`,
+            bottom: -100,
+            left: -70,
+            width: 240,
+            height: 240,
+            background: `radial-gradient(circle, ${theme.primaryText}14 0%, transparent 70%)`,
             display: 'flex',
           }}
         />
 
-        {/* Title with accent bar */}
         <div
           style={{
-            display: 'flex',
-            flexDirection: 'row',
-            alignItems: 'center',
-            marginBottom: 24,
-            gap: 12,
-          }}
-        >
-          <div
-            style={{
-              width: 3,
-              height: 22,
-              background: `linear-gradient(180deg, ${theme.accentColor} 0%, ${theme.accentColor}60 100%)`,
-              borderRadius: 3,
-              display: 'flex',
-              boxShadow: `0 0 10px ${theme.accentColor}40`,
-            }}
-          />
-          <div
-            style={{
-              fontSize: 13,
-              fontWeight: 700,
-              color: theme.primaryText,
-              letterSpacing: 1.5,
-              textTransform: 'uppercase',
-              display: 'flex',
-            }}
-          >
-            <span>GitHub Stats</span>
-          </div>
-        </div>
-
-        {/* Stats Grid - 2x2 layout */}
-        <div
-          style={{
+            width: '100%',
+            height: '100%',
             display: 'flex',
             flexDirection: 'column',
-            flex: 1,
-            gap: 16,
+            position: 'relative',
           }}
         >
-          {/* Top Row */}
           <div
             style={{
               display: 'flex',
-              flexDirection: 'row',
-              gap: 16,
-              flex: 1,
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: 16,
             }}
           >
-            {/* Stars - Featured */}
-            <div
-              style={{
-                flex: 1,
-                background: `linear-gradient(135deg, ${theme.accentColor}12 0%, ${theme.bg}80 100%)`,
-                borderRadius: 14,
-                padding: 18,
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-                border: `1px solid ${theme.accentColor}25`,
-                boxShadow: `0 6px 20px rgba(0, 0, 0, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.1)`,
-                position: 'relative',
-              }}
-            >
-              {/* Gradient overlay */}
-              <div
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  right: 0,
-                  width: 60,
-                  height: 60,
-                  background: `radial-gradient(circle at top right, ${theme.accentColor}10 0%, transparent 70%)`,
-                  display: 'flex',
-                }}
-              />
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  gap: 10,
-                  marginBottom: 4,
-                  position: 'relative',
-                }}
-              >
-                {/* Custom Star SVG Icon */}
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  style={{ display: 'flex' }}
-                >
-                  <defs>
-                    <linearGradient id="starGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" style={{ stopColor: theme.accentColor, stopOpacity: 1 }} />
-                      <stop offset="100%" style={{ stopColor: theme.accentColor, stopOpacity: 0.6 }} />
-                    </linearGradient>
-                  </defs>
-                  <path
-                    d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
-                    fill="url(#starGrad)"
-                  />
-                </svg>
-                <div
-                  style={{
-                    fontSize: 32,
-                    fontWeight: 700,
-                    color: theme.primaryText,
-                    display: 'flex',
-                  }}
-                >
-                  <span>{stats.totalStars.toLocaleString()}</span>
-                </div>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <div style={{ color: theme.primaryText, fontSize: 22, fontWeight: 850, letterSpacing: -0.4, display: 'flex' }}>
+                <span>GitHub Stats</span>
               </div>
-              <div
-                style={{
-                  fontSize: 11,
-                  color: theme.secondaryText,
-                  opacity: 0.8,
-                  display: 'flex',
-                  textTransform: 'uppercase',
-                  letterSpacing: 0.5,
-                }}
-              >
-                <span>Total Stars</span>
+              <div style={{ color: theme.secondaryText, fontSize: 12, fontWeight: 650, letterSpacing: 1.2, textTransform: 'uppercase', display: 'flex', marginTop: 3 }}>
+                <span>Profile signal</span>
               </div>
             </div>
-
-            {/* Contributions */}
-            <div
-              style={{
-                flex: 1,
-                background: `linear-gradient(135deg, ${theme.accentColor}12 0%, ${theme.bg}80 100%)`,
-                borderRadius: 14,
-                padding: 18,
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-                border: `1px solid ${theme.accentColor}25`,
-                boxShadow: `0 6px 20px rgba(0, 0, 0, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.1)`,
-                position: 'relative',
-              }}
-            >
-              {/* Gradient overlay */}
-              <div
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  right: 0,
-                  width: 60,
-                  height: 60,
-                  background: `radial-gradient(circle at top right, ${theme.accentColor}10 0%, transparent 70%)`,
-                  display: 'flex',
-                }}
-              />
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  gap: 10,
-                  marginBottom: 4,
-                  position: 'relative',
-                }}
-              >
-                {/* Custom Activity SVG Icon */}
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  style={{ display: 'flex' }}
-                >
-                  <defs>
-                    <linearGradient id="activityGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" style={{ stopColor: theme.accentColor, stopOpacity: 1 }} />
-                      <stop offset="100%" style={{ stopColor: theme.accentColor, stopOpacity: 0.6 }} />
-                    </linearGradient>
-                  </defs>
-                  <path
-                    d="M3 12L7 8L11 12L16 7L21 12M3 20H21V4H3V20Z"
-                    stroke="url(#activityGrad)"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    fill="none"
-                  />
-                </svg>
-                <div
-                  style={{
-                    fontSize: 32,
-                    fontWeight: 700,
-                    color: theme.primaryText,
-                    display: 'flex',
-                  }}
-                >
-                  <span>{stats.totalContributions.toLocaleString()}</span>
-                </div>
-              </div>
-              <div
-                style={{
-                  fontSize: 11,
-                  color: theme.secondaryText,
-                  opacity: 0.8,
-                  display: 'flex',
-                  textTransform: 'uppercase',
-                  letterSpacing: 0.5,
-                }}
-              >
-                <span>Contributions</span>
-              </div>
+            <div style={{ padding: '7px 11px', borderRadius: 999, background: `${theme.accentColor}16`, border: `1px solid ${theme.accentColor}34`, color: theme.accentColor, fontSize: 11, fontWeight: 800, letterSpacing: 1.1, textTransform: 'uppercase', display: 'flex' }}>
+              <span>GitSkins</span>
             </div>
           </div>
 
-          {/* Bottom Row */}
+          <div style={{ display: 'flex', flexDirection: 'row', gap: 14, flex: 1 }}>
+            <div
+              style={{
+                width: 190,
+                borderRadius: 18,
+                background: `linear-gradient(145deg, ${theme.accentColor}22, ${theme.bg}80)`,
+                border: `1px solid ${theme.accentColor}30`,
+                padding: 18,
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+              }}
+            >
+              <div style={{ color: theme.secondaryText, fontSize: 12, fontWeight: 750, letterSpacing: 1.1, textTransform: 'uppercase', display: 'flex' }}>
+                <span>Total impact</span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <div style={{ color: theme.primaryText, fontSize: 42, fontWeight: 900, letterSpacing: -1, display: 'flex' }}>
+                  <span>{(stats.totalStars + stats.totalContributions).toLocaleString()}</span>
+                </div>
+                <div style={{ color: theme.secondaryText, fontSize: 12, display: 'flex' }}>
+                  <span>stars + contributions</span>
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: 5 }}>
+                {[0, 1, 2, 3, 4, 5, 6].map((index) => (
+                  <div
+                    key={index}
+                    style={{
+                      width: 16,
+                      height: 42 + (index % 4) * 10,
+                      alignSelf: 'flex-end',
+                      borderRadius: 8,
+                      background: index % 2 === 0 ? theme.accentColor : `${theme.accentColor}72`,
+                      opacity: 0.25 + index * 0.08,
+                      display: 'flex',
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {statItems.map((item) => {
+                const pct = Math.max(9, Math.round((item.value / maxValue) * 100));
+                return (
+                  <div
+                    key={item.label}
+                    style={{
+                      flex: 1,
+                      minHeight: 0,
+                      borderRadius: 15,
+                      background: 'rgba(255,255,255,0.035)',
+                      border: `1px solid ${theme.borderColor}`,
+                      padding: '10px 12px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 12,
+                    }}
+                  >
+                    <div style={{ width: 38, height: 38, borderRadius: 13, background: `${item.accent}18`, border: `1px solid ${item.accent}30`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        {item.icon === 'star' && <path d="M12 3l2.7 5.5 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.8 1-6.1-4.4-4.3 6.1-.9L12 3z" fill={item.accent} />}
+                        {item.icon === 'pulse' && <path d="M3 13h4l3-7 4 12 3-5h4" stroke={item.accent} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />}
+                        {item.icon === 'repo' && <path d="M5 4h11a3 3 0 0 1 3 3v13H7a2 2 0 0 1-2-2V4zM7 17h12" stroke={item.accent} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />}
+                        {item.icon === 'user' && <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm-7 8c1.2-3.4 3.6-5 7-5s5.8 1.6 7 5" stroke={item.accent} strokeWidth="2.2" strokeLinecap="round" />}
+                      </svg>
+                    </div>
+                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 5 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                        <span style={{ color: theme.secondaryText, fontSize: 12, fontWeight: 750, textTransform: 'uppercase', letterSpacing: 0.8 }}>{item.label}</span>
+                        <span style={{ color: theme.primaryText, fontSize: 24, fontWeight: 900 }}>{item.value.toLocaleString()}</span>
+                      </div>
+                      <div style={{ height: 7, borderRadius: 999, background: `${theme.primaryText}12`, display: 'flex', overflow: 'hidden' }}>
+                        <div style={{ width: `${pct}%`, borderRadius: 999, background: `linear-gradient(90deg, ${item.accent}, ${theme.primaryText}99)`, display: 'flex' }} />
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
           <div
             style={{
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: 1,
+              background: `linear-gradient(90deg, transparent, ${theme.accentColor}80, transparent)`,
               display: 'flex',
-              flexDirection: 'row',
-              gap: 16,
-              flex: 1,
             }}
-          >
-            {/* Repos */}
-            <div
-              style={{
-                flex: 1,
-                background: `linear-gradient(135deg, ${theme.accentColor}12 0%, ${theme.bg}80 100%)`,
-                borderRadius: 14,
-                padding: 18,
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-                border: `1px solid ${theme.accentColor}25`,
-                boxShadow: `0 6px 20px rgba(0, 0, 0, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.1)`,
-                position: 'relative',
-              }}
-            >
-              {/* Gradient overlay */}
-              <div
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  right: 0,
-                  width: 60,
-                  height: 60,
-                  background: `radial-gradient(circle at top right, ${theme.accentColor}10 0%, transparent 70%)`,
-                  display: 'flex',
-                }}
-              />
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  gap: 10,
-                  marginBottom: 4,
-                  position: 'relative',
-                }}
-              >
-                {/* Custom Folder SVG Icon */}
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  style={{ display: 'flex' }}
-                >
-                  <defs>
-                    <linearGradient id="folderGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" style={{ stopColor: theme.accentColor, stopOpacity: 1 }} />
-                      <stop offset="100%" style={{ stopColor: theme.accentColor, stopOpacity: 0.6 }} />
-                    </linearGradient>
-                  </defs>
-                  <path
-                    d="M3 7V17C3 18.1046 3.89543 19 5 19H19C20.1046 19 21 18.1046 21 17V9C21 7.89543 20.1046 7 19 7H12L10 5H5C3.89543 5 3 5.89543 3 7Z"
-                    fill="url(#folderGrad)"
-                  />
-                </svg>
-                <div
-                  style={{
-                    fontSize: 32,
-                    fontWeight: 700,
-                    color: theme.primaryText,
-                    display: 'flex',
-                  }}
-                >
-                  <span>{stats.totalRepos.toLocaleString()}</span>
-                </div>
-              </div>
-              <div
-                style={{
-                  fontSize: 11,
-                  color: theme.secondaryText,
-                  opacity: 0.8,
-                  display: 'flex',
-                  textTransform: 'uppercase',
-                  letterSpacing: 0.5,
-                }}
-              >
-                <span>Repositories</span>
-              </div>
-            </div>
-
-            {/* Followers */}
-            <div
-              style={{
-                flex: 1,
-                background: `linear-gradient(135deg, ${theme.accentColor}12 0%, ${theme.bg}80 100%)`,
-                borderRadius: 14,
-                padding: 18,
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-                border: `1px solid ${theme.accentColor}25`,
-                boxShadow: `0 6px 20px rgba(0, 0, 0, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.1)`,
-                position: 'relative',
-              }}
-            >
-              {/* Gradient overlay */}
-              <div
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  right: 0,
-                  width: 60,
-                  height: 60,
-                  background: `radial-gradient(circle at top right, ${theme.accentColor}10 0%, transparent 70%)`,
-                  display: 'flex',
-                }}
-              />
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  gap: 10,
-                  marginBottom: 4,
-                  position: 'relative',
-                }}
-              >
-                {/* Custom Users SVG Icon */}
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  style={{ display: 'flex' }}
-                >
-                  <defs>
-                    <linearGradient id="usersGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" style={{ stopColor: theme.accentColor, stopOpacity: 1 }} />
-                      <stop offset="100%" style={{ stopColor: theme.accentColor, stopOpacity: 0.6 }} />
-                    </linearGradient>
-                  </defs>
-                  <circle cx="9" cy="7" r="4" fill="url(#usersGrad)" />
-                  <path
-                    d="M3 21C3 17.134 6.134 14 10 14H8C11.866 14 15 17.134 15 21"
-                    fill="url(#usersGrad)"
-                  />
-                  <circle cx="16" cy="8" r="3" fill="url(#usersGrad)" opacity="0.7" />
-                  <path
-                    d="M18 21C18 18.239 19.239 17 22 17"
-                    stroke="url(#usersGrad)"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    opacity="0.7"
-                  />
-                </svg>
-                <div
-                  style={{
-                    fontSize: 32,
-                    fontWeight: 700,
-                    color: theme.primaryText,
-                    display: 'flex',
-                  }}
-                >
-                  <span>{stats.followers.toLocaleString()}</span>
-                </div>
-              </div>
-              <div
-                style={{
-                  fontSize: 11,
-                  color: theme.secondaryText,
-                  opacity: 0.8,
-                  display: 'flex',
-                  textTransform: 'uppercase',
-                  letterSpacing: 0.5,
-                }}
-              >
-                <span>Followers</span>
-              </div>
-            </div>
-          </div>
+          />
         </div>
       </div>
     ),

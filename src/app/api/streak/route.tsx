@@ -67,264 +67,157 @@ async function generateErrorImage(message: string, theme: Theme): Promise<NextRe
  * Generate streak widget image with premium design
  */
 async function generateStreakImage(streak: StreakData, theme: Theme): Promise<NextResponse> {
+  const streakItems = [
+    { label: 'Current', value: streak.currentStreak, color: theme.streakColors.fire, icon: 'flame' },
+    { label: 'Longest', value: streak.longestStreak, color: theme.streakColors.trophy, icon: 'trophy' },
+    { label: 'Active Days', value: streak.totalActiveDays, color: theme.streakColors.calendar, icon: 'calendar' },
+  ];
+  const maxValue = Math.max(...streakItems.map((item) => item.value), 1);
+  const heatCells = Array.from({ length: 18 }, (_, index) => {
+    const active = index < Math.min(18, Math.ceil((streak.currentStreak / Math.max(streak.longestStreak, 1)) * 18));
+    return active;
+  });
+
   const imageResponse = new ImageResponse(
     (
       <div
         style={{
           width,
           height,
-          background: `linear-gradient(165deg, ${theme.cardBg}dd 0%, ${theme.bg}dd 50%, ${theme.cardBg}aa 100%)`,
+          background: `linear-gradient(135deg, ${theme.bg} 0%, ${theme.cardBg} 58%, ${theme.bg} 100%)`,
           display: 'flex',
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'center',
+          flexDirection: 'column',
           fontFamily: 'system-ui',
-          border: `1px solid ${theme.borderColor}`,
-          borderRadius: 20,
-          padding: 24,
-          gap: 24,
+          border: `1px solid ${theme.streakColors.fire}36`,
+          borderRadius: 22,
+          padding: 22,
           position: 'relative',
           overflow: 'hidden',
-          boxShadow: '0 16px 48px rgba(0, 0, 0, 0.5), 0 8px 16px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.15)',
         }}
       >
-        {/* Enhanced glow backgrounds */}
         <div
           style={{
             position: 'absolute',
-            left: '15%',
-            top: '50%',
-            width: 120,
-            height: 120,
-            background: `radial-gradient(circle, ${theme.streakColors.fire}25 0%, ${theme.streakColors.fire}10 40%, transparent 70%)`,
-            transform: 'translateY(-50%)',
+            left: -80,
+            top: -80,
+            width: 230,
+            height: 230,
+            background: `radial-gradient(circle, ${theme.streakColors.fire}32 0%, transparent 72%)`,
             display: 'flex',
           }}
         />
         <div
           style={{
             position: 'absolute',
-            right: '15%',
-            top: '50%',
-            width: 120,
-            height: 120,
-            background: `radial-gradient(circle, ${theme.accentColor}15 0%, transparent 70%)`,
-            transform: 'translateY(-50%)',
+            right: -70,
+            bottom: -90,
+            width: 230,
+            height: 230,
+            background: `radial-gradient(circle, ${theme.accentColor}24 0%, transparent 70%)`,
             display: 'flex',
           }}
         />
 
-        {/* Current Streak - Featured */}
         <div
           style={{
-            flex: 1,
             display: 'flex',
-            flexDirection: 'column',
+            justifyContent: 'space-between',
             alignItems: 'center',
-            justifyContent: 'center',
-            background: `linear-gradient(135deg, ${theme.accentColor}10 0%, ${theme.bg}80 100%)`,
-            borderRadius: 14,
-            padding: 18,
-            border: `1px solid ${theme.accentColor}25`,
-            height: '100%',
-            boxShadow: `0 6px 20px rgba(0, 0, 0, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.1)`,
-            position: 'relative',
+            marginBottom: 16,
           }}
         >
-          {/* Gradient overlay */}
-          <div
-            style={{
-              position: 'absolute',
-              top: 0,
-              right: 0,
-              width: 50,
-              height: 50,
-              background: `radial-gradient(circle at top right, ${theme.streakColors.fire}10 0%, transparent 70%)`,
-              display: 'flex',
-            }}
-          />
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: 8,
-              marginBottom: 6,
-            }}
-          >
-            <div
-              style={{
-                fontSize: 24,
-                display: 'flex',
-              }}
-            >
-              <span>🔥</span>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <div style={{ color: theme.primaryText, fontSize: 22, fontWeight: 850, letterSpacing: -0.4, display: 'flex' }}>
+              <span>Contribution Streak</span>
             </div>
-            <div
-              style={{
-                fontSize: 36,
-                fontWeight: 700,
-                color: theme.streakColors.fire,
-                display: 'flex',
-                textShadow: `0 0 20px ${theme.streakColors.fire}40`,
-              }}
-            >
-              <span>{streak.currentStreak}</span>
+            <div style={{ color: theme.secondaryText, fontSize: 12, fontWeight: 650, letterSpacing: 1.1, textTransform: 'uppercase', marginTop: 3, display: 'flex' }}>
+              <span>Consistency tracker</span>
             </div>
           </div>
-          <div
-            style={{
-              fontSize: 11,
-              color: theme.secondaryText,
-              fontWeight: 500,
-              textTransform: 'uppercase',
-              letterSpacing: 0.5,
-              display: 'flex',
-            }}
-          >
-            <span>Current Streak</span>
+          <div style={{ padding: '7px 11px', borderRadius: 999, background: `${theme.streakColors.fire}16`, border: `1px solid ${theme.streakColors.fire}34`, color: theme.streakColors.fire, fontSize: 11, fontWeight: 850, letterSpacing: 1, textTransform: 'uppercase', display: 'flex' }}>
+            <span>{streak.currentStreak > 0 ? 'Active' : 'Restart today'}</span>
           </div>
         </div>
 
-        {/* Longest Streak */}
-        <div
-          style={{
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            background: `linear-gradient(135deg, ${theme.accentColor}10 0%, ${theme.bg}80 100%)`,
-            borderRadius: 14,
-            padding: 18,
-            border: `1px solid ${theme.accentColor}25`,
-            height: '100%',
-            boxShadow: `0 6px 20px rgba(0, 0, 0, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.1)`,
-            position: 'relative',
-          }}
-        >
-          {/* Gradient overlay */}
+        <div style={{ display: 'flex', flexDirection: 'row', gap: 14, flex: 1, position: 'relative' }}>
           <div
             style={{
-              position: 'absolute',
-              top: 0,
-              right: 0,
-              width: 50,
-              height: 50,
-              background: `radial-gradient(circle at top right, ${theme.streakColors.trophy}10 0%, transparent 70%)`,
+              width: 180,
+              borderRadius: 20,
+              background: `linear-gradient(145deg, ${theme.streakColors.fire}24, ${theme.bg}80)`,
+              border: `1px solid ${theme.streakColors.fire}38`,
+              padding: 18,
               display: 'flex',
-            }}
-          />
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: 8,
-              marginBottom: 6,
+              flexDirection: 'column',
+              justifyContent: 'space-between',
             }}
           >
-            <div
-              style={{
-                fontSize: 24,
-                display: 'flex',
-              }}
-            >
-              <span>🏆</span>
+            <div style={{ width: 72, height: 72, borderRadius: 24, background: `${theme.streakColors.fire}18`, border: `1px solid ${theme.streakColors.fire}38`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <svg width="38" height="38" viewBox="0 0 24 24" fill="none">
+                <path d="M12 22c4 0 7-2.7 7-6.7 0-2.3-1.2-4.2-2.6-5.9-.6 1.7-1.8 2.7-3.1 3.2.5-3.5-.7-6.2-3.5-8.6.2 3.1-1.2 4.7-2.7 6.4C5.9 11.8 5 13.2 5 15.4 5 19.3 8 22 12 22z" fill={theme.streakColors.fire}/>
+              </svg>
             </div>
-            <div
-              style={{
-                fontSize: 36,
-                fontWeight: 700,
-                color: theme.streakColors.trophy,
-                display: 'flex',
-              }}
-            >
-              <span>{streak.longestStreak}</span>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <div style={{ color: theme.streakColors.fire, fontSize: 54, fontWeight: 950, letterSpacing: -2, display: 'flex' }}>
+                <span>{streak.currentStreak}</span>
+              </div>
+              <div style={{ color: theme.secondaryText, fontSize: 12, fontWeight: 750, textTransform: 'uppercase', letterSpacing: 1, display: 'flex' }}>
+                <span>current days</span>
+              </div>
             </div>
           </div>
-          <div
-            style={{
-              fontSize: 11,
-              color: theme.secondaryText,
-              fontWeight: 500,
-              textTransform: 'uppercase',
-              letterSpacing: 0.5,
-              display: 'flex',
-            }}
-          >
-            <span>Longest Streak</span>
-          </div>
-        </div>
 
-        {/* Total Active Days */}
-        <div
-          style={{
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            background: `linear-gradient(135deg, ${theme.accentColor}10 0%, ${theme.bg}80 100%)`,
-            borderRadius: 14,
-            padding: 18,
-            border: `1px solid ${theme.accentColor}25`,
-            height: '100%',
-            boxShadow: `0 6px 20px rgba(0, 0, 0, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.1)`,
-            position: 'relative',
-          }}
-        >
-          {/* Gradient overlay */}
-          <div
-            style={{
-              position: 'absolute',
-              top: 0,
-              right: 0,
-              width: 50,
-              height: 50,
-              background: `radial-gradient(circle at top right, ${theme.streakColors.calendar}10 0%, transparent 70%)`,
-              display: 'flex',
-            }}
-          />
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: 8,
-              marginBottom: 6,
-            }}
-          >
-            <div
-              style={{
-                fontSize: 24,
-                display: 'flex',
-              }}
-            >
-              <span>📅</span>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {streakItems.slice(1).map((item) => {
+              const pct = Math.max(6, Math.round((item.value / maxValue) * 100));
+              return (
+                <div
+                  key={item.label}
+                  style={{
+                    flex: 1,
+                    borderRadius: 16,
+                    background: 'rgba(255,255,255,0.035)',
+                    border: `1px solid ${theme.borderColor}`,
+                    padding: '12px 14px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 12,
+                  }}
+                >
+                  <div style={{ width: 38, height: 38, borderRadius: 13, background: `${item.color}18`, border: `1px solid ${item.color}30`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                      {item.icon === 'trophy' && <path d="M7 4h10v3a5 5 0 0 1-10 0V4zm0 2H4c0 3 1.2 5 4.3 5M17 6h3c0 3-1.2 5-4.3 5M12 12v4m-4 4h8" stroke={item.color} strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" />}
+                      {item.icon === 'calendar' && <path d="M5 5h14v15H5V5zm0 5h14M8 3v4m8-4v4" stroke={item.color} strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" />}
+                    </svg>
+                  </div>
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                      <span style={{ color: theme.secondaryText, fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 0.8 }}>{item.label}</span>
+                      <span style={{ color: theme.primaryText, fontSize: 28, fontWeight: 900 }}>{item.value.toLocaleString()}</span>
+                    </div>
+                    <div style={{ height: 8, borderRadius: 999, background: `${theme.primaryText}12`, overflow: 'hidden', display: 'flex' }}>
+                      <div style={{ width: `${pct}%`, borderRadius: 999, background: `linear-gradient(90deg, ${item.color}, ${theme.primaryText}99)`, display: 'flex' }} />
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+
+            <div style={{ height: 28, display: 'flex', gap: 4, alignItems: 'center' }}>
+              {heatCells.map((active, index) => (
+                <div
+                  key={index}
+                  style={{
+                    flex: 1,
+                    height: active ? 20 : 12,
+                    borderRadius: 6,
+                    background: active ? theme.streakColors.fire : `${theme.primaryText}14`,
+                    opacity: active ? 0.35 + (index / heatCells.length) * 0.6 : 1,
+                    display: 'flex',
+                  }}
+                />
+              ))}
             </div>
-            <div
-              style={{
-                fontSize: 36,
-                fontWeight: 700,
-                color: theme.streakColors.calendar,
-                display: 'flex',
-              }}
-            >
-              <span>{streak.totalActiveDays}</span>
-            </div>
-          </div>
-          <div
-            style={{
-              fontSize: 11,
-              color: theme.secondaryText,
-              fontWeight: 500,
-              textTransform: 'uppercase',
-              letterSpacing: 0.5,
-              display: 'flex',
-            }}
-          >
-            <span>Total Days</span>
           </div>
         </div>
       </div>
