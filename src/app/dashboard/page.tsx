@@ -21,8 +21,16 @@ const WIDGETS = [
   { id: 'stats', label: 'Stats Card', path: '/api/stats' },
   { id: 'languages', label: 'Top Languages', path: '/api/languages' },
   { id: 'streak', label: 'Streak Card', path: '/api/streak' },
-  { id: 'card', label: 'Profile Card', path: '/api/card' },
+  { id: 'card', label: 'Glass Profile', path: '/api/premium-card', params: { variant: 'glass', avatar: 'persona' } },
 ] as const;
+
+function buildWidgetUrl(baseUrl: string, widget: typeof WIDGETS[number], username: string, theme: string) {
+  const params = new URLSearchParams({ username, theme });
+  if ('params' in widget) {
+    Object.entries(widget.params).forEach(([key, value]) => params.set(key, value));
+  }
+  return `${baseUrl}${widget.path}?${params.toString()}`;
+}
 
 function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
@@ -130,10 +138,10 @@ export default function DashboardPage() {
 
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://gitskins.com';
   const widgetTheme = 'zen';
-  const activeWidgetPath = WIDGETS.find(w => w.id === activeWidget)?.path ?? '/api/stats';
-  const widgetUrl = `${baseUrl}${activeWidgetPath}?username=${user.username || 'octocat'}&theme=${widgetTheme}`;
-  const embedMarkdown = `![${WIDGETS.find(w => w.id === activeWidget)?.label}](${widgetUrl})`;
-  const embedHtml = `<img src="${widgetUrl}" alt="${WIDGETS.find(w => w.id === activeWidget)?.label}" />`;
+  const activeWidgetConfig = WIDGETS.find(w => w.id === activeWidget) ?? WIDGETS[0];
+  const widgetUrl = buildWidgetUrl(baseUrl, activeWidgetConfig, user.username || 'octocat', widgetTheme);
+  const embedMarkdown = `![${activeWidgetConfig.label}](${widgetUrl})`;
+  const embedHtml = `<img src="${widgetUrl}" alt="${activeWidgetConfig.label}" />`;
 
   const cardStyle = {
     background: '#161616',

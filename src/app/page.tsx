@@ -14,11 +14,19 @@ import { landingThemes } from '@/lib/landing-themes';
 const themes = landingThemes;
 
 const widgets = [
-  { id: 'card', name: 'Profile Card', path: '/api/premium-card', description: 'Full profile with contribution graph' },
+  { id: 'card', name: 'Glass Profile Card', path: '/api/premium-card', description: 'Modern profile card with avatar, languages, stats, and contribution graph', params: { variant: 'glass', avatar: 'persona' } },
   { id: 'stats', name: 'Stats', path: '/api/stats', description: 'Stars, contributions, repos' },
   { id: 'languages', name: 'Languages', path: '/api/languages', description: 'Top programming languages' },
   { id: 'streak', name: 'Streak', path: '/api/streak', description: 'Current and longest streak' },
 ];
+
+function buildWidgetUrl(baseUrl: string, widget: typeof widgets[number], username: string, theme: string) {
+  const params = new URLSearchParams({ username, theme });
+  if ('params' in widget && widget.params) {
+    Object.entries(widget.params).forEach(([key, value]) => params.set(key, value));
+  }
+  return `${baseUrl}${widget.path}?${params.toString()}`;
+}
 
 const MARQUEE_ITEMS = [
   '20 Themes',
@@ -90,7 +98,7 @@ export default function Home() {
 
   const copyToClipboard = async (widget: typeof widgets[0]) => {
     try {
-      const url = `${baseUrl}${widget.path}?username=${username}&theme=${selectedTheme}`;
+      const url = buildWidgetUrl(baseUrl, widget, username, selectedTheme);
       const markdown = `![${widget.name}](${url})`;
       await navigator.clipboard.writeText(markdown);
       setCopied(widget.id);
@@ -567,7 +575,7 @@ export default function Home() {
                         <ShareMenu
                           shareUrl={`${baseUrl}/showcase/${username}?theme=${selectedTheme}`}
                           shareText={`Check out my GitHub ${widget.name} widget — generated with GitSkins`}
-                          imageUrl={`${baseUrl}${widget.path}?username=${username}&theme=${selectedTheme}`}
+                          imageUrl={buildWidgetUrl(baseUrl, widget, username, selectedTheme)}
                           downloadFilename={`gitskins-${widget.id}-${username}.png`}
                           context={{ username, theme: selectedTheme, widget: widget.id, source: 'landing' }}
                         />
@@ -595,7 +603,7 @@ export default function Home() {
                     <div style={{ padding: '16px', background: '#0a0a0a' }}>
                       <img
                         key={`${widget.id}-${username}-${selectedTheme}`}
-                        src={`${widget.path}?username=${username}&theme=${selectedTheme}`}
+                        src={buildWidgetUrl('', widget, username, selectedTheme)}
                         alt={`${widget.name} preview`}
                         style={{ width: '100%', height: 'auto', display: 'block', borderRadius: '8px' }}
                       />

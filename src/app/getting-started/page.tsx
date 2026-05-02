@@ -9,7 +9,7 @@ const steps = [
     number: 1,
     title: 'Choose Your Widget',
     description: 'Select from profile cards, stats, languages, streaks, or repos',
-    code: `![Profile Card](https://gitskins.com/api/premium-card?username=YOUR_USERNAME&theme=satan)`,
+    code: `![Profile Card](https://gitskins.com/api/premium-card?username=YOUR_USERNAME&theme=github-dark&variant=glass&avatar=persona)`,
   },
   {
     number: 2,
@@ -21,22 +21,22 @@ const steps = [
     number: 3,
     title: 'Copy the Markdown',
     description: 'Copy the generated markdown code to your clipboard',
-    code: `![Profile Card](https://gitskins.com/api/premium-card?username=octocat&theme=satan)`,
+    code: `![Profile Card](https://gitskins.com/api/premium-card?username=octocat&theme=github-dark&variant=glass&avatar=persona)`,
   },
   {
     number: 4,
     title: 'Add to Your README',
     description: 'Paste the markdown into your GitHub profile README.md file',
-    code: `# My GitHub Profile\n\n![Profile Card](https://gitskins.com/api/premium-card?username=octocat&theme=satan)`,
+    code: `# My GitHub Profile\n\n![Profile Card](https://gitskins.com/api/premium-card?username=octocat&theme=github-dark&variant=glass&avatar=persona)`,
   },
 ];
 
 const widgets = [
   {
-    name: 'Profile Card',
+    name: 'Glass Profile Card',
     path: '/api/premium-card',
-    description: 'Full profile with contribution graph',
-    example: '![Profile Card](https://gitskins.com/api/premium-card?username=octocat&theme=satan)',
+    description: 'Modern profile card with avatar, languages, stats, and contribution graph',
+    example: '![Glass Profile Card](https://gitskins.com/api/premium-card?username=octocat&theme=github-dark&variant=glass&avatar=persona)',
   },
   {
     name: 'Stats',

@@ -117,7 +117,7 @@ export default function ThemeSpecPage() {
               overflow: 'auto',
             }}
           >
-            {`https://gitskins.com/api/premium-card?username=octocat&theme=dracula`}
+            {`https://gitskins.com/api/premium-card?username=octocat&theme=dracula&variant=glass&avatar=persona`}
           </pre>
           <p style={{ fontSize: '14px', color: '#666', lineHeight: 1.7, marginTop: '24px' }}>
             Theme IDs match the table above (e.g. <code style={{ background: '#111', padding: '2px 4px', borderRadius: '4px' }}>github-dark</code>, <code style={{ background: '#111', padding: '2px 4px', borderRadius: '4px' }}>dracula</code>, <code style={{ background: '#111', padding: '2px 4px', borderRadius: '4px' }}>minimal</code>).

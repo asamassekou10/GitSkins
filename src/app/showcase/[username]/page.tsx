@@ -64,7 +64,8 @@ function ShowcaseContent() {
 
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
   const productionUrl = 'https://gitskins.com';
-  const cardUrl = `${baseUrl}/api/premium-card?username=${encodeURIComponent(username)}&theme=${selectedTheme}`;
+  const cardParams = `username=${encodeURIComponent(username)}&theme=${selectedTheme}&variant=glass&avatar=persona`;
+  const cardUrl = `${baseUrl}/api/premium-card?${cardParams}`;
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 600);
@@ -76,12 +77,12 @@ function ShowcaseContent() {
   }, [username, selectedTheme]);
 
   const copyMarkdown = useCallback(async () => {
-    const markdown = `![GitSkins Card](${productionUrl}/api/premium-card?username=${username}&theme=${selectedTheme})`;
+    const markdown = `![GitSkins Card](${productionUrl}/api/premium-card?${cardParams})`;
     await navigator.clipboard.writeText(markdown);
     setShowCopied(true);
     setTimeout(() => setShowCopied(false), 2000);
     analytics.trackMarkdownCopy('premium-card', selectedTheme, username, 'showcase');
-  }, [username, selectedTheme]);
+  }, [cardParams, username, selectedTheme]);
 
   const shareUrl = `${baseUrl}/showcase/${username}?theme=${selectedTheme}`;
 
@@ -416,7 +417,7 @@ function ShowcaseContent() {
                 display: 'block',
               }}
             >
-              {`![GitSkins Card](${productionUrl}/api/premium-card?username=${username}&theme=${selectedTheme})`}
+              {`![GitSkins Card](${productionUrl}/api/premium-card?${cardParams})`}
             </code>
           </div>
         </motion.div>

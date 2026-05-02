@@ -20,19 +20,20 @@ type AvatarMode = 'github' | 'gitskins' | 'persona';
 
 const CARD_TYPES: CardType[] = [
   {
-    id: 'premium-card',
-    label: 'Classic Profile',
-    desc: 'Full profile header with identity, stats, and contribution story.',
-    path: '/api/premium-card',
-    width: 820,
-    height: 420,
-  },
-  {
     id: 'premium-glass',
     label: 'Glass Profile',
     desc: 'Modern glass card with richer stats, language chips, and activity map.',
     path: '/api/premium-card',
     variant: 'glass',
+    width: 820,
+    height: 420,
+  },
+  {
+    id: 'premium-card',
+    label: 'Classic Profile',
+    desc: 'Original profile header with identity, stats, and contribution story.',
+    path: '/api/premium-card',
+    variant: 'classic',
     width: 820,
     height: 420,
   },

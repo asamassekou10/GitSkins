@@ -438,7 +438,7 @@ export async function GET(request: NextRequest) {
     theme = themeParam || 'satan';
     const variant = VALID_VARIANTS.includes(variantParam as PremiumCardVariant)
       ? variantParam as PremiumCardVariant
-      : 'classic';
+      : 'glass';
     const avatarMode = VALID_AVATARS.includes(avatarParam as PremiumCardAvatar)
       ? avatarParam as PremiumCardAvatar
       : 'github';
