@@ -207,10 +207,10 @@ export function ThemeShowcase({ themes, selectedTheme, onThemeSelect, username }
               color: '#fafafa',
             }}
           >
-            Choose Your Theme
+            Pick the visual language
           </h2>
           <p style={{ fontSize: '16px', color: '#666', maxWidth: '500px', margin: '0 auto' }}>
-            20 carefully crafted themes to match your style.
+            A theme should do more than change colors. It should make every card, avatar, and embed feel like one deliberate identity.
           </p>
         </AnimatedSection>
 
@@ -308,7 +308,7 @@ export function ThemeShowcase({ themes, selectedTheme, onThemeSelect, username }
               </span>
             </div>
             <a
-              href="#create"
+              href="#live-preview"
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -329,7 +329,7 @@ export function ThemeShowcase({ themes, selectedTheme, onThemeSelect, username }
                 e.currentTarget.style.background = '#22c55e';
               }}
             >
-              Create Widget
+              Preview this theme
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <path d="M5 12h14M12 5l7 7-7 7" />
               </svg>

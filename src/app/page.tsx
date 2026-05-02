@@ -176,10 +176,10 @@ export default function Home() {
             <AnimatedSection style={{ display: 'flex', justifyContent: 'space-between', gap: 24, alignItems: 'end', marginBottom: 34, flexWrap: 'wrap' }}>
               <div>
                 <div style={{ color: '#22c55e', fontSize: 12, fontWeight: 850, textTransform: 'uppercase', letterSpacing: 1.4, marginBottom: 10 }}>
-                  Live preview studio
+                  Live product preview
                 </div>
                 <h2 style={{ fontSize: 'clamp(30px, 4.8vw, 56px)', lineHeight: 1, letterSpacing: '-0.045em', fontWeight: 900, margin: 0, maxWidth: 680 }}>
-                  Show visitors the product before asking them to sign up.
+                  See your GitHub identity come to life.
                 </h2>
               </div>
               <Link href="/cards" style={{ color: '#050505', background: '#22c55e', borderRadius: 12, padding: '13px 18px', textDecoration: 'none', fontWeight: 850 }}>
@@ -253,10 +253,10 @@ export default function Home() {
           <div style={{ maxWidth: 1120, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 420px), 1fr))', gap: 42, alignItems: 'center' }}>
             <AnimatedSection>
               <div style={{ color: '#22c55e', fontSize: 12, fontWeight: 850, textTransform: 'uppercase', letterSpacing: 1.4, marginBottom: 12 }}>
-                Avatar generator
+                Avatar identity system
               </div>
               <h2 style={{ fontSize: 'clamp(30px, 4.8vw, 56px)', lineHeight: 1, letterSpacing: '-0.045em', fontWeight: 900, margin: '0 0 18px' }}>
-                Give developers a profile picture that matches the brand.
+                A profile picture that belongs with the rest of the kit.
               </h2>
               <p style={{ color: '#888', fontSize: 17, lineHeight: 1.7, margin: '0 0 24px' }}>
                 Cards get attention. Matching avatars make the profile feel intentional. GitSkins can generate a complete visual system from one GitHub username.
@@ -296,10 +296,10 @@ export default function Home() {
           <div style={{ maxWidth: 1120, margin: '0 auto' }}>
             <AnimatedSection style={{ marginBottom: 42 }}>
               <div style={{ color: '#22c55e', fontSize: 12, fontWeight: 850, textTransform: 'uppercase', letterSpacing: 1.4, marginBottom: 12 }}>
-                Product system
+                Premium toolkit
               </div>
               <h2 style={{ fontSize: 'clamp(30px, 4.8vw, 56px)', lineHeight: 1, letterSpacing: '-0.045em', fontWeight: 900, margin: 0, maxWidth: 760 }}>
-                Everything needed to turn a GitHub profile into a premium landing page.
+                Every surface a developer needs to look intentional.
               </h2>
             </AnimatedSection>
             <StaggerContainer style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 250px), 1fr))', gap: 16 }}>
@@ -358,10 +358,10 @@ export default function Home() {
             <div style={{ position: 'relative', zIndex: 1, maxWidth: 1120, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 360px), 1fr))', gap: 40, alignItems: 'center' }}>
               <div>
                 <div style={{ color: '#22c55e', fontSize: 12, fontWeight: 850, textTransform: 'uppercase', letterSpacing: 1.4, marginBottom: 12 }}>
-                  Free to start. Built to upgrade.
+                  Start free. Upgrade the full identity.
                 </div>
                 <h2 style={{ fontSize: 'clamp(34px, 5.4vw, 62px)', fontWeight: 900, color: '#fafafa', letterSpacing: '-0.05em', lineHeight: 0.98, margin: '0 0 20px' }}>
-                  Turn your GitHub into a visual brand system.
+                  Make your GitHub feel like a product, not a profile.
                 </h2>
                 <p style={{ fontSize: 18, color: '#a1a1a1', margin: '0 0 30px', lineHeight: 1.65, maxWidth: 560 }}>
                   Start with free cards and themes. Upgrade when you want premium avatars, AI profile tools, project personas, and the full visual kit.

@@ -79,7 +79,7 @@ export function HeroSection({ username, selectedTheme, onUsernameChange, onTheme
         >
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '7px 12px', borderRadius: 999, background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.24)', color: '#4ade80', fontSize: 12, fontWeight: 800, letterSpacing: 0.4, marginBottom: 22 }}>
             <span style={{ width: 7, height: 7, borderRadius: 999, background: '#22c55e', boxShadow: '0 0 18px #22c55e', display: 'inline-flex' }} />
-            Premium GitHub identity kit
+            Developer identity suite
           </div>
 
           <h1
@@ -93,10 +93,10 @@ export function HeroSection({ username, selectedTheme, onUsernameChange, onTheme
               maxWidth: 650,
             }}
           >
-            Make your GitHub profile look paid for.
+            Give your GitHub the polish of a product launch.
           </h1>
           <p style={{ color: '#a3a3a3', fontSize: 'clamp(17px, 2vw, 20px)', lineHeight: 1.65, margin: '0 0 30px', maxWidth: 570 }}>
-            GitSkins turns your profile into a complete developer brand: premium README cards, themed avatars, AI profile tools, and copy-ready embeds.
+            GitSkins turns your profile into a complete developer brand: cinematic README cards, theme-matched avatars, AI profile tools, and copy-ready embeds.
           </p>
 
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 26 }}>
