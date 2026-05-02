@@ -65,6 +65,15 @@ const GITHUB_GRAPHQL_QUERY = `
           stargazers { 
             totalCount 
           } 
+          languages(first: 5, orderBy: {field: SIZE, direction: DESC}) {
+            edges {
+              size
+              node {
+                name
+                color
+              }
+            }
+          }
         } 
       }
     }
@@ -96,6 +105,15 @@ interface GitHubGraphQLResponse {
         stargazers: {
           totalCount: number;
         };
+        languages: {
+          edges: Array<{
+            size: number;
+            node: {
+              name: string;
+              color: string | null;
+            };
+          }>;
+        };
       }>;
     };
   } | null;
@@ -112,6 +130,28 @@ function calculateTotalStars(
     (sum, repo) => sum + repo.stargazers.totalCount,
     0
   );
+}
+
+function aggregateBasicLanguages(
+  repositories: NonNullable<GitHubGraphQLResponse['user']>['repositories']
+): Language[] {
+  const totals = new Map<string, { bytes: number; color: string | null }>();
+
+  for (const repo of repositories.nodes) {
+    for (const edge of repo.languages.edges) {
+      const existing = totals.get(edge.node.name) || {
+        bytes: 0,
+        color: edge.node.color,
+      };
+      existing.bytes += edge.size;
+      totals.set(edge.node.name, existing);
+    }
+  }
+
+  return Array.from(totals.entries())
+    .sort((a, b) => b[1].bytes - a[1].bytes)
+    .slice(0, 5)
+    .map(([name, data]) => ({ name, color: data.color }));
 }
 
 /**
@@ -133,7 +173,7 @@ function transformResponse(
     totalContributions:
       user.contributionsCollection.contributionCalendar.totalContributions,
     totalStars: calculateTotalStars(user.repositories),
-    topLanguages: [], // Not included in the specified query
+    topLanguages: aggregateBasicLanguages(user.repositories),
     contributionCalendar: {
       weeks: user.contributionsCollection.contributionCalendar.weeks,
     },

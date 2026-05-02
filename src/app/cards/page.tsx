@@ -11,6 +11,7 @@ type CardType = {
   label: string;
   desc: string;
   path: string;
+  variant?: string;
   width: number;
   height: number;
 };
@@ -18,9 +19,27 @@ type CardType = {
 const CARD_TYPES: CardType[] = [
   {
     id: 'premium-card',
-    label: 'Profile Card',
+    label: 'Classic Profile',
     desc: 'Full profile header with identity, stats, and contribution story.',
     path: '/api/premium-card',
+    width: 820,
+    height: 420,
+  },
+  {
+    id: 'premium-glass',
+    label: 'Glass Profile',
+    desc: 'Modern glass card with richer stats, language chips, and activity map.',
+    path: '/api/premium-card',
+    variant: 'glass',
+    width: 820,
+    height: 420,
+  },
+  {
+    id: 'premium-persona',
+    label: 'Persona Profile',
+    desc: 'Editorial profile card with a stronger portrait layout and developer signal.',
+    path: '/api/premium-card',
+    variant: 'persona',
     width: 820,
     height: 420,
   },
@@ -58,9 +77,10 @@ const CARD_TYPES: CardType[] = [
   },
 ];
 
-function buildCardUrl(origin: string, path: string, username: string, theme: string) {
+function buildCardUrl(origin: string, cardType: CardType, username: string, theme: string) {
   const params = new URLSearchParams({ username: username || 'octocat', theme });
-  return `${origin}${path}?${params.toString()}`;
+  if (cardType.variant) params.set('variant', cardType.variant);
+  return `${origin}${cardType.path}?${params.toString()}`;
 }
 
 export default function CardsPage() {
@@ -72,7 +92,7 @@ export default function CardsPage() {
   const [copied, setCopied] = useState<'markdown' | 'html' | 'url' | null>(null);
 
   const origin = typeof window !== 'undefined' ? window.location.origin : 'https://gitskins.com';
-  const cardUrl = useMemo(() => buildCardUrl(origin, cardType.path, username, theme), [cardType.path, origin, theme, username]);
+  const cardUrl = useMemo(() => buildCardUrl(origin, cardType, username, theme), [cardType, origin, theme, username]);
   const publicUrl = cardUrl.replace(origin, 'https://gitskins.com');
   const markdown = `![GitSkins ${cardType.label}](${publicUrl})`;
   const html = `<img src="${publicUrl}" alt="GitSkins ${cardType.label}" width="${cardType.width}" />`;
