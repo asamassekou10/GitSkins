@@ -4,7 +4,7 @@
  * Generates a 400×400 themed avatar PNG.
  * Deterministic: same username+theme+style always produces the same image.
  *
- * Families: abstract | mascot
+ * Families: abstract | mascot | character
  * Abstract styles: nebula | crystal | circuit | constellation | terminal
  * Character archetypes: terminal-mage | ai-alchemist | interface-architect | systems-ranger | pixel-adventurer | cloud-pilot | data-oracle | docs-sage | indie-builder
  * Export sizes: 400 | 800 | 1024
@@ -982,6 +982,134 @@ function MascotMouth({ expression, color }: { expression: AvatarExpression; colo
   );
 }
 
+function CharacterBackLayer({
+  character,
+  accent,
+  primary,
+}: {
+  character?: AvatarCharacter;
+  accent: string;
+  primary: string;
+}) {
+  if (!character) return null;
+
+  if (character === 'ai-alchemist') {
+    return (
+      <>
+        <div style={{ position: 'absolute', left: 105, top: 71, width: 190, height: 190, borderRadius: '50%', border: `2px solid ${hexRgba(accent, 0.24)}`, transform: 'rotate(20deg)' }} />
+        <div style={{ position: 'absolute', left: 88, top: 118, width: 224, height: 96, borderRadius: '50%', border: `2px solid ${hexRgba(primary, 0.18)}`, transform: 'rotate(-18deg)' }} />
+        <div style={{ position: 'absolute', left: 190, top: 66, width: 20, height: 20, borderRadius: '50%', background: primary, boxShadow: `0 0 18px ${hexRgba(primary, 0.55)}` }} />
+      </>
+    );
+  }
+
+  if (character === 'interface-architect') {
+    return (
+      <>
+        <div style={{ position: 'absolute', left: 38, top: 102, width: 88, height: 64, borderRadius: 12, border: `1px solid ${hexRgba(accent, 0.28)}`, background: hexRgba('#000000', 0.16) }} />
+        <div style={{ position: 'absolute', right: 34, top: 126, width: 94, height: 72, borderRadius: 12, border: `1px solid ${hexRgba(primary, 0.22)}`, background: hexRgba('#000000', 0.14) }} />
+        <div style={{ position: 'absolute', left: 55, top: 122, width: 52, height: 5, borderRadius: 999, background: hexRgba(accent, 0.35) }} />
+        <div style={{ position: 'absolute', right: 52, top: 150, width: 58, height: 5, borderRadius: 999, background: hexRgba(primary, 0.3) }} />
+      </>
+    );
+  }
+
+  if (character === 'pixel-adventurer') {
+    return (
+      <>
+        {Array.from({ length: 8 }, (_, i) => (
+          <div key={`px-star-${i}`} style={{ position: 'absolute', left: 46 + (i % 4) * 84, top: 70 + Math.floor(i / 4) * 72, width: 14, height: 14, background: i % 2 === 0 ? accent : primary, opacity: 0.2 }} />
+        ))}
+      </>
+    );
+  }
+
+  if (character === 'data-oracle') {
+    return (
+      <>
+        {[0, 1, 2, 3, 4].map((i) => (
+          <div key={`bar-${i}`} style={{ position: 'absolute', left: 45 + i * 68, bottom: 64, width: 18, height: 36 + i * 14, borderRadius: 999, background: i % 2 === 0 ? hexRgba(accent, 0.18) : hexRgba(primary, 0.18) }} />
+        ))}
+      </>
+    );
+  }
+
+  return null;
+}
+
+function CharacterFaceDetails({
+  character,
+  accent,
+  primary,
+}: {
+  character?: AvatarCharacter;
+  accent: string;
+  primary: string;
+}) {
+  if (!character) return null;
+
+  if (character === 'docs-sage' || character === 'data-oracle') {
+    return (
+      <>
+        <div style={{ position: 'absolute', left: 136, top: 178, width: 48, height: 30, borderRadius: 999, border: `3px solid ${hexRgba(accent, 0.75)}` }} />
+        <div style={{ position: 'absolute', right: 136, top: 178, width: 48, height: 30, borderRadius: 999, border: `3px solid ${hexRgba(accent, 0.75)}` }} />
+        <div style={{ position: 'absolute', left: 184, top: 191, width: 32, height: 3, background: hexRgba(accent, 0.75) }} />
+      </>
+    );
+  }
+
+  if (character === 'systems-ranger' || character === 'cloud-pilot') {
+    return (
+      <>
+        <div style={{ position: 'absolute', left: 87, top: 188, width: 26, height: 52, borderRadius: 999, background: hexRgba(primary, 0.4), border: `2px solid ${hexRgba(accent, 0.35)}` }} />
+        <div style={{ position: 'absolute', right: 87, top: 188, width: 26, height: 52, borderRadius: 999, background: hexRgba(primary, 0.4), border: `2px solid ${hexRgba(accent, 0.35)}` }} />
+      </>
+    );
+  }
+
+  if (character === 'terminal-mage') {
+    return (
+      <div style={{ position: 'absolute', left: 130, top: 164, width: 140, height: 64, borderRadius: 20, border: `1px solid ${hexRgba(accent, 0.18)}`, background: 'radial-gradient(circle at 50% 50%, rgba(0,0,0,0.12), transparent 65%)' }} />
+    );
+  }
+
+  return null;
+}
+
+function CharacterProp({
+  character,
+  accent,
+  primary,
+}: {
+  character?: AvatarCharacter;
+  accent: string;
+  primary: string;
+}) {
+  if (!character) return null;
+
+  if (character === 'terminal-mage') {
+    return <div style={{ position: 'absolute', right: 58, bottom: 92, fontFamily: 'monospace', fontSize: 34, fontWeight: 900, color: accent, textShadow: `0 0 14px ${hexRgba(accent, 0.55)}` }}>{'$_'}</div>;
+  }
+
+  if (character === 'ai-alchemist') {
+    return <div style={{ position: 'absolute', right: 66, bottom: 96, width: 34, height: 34, borderRadius: '50%', background: `radial-gradient(circle, ${primary}, ${hexRgba(accent, 0.22)})`, boxShadow: `0 0 22px ${hexRgba(primary, 0.5)}` }} />;
+  }
+
+  if (character === 'interface-architect') {
+    return <div style={{ position: 'absolute', right: 52, bottom: 94, width: 58, height: 42, borderRadius: 8, border: `2px solid ${hexRgba(accent, 0.5)}`, background: hexRgba('#000000', 0.22) }} />;
+  }
+
+  if (character === 'pixel-adventurer') {
+    return <div style={{ position: 'absolute', right: 58, bottom: 98, width: 44, height: 44, background: primary, opacity: 0.85, boxShadow: `12px 12px 0 ${hexRgba(accent, 0.75)}` }} />;
+  }
+
+  if (character === 'docs-sage') {
+    return <div style={{ position: 'absolute', right: 56, bottom: 94, width: 54, height: 42, borderRadius: '4px 12px 12px 4px', background: hexRgba(primary, 0.82), borderLeft: `8px solid ${accent}` }} />;
+  }
+
+  return <div style={{ position: 'absolute', right: 60, bottom: 96, width: 44, height: 44, borderRadius: 12, background: hexRgba(primary, 0.75), border: `2px solid ${hexRgba(accent, 0.45)}` }} />;
+}
+
 function MascotAvatar({ username, themeId, expression, background, character }: AvatarRenderOptions) {
   const theme = safeTheme(themeId);
   const seed = hashStr(username + themeId + expression + (character ?? 'mascot'));
@@ -1011,6 +1139,7 @@ function MascotAvatar({ username, themeId, expression, background, character }: 
       }}
     >
       <BackgroundMotif themeId={themeId} motif={preset.motif} accent={accent} primary={primary} />
+      <CharacterBackLayer character={character} accent={accent} primary={primary} />
 
       <div
         style={{
@@ -1117,6 +1246,8 @@ function MascotAvatar({ username, themeId, expression, background, character }: 
         />
       )}
 
+      <CharacterFaceDetails character={character} accent={accent} primary={primary} />
+
       {preset.accessory !== 'visor' && (
         <>
           <div
@@ -1147,6 +1278,7 @@ function MascotAvatar({ username, themeId, expression, background, character }: 
       )}
 
       <MascotMouth expression={expression} color={preset.archetype === 'pumpkin' ? '#431407' : '#1f2937'} />
+      <CharacterProp character={character} accent={accent} primary={primary} />
 
       <div
         style={{

@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { landingThemes } from '@/lib/landing-themes';
 import { isFreeTierTheme } from '@/config/subscription';
 import { useUserPlan } from '@/hooks/useUserPlan';
-import type { AvatarBackground, AvatarExportSize, AvatarExpression, AvatarFamily, AvatarStyle } from '@/lib/avatar-generator';
+import type { AvatarBackground, AvatarCharacter, AvatarExportSize, AvatarExpression, AvatarFamily, AvatarStyle } from '@/lib/avatar-generator';
 
 const FAMILIES: { id: AvatarFamily; label: string; desc: string }[] = [
   {
@@ -15,10 +15,27 @@ const FAMILIES: { id: AvatarFamily; label: string; desc: string }[] = [
     desc: 'Original character portraits matched to each theme',
   },
   {
+    id: 'character',
+    label: 'Character',
+    desc: 'Developer archetypes like Terminal Mage and AI Alchemist',
+  },
+  {
     id: 'abstract',
     label: 'Abstract',
     desc: 'Deterministic visual systems built from your username',
   },
+];
+
+const CHARACTERS: { id: AvatarCharacter; label: string; desc: string }[] = [
+  { id: 'terminal-mage', label: 'Terminal Mage', desc: 'CLI tools, automation, scripts' },
+  { id: 'ai-alchemist', label: 'AI Alchemist', desc: 'Agents, models, experiments' },
+  { id: 'interface-architect', label: 'Interface Architect', desc: 'Frontend, UX, design systems' },
+  { id: 'systems-ranger', label: 'Systems Ranger', desc: 'Rust, Go, infra, performance' },
+  { id: 'pixel-adventurer', label: 'Pixel Adventurer', desc: 'Games, WebGL, creative code' },
+  { id: 'cloud-pilot', label: 'Cloud Pilot', desc: 'APIs, backend, deployed services' },
+  { id: 'data-oracle', label: 'Data Oracle', desc: 'Analytics, notebooks, datasets' },
+  { id: 'docs-sage', label: 'Docs Sage', desc: 'Guides, teaching, thoughtful docs' },
+  { id: 'indie-builder', label: 'Indie Builder', desc: 'Products, SaaS, practical tools' },
 ];
 
 const EXPRESSIONS: { id: AvatarExpression; label: string }[] = [
@@ -121,7 +138,8 @@ function buildAvatarUrl(
   style: AvatarStyle,
   expression: AvatarExpression,
   background: AvatarBackground,
-  size: AvatarExportSize = 400
+  size: AvatarExportSize = 400,
+  character?: AvatarCharacter
 ) {
   const params = new URLSearchParams({
     username,
@@ -132,6 +150,7 @@ function buildAvatarUrl(
     bg: background,
     size: String(size),
   });
+  if (character) params.set('character', character);
 
   return `${base}/api/avatar?${params.toString()}`;
 }
@@ -145,6 +164,7 @@ export default function AvatarPage() {
   const [username, setUsername] = useState('');
   const [theme, setTheme] = useState('github-dark');
   const [family, setFamily] = useState<AvatarFamily>('mascot');
+  const [character, setCharacter] = useState<AvatarCharacter>('terminal-mage');
   const [style, setStyle] = useState<AvatarStyle>('nebula');
   const [expression, setExpression] = useState<AvatarExpression>('focused');
   const [background, setBackground] = useState<AvatarBackground>('gradient');
@@ -159,14 +179,14 @@ export default function AvatarPage() {
 
   useEffect(() => {
     if (planLoading || userIsPro) return;
-    if (family === 'mascot') setFamily('abstract');
+    if (family === 'mascot' || family === 'character') setFamily('abstract');
     if (!isFreeTierTheme(theme)) setTheme('github-dark');
     if (exportSize !== 400) setExportSize(400);
   }, [exportSize, family, planLoading, theme, userIsPro]);
 
   const base = typeof window !== 'undefined' ? window.location.origin : 'https://gitskins.com';
-  const avatarUrl = buildAvatarUrl(base, username || 'octocat', theme, family, style, expression, background);
-  const exportUrl = buildAvatarUrl(base, username || 'octocat', theme, family, style, expression, background, exportSize);
+  const avatarUrl = buildAvatarUrl(base, username || 'octocat', theme, family, style, expression, background, 400, character);
+  const exportUrl = buildAvatarUrl(base, username || 'octocat', theme, family, style, expression, background, exportSize, character);
   const markdownCode = `![GitSkins Avatar](${avatarUrl})`;
 
   function handleApply() {
@@ -269,12 +289,12 @@ export default function AvatarPage() {
               <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#666', textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: '12px' }}>
                 Avatar Family
               </label>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '8px' }}>
                 {FAMILIES.map((f) => (
                   <motion.button
                     key={f.id}
                     onClick={() => {
-                      if (f.id === 'mascot' && !userIsPro) {
+                      if ((f.id === 'mascot' || f.id === 'character') && !userIsPro) {
                         goToPricing();
                         return;
                       }
@@ -291,12 +311,12 @@ export default function AvatarPage() {
                       borderRadius: '12px',
                       cursor: 'pointer',
                       textAlign: 'left',
-                      opacity: f.id === 'mascot' && !userIsPro ? 0.72 : 1,
+                      opacity: (f.id === 'mascot' || f.id === 'character') && !userIsPro ? 0.72 : 1,
                     }}
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center', fontSize: '14px', fontWeight: 700, color: family === f.id ? '#fff' : '#aaa', marginBottom: '6px' }}>
                       <span>{f.label}</span>
-                      {f.id === 'mascot' && !userIsPro && (
+                      {(f.id === 'mascot' || f.id === 'character') && !userIsPro && (
                         <span style={{ color: '#facc15', fontSize: 10, fontWeight: 800, letterSpacing: 0.4 }}>PRO</span>
                       )}
                     </div>
@@ -306,8 +326,45 @@ export default function AvatarPage() {
               </div>
             </div>
 
+            {/* Character archetype picker */}
+            {family === 'character' && (
+              <div style={{ background: '#0d0d0d', border: '1px solid #1a1a1a', borderRadius: '16px', padding: '20px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center', marginBottom: 12 }}>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#666', textTransform: 'uppercase', letterSpacing: '0.6px' }}>
+                    Developer Character
+                  </label>
+                  <a href="/avatar/persona" style={{ color: '#22c55e', fontSize: 12, fontWeight: 700, textDecoration: 'none' }}>
+                    Analyze projects
+                  </a>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: 310, overflow: 'auto', paddingRight: 2 }}>
+                  {CHARACTERS.map((option) => (
+                    <button
+                      key={option.id}
+                      onClick={() => setCharacter(option.id)}
+                      style={{
+                        padding: '11px 12px',
+                        borderRadius: 11,
+                        border: `1px solid ${character === option.id ? 'rgba(34,197,94,0.45)' : '#1a1a1a'}`,
+                        background: character === option.id ? 'rgba(34,197,94,0.1)' : '#111',
+                        textAlign: 'left',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      <div style={{ color: character === option.id ? '#fff' : '#aaa', fontSize: 13, fontWeight: 750, marginBottom: 3 }}>
+                        {option.label}
+                      </div>
+                      <div style={{ color: '#555', fontSize: 12, lineHeight: 1.4 }}>
+                        {option.desc}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Character controls */}
-            {family === 'mascot' && (
+            {(family === 'mascot' || family === 'character') && (
               <div style={{ background: '#0d0d0d', border: '1px solid #1a1a1a', borderRadius: '16px', padding: '20px' }}>
                 <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#666', textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: '12px' }}>
                   Character Mood
@@ -362,11 +419,11 @@ export default function AvatarPage() {
             {/* Style picker */}
             <div style={{ background: '#0d0d0d', border: '1px solid #1a1a1a', borderRadius: '16px', padding: '20px' }}>
               <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#666', textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: '12px' }}>
-                {family === 'mascot' ? 'Abstract Style Fallback' : 'Style'}
+                {family === 'mascot' || family === 'character' ? 'Abstract Style Fallback' : 'Style'}
               </label>
-              {family === 'mascot' && (
+              {(family === 'mascot' || family === 'character') && (
                 <p style={{ margin: '0 0 12px', color: '#555', fontSize: 12, lineHeight: 1.5 }}>
-                  Mascot avatars use the selected theme and mood. Pick an abstract style too so your copied URL can be switched back later.
+                  Character avatars use the selected theme and mood. Pick an abstract style too so your copied URL can be switched back later.
                 </p>
               )}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -453,7 +510,7 @@ export default function AvatarPage() {
               <div style={{ position: 'relative' }}>
                 <AnimatePresence mode="wait">
                   <motion.div
-                    key={`${previewKey}-${username}-${theme}-${family}-${style}-${expression}-${background}`}
+                    key={`${previewKey}-${username}-${theme}-${family}-${character}-${style}-${expression}-${background}`}
                     initial={{ opacity: 0, scale: 0.92 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.96 }}
