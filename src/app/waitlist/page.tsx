@@ -86,10 +86,7 @@ export default function WaitlistPage() {
             marginBottom: 48,
           }}
         >
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
-            <rect x="2" y="2" width="20" height="20" rx="4" fill="#22c55e" />
-            <path d="M7 12h10M12 7v10" stroke="#050505" strokeWidth="2.5" strokeLinecap="round" />
-          </svg>
+          <img src="/logo-mark.png" alt="" width={34} height={34} style={{ width: 34, height: 34, borderRadius: 10, objectFit: 'cover', boxShadow: '0 0 22px rgba(34,197,94,0.25)' }} />
           <span style={{ fontSize: 24, fontWeight: 700, letterSpacing: '-0.5px' }}>GitSkins</span>
         </div>
 

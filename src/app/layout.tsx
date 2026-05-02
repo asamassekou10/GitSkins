@@ -46,6 +46,13 @@ export const metadata: Metadata = {
   creator: 'GitSkins',
   publisher: 'GitSkins',
   metadataBase: new URL(siteConfig.url),
+  icons: {
+    icon: [
+      { url: '/icon.png', sizes: '192x192', type: 'image/png' },
+      { url: '/logo-mark.png', sizes: '512x512', type: 'image/png' },
+    ],
+    apple: [{ url: '/apple-icon.png', sizes: '180x180', type: 'image/png' }],
+  },
   alternates: {
     canonical: '/',
   },

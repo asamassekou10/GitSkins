@@ -484,10 +484,7 @@ export default function Home() {
                       marginBottom: '12px',
                     }}
                   >
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                      <rect x="2" y="2" width="20" height="20" rx="4" fill="#22c55e" />
-                      <path d="M7 12h10M12 7v10" stroke="#050505" strokeWidth="2.5" strokeLinecap="round" />
-                    </svg>
+                    <img src="/logo-mark.png" alt="" width={24} height={24} style={{ width: 24, height: 24, borderRadius: 7, objectFit: 'cover' }} />
                     GitSkins
                   </div>
                   <p style={{ fontSize: '14px', color: '#666', lineHeight: 1.6, maxWidth: '200px' }}>

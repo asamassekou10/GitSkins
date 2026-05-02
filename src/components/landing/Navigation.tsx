@@ -221,18 +221,27 @@ export function Navigation() {
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '10px',
+            gap: '9px',
             fontSize: '20px',
-            fontWeight: 700,
+            fontWeight: 850,
             color: '#fafafa',
             textDecoration: 'none',
-            letterSpacing: '-0.5px',
+            letterSpacing: '-0.04em',
           }}
         >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <rect x="2" y="2" width="20" height="20" rx="4" fill="#22c55e" />
-            <path d="M7 12h10M12 7v10" stroke="#050505" strokeWidth="2.5" strokeLinecap="round" />
-          </svg>
+          <img
+            src="/logo-mark.png"
+            alt=""
+            width={34}
+            height={34}
+            style={{
+              width: 34,
+              height: 34,
+              borderRadius: 10,
+              objectFit: 'cover',
+              boxShadow: '0 0 22px rgba(34,197,94,0.28)',
+            }}
+          />
           GitSkins
         </Link>
 

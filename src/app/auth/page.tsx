@@ -65,7 +65,7 @@ export default function AuthPage() {
           style={{ display: 'flex', flexDirection: 'column', gap: 28 }}
         >
           <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 10, color: '#fff', textDecoration: 'none', fontWeight: 900, fontSize: 20 }}>
-            <span style={{ width: 28, height: 28, borderRadius: 8, display: 'grid', placeItems: 'center', background: '#22c55e', color: '#050505' }}>G</span>
+            <img src="/logo-mark.png" alt="" width={30} height={30} style={{ width: 30, height: 30, borderRadius: 9, objectFit: 'cover', boxShadow: '0 0 22px rgba(34,197,94,0.25)' }} />
             GitSkins
           </Link>
 
