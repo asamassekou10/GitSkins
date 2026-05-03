@@ -25,6 +25,7 @@ export const primaryNavItems: NavItemWithHash[] = [
 export const toolsNavItems: NavItem[] = [
   { label: 'README Studio', href: '/readme-generator', keywords: 'readme generator animations markdown' },
   { label: 'Profile Cards', href: '/cards', keywords: 'cards widgets readme markdown stats languages streak profile' },
+  { label: 'Profile Skins', href: '/showcase/octocat?skin=studio', keywords: 'showcase profile skins hosted github theme page' },
   { label: 'Theme Avatars', href: '/avatar', keywords: 'avatar profile picture generator themes characters' },
   { label: 'Project Persona', href: '/avatar/persona', keywords: 'avatar character persona projects github' },
   { label: 'AI Toolkit', href: '/ai', keywords: 'ai analyze themes portfolio chat profile intel' },

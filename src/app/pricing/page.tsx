@@ -33,6 +33,8 @@ const PRO_FEATURES = [
   'No watermark on widgets',
   'Priority widget rendering',
   'All AI features (analysis, chat, portfolio)',
+  'Hosted profile skin pages',
+  'Premium character avatar packs',
   'Cancel or manage anytime',
 ];
 

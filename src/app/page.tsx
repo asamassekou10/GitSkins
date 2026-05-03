@@ -60,6 +60,12 @@ const productTiles = [
     size: 'tall',
   },
   {
+    title: 'Profile skin pages',
+    copy: 'Preview a full GitHub-inspired profile page with backgrounds, animated repo cards, avatars, and real activity signal.',
+    href: '/showcase/octocat?skin=renaissance',
+    size: 'wide',
+  },
+  {
     title: 'AI README Agent',
     copy: 'Turn messy repo signal into a sharper README with live streaming and critique/refine loops.',
     href: '/readme-agent',
