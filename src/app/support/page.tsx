@@ -24,6 +24,14 @@ const faqs = [
     answer: 'Payments are handled by Stripe. Pro subscribers can manage or cancel from Dashboard → Manage subscription. Lifetime Pro is a one-time purchase.',
   },
   {
+    question: 'How do I get help with the GitSkins browser extension?',
+    answer: 'Email gitskinspro@gmail.com with your browser, extension version, GitHub profile URL, and a short description of the issue. The extension only works on GitHub profile pages, not repository pages.',
+  },
+  {
+    question: 'Does the extension change my GitHub profile for everyone?',
+    answer: 'No. The extension adds GitSkins tools to your own browser while you use GitHub. To publish something other people can see, copy the generated README markdown or share your hosted GitSkins profile skin link.',
+  },
+  {
     question: 'How do I get support?',
     answer: 'Email gitskinspro@gmail.com for account or billing help. For bugs and feature requests, GitHub issues are the best place.',
   },
@@ -41,6 +49,12 @@ const contactCards = [
     copy: 'Report rendering issues, broken cards, or ideas for new themes.',
     href: 'https://github.com/asamassekou10/GitSkins/issues',
     label: 'Open GitHub issues',
+  },
+  {
+    title: 'Browser extension',
+    copy: 'Chrome or Edge extension install, popup, action bar, and copy-button issues.',
+    href: 'mailto:gitskinspro@gmail.com?subject=GitSkins%20browser%20extension%20support',
+    label: 'Email extension support',
   },
   {
     title: 'Get oriented',

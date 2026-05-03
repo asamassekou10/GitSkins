@@ -42,7 +42,7 @@ export default function PrivacyPage() {
         </h1>
 
         <p style={{ color: '#888', marginBottom: '40px' }}>
-          Last updated: January 25, 2026
+          Last updated: May 3, 2026
         </p>
 
         {/* Content */}
@@ -70,6 +70,12 @@ export default function PrivacyPage() {
                 <strong style={{ color: '#fff' }}>Payment Information:</strong> Payment processing is handled
                 by Stripe. We do not store your credit card details.
               </li>
+              <li style={{ marginBottom: '8px' }}>
+                <strong style={{ color: '#fff' }}>Browser Extension Data:</strong> The GitSkins browser extension
+                reads the active GitHub profile URL to detect the public GitHub username and generate GitSkins
+                links or markdown snippets. It also stores your default theme and profile skin preference using
+                Chrome storage.
+              </li>
             </ul>
           </section>
 
@@ -81,6 +87,7 @@ export default function PrivacyPage() {
             <ul style={{ paddingLeft: '24px', marginTop: '12px' }}>
               <li style={{ marginBottom: '8px' }}>Generate your GitHub profile widgets and cards</li>
               <li style={{ marginBottom: '8px' }}>Create AI-powered README files for your profile</li>
+              <li style={{ marginBottom: '8px' }}>Create GitSkins browser extension links and copy-ready markdown snippets</li>
               <li style={{ marginBottom: '8px' }}>Process payments and manage subscriptions</li>
               <li style={{ marginBottom: '8px' }}>Improve our services and develop new features</li>
               <li style={{ marginBottom: '8px' }}>Communicate with you about updates and support</li>
@@ -100,7 +107,25 @@ export default function PrivacyPage() {
 
           <section style={{ marginBottom: '32px' }}>
             <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#fff', marginBottom: '16px' }}>
-              4. Third-Party Services
+              4. Browser Extension Privacy
+            </h2>
+            <p style={{ marginBottom: '12px' }}>
+              The GitSkins browser extension has a narrow purpose: helping developers create and copy GitSkins
+              profile assets from GitHub profile pages.
+            </p>
+            <ul style={{ paddingLeft: '24px', marginTop: '12px' }}>
+              <li style={{ marginBottom: '8px' }}>The extension detects the current GitHub profile username from the active tab URL.</li>
+              <li style={{ marginBottom: '8px' }}>The extension injects a GitSkins action bar on GitHub profile pages.</li>
+              <li style={{ marginBottom: '8px' }}>The extension uses clipboard access only when you click a copy button.</li>
+              <li style={{ marginBottom: '8px' }}>The extension stores default theme and profile skin preferences using Chrome storage.</li>
+              <li style={{ marginBottom: '8px' }}>The extension does not collect passwords, authentication tokens, payment data, private repository content, personal communications, or browsing history.</li>
+              <li style={{ marginBottom: '8px' }}>The extension does not sell or transfer user data to third parties.</li>
+            </ul>
+          </section>
+
+          <section style={{ marginBottom: '32px' }}>
+            <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#fff', marginBottom: '16px' }}>
+              5. Third-Party Services
             </h2>
             <p style={{ marginBottom: '12px' }}>We use the following third-party services:</p>
             <ul style={{ paddingLeft: '24px', marginTop: '12px' }}>
@@ -124,7 +149,7 @@ export default function PrivacyPage() {
 
           <section style={{ marginBottom: '32px' }}>
             <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#fff', marginBottom: '16px' }}>
-              5. Cookies and Tracking
+              6. Cookies and Tracking
             </h2>
             <p>
               We use essential cookies to maintain your session and preferences. We also use analytics
@@ -135,7 +160,7 @@ export default function PrivacyPage() {
 
           <section style={{ marginBottom: '32px' }}>
             <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#fff', marginBottom: '16px' }}>
-              6. Your Rights
+              7. Your Rights
             </h2>
             <p style={{ marginBottom: '12px' }}>You have the right to:</p>
             <ul style={{ paddingLeft: '24px', marginTop: '12px' }}>
@@ -149,7 +174,7 @@ export default function PrivacyPage() {
 
           <section style={{ marginBottom: '32px' }}>
             <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#fff', marginBottom: '16px' }}>
-              7. Data Retention
+              8. Data Retention
             </h2>
             <p>
               We retain your data only as long as necessary to provide our services. Widget and card
@@ -160,7 +185,7 @@ export default function PrivacyPage() {
 
           <section style={{ marginBottom: '32px' }}>
             <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#fff', marginBottom: '16px' }}>
-              8. Children&apos;s Privacy
+              9. Children&apos;s Privacy
             </h2>
             <p>
               Our service is not intended for children under 13. We do not knowingly collect personal
@@ -171,7 +196,7 @@ export default function PrivacyPage() {
 
           <section style={{ marginBottom: '32px' }}>
             <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#fff', marginBottom: '16px' }}>
-              9. Changes to This Policy
+              10. Changes to This Policy
             </h2>
             <p>
               We may update this Privacy Policy from time to time. We will notify you of any changes
@@ -181,7 +206,7 @@ export default function PrivacyPage() {
 
           <section style={{ marginBottom: '32px' }}>
             <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#fff', marginBottom: '16px' }}>
-              10. Contact Us
+              11. Contact Us
             </h2>
             <p>
               If you have any questions about this Privacy Policy, please contact us at{' '}
