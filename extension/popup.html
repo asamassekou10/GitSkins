@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>GitSkins</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main class="popup">
+      <header class="header">
+        <div class="mark">G</div>
+        <div>
+          <h1>GitSkins</h1>
+          <p id="status">Detecting GitHub profile...</p>
+        </div>
+      </header>
+
+      <label class="field">
+        <span>GitHub username</span>
+        <input id="username" type="text" placeholder="octocat" autocomplete="off" />
+      </label>
+
+      <label class="field">
+        <span>Theme</span>
+        <select id="theme">
+          <option value="studio">Studio</option>
+          <option value="neon">Neon</option>
+          <option value="matrix">Matrix</option>
+          <option value="dracula">Dracula</option>
+          <option value="winter">Winter</option>
+          <option value="satan">Inferno</option>
+        </select>
+      </label>
+
+      <div class="actions">
+        <button id="copy-card" class="primary">Copy card markdown</button>
+        <button id="copy-skin">Copy skin block</button>
+      </div>
+
+      <div class="links">
+        <a id="open-skin" target="_blank" rel="noopener noreferrer">Open profile skin</a>
+        <a id="open-readme" target="_blank" rel="noopener noreferrer">Generate README</a>
+        <a id="open-avatar" target="_blank" rel="noopener noreferrer">Create avatar</a>
+      </div>
+
+      <p id="message" class="message" aria-live="polite"></p>
+    </main>
+    <script src="popup.js"></script>
+  </body>
+</html>

@@ -1,0 +1,140 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  width: 340px;
+  margin: 0;
+  color: #fafafa;
+  background: #050505;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.popup {
+  min-height: 420px;
+  padding: 18px;
+  background:
+    radial-gradient(circle at 82% 8%, rgba(34, 197, 94, 0.18), transparent 32%),
+    linear-gradient(160deg, #050505, #0d0f0e);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.mark {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  background: #22c55e;
+  color: #050505;
+  font-size: 20px;
+  font-weight: 950;
+  box-shadow: 0 0 32px rgba(34, 197, 94, 0.28);
+}
+
+h1 {
+  margin: 0 0 3px;
+  font-size: 18px;
+  letter-spacing: -0.03em;
+}
+
+p {
+  margin: 0;
+}
+
+#status {
+  color: #8a8a8a;
+  font-size: 12px;
+}
+
+.field {
+  display: grid;
+  gap: 7px;
+  margin-bottom: 12px;
+}
+
+.field span {
+  color: #a1a1a1;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+input,
+select {
+  width: 100%;
+  height: 42px;
+  border: 1px solid #242424;
+  border-radius: 12px;
+  padding: 0 12px;
+  background: #101010;
+  color: #fafafa;
+  font: inherit;
+  font-weight: 750;
+  outline: none;
+}
+
+input:focus,
+select:focus {
+  border-color: rgba(34, 197, 94, 0.7);
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.12);
+}
+
+.actions {
+  display: grid;
+  gap: 9px;
+  margin: 16px 0;
+}
+
+button,
+.links a {
+  min-height: 40px;
+  border-radius: 12px;
+  border: 1px solid #242424;
+  background: #111;
+  color: #fafafa;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 850;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+button.primary {
+  border-color: #22c55e;
+  background: #22c55e;
+  color: #050505;
+}
+
+.links {
+  display: grid;
+  gap: 8px;
+}
+
+.links a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  color: #d4d4d4;
+}
+
+.links a::after {
+  content: "↗";
+  color: #22c55e;
+}
+
+.message {
+  min-height: 18px;
+  margin-top: 12px;
+  color: #4ade80;
+  font-size: 12px;
+  font-weight: 750;
+}

@@ -1,0 +1,85 @@
+.gitskins-action-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 16px 0;
+  padding: 12px;
+  border: 1px solid rgba(34, 197, 94, 0.28);
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at 12% 18%, rgba(34, 197, 94, 0.14), transparent 38%),
+    rgba(5, 5, 5, 0.92);
+  box-shadow: 0 16px 42px rgba(0, 0, 0, 0.28);
+  color: #fafafa;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.gitskins-action-bar__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: 4px;
+  color: #fafafa;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.gitskins-action-bar__mark {
+  width: 22px;
+  height: 22px;
+  border-radius: 7px;
+  display: grid;
+  place-items: center;
+  background: #22c55e;
+  color: #050505;
+  font-weight: 900;
+}
+
+.gitskins-action-bar a,
+.gitskins-action-bar button {
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: #e5e7eb;
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 140ms ease, border-color 140ms ease, background 140ms ease, color 140ms ease;
+}
+
+.gitskins-action-bar a:hover,
+.gitskins-action-bar button:hover {
+  transform: translateY(-1px);
+  border-color: rgba(34, 197, 94, 0.54);
+  background: rgba(34, 197, 94, 0.12);
+  color: #ffffff;
+}
+
+.gitskins-action-bar__primary {
+  background: #22c55e !important;
+  border-color: #22c55e !important;
+  color: #050505 !important;
+}
+
+.gitskins-toast {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 999999;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #050505;
+  border: 1px solid rgba(34, 197, 94, 0.34);
+  color: #fafafa;
+  font: 700 13px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.34);
+}
