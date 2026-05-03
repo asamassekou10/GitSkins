@@ -22,8 +22,11 @@ What you can do:
 - Copy premium GitSkins card markdown.
 - Copy a linked profile skin README block.
 - Save your preferred default theme and skin.
+- Optionally preview GitHub profile skins locally in your own browser.
 
 GitSkins does not permanently modify GitHub profiles. It helps you create and publish profile assets through GitSkins.
+
+The optional GitHub profile skin preview is visible only to the user who installed the extension.
 
 ## Category
 
@@ -45,7 +48,7 @@ Used only when the user clicks a copy button to copy GitSkins markdown snippets.
 
 ### storage
 
-Used to save the user's default theme and profile skin preference.
+Used to save the user's default theme, profile skin preference, and optional local GitHub skin preview setting.
 
 ### Host permission: https://github.com/*
 
@@ -58,6 +61,8 @@ Used for opening GitSkins pages and generating GitSkins asset URLs.
 ## Privacy Disclosure
 
 The extension reads the current GitHub profile username from the active tab URL. It does not collect browsing history, passwords, private repository content, or GitHub tokens.
+
+If enabled by the user, the extension applies local CSS styling to GitHub profile pages in that user's browser only.
 
 GitSkins links and generated assets are handled by `https://gitskins.com`.
 

@@ -83,3 +83,182 @@
   font: 700 13px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   box-shadow: 0 18px 60px rgba(0, 0, 0, 0.34);
 }
+
+html[data-gitskins-active="true"] {
+  --gitskins-bg: #050505;
+  --gitskins-surface: rgba(14, 16, 18, 0.82);
+  --gitskins-border: rgba(255, 255, 255, 0.14);
+  --gitskins-text: #fafafa;
+  --gitskins-muted: #a1a1a1;
+  --gitskins-accent: #22c55e;
+  --gitskins-glow: rgba(34, 197, 94, 0.22);
+  --gitskins-page-bg:
+    radial-gradient(circle at 18% 12%, rgba(34, 197, 94, 0.16), transparent 28%),
+    linear-gradient(135deg, #050505, #111315 60%, #060606);
+}
+
+html.gitskins-theme-renaissance {
+  --gitskins-bg: #2a1d12;
+  --gitskins-surface: rgba(45, 31, 19, 0.82);
+  --gitskins-border: rgba(239, 198, 128, 0.38);
+  --gitskins-text: #fff4d6;
+  --gitskins-muted: #d7bb89;
+  --gitskins-accent: #f1b85b;
+  --gitskins-glow: rgba(241, 184, 91, 0.30);
+  --gitskins-page-bg:
+    radial-gradient(circle at 20% 10%, rgba(214, 158, 88, 0.26), transparent 34%),
+    linear-gradient(135deg, #2a1d12, #6b4a2c 55%, #20150c);
+}
+
+html.gitskins-theme-inferno {
+  --gitskins-bg: #050101;
+  --gitskins-surface: rgba(22, 6, 5, 0.86);
+  --gitskins-border: rgba(255, 120, 62, 0.32);
+  --gitskins-text: #fff0e8;
+  --gitskins-muted: #cf8d78;
+  --gitskins-accent: #ff6b2c;
+  --gitskins-glow: rgba(255, 89, 36, 0.34);
+  --gitskins-page-bg:
+    radial-gradient(circle at 72% 24%, rgba(255, 115, 36, 0.30), transparent 28%),
+    linear-gradient(135deg, #050101, #2a0705 58%, #110302);
+}
+
+html.gitskins-theme-frosted {
+  --gitskins-bg: #07121f;
+  --gitskins-surface: rgba(12, 24, 34, 0.62);
+  --gitskins-border: rgba(216, 244, 255, 0.26);
+  --gitskins-text: #f4fbff;
+  --gitskins-muted: #b9d5df;
+  --gitskins-accent: #7dd3fc;
+  --gitskins-glow: rgba(125, 211, 252, 0.28);
+  --gitskins-page-bg:
+    radial-gradient(circle at 28% 18%, rgba(152, 219, 255, 0.30), transparent 30%),
+    linear-gradient(135deg, #07121f, #406a7c 55%, #102331);
+}
+
+html.gitskins-theme-divine {
+  --gitskins-bg: #050505;
+  --gitskins-surface: rgba(15, 12, 8, 0.84);
+  --gitskins-border: rgba(255, 216, 145, 0.28);
+  --gitskins-text: #fff8e7;
+  --gitskins-muted: #c9ad78;
+  --gitskins-accent: #f6c45f;
+  --gitskins-glow: rgba(246, 196, 95, 0.30);
+  --gitskins-page-bg:
+    radial-gradient(circle at 50% 14%, rgba(255, 219, 140, 0.26), transparent 28%),
+    linear-gradient(135deg, #050505, #21170c 60%, #080604);
+}
+
+html.gitskins-theme-cyber {
+  --gitskins-bg: #010402;
+  --gitskins-surface: rgba(2, 12, 6, 0.86);
+  --gitskins-border: rgba(74, 222, 128, 0.28);
+  --gitskins-text: #eafff0;
+  --gitskins-muted: #8bd9a2;
+  --gitskins-accent: #22c55e;
+  --gitskins-glow: rgba(34, 197, 94, 0.34);
+  --gitskins-page-bg:
+    linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
+    radial-gradient(circle at 80% 18%, rgba(34, 197, 94, 0.24), transparent 25%),
+    linear-gradient(135deg, #010402, #05170b 58%, #020805);
+}
+
+html[data-gitskins-active="true"] body {
+  background: var(--gitskins-page-bg) !important;
+  background-size: auto, auto, auto !important;
+  color: var(--gitskins-text) !important;
+}
+
+html[data-gitskins-active="true"] .application-main,
+html[data-gitskins-active="true"] .Layout,
+html[data-gitskins-active="true"] main {
+  background: transparent !important;
+}
+
+html[data-gitskins-active="true"] .UnderlineNav,
+html[data-gitskins-active="true"] .js-profile-editable-area,
+html[data-gitskins-active="true"] .pinned-item-list-item,
+html[data-gitskins-active="true"] .Box,
+html[data-gitskins-active="true"] .ContributionCalendar-grid,
+html[data-gitskins-active="true"] .js-yearly-contributions,
+html[data-gitskins-active="true"] .profile-timeline-year-list,
+html[data-gitskins-active="true"] .border {
+  border-color: var(--gitskins-border) !important;
+}
+
+html[data-gitskins-active="true"] .pinned-item-list-item,
+html[data-gitskins-active="true"] .Box,
+html[data-gitskins-active="true"] .js-yearly-contributions,
+html[data-gitskins-active="true"] .profile-timeline-year-list,
+html[data-gitskins-active="true"] .js-profile-editable-area .vcard-details li,
+html[data-gitskins-active="true"] .gitskins-action-bar {
+  background:
+    radial-gradient(circle at 90% 10%, var(--gitskins-glow), transparent 34%),
+    var(--gitskins-surface) !important;
+  backdrop-filter: blur(18px);
+  box-shadow: 0 18px 70px rgba(0, 0, 0, 0.22) !important;
+}
+
+html[data-gitskins-active="true"] .pinned-item-list-item,
+html[data-gitskins-active="true"] .Box {
+  border-radius: 16px !important;
+}
+
+html[data-gitskins-active="true"] .vcard-fullname,
+html[data-gitskins-active="true"] .p-name,
+html[data-gitskins-active="true"] h1,
+html[data-gitskins-active="true"] h2,
+html[data-gitskins-active="true"] h3,
+html[data-gitskins-active="true"] .repo,
+html[data-gitskins-active="true"] .Link--primary {
+  color: var(--gitskins-text) !important;
+}
+
+html[data-gitskins-active="true"] .color-fg-muted,
+html[data-gitskins-active="true"] .vcard-username,
+html[data-gitskins-active="true"] .p-note,
+html[data-gitskins-active="true"] .text-small,
+html[data-gitskins-active="true"] .Link--muted {
+  color: var(--gitskins-muted) !important;
+}
+
+html[data-gitskins-active="true"] a,
+html[data-gitskins-active="true"] .Link,
+html[data-gitskins-active="true"] .UnderlineNav-item.selected {
+  color: var(--gitskins-accent) !important;
+}
+
+html[data-gitskins-active="true"] .avatar-user {
+  border: 3px solid var(--gitskins-accent) !important;
+  box-shadow: 0 18px 70px var(--gitskins-glow) !important;
+}
+
+html[data-gitskins-active="true"] .btn,
+html[data-gitskins-active="true"] .Button {
+  background: var(--gitskins-surface) !important;
+  border-color: var(--gitskins-border) !important;
+  color: var(--gitskins-text) !important;
+}
+
+html.gitskins-intensity-full[data-gitskins-active="true"] .Header,
+html.gitskins-intensity-full[data-gitskins-active="true"] .AppHeader {
+  background: rgba(0, 0, 0, 0.72) !important;
+  border-bottom: 1px solid var(--gitskins-border) !important;
+  backdrop-filter: blur(16px);
+}
+
+html.gitskins-intensity-full[data-gitskins-active="true"] .Layout-sidebar,
+html.gitskins-intensity-full[data-gitskins-active="true"] .Layout-main {
+  filter: drop-shadow(0 26px 80px rgba(0, 0, 0, 0.22));
+}
+
+html.gitskins-intensity-subtle[data-gitskins-active="true"] body {
+  background:
+    radial-gradient(circle at 80% 10%, var(--gitskins-glow), transparent 32%),
+    #0d1117 !important;
+}
+
+html.gitskins-intensity-subtle[data-gitskins-active="true"] .pinned-item-list-item,
+html.gitskins-intensity-subtle[data-gitskins-active="true"] .Box {
+  background: rgba(13, 17, 23, 0.86) !important;
+}

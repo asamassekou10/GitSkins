@@ -3,6 +3,8 @@ const BASE_URL = 'https://gitskins.com';
 const usernameInput = document.getElementById('username');
 const themeSelect = document.getElementById('theme');
 const skinSelect = document.getElementById('skin');
+const enableGithubSkin = document.getElementById('enable-github-skin');
+const skinIntensity = document.getElementById('skin-intensity');
 const statusEl = document.getElementById('status');
 const messageEl = document.getElementById('message');
 const openSkin = document.getElementById('open-skin');
@@ -58,6 +60,8 @@ function saveDefaults() {
   chrome.storage.sync.set({
     defaultTheme: getTheme(),
     defaultSkin: getSkin(),
+    enableGithubSkin: enableGithubSkin.checked,
+    skinIntensity: skinIntensity.value,
   });
 }
 
@@ -74,9 +78,13 @@ async function init() {
   const defaults = await chrome.storage.sync.get({
     defaultTheme: 'studio',
     defaultSkin: 'studio',
+    enableGithubSkin: false,
+    skinIntensity: 'subtle',
   });
   themeSelect.value = defaults.defaultTheme;
   skinSelect.value = defaults.defaultSkin;
+  enableGithubSkin.checked = defaults.enableGithubSkin;
+  skinIntensity.value = defaults.skinIntensity;
   const detected = tab?.url ? profileUsernameFromUrl(tab.url) : null;
 
   if (detected) {
@@ -99,6 +107,8 @@ skinSelect.addEventListener('change', () => {
   updateLinks();
   saveDefaults();
 });
+enableGithubSkin.addEventListener('change', saveDefaults);
+skinIntensity.addEventListener('change', saveDefaults);
 
 copyCard.addEventListener('click', () => {
   writeClipboard(cardMarkdown(getUsername(), getTheme()), 'Card markdown copied.');

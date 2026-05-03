@@ -1,6 +1,14 @@
 const GITSKINS_BASE_URL = 'https://gitskins.com';
 const BAR_ID = 'gitskins-action-bar';
 
+const SKIN_CLASS_PREFIX = 'gitskins-theme-';
+const INTENSITY_CLASS_PREFIX = 'gitskins-intensity-';
+const DEFAULT_SETTINGS = {
+  defaultSkin: 'studio',
+  enableGithubSkin: false,
+  skinIntensity: 'subtle',
+};
+
 function getProfileUsername() {
   const path = window.location.pathname.split('/').filter(Boolean);
   if (path.length !== 1) return null;
@@ -111,14 +119,53 @@ function injectActionBar() {
   sidebar.prepend(bar);
 }
 
-injectActionBar();
+function clearThemeClasses() {
+  const root = document.documentElement;
+  for (const className of [...root.classList]) {
+    if (className.startsWith(SKIN_CLASS_PREFIX) || className.startsWith(INTENSITY_CLASS_PREFIX)) {
+      root.classList.remove(className);
+    }
+  }
+}
+
+async function applyGithubSkin() {
+  const username = getProfileUsername();
+  const settings = await chrome.storage.sync.get(DEFAULT_SETTINGS);
+  clearThemeClasses();
+
+  if (!username || !settings.enableGithubSkin) {
+    document.documentElement.removeAttribute('data-gitskins-active');
+    return;
+  }
+
+  document.documentElement.dataset.gitskinsActive = 'true';
+  document.documentElement.classList.add(`${SKIN_CLASS_PREFIX}${settings.defaultSkin}`);
+  document.documentElement.classList.add(`${INTENSITY_CLASS_PREFIX}${settings.skinIntensity}`);
+}
+
+function refreshGitSkins() {
+  injectActionBar();
+  applyGithubSkin();
+}
+
+refreshGitSkins();
 
 let lastUrl = window.location.href;
 const observer = new MutationObserver(() => {
   if (lastUrl !== window.location.href) {
     lastUrl = window.location.href;
-    window.setTimeout(injectActionBar, 350);
+    window.setTimeout(refreshGitSkins, 350);
   }
 });
 
 observer.observe(document.documentElement, { childList: true, subtree: true });
+
+chrome.storage.onChanged.addListener((changes, areaName) => {
+  if (areaName === 'sync' && (
+    changes.defaultSkin ||
+    changes.enableGithubSkin ||
+    changes.skinIntensity
+  )) {
+    applyGithubSkin();
+  }
+});

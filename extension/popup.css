@@ -59,6 +59,47 @@ p {
   margin-bottom: 12px;
 }
 
+.skin-settings {
+  margin: 14px 0;
+  padding: 12px;
+  border: 1px solid #242424;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.skin-settings .field {
+  margin-bottom: 0;
+}
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.toggle-row strong {
+  display: block;
+  color: #fafafa;
+  font-size: 13px;
+  line-height: 1.2;
+}
+
+.toggle-row small {
+  display: block;
+  margin-top: 3px;
+  color: #777;
+  font-size: 11px;
+}
+
+.toggle-row input {
+  width: 42px;
+  height: 24px;
+  flex: 0 0 auto;
+  accent-color: #22c55e;
+}
+
 .field span {
   color: #a1a1a1;
   font-size: 12px;
