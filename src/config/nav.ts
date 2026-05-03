@@ -36,6 +36,7 @@ export const toolsNavItems: NavItem[] = [
 export const resourcesNavItems: NavItem[] = [
   { label: 'Getting Started', href: '/getting-started', keywords: 'getting started' },
   { label: 'Blog', href: '/blog', keywords: 'blog guides seo readme github profile avatar cards' },
+  { label: 'Browser Extension', href: '/extension', keywords: 'chrome edge browser extension github profile' },
   { label: 'Examples Gallery', href: '/examples', keywords: 'examples gallery cards avatars themes' },
   { label: 'Docs / Themes', href: '/docs/themes', keywords: 'docs themes' },
   { label: 'Support', href: '/support', keywords: 'support help' },
