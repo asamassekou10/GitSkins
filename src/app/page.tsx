@@ -384,6 +384,66 @@ export default function Home() {
           </div>
         </section>
 
+        {/* Extension CTA */}
+        <AnimatedSection>
+          <section style={{ padding: '96px 24px', background: '#050505', borderTop: '1px solid #111' }}>
+            <div
+              style={{
+                maxWidth: 1120,
+                margin: '0 auto',
+                display: 'grid',
+                gridTemplateColumns: 'minmax(0, 1fr) 360px',
+                gap: 34,
+                alignItems: 'center',
+                padding: 28,
+                borderRadius: 30,
+                border: '1px solid rgba(34,197,94,0.22)',
+                background: 'radial-gradient(circle at 86% 18%, rgba(34,197,94,0.18), transparent 34%), #090909',
+                boxShadow: '0 28px 100px rgba(0,0,0,0.34)',
+              }}
+              className="home-extension-cta"
+            >
+              <div>
+                <div style={{ color: '#22c55e', fontSize: 12, fontWeight: 850, textTransform: 'uppercase', letterSpacing: 1.4, marginBottom: 12 }}>
+                  Browser extension
+                </div>
+                <h2 style={{ fontSize: 'clamp(30px, 4.8vw, 56px)', lineHeight: 1, letterSpacing: '-0.045em', fontWeight: 900, margin: '0 0 16px' }}>
+                  Use GitSkins directly from GitHub.
+                </h2>
+                <p style={{ margin: '0 0 24px', color: '#a1a1a1', fontSize: 16, lineHeight: 1.7, maxWidth: 620 }}>
+                  Add a GitSkins action bar to GitHub profiles, detect usernames automatically, and jump straight into profile skins, avatars, README generation, and copy-ready cards.
+                </p>
+                <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+                  <Link href="/extension" style={{ padding: '13px 18px', borderRadius: 12, background: '#22c55e', color: '#050505', textDecoration: 'none', fontWeight: 900 }}>
+                    Preview extension
+                  </Link>
+                  <Link href="/showcase/octocat?skin=studio" style={{ padding: '13px 18px', borderRadius: 12, background: 'rgba(255,255,255,0.04)', border: '1px solid #2a2a2a', color: '#fafafa', textDecoration: 'none', fontWeight: 850 }}>
+                    See profile skins
+                  </Link>
+                </div>
+              </div>
+              <motion.div
+                animate={{ y: [0, -8, 0] }}
+                transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
+                style={{ borderRadius: 24, padding: 16, background: '#080808', border: '1px solid #242424' }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
+                  <div style={{ width: 38, height: 38, borderRadius: 13, background: '#22c55e', color: '#050505', display: 'grid', placeItems: 'center', fontWeight: 950 }}>G</div>
+                  <div>
+                    <div style={{ color: '#fafafa', fontWeight: 900 }}>GitSkins</div>
+                    <div style={{ color: '#777', fontSize: 12 }}>Detected @octocat</div>
+                  </div>
+                </div>
+                {['Copy card markdown', 'Open profile skin', 'Generate README'].map((item, index) => (
+                  <div key={item} style={{ height: 40, marginTop: 9, borderRadius: 12, background: index === 0 ? '#22c55e' : '#111', border: index === 0 ? 'none' : '1px solid #242424', color: index === 0 ? '#050505' : '#fafafa', display: 'grid', placeItems: 'center', fontSize: 13, fontWeight: 850 }}>
+                    {item}
+                  </div>
+                ))}
+              </motion.div>
+            </div>
+          </section>
+        </AnimatedSection>
+
         {/* Themes Section */}
         <section id="themes">
           <ThemeShowcase
@@ -516,6 +576,7 @@ export default function Home() {
                     <Link href="/ai" style={{ fontSize: '14px', color: '#a1a1a1' }}>AI Features</Link>
                     <Link href="/wrapped" style={{ fontSize: '14px', color: '#a1a1a1' }}>GitHub Wrapped</Link>
                     <Link href="/avatar" style={{ fontSize: '14px', color: '#a1a1a1' }}>Avatar Generator</Link>
+                    <Link href="/extension" style={{ fontSize: '14px', color: '#a1a1a1' }}>Browser Extension</Link>
                     <Link href="/visualize" style={{ fontSize: '14px', color: '#a1a1a1' }}>Repo Visualizer</Link>
                     <Link href="/daily" style={{ fontSize: '14px', color: '#a1a1a1' }}>Daily Dev Card</Link>
                   </div>
@@ -579,6 +640,13 @@ export default function Home() {
             </div>
           </footer>
         </AnimatedSection>
+        <style>{`
+          @media (max-width: 900px) {
+            .home-extension-cta {
+              grid-template-columns: 1fr !important;
+            }
+          }
+        `}</style>
       </div>
     </>
   );
