@@ -291,10 +291,10 @@ export const blogPosts: BlogPost[] = [
       {
         heading: 'Available where developers work',
         body: [
-          'GitSkins also brings theme systems into the browser extension. Users can copy theme-matched markdown from GitHub profile pages and optionally preview GitHub profile skins locally in their own browser.',
+          'GitSkins also brings theme systems into the live Chrome extension. Users can copy theme-matched markdown from GitHub profile pages and optionally preview GitHub profile skins locally in their own browser.',
           'The public profile still comes from README markdown and hosted GitSkins pages, but the extension makes the creative workflow faster and more fun.',
         ],
-        cta: { label: 'Preview the extension', href: '/extension' },
+        cta: { label: 'Install the extension', href: '/extension' },
       },
     ],
   },

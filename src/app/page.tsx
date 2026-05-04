@@ -8,6 +8,7 @@ import { HeroSection } from '@/components/landing/HeroSection';
 import { ThemeShowcase } from '@/components/landing/ThemeShowcase';
 import { AnimatedSection, StaggerContainer, StaggerItem } from '@/components/landing/AnimatedSection';
 import { landingThemes } from '@/lib/landing-themes';
+import { CHROME_WEB_STORE_URL } from '@/config/external-links';
 
 const themes = landingThemes;
 
@@ -464,12 +465,12 @@ export default function Home() {
                   Use GitSkins directly from GitHub.
                 </h2>
                 <p style={{ margin: '0 0 24px', color: '#a1a1a1', fontSize: 16, lineHeight: 1.7, maxWidth: 620 }}>
-                  Add a GitSkins action bar to GitHub profiles, detect usernames automatically, and jump straight into profile skins, avatars, README generation, and copy-ready cards.
+                  Install the live Chrome extension, add a GitSkins action bar to GitHub profiles, detect usernames automatically, and jump straight into profile skins, avatars, README generation, and copy-ready cards.
                 </p>
                 <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-                  <Link href="/extension" style={{ padding: '13px 18px', borderRadius: 12, background: '#22c55e', color: '#050505', textDecoration: 'none', fontWeight: 900 }}>
-                    Preview extension
-                  </Link>
+                  <a href={CHROME_WEB_STORE_URL} target="_blank" rel="noreferrer" style={{ padding: '13px 18px', borderRadius: 12, background: '#22c55e', color: '#050505', textDecoration: 'none', fontWeight: 900 }}>
+                    Install extension
+                  </a>
                   <Link href="/showcase/octocat?skin=studio" style={{ padding: '13px 18px', borderRadius: 12, background: 'rgba(255,255,255,0.04)', border: '1px solid #2a2a2a', color: '#fafafa', textDecoration: 'none', fontWeight: 850 }}>
                     See profile skins
                   </Link>

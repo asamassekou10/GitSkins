@@ -1,7 +1,8 @@
 import Link from 'next/link';
+import { CHROME_WEB_STORE_URL } from '@/config/external-links';
 
 const steps = [
-  'Load the extension in Chrome or Edge.',
+  'Install GitSkins from the Chrome Web Store.',
   'Open any GitHub profile.',
   'Use the GitSkins action bar to create cards, avatars, README blocks, and profile skins.',
 ];
@@ -39,13 +40,16 @@ export default function ExtensionPage() {
               Bring GitSkins into GitHub.
             </h1>
             <p style={{ margin: '0 0 30px', color: '#a1a1a1', fontSize: 18, lineHeight: 1.7, maxWidth: 650 }}>
-              The GitSkins extension adds profile cards, avatar links, README actions, and hosted profile skin previews directly where developers already work: GitHub profile pages.
+              The GitSkins extension is now live on the Chrome Web Store. Add profile cards, avatar links, README actions, and hosted profile skin previews directly where developers already work: GitHub profile pages.
             </p>
             <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-              <Link href="/showcase/octocat?skin=studio" style={{ padding: '14px 20px', borderRadius: 13, background: '#22c55e', color: '#050505', textDecoration: 'none', fontWeight: 900 }}>
+              <a href={CHROME_WEB_STORE_URL} target="_blank" rel="noreferrer" style={{ padding: '14px 20px', borderRadius: 13, background: '#22c55e', color: '#050505', textDecoration: 'none', fontWeight: 900 }}>
+                Install from Chrome Web Store
+              </a>
+              <Link href="/showcase/octocat?skin=studio" style={{ padding: '14px 20px', borderRadius: 13, background: '#101010', border: '1px solid #252525', color: '#fafafa', textDecoration: 'none', fontWeight: 850 }}>
                 Preview a profile skin
               </Link>
-              <a href="https://github.com/asamassekou10/GitSkins/tree/main/extension" style={{ padding: '14px 20px', borderRadius: 13, background: '#101010', border: '1px solid #252525', color: '#fafafa', textDecoration: 'none', fontWeight: 850 }}>
+              <a href="https://github.com/asamassekou10/GitSkins/tree/main/extension" target="_blank" rel="noreferrer" style={{ padding: '14px 20px', borderRadius: 13, background: '#101010', border: '1px solid #252525', color: '#fafafa', textDecoration: 'none', fontWeight: 850 }}>
                 View extension source
               </a>
             </div>
@@ -96,14 +100,17 @@ export default function ExtensionPage() {
       <section style={{ padding: '76px 24px' }}>
         <div style={{ maxWidth: 840, margin: '0 auto', padding: 28, borderRadius: 26, background: '#0b0b0b', border: '1px solid #1f1f1f' }}>
           <div style={{ color: '#22c55e', fontSize: 12, fontWeight: 850, textTransform: 'uppercase', letterSpacing: 1.4, marginBottom: 12 }}>
-            Local install
+            Chrome Web Store
           </div>
-          <h2 style={{ margin: '0 0 18px', fontSize: 34, letterSpacing: '-0.04em' }}>Test it before the store release.</h2>
+          <h2 style={{ margin: '0 0 18px', fontSize: 34, letterSpacing: '-0.04em' }}>Install it in a few clicks.</h2>
           <ol style={{ margin: 0, paddingLeft: 20, color: '#a1a1a1', lineHeight: 1.9 }}>
             {steps.map((step) => (
               <li key={step}>{step}</li>
             ))}
           </ol>
+          <a href={CHROME_WEB_STORE_URL} target="_blank" rel="noreferrer" style={{ display: 'inline-flex', marginTop: 22, padding: '13px 18px', borderRadius: 12, background: '#22c55e', color: '#050505', textDecoration: 'none', fontWeight: 900 }}>
+            Open Chrome Web Store listing
+          </a>
           <p style={{ color: '#666', fontSize: 13, lineHeight: 1.7, margin: '20px 0 0' }}>
             The extension helps you create and publish GitSkins assets. It does not permanently modify how your GitHub profile appears to other visitors.
           </p>
