@@ -644,6 +644,9 @@ export default function Home() {
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                     <Link href="/getting-started" style={{ fontSize: '14px', color: '#a1a1a1' }}>Getting Started</Link>
                     <Link href="/blog" style={{ fontSize: '14px', color: '#a1a1a1' }}>Blog</Link>
+                    <Link href="/github-profile-readme-generator" style={{ fontSize: '14px', color: '#a1a1a1' }}>README Generator Guide</Link>
+                    <Link href="/github-readme-stats-card" style={{ fontSize: '14px', color: '#a1a1a1' }}>Stats Card Guide</Link>
+                    <Link href="/github-profile-themes" style={{ fontSize: '14px', color: '#a1a1a1' }}>Profile Themes</Link>
                     <Link href="/docs/themes" style={{ fontSize: '14px', color: '#a1a1a1' }}>Theme Spec</Link>
                     <Link href="/support" style={{ fontSize: '14px', color: '#a1a1a1' }}>Support</Link>
                   </div>

@@ -7,6 +7,8 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { PLANS, FREE_THEMES, PRO_THEMES } from '@/config/subscription';
 import { analytics } from '@/components/AnalyticsProvider';
+import { JsonLd } from '@/components/seo/JsonLd';
+import { faqJsonLd } from '@/lib/seo';
 
 type BillingCycle = 'monthly' | 'annual';
 type AvailablePlans = {
@@ -42,6 +44,15 @@ const PRO_LIFETIME_FEATURES = [
   'Everything in Pro — forever',
   'Pay once, never again',
   'All future themes included',
+];
+
+const PRICING_FAQS = [
+  { q: 'Can I cancel at any time?', a: 'Yes — cancel instantly from the customer portal. You keep Pro access until the end of the billing period.' },
+  { q: 'What is the difference between monthly and annual?', a: 'Annual billing costs $79/year compared with $9/month. It includes the same Pro features at a lower yearly price.' },
+  { q: 'What are credits and how do they work?', a: 'Credits are one-time README generation top-ups. Each generation costs 1 credit. Credits never expire and work alongside your monthly plan.' },
+  { q: 'What counts as a README generation?', a: 'Each time you click Generate in the README Generator or Live README Agent counts as one. Refreshing or copying does not count.' },
+  { q: 'Does the lifetime plan include future themes?', a: 'Yes. Any new themes added to GitSkins are automatically available to lifetime Pro users.' },
+  { q: 'What payment methods are accepted?', a: 'All major credit and debit cards via Stripe. Apple Pay and Google Pay are available in supported browsers.' },
 ];
 
 function CheckIcon() {
@@ -140,7 +151,24 @@ export default function PricingPage() {
   const annualSavings = Math.round(((9 * 12 - 79) / (9 * 12)) * 100);
 
   return (
-    <div style={{ minHeight: '100vh', background: '#050505', color: '#fafafa' }}>
+    <>
+      <JsonLd
+        data={{
+          '@context': 'https://schema.org',
+          '@type': 'Product',
+          name: 'GitSkins Pro',
+          description: 'Premium GitHub profile themes, README generation, AI profile tools, avatars, widgets, and hosted profile skins.',
+          brand: { '@type': 'Brand', name: 'GitSkins' },
+          offers: [
+            { '@type': 'Offer', name: 'Free', price: '0', priceCurrency: 'USD', availability: 'https://schema.org/InStock', url: 'https://gitskins.com/pricing' },
+            { '@type': 'Offer', name: 'Pro Monthly', price: '9', priceCurrency: 'USD', availability: 'https://schema.org/InStock', url: 'https://gitskins.com/pricing' },
+            { '@type': 'Offer', name: 'Pro Annual', price: '79', priceCurrency: 'USD', availability: 'https://schema.org/InStock', url: 'https://gitskins.com/pricing' },
+            { '@type': 'Offer', name: 'Pro Lifetime', price: '49', priceCurrency: 'USD', availability: 'https://schema.org/InStock', url: 'https://gitskins.com/pricing' },
+          ],
+        }}
+      />
+      <JsonLd data={faqJsonLd(PRICING_FAQS.map(({ q, a }) => ({ question: q, answer: a })))} />
+      <div style={{ minHeight: '100vh', background: '#050505', color: '#fafafa' }}>
       <div style={{ maxWidth: '1040px', margin: '0 auto', padding: '100px 24px 80px' }}>
 
         {/* Header */}
@@ -390,14 +418,7 @@ export default function PricingPage() {
         {/* FAQ */}
         <div style={{ maxWidth: '600px', margin: '0 auto' }}>
           <h2 style={{ fontSize: '24px', fontWeight: 700, textAlign: 'center', marginBottom: '40px' }}>Common questions</h2>
-          {[
-            { q: 'Can I cancel at any time?', a: 'Yes — cancel instantly from the customer portal (Dashboard → Manage Subscription). You keep Pro access until the end of the billing period.' },
-            { q: 'What\'s the difference between monthly and annual?', a: `Annual billing costs $79/year ($6.58/month) vs $9/month — saving you $${9 * 12 - 79} over a year. Same features, better price.` },
-            { q: 'What are credits and how do they work?', a: 'Credits are one-time README generation top-ups. Each generation costs 1 credit. Credits never expire and work alongside your monthly plan.' },
-            { q: 'What counts as a README generation?', a: 'Each time you click Generate in the README Generator or Live README Agent counts as one. Refreshing or copying does not count.' },
-            { q: 'Does the lifetime plan include future themes?', a: 'Yes. Any new themes added to GitSkins are automatically available to lifetime Pro users.' },
-            { q: 'What payment methods are accepted?', a: 'All major credit and debit cards via Stripe. Apple Pay and Google Pay are available in supported browsers.' },
-          ].map(({ q, a }) => (
+          {PRICING_FAQS.map(({ q, a }) => (
             <div key={q} style={{ borderBottom: '1px solid #1a1a1a', padding: '24px 0' }}>
               <p style={{ fontWeight: 600, color: '#e5e5e5', margin: '0 0 8px' }}>{q}</p>
               <p style={{ color: '#666', fontSize: '14px', lineHeight: 1.7, margin: 0 }}>{a}</p>
@@ -412,5 +433,6 @@ export default function PricingPage() {
         </p>
       </div>
     </div>
+    </>
   );
 }

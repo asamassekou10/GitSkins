@@ -2,6 +2,7 @@ import { MetadataRoute } from 'next';
 import { siteConfig } from '@/config/site';
 import { blogPosts } from '@/app/blog/posts';
 import { landingThemes } from '@/lib/landing-themes';
+import { seoLandingSlugs } from '@/lib/seo-content/landing-pages';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = siteConfig.url;
@@ -28,6 +29,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${baseUrl}/privacy`, lastModified: now, changeFrequency: 'monthly', priority: 0.3 },
     { url: `${baseUrl}/terms`, lastModified: now, changeFrequency: 'monthly', priority: 0.3 },
   ];
+
+  const seoLandingPages: MetadataRoute.Sitemap = seoLandingSlugs.map((slug) => ({
+    url: `${baseUrl}/${slug}`,
+    lastModified: now,
+    changeFrequency: 'monthly' as const,
+    priority: 0.82,
+  }));
 
   const popularUsers = [
     'octocat', 'torvalds', 'gaearon', 'sindresorhus', 'tj',
@@ -62,5 +70,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.62,
   }));
 
-  return [...staticPages, ...themePages, ...showcasePages, ...wrappedPages, ...blogPages];
+  return [...staticPages, ...seoLandingPages, ...themePages, ...showcasePages, ...wrappedPages, ...blogPages];
 }

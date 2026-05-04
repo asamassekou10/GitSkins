@@ -8,7 +8,9 @@ import { SessionProvider } from '@/components/providers/session-provider';
 import { AnalyticsProvider } from '@/components/AnalyticsProvider';
 import { Navigation } from '@/components/landing/Navigation';
 import { CommandPaletteWrapper } from '@/components/CommandPaletteWrapper';
+import { JsonLd } from '@/components/seo/JsonLd';
 import { siteConfig } from '@/config/site';
+import { organizationJsonLd } from '@/lib/seo';
 import './globals.css';
 
 const geistSans = Geist({
@@ -103,6 +105,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className={`${geistSans.variable} ${geistMono.variable} ${spaceGrotesk.variable}`}>
       <body>
+        <JsonLd data={organizationJsonLd()} />
         <SessionProvider>
           <PostHogProvider>
             <Suspense fallback={null}>
