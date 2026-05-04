@@ -13,7 +13,7 @@ import { CHROME_WEB_STORE_URL } from '@/config/external-links';
 const themes = landingThemes;
 
 const widgets = [
-  { id: 'card', name: 'Glass Profile Card', path: '/api/premium-card', description: 'Modern profile card with avatar, languages, stats, and contribution graph', params: { variant: 'glass', avatar: 'persona' } },
+  { id: 'card', name: 'Glass Profile Card', path: '/api/premium-card', description: 'Modern profile card with avatar, languages, stats, and contribution graph', params: { variant: 'glass', avatar: 'persona', avatarFallback: 'v2' } },
   { id: 'stats', name: 'Stats', path: '/api/stats', description: 'Stars, contributions, repos' },
   { id: 'languages', name: 'Languages', path: '/api/languages', description: 'Top programming languages' },
   { id: 'streak', name: 'Streak', path: '/api/streak', description: 'Current and longest streak' },

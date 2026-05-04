@@ -34,24 +34,71 @@ function esc(str: string): string {
   );
 }
 
+function firstHexColor(value: string, fallback: string): string {
+  return value.match(/#[a-fA-F0-9]{6}/)?.[0] ?? fallback;
+}
+
+function fallbackAvatarDataUri(username: string, themeName: PremiumThemeName): string {
+  const theme = getPremiumTheme(themeName);
+  const c = theme.colors;
+  const bg = firstHexColor(c.bg, '#050505');
+  const cardBg = firstHexColor(c.cardBg, '#101010');
+  const accent = firstHexColor(c.accent, '#22c55e');
+  const ring = firstHexColor(c.ring, accent);
+  const primary = firstHexColor(c.primary, '#fafafa');
+  const cleaned = username.trim().replace(/^@/, '') || 'user';
+  const initials = cleaned
+    .split(/[-_.\s]+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join('') || cleaned.slice(0, 2).toUpperCase();
+  const safeInitials = esc(initials.slice(0, 2));
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400">
+    <defs>
+      <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="${bg}"/>
+        <stop offset="55%" stop-color="${cardBg}"/>
+        <stop offset="100%" stop-color="${accent}"/>
+      </linearGradient>
+      <radialGradient id="r" cx="72%" cy="18%" r="60%">
+        <stop offset="0%" stop-color="${accent}" stop-opacity="0.36"/>
+        <stop offset="100%" stop-color="${accent}" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+    <rect width="400" height="400" rx="92" fill="url(#g)"/>
+    <circle cx="310" cy="70" r="170" fill="url(#r)"/>
+    <circle cx="92" cy="326" r="150" fill="${ring}" opacity="0.16"/>
+    <rect x="58" y="58" width="284" height="284" rx="78" fill="#000" opacity="0.2" stroke="${accent}" stroke-opacity="0.38" stroke-width="4"/>
+    <text x="200" y="230" text-anchor="middle" fill="${primary}" font-size="112" font-weight="900" font-family="Inter, Segoe UI, Arial, sans-serif">${safeInitials}</text>
+  </svg>`;
+
+  return `data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}`;
+}
+
 // Fetch image buffer and convert to base64 for embedding
-async function fetchImageAsBase64(url: string): Promise<string> {
+async function fetchImageAsBase64(url: string, fallbackDataUri: string): Promise<string> {
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 3000); // 3s timeout
+    const timeoutId = setTimeout(() => controller.abort(), 7000);
     const res = await fetch(url, { signal: controller.signal });
     clearTimeout(timeoutId);
     
     if (!res.ok) throw new Error('Failed to fetch image');
+    const contentType = res.headers.get('content-type') || 'image/png';
+    if (!contentType.startsWith('image/')) {
+      throw new Error(`Unexpected avatar content type: ${contentType}`);
+    }
     const arrayBuffer = await res.arrayBuffer();
+    if (arrayBuffer.byteLength === 0) {
+      throw new Error('Empty avatar response');
+    }
     const buffer = Buffer.from(arrayBuffer);
     const base64 = buffer.toString('base64');
-    const contentType = res.headers.get('content-type') || 'image/png';
     return `data:${contentType};base64,${base64}`;
   } catch (e) {
     console.warn('Failed to fetch avatar for embedding:', e);
-    // Fallback to a generic placeholder or original URL if possible (though original URL might fail display if CORS/hotlink blocked)
-    return url;
+    return fallbackDataUri;
   }
 }
 
@@ -190,7 +237,7 @@ async function generatePremiumCardSvg(
   const c = theme.colors;
   
   // Embed avatar
-  const avatarBase64 = await fetchImageAsBase64(avatarUrl);
+  const avatarBase64 = await fetchImageAsBase64(avatarUrl, fallbackAvatarDataUri(username, themeName));
 
   // Stats
   const stars = data.totalStars.toLocaleString();
@@ -286,7 +333,7 @@ async function generateGlassCardSvg(
 ): Promise<NextResponse> {
   const theme = getPremiumTheme(themeName);
   const c = theme.colors;
-  const avatarBase64 = await fetchImageAsBase64(avatarUrl);
+  const avatarBase64 = await fetchImageAsBase64(avatarUrl, fallbackAvatarDataUri(username, themeName));
   const stars = data.totalStars.toLocaleString();
   const contributions = data.totalContributions.toLocaleString();
   const activeDays = activeDayCount(data).toLocaleString();
@@ -363,7 +410,7 @@ async function generatePersonaCardSvg(
 ): Promise<NextResponse> {
   const theme = getPremiumTheme(themeName);
   const c = theme.colors;
-  const avatarBase64 = await fetchImageAsBase64(avatarUrl);
+  const avatarBase64 = await fetchImageAsBase64(avatarUrl, fallbackAvatarDataUri(username, themeName));
   const personaTitle = data.totalStars > 500
     ? 'Open Source Builder'
     : data.totalContributions > 1000
