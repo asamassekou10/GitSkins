@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { allNavItemsForCommandPalette } from '@/config/nav';
 import { landingThemes } from '@/lib/landing-themes';
 
-type ItemType = { type: 'nav'; label: string; href: string } | { type: 'theme'; id: string; name: string; href: string };
+type ItemType = { type: 'nav'; label: string; href: string } | { type: 'theme'; id: string; name: string; description: string; href: string };
 
 interface CommandPaletteProps {
   open: boolean;
@@ -19,7 +19,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
   const listRef = useRef<HTMLDivElement>(null);
 
   const navItems: ItemType[] = allNavItemsForCommandPalette.map(({ label, href }) => ({ type: 'nav', label, href }));
-  const themeItems: ItemType[] = landingThemes.map((t) => ({ type: 'theme', id: t.id, name: t.name, href: '/#themes' }));
+  const themeItems: ItemType[] = landingThemes.map((t) => ({ type: 'theme', id: t.id, name: t.name, description: t.description, href: `/themes/${t.id}` }));
 
   const allItems: ItemType[] = [...navItems, ...themeItems];
 
@@ -30,7 +30,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
       const searchText = `${item.label} ${navItem?.keywords ?? ''}`.toLowerCase();
       return searchText.includes(q);
     }
-    return item.name.toLowerCase().includes(q);
+    return `${item.name} ${item.description}`.toLowerCase().includes(q);
   });
 
   const selectItem = useCallback(

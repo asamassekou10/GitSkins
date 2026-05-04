@@ -1,6 +1,7 @@
 import { MetadataRoute } from 'next';
 import { siteConfig } from '@/config/site';
 import { blogPosts } from '@/app/blog/posts';
+import { landingThemes } from '@/lib/landing-themes';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = siteConfig.url;
@@ -12,6 +13,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${baseUrl}/examples`, lastModified: now, changeFrequency: 'weekly', priority: 0.9 },
     { url: `${baseUrl}/readme-generator`, lastModified: now, changeFrequency: 'weekly', priority: 0.9 },
     { url: `${baseUrl}/cards`, lastModified: now, changeFrequency: 'weekly', priority: 0.88 },
+    { url: `${baseUrl}/themes`, lastModified: now, changeFrequency: 'weekly', priority: 0.88 },
     { url: `${baseUrl}/readme-agent`, lastModified: now, changeFrequency: 'weekly', priority: 0.85 },
     { url: `${baseUrl}/ai`, lastModified: now, changeFrequency: 'weekly', priority: 0.85 },
     { url: `${baseUrl}/avatar`, lastModified: now, changeFrequency: 'weekly', priority: 0.85 },
@@ -39,6 +41,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
+  const themePages: MetadataRoute.Sitemap = landingThemes.map((theme) => ({
+    url: `${baseUrl}/themes/${theme.id}`,
+    lastModified: now,
+    changeFrequency: 'weekly' as const,
+    priority: 0.72,
+  }));
+
   const wrappedPages: MetadataRoute.Sitemap = popularUsers.map((username) => ({
     url: `${baseUrl}/wrapped/${username}`,
     lastModified: now,
@@ -53,5 +62,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.62,
   }));
 
-  return [...staticPages, ...showcasePages, ...wrappedPages, ...blogPages];
+  return [...staticPages, ...themePages, ...showcasePages, ...wrappedPages, ...blogPages];
 }
