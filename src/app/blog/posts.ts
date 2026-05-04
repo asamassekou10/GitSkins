@@ -257,6 +257,47 @@ export const blogPosts: BlogPost[] = [
       },
     ],
   },
+  {
+    slug: 'introducing-gitskins-theme-systems',
+    title: 'Introducing GitSkins Theme Systems',
+    description: 'GitSkins themes now work across profile cards, avatars, README assets, hosted profile skins, and the browser extension.',
+    category: 'Product Update',
+    readTime: '5 min read',
+    updated: '2026-05-04',
+    hero: '/api/premium-card?username=octocat&theme=matrix&variant=persona&avatar=persona',
+    sections: [
+      {
+        heading: 'A theme should be more than a color picker',
+        body: [
+          'A developer profile has many surfaces: the README hero, stats widgets, language charts, avatars, browser previews, and portfolio links. If each piece uses a different visual style, the profile starts to feel assembled instead of designed.',
+          'Theme Systems are GitSkins answer to that problem. Each theme is designed to carry across the full profile kit so the user can build one consistent developer identity.',
+        ],
+        bullets: [
+          'Profile cards for first impression.',
+          'Stats, language, and streak widgets for proof.',
+          'Theme-matched avatars for recognition.',
+          'README motion and dividers for structure.',
+          'Hosted profile skins for sharing beyond GitHub.',
+        ],
+        cta: { label: 'Browse theme systems', href: '/themes' },
+      },
+      {
+        heading: 'The catalog is built for exploration',
+        body: [
+          'The new theme catalog lets users search and filter every GitSkins theme by mood and category. Each detail page shows the theme across multiple profile surfaces instead of only showing a static palette.',
+          'This makes theme choice more practical. Users can see whether a theme works for a polished portfolio, a playful open-source identity, a cyber console look, or a seasonal refresh.',
+        ],
+      },
+      {
+        heading: 'Available where developers work',
+        body: [
+          'GitSkins also brings theme systems into the browser extension. Users can copy theme-matched markdown from GitHub profile pages and optionally preview GitHub profile skins locally in their own browser.',
+          'The public profile still comes from README markdown and hosted GitSkins pages, but the extension makes the creative workflow faster and more fun.',
+        ],
+        cta: { label: 'Preview the extension', href: '/extension' },
+      },
+    ],
+  },
 ];
 
 export function getBlogPost(slug: string) {

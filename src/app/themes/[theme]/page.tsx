@@ -31,6 +31,14 @@ const surfaces = [
   { title: 'Streak', path: '/api/streak', params: '', ratio: '600 / 260' },
 ] as const;
 
+const useCases: Record<string, string[]> = {
+  original: ['Developer profiles that need a strong first impression.', 'README cards with recognizable visual identity.', 'Profile kits that should feel memorable without being generic.'],
+  seasonal: ['Seasonal launch pages and GitHub profile refreshes.', 'Portfolio updates with a softer editorial mood.', 'Developer profiles that benefit from atmosphere and warmth.'],
+  holiday: ['Limited-time profile moments and launch campaigns.', 'Playful README refreshes for seasonal projects.', 'Shareable profile skins with a stronger visual hook.'],
+  developer: ['Technical portfolios, tools, infrastructure, and open-source projects.', 'Profiles that should feel credible, focused, and production-ready.', 'Browser extension previews with strong contrast.'],
+  aesthetic: ['Personal brands, creative coding, and indie projects.', 'Profiles that need a distinctive mood without heavy visual noise.', 'Avatar and README systems with softer personality.'],
+};
+
 function assetUrl(path: string, theme: string, params = '') {
   return `${path}?username=octocat&theme=${theme}${params}`;
 }
@@ -116,6 +124,31 @@ export default async function ThemeDetailPage({ params }: ThemePageProps) {
                 <h2 style={{ margin: '0 0 8px', fontSize: 28, letterSpacing: '-0.04em' }}>Generate matching README assets.</h2>
                 <p style={{ margin: 0, color: premium.colors.secondary, lineHeight: 1.55 }}>Use the theme across typing headers, cards, dividers, avatars, and profile sections.</p>
               </Link>
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 260px), 1fr))', gap: 16 }}>
+            <div style={{ padding: 22, borderRadius: 24, background: premium.colors.cardBg, border: `1px solid ${premium.colors.border}` }}>
+              <div style={{ color: premium.colors.accent, fontSize: 12, fontWeight: 900, textTransform: 'uppercase', letterSpacing: 1.2, marginBottom: 10 }}>Best for</div>
+              <ul style={{ margin: 0, paddingLeft: 18, color: premium.colors.secondary, lineHeight: 1.7 }}>
+                {(useCases[meta.category] ?? useCases.original).map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </div>
+            <div style={{ padding: 22, borderRadius: 24, background: premium.colors.cardBg, border: `1px solid ${premium.colors.border}` }}>
+              <div style={{ color: premium.colors.accent, fontSize: 12, fontWeight: 900, textTransform: 'uppercase', letterSpacing: 1.2, marginBottom: 10 }}>Included surfaces</div>
+              <ul style={{ margin: 0, paddingLeft: 18, color: premium.colors.secondary, lineHeight: 1.7 }}>
+                {['Premium profile card', 'Stats, streak, and language widgets', 'Character avatar prompt', 'README animation pack', 'Hosted profile skin', 'Browser extension preview'].map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </div>
+            <div style={{ padding: 22, borderRadius: 24, background: premium.colors.cardBg, border: `1px solid ${premium.colors.border}` }}>
+              <div style={{ color: premium.colors.accent, fontSize: 12, fontWeight: 900, textTransform: 'uppercase', letterSpacing: 1.2, marginBottom: 10 }}>Suggested use</div>
+              <p style={{ margin: 0, color: premium.colors.secondary, lineHeight: 1.7 }}>
+                Start with the profile card as the README hero, add one supporting widget, then use the matching avatar and hosted profile skin as the shareable layer.
+              </p>
             </div>
           </div>
 

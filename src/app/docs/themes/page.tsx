@@ -33,6 +33,29 @@ export default function ThemeSpecPage() {
           All GitSkins themes and their primary (accent) color. Use these values for consistency when building widgets or integrating with your profile. Click a color to copy its hex value.
         </p>
 
+        <section
+          style={{
+            padding: 20,
+            borderRadius: 18,
+            background: 'radial-gradient(circle at 86% 12%, rgba(34,197,94,0.16), transparent 34%), #0b0b0b',
+            border: '1px solid rgba(34,197,94,0.24)',
+            marginBottom: 36,
+          }}
+        >
+          <div style={{ color: '#22c55e', fontSize: 12, fontWeight: 850, textTransform: 'uppercase', letterSpacing: 1.2, marginBottom: 8 }}>
+            Visual theme catalog
+          </div>
+          <h2 style={{ color: '#fafafa', fontSize: 24, margin: '0 0 8px', letterSpacing: '-0.03em' }}>
+            Looking for previews, cards, avatars, and profile skins?
+          </h2>
+          <p style={{ color: '#888', lineHeight: 1.6, margin: '0 0 16px' }}>
+            This page is the technical color reference. The full catalog shows every theme across GitSkins cards, avatars, README assets, hosted profile skins, and browser extension previews.
+          </p>
+          <Link href="/themes" style={{ display: 'inline-flex', padding: '10px 14px', borderRadius: 10, background: '#22c55e', color: '#050505', textDecoration: 'none', fontWeight: 850 }}>
+            Browse visual catalog
+          </Link>
+        </section>
+
         <section style={{ marginBottom: '48px' }}>
           <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#a1a1a1', marginBottom: '20px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
             Color palette by theme

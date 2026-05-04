@@ -263,6 +263,59 @@ export default function Home() {
           </div>
         </section>
 
+        {/* Theme Ecosystem */}
+        <section style={{ padding: '110px 24px', background: '#080808', borderTop: '1px solid #111' }}>
+          <div style={{ maxWidth: 1120, margin: '0 auto' }}>
+            <AnimatedSection style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(280px, 420px)', gap: 40, alignItems: 'center' }} className="theme-ecosystem">
+              <div>
+                <div style={{ color: '#22c55e', fontSize: 12, fontWeight: 850, textTransform: 'uppercase', letterSpacing: 1.4, marginBottom: 12 }}>
+                  Theme systems
+                </div>
+                <h2 style={{ fontSize: 'clamp(32px, 5vw, 62px)', lineHeight: 0.98, letterSpacing: '-0.05em', fontWeight: 900, margin: '0 0 18px' }}>
+                  One theme across every profile surface.
+                </h2>
+                <p style={{ color: '#a1a1a1', fontSize: 17, lineHeight: 1.7, margin: '0 0 24px', maxWidth: 640 }}>
+                  GitSkins themes are not just color presets. Each one carries across profile cards, stats, language charts, streaks, avatars, README motion, hosted profile skins, and the browser extension.
+                </p>
+                <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+                  <Link href="/themes" style={{ padding: '13px 18px', borderRadius: 12, background: '#22c55e', color: '#050505', textDecoration: 'none', fontWeight: 900 }}>
+                    Browse themes
+                  </Link>
+                  <Link href="/themes/matrix" style={{ padding: '13px 18px', borderRadius: 12, background: 'rgba(255,255,255,0.04)', border: '1px solid #2a2a2a', color: '#fafafa', textDecoration: 'none', fontWeight: 850 }}>
+                    View Matrix system
+                  </Link>
+                </div>
+              </div>
+
+              <div style={{ position: 'relative', minHeight: 430 }}>
+                {[
+                  ['/api/premium-card?username=octocat&theme=matrix&variant=persona&avatar=persona', 0, 0, 330],
+                  ['/api/avatar?username=octocat&family=character&theme=matrix&size=400', 220, 188, 150],
+                  ['/api/languages?username=octocat&theme=matrix', 24, 286, 260],
+                ].map(([src, left, top, width], index) => (
+                  <motion.img
+                    key={String(src)}
+                    src={String(src)}
+                    alt=""
+                    animate={{ y: [0, index % 2 === 0 ? -8 : 8, 0] }}
+                    transition={{ duration: 5 + index, repeat: Infinity, ease: 'easeInOut' }}
+                    style={{
+                      position: 'absolute',
+                      left: Number(left),
+                      top: Number(top),
+                      width: Number(width),
+                      maxWidth: '100%',
+                      borderRadius: 18,
+                      border: '1px solid rgba(34,197,94,0.2)',
+                      boxShadow: '0 28px 90px rgba(0,0,0,0.5)',
+                    }}
+                  />
+                ))}
+              </div>
+            </AnimatedSection>
+          </div>
+        </section>
+
         {/* Avatar Showcase */}
         <section style={{ padding: '110px 24px', background: '#080808' }}>
           <div style={{ maxWidth: 1120, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 420px), 1fr))', gap: 42, alignItems: 'center' }}>
@@ -642,7 +695,8 @@ export default function Home() {
         </AnimatedSection>
         <style>{`
           @media (max-width: 900px) {
-            .home-extension-cta {
+            .home-extension-cta,
+            .theme-ecosystem {
               grid-template-columns: 1fr !important;
             }
           }
