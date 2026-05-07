@@ -2,8 +2,8 @@
  * Server-side usage and subscription helpers.
  *
  * These functions run only in server contexts (API routes, server components).
- * When DATABASE_URL is not set they fall back to permissive in-memory limits so
- * the app still works in local development without a database.
+ * In production, usage checks fail closed when the database is unavailable so
+ * free limits and paid gating cannot be bypassed.
  */
 
 import { db } from '@/lib/db';
@@ -124,6 +124,28 @@ function dbAvailable(): boolean {
   return !!process.env.DATABASE_URL;
 }
 
+function strictUsageEnforcement(): boolean {
+  return process.env.NODE_ENV === 'production';
+}
+
+function dbUnavailableCheck(): UsageCheckResult {
+  return strictUsageEnforcement()
+    ? { allowed: false, remaining: 0, limit: FREE_TIER_README_LIMIT, plan: 'free' }
+    : { allowed: true, remaining: FREE_TIER_README_LIMIT, limit: FREE_TIER_README_LIMIT, plan: 'free' };
+}
+
+function dbUnavailableSnapshot() {
+  return {
+    plan: 'free' as const,
+    readmeGenerationsUsed: 0,
+    readmeGenerationsLimit: FREE_TIER_README_LIMIT,
+    readmeGenerationsRemaining: strictUsageEnforcement() ? 0 : FREE_TIER_README_LIMIT,
+    creditsRemaining: 0,
+    month: currentMonth(),
+    dbAvailable: false,
+  };
+}
+
 /** Resolve our internal DB user id from a GitHub username. */
 async function getUserId(username: string): Promise<string | null> {
   const user = await db.user.findUnique({
@@ -227,7 +249,7 @@ async function checkReadmeAllowedForUserId(userId: string): Promise<UsageCheckRe
 
 export async function checkReadmeAllowedById(userId: string): Promise<UsageCheckResult> {
   if (!dbAvailable()) {
-    return { allowed: true, remaining: 9999, limit: 9999, plan: 'free' };
+    return dbUnavailableCheck();
   }
 
   try {
@@ -243,8 +265,7 @@ export async function checkReadmeAllowedById(userId: string): Promise<UsageCheck
  */
 export async function checkReadmeAllowed(username: string): Promise<UsageCheckResult> {
   if (!dbAvailable()) {
-    // Dev/demo mode: allow everything
-    return { allowed: true, remaining: 9999, limit: 9999, plan: 'free' };
+    return dbUnavailableCheck();
   }
 
   try {
@@ -257,8 +278,7 @@ export async function checkReadmeAllowed(username: string): Promise<UsageCheckRe
 
     const userId = await getUserId(username);
     if (!userId) {
-      // User hasn't been synced to the DB yet; allow but don't count
-      return { allowed: true, remaining: FREE_TIER_README_LIMIT, limit: FREE_TIER_README_LIMIT, plan: 'free' };
+      return { allowed: false, remaining: 0, limit: FREE_TIER_README_LIMIT, plan: 'free' };
     }
 
     const month = currentMonth();
@@ -278,20 +298,26 @@ export async function checkReadmeAllowed(username: string): Promise<UsageCheckRe
       creditsRemaining,
     };
   } catch {
-    // On any DB error, fail open so users aren't blocked
-    return { allowed: true, remaining: FREE_TIER_README_LIMIT, limit: FREE_TIER_README_LIMIT, plan: 'free' };
+    return dbUnavailableCheck();
   }
 }
 
-export async function incrementReadmeUsageById(userId: string): Promise<void> {
-  if (!dbAvailable()) return;
+export interface UsageIncrementResult {
+  usedFreeGeneration: boolean;
+  usedCredit: boolean;
+  usageUsed: number;
+  creditsRemaining: number;
+}
+
+export async function incrementReadmeUsageById(userId: string): Promise<UsageIncrementResult | null> {
+  if (!dbAvailable()) return null;
 
   try {
     const plan = await getUserPlanById(userId);
-    if (plan === 'pro') return;
+    if (plan === 'pro') return null;
 
     const month = currentMonth();
-    await db.$transaction(async (tx) => {
+    return await db.$transaction(async (tx) => {
       const usage = await tx.usage.upsert({
         where: { userId_month: { userId, month } },
         update: {},
@@ -300,11 +326,21 @@ export async function incrementReadmeUsageById(userId: string): Promise<void> {
       });
 
       if (usage.readmeGenerationsUsed < FREE_TIER_README_LIMIT) {
-        await tx.usage.update({
+        const updated = await tx.usage.update({
           where: { userId_month: { userId, month } },
           data: { readmeGenerationsUsed: { increment: 1 } },
+          select: { readmeGenerationsUsed: true },
         });
-        return;
+        const balance = await tx.creditBalance.findUnique({
+          where: { userId },
+          select: { credits: true },
+        });
+        return {
+          usedFreeGeneration: true,
+          usedCredit: false,
+          usageUsed: updated.readmeGenerationsUsed,
+          creditsRemaining: balance?.credits ?? 0,
+        };
       }
 
       const balance = await tx.creditBalance.findUnique({
@@ -316,16 +352,24 @@ export async function incrementReadmeUsageById(userId: string): Promise<void> {
         throw new Error('No README credits available');
       }
 
-      await tx.creditBalance.update({
+      const updatedBalance = await tx.creditBalance.update({
         where: { userId },
         data: { credits: { decrement: 1 } },
+        select: { credits: true },
       });
       await tx.creditTransaction.create({
         data: { userId, amount: -1, reason: 'readme_generation' },
       });
+      return {
+        usedFreeGeneration: false,
+        usedCredit: true,
+        usageUsed: usage.readmeGenerationsUsed,
+        creditsRemaining: updatedBalance.credits,
+      };
     });
   } catch (err) {
     console.error('[server-usage] incrementReadmeUsageById failed:', err);
+    return null;
   }
 }
 
@@ -351,14 +395,7 @@ export async function incrementReadmeUsage(username: string): Promise<void> {
  */
 export async function getUsageSnapshotById(userId: string) {
   if (!dbAvailable()) {
-    return {
-      plan: 'free' as const,
-      readmeGenerationsUsed: 0,
-      readmeGenerationsLimit: FREE_TIER_README_LIMIT,
-      readmeGenerationsRemaining: FREE_TIER_README_LIMIT,
-      month: currentMonth(),
-      dbAvailable: false,
-    };
+    return dbUnavailableSnapshot();
   }
 
   try {
@@ -387,14 +424,7 @@ export async function getUsageSnapshotById(userId: string) {
       dbAvailable: true,
     };
   } catch {
-    return {
-      plan: 'free' as const,
-      readmeGenerationsUsed: 0,
-      readmeGenerationsLimit: FREE_TIER_README_LIMIT,
-      readmeGenerationsRemaining: FREE_TIER_README_LIMIT,
-      month: currentMonth(),
-      dbAvailable: false,
-    };
+    return dbUnavailableSnapshot();
   }
 }
 
@@ -403,14 +433,7 @@ export async function getUsageSnapshotById(userId: string) {
  */
 export async function getUsageSnapshot(username: string) {
   if (!dbAvailable()) {
-    return {
-      plan: 'free' as const,
-      readmeGenerationsUsed: 0,
-      readmeGenerationsLimit: FREE_TIER_README_LIMIT,
-      readmeGenerationsRemaining: FREE_TIER_README_LIMIT,
-      month: currentMonth(),
-      dbAvailable: false,
-    };
+    return dbUnavailableSnapshot();
   }
 
   try {
@@ -440,13 +463,6 @@ export async function getUsageSnapshot(username: string) {
       dbAvailable: true,
     };
   } catch {
-    return {
-      plan: 'free' as const,
-      readmeGenerationsUsed: 0,
-      readmeGenerationsLimit: FREE_TIER_README_LIMIT,
-      readmeGenerationsRemaining: FREE_TIER_README_LIMIT,
-      month: currentMonth(),
-      dbAvailable: false,
-    };
+    return dbUnavailableSnapshot();
   }
 }

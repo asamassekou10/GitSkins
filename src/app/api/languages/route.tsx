@@ -70,8 +70,17 @@ async function generateLanguagesImage(
   languages: LanguageStat[],
   theme: Theme
 ): Promise<NextResponse> {
-  const topLanguage = languages[0];
-  const totalBytes = languages.reduce((sum, lang) => sum + lang.bytes, 0);
+  const safeLanguages = languages
+    .filter((lang) => lang.name && Number.isFinite(lang.percentage))
+    .slice(0, 4)
+    .map((lang) => ({
+      ...lang,
+      color: lang.color || theme.accentColor,
+      percentage: Math.max(0, Math.min(100, Math.round(lang.percentage))),
+      name: lang.name.length > 18 ? `${lang.name.slice(0, 16)}…` : lang.name,
+    }));
+  const topLanguage = safeLanguages[0];
+  const totalBytes = safeLanguages.reduce((sum, lang) => sum + lang.bytes, 0);
   const imageResponse = new ImageResponse(
     (
       <div
@@ -126,7 +135,7 @@ async function generateLanguagesImage(
               <span>Language Mix</span>
             </div>
             <div style={{ color: theme.secondaryText, fontSize: 12, fontWeight: 650, letterSpacing: 1.1, textTransform: 'uppercase', marginTop: 3, display: 'flex' }}>
-              <span>{languages.length > 0 ? `${languages.length} technologies detected` : 'No language signal yet'}</span>
+              <span>{safeLanguages.length > 0 ? `${languages.length} technologies detected` : 'No language signal yet'}</span>
             </div>
           </div>
           {topLanguage ? (
@@ -136,7 +145,7 @@ async function generateLanguagesImage(
           ) : null}
         </div>
 
-        {languages.length > 0 ? (
+        {safeLanguages.length > 0 ? (
           <div style={{ position: 'relative', flex: 1, display: 'flex' }}>
             <div style={{ position: 'absolute', left: 0, top: 0, width: 132, height: 142, borderRadius: 20, background: `linear-gradient(145deg, ${(topLanguage?.color || theme.accentColor)}22, ${theme.bg}80)`, border: `1px solid ${(topLanguage?.color || theme.accentColor)}38`, display: 'flex' }} />
             <div style={{ position: 'absolute', left: 39, top: 18, width: 72, height: 72, borderRadius: '50%', border: `12px solid ${(topLanguage?.color || theme.accentColor)}55`, background: `${theme.cardBg}cc`, display: 'flex' }} />
@@ -148,11 +157,11 @@ async function generateLanguagesImage(
               <span>{Math.round(totalBytes / 1000).toLocaleString()} KB indexed</span>
             </div>
 
-            {languages.map((lang, index) => {
-              const y = index * 45;
+            {safeLanguages.map((lang, index) => {
+              const y = index * 42;
               return (
                 <div key={index} style={{ display: 'flex' }}>
-                  <div style={{ position: 'absolute', left: 154, top: y, width: 252, height: 36, borderRadius: 14, background: 'rgba(255,255,255,0.035)', border: `1px solid ${theme.borderColor}`, display: 'flex' }} />
+                  <div style={{ position: 'absolute', left: 154, top: y, width: 252, height: 34, borderRadius: 14, background: 'rgba(255,255,255,0.035)', border: `1px solid ${theme.borderColor}`, display: 'flex' }} />
                   <div style={{ position: 'absolute', left: 170, top: y + 11, width: 10, height: 10, borderRadius: '50%', backgroundColor: lang.color, boxShadow: `0 0 10px ${lang.color}80`, display: 'flex' }} />
                   <div style={{ position: 'absolute', left: 190, top: y + 8, color: theme.primaryText, fontSize: 13, fontWeight: 750, display: 'flex' }}>
                     <span>{lang.name}</span>
@@ -189,9 +198,9 @@ async function generateLanguagesImage(
             </div>
         )}
 
-        {languages.length > 0 ? (
+        {safeLanguages.length > 0 ? (
           <div style={{ display: 'flex', gap: 6, marginTop: 14 }}>
-            {languages.map((lang, index) => (
+            {safeLanguages.map((lang, index) => (
               <div
                 key={index}
                 style={{

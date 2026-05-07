@@ -24,6 +24,25 @@ import { db } from '@/lib/db';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
+const inFlightReadmeGenerations = new Map<string, number>();
+const IN_FLIGHT_TTL_MS = 90_000;
+
+function reserveGenerationSlot(userId: string): boolean {
+  const now = Date.now();
+  for (const [key, startedAt] of inFlightReadmeGenerations.entries()) {
+    if (now - startedAt > IN_FLIGHT_TTL_MS) {
+      inFlightReadmeGenerations.delete(key);
+    }
+  }
+
+  if (inFlightReadmeGenerations.has(userId)) {
+    return false;
+  }
+
+  inFlightReadmeGenerations.set(userId, now);
+  return true;
+}
+
 const requestSchema = z.object({
   username: z.string().min(1).max(39),
   sections: z
@@ -68,47 +87,59 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const usageCheck = sessionUser.id
-      ? await checkReadmeAllowedById(sessionUser.id)
-      : await checkReadmeAllowed(sessionUser.username!);
-    if (!usageCheck.allowed) {
+    const inFlightKey = sessionUser.id ?? sessionUser.username!;
+    if (!reserveGenerationSlot(inFlightKey)) {
       return NextResponse.json(
         {
-          error: 'Monthly README generation limit reached',
-          code: 'LIMIT_REACHED',
-          remaining: 0,
-          limit: usageCheck.limit,
-          plan: usageCheck.plan,
+          error: 'A README generation is already running. Wait for it to finish before retrying.',
+          code: 'GENERATION_IN_PROGRESS',
         },
-        { status: 429 }
+        { status: 409 }
       );
     }
 
-    const body = await request.json();
-    const validatedData = requestSchema.parse(body);
+    try {
+      const usageCheckBefore = sessionUser.id
+        ? await checkReadmeAllowedById(sessionUser.id)
+        : await checkReadmeAllowed(sessionUser.username!);
+      if (!usageCheckBefore.allowed) {
+        return NextResponse.json(
+          {
+            error: 'You have used your free README generations for this month.',
+            code: 'LIMIT_REACHED',
+            remaining: 0,
+            limit: usageCheckBefore.limit,
+            plan: usageCheckBefore.plan,
+          },
+          { status: 429 }
+        );
+      }
 
-    const {
-      username,
-      sections,
-      style,
-      theme,
-      careerMode,
-      careerRole,
-      agentLoop,
-      useAI,
-      goal,
-      structure,
-      tone,
-      motionStyle,
-      typingHeadline,
-      typingLines,
-      animatedDivider,
-      contributionSnake,
-      skillBadges,
-      visitorCounter,
-      githubTrophies,
-      avatarBlock,
-    } = validatedData;
+      const body = await request.json();
+      const validatedData = requestSchema.parse(body);
+
+      const {
+        username,
+        sections,
+        style,
+        theme,
+        careerMode,
+        careerRole,
+        agentLoop,
+        useAI,
+        goal,
+        structure,
+        tone,
+        motionStyle,
+        typingHeadline,
+        typingLines,
+        animatedDivider,
+        contributionSnake,
+        skillBadges,
+        visitorCounter,
+        githubTrophies,
+        avatarBlock,
+      } = validatedData;
 
     // Fetch GitHub profile data
     const profileData = await fetchProfileForReadme(username);
@@ -254,8 +285,19 @@ export async function POST(request: NextRequest) {
       score,
     };
 
+    let usageCheckAfter = usageCheckBefore;
     if (sessionUser.id) {
-      await incrementReadmeUsageById(sessionUser.id);
+      const usageIncrement = await incrementReadmeUsageById(sessionUser.id);
+      if (usageCheckBefore.plan !== 'pro' && !usageIncrement) {
+        return NextResponse.json(
+          {
+            error: 'Usage tracking is temporarily unavailable. Please retry in a moment.',
+            code: 'USAGE_UPDATE_FAILED',
+          },
+          { status: 503 }
+        );
+      }
+      usageCheckAfter = await checkReadmeAllowedById(sessionUser.id);
       await db.readmeGeneration.create({
         data: {
           userId: sessionUser.id,
@@ -272,34 +314,39 @@ export async function POST(request: NextRequest) {
       }).catch((err) => console.error('[readme] save generation failed:', err));
     } else {
       await incrementReadmeUsage(sessionUser.username!);
+      usageCheckAfter = await checkReadmeAllowed(sessionUser.username!);
     }
 
-    return NextResponse.json({
-      success: true,
-      readme: result.markdown,
-      sections: result.sections,
-      metadata: result.metadata,
-      aiProvider,
-      refinementNotes,
-      reasoning,
-      strategy,
-      score,
-      animationBlocks: animationPack.blocks,
-      setupInstructions: animationPack.setupInstructions,
-      profile: {
-        name: profileData.name,
-        avatarUrl: profileData.avatarUrl,
-        bio: profileData.bio,
-        followers: profileData.followers,
-        totalStars: profileData.totalStars,
-        totalRepos: profileData.totalRepos,
-      },
-      usage: {
-        remaining: usageCheck.remaining - 1,
-        limit: usageCheck.limit,
-        plan: usageCheck.plan,
-      },
-    });
+      return NextResponse.json({
+        success: true,
+        readme: result.markdown,
+        sections: result.sections,
+        metadata: result.metadata,
+        aiProvider,
+        refinementNotes,
+        reasoning,
+        strategy,
+        score,
+        animationBlocks: animationPack.blocks,
+        setupInstructions: animationPack.setupInstructions,
+        profile: {
+          name: profileData.name,
+          avatarUrl: profileData.avatarUrl,
+          bio: profileData.bio,
+          followers: profileData.followers,
+          totalStars: profileData.totalStars,
+          totalRepos: profileData.totalRepos,
+        },
+        usage: {
+          remaining: usageCheckAfter.remaining,
+          limit: usageCheckAfter.limit,
+          plan: usageCheckAfter.plan,
+          creditsRemaining: usageCheckAfter.creditsRemaining,
+        },
+      });
+    } finally {
+      inFlightReadmeGenerations.delete(inFlightKey);
+    }
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(

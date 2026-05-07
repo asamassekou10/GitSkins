@@ -7,7 +7,7 @@ import rehypeRaw from 'rehype-raw';
 import { FREE_THEMES } from '@/config/subscription';
 import { ThinkingProgress } from '@/components/ThinkingProgress';
 import { useThinkingProgress } from '@/hooks/useThinkingProgress';
-import { useUserPlan } from '@/hooks/useUserPlan';
+import { invalidateUserPlanCache, useUserPlan } from '@/hooks/useUserPlan';
 
 type ReadmeStyle = 'minimal' | 'detailed' | 'creative';
 type SectionType = 'header' | 'about' | 'skills' | 'stats' | 'projects' | 'streak' | 'connect';
@@ -156,9 +156,16 @@ export default function ReadmeGeneratorPage() {
     files: { path: string; content: string }[];
   } | null>(null);
 
-  const { plan: userPlan, readmeGenerationsUsed, readmeGenerationsLimit, readmeGenerationsRemaining, creditsRemaining, loading: planLoading, authenticated } = useUserPlan();
-  const userIsPro = userPlan === 'pro';
-  const usageAllowed = authenticated && (userIsPro || readmeGenerationsRemaining > 0);
+  const [usageOverride, setUsageOverride] = useState<{ remaining: number; limit: number; plan: 'free' | 'pro'; creditsRemaining?: number } | null>(null);
+  const userPlanData = useUserPlan();
+  const effectivePlan = usageOverride?.plan ?? userPlanData.plan;
+  const effectiveLimit = usageOverride?.limit ?? userPlanData.readmeGenerationsLimit;
+  const effectiveRemaining = usageOverride?.remaining ?? userPlanData.readmeGenerationsRemaining;
+  const effectiveUsed = Math.max(0, effectiveLimit - effectiveRemaining);
+  const effectiveCreditsRemaining = usageOverride?.creditsRemaining ?? userPlanData.creditsRemaining;
+  const { loading: planLoading, authenticated } = userPlanData;
+  const userIsPro = effectivePlan === 'pro';
+  const usageAllowed = authenticated && (userIsPro || effectiveRemaining > 0);
 
   const readmeStepLabels = useMemo(
     () =>
@@ -224,6 +231,7 @@ export default function ReadmeGeneratorPage() {
     }
 
     setIsLoading(true);
+    setUsageOverride(null);
     setError(null);
     setGeneratedReadme(null);
     setAiProvider(null);
@@ -276,6 +284,10 @@ export default function ReadmeGeneratorPage() {
       setReadmeScore(data.score ?? null);
       setStrategy(data.strategy ?? null);
       setSetupInstructions(data.setupInstructions ?? null);
+      if (data.usage && typeof data.usage.remaining === 'number') {
+        setUsageOverride(data.usage);
+        invalidateUserPlanCache();
+      }
       readmeProgress.complete();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
@@ -439,12 +451,12 @@ export default function ReadmeGeneratorPage() {
                   <>
                     <span style={{ fontSize: '14px', color: '#888' }}>
                       Generations this month:{' '}
-                      <span style={{ color: readmeGenerationsRemaining > 0 ? '#22c55e' : '#ef4444', fontWeight: 600 }}>
-                        {readmeGenerationsRemaining}/{readmeGenerationsLimit}
+                      <span style={{ color: effectiveRemaining > 0 ? '#22c55e' : '#ef4444', fontWeight: 600 }}>
+                        {effectiveRemaining}/{effectiveLimit}
                       </span>
-                      {creditsRemaining ? (
+                      {effectiveCreditsRemaining ? (
                         <span style={{ color: '#58a6ff', marginLeft: 8 }}>
-                          + {creditsRemaining} paid credit{creditsRemaining === 1 ? '' : 's'}
+                          + {effectiveCreditsRemaining} paid credit{effectiveCreditsRemaining === 1 ? '' : 's'}
                         </span>
                       ) : null}
                     </span>
@@ -452,8 +464,8 @@ export default function ReadmeGeneratorPage() {
                     <div style={{ width: '120px', height: '4px', background: '#2a2a2a', borderRadius: '2px', overflow: 'hidden' }}>
                       <div style={{
                         height: '100%',
-                        width: `${readmeGenerationsLimit > 0 ? Math.min(100, (readmeGenerationsUsed / readmeGenerationsLimit) * 100) : 0}%`,
-                        background: readmeGenerationsRemaining > 0 ? '#22c55e' : '#ef4444',
+                        width: `${effectiveLimit > 0 ? Math.min(100, (effectiveUsed / effectiveLimit) * 100) : 0}%`,
+                        background: effectiveRemaining > 0 ? '#22c55e' : '#ef4444',
                         borderRadius: '2px',
                         transition: 'width 0.3s',
                       }} />

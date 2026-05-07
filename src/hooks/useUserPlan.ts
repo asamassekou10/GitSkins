@@ -35,6 +35,11 @@ const UNAUTHENTICATED: UserPlanData = {
 // Module-level cache: key → { data, fetchedAt }
 const cache = new Map<string, { data: UserPlanData; fetchedAt: number }>();
 const CACHE_TTL = 30_000; // 30 seconds
+const CACHE_KEY = '/api/usage';
+
+export function invalidateUserPlanCache() {
+  cache.delete(CACHE_KEY);
+}
 
 export function useUserPlan(): UserPlanData {
   const { status } = useSession();
@@ -49,8 +54,7 @@ export function useUserPlan(): UserPlanData {
       return;
     }
 
-    const key = '/api/usage';
-    const cached = cache.get(key);
+    const cached = cache.get(CACHE_KEY);
     if (cached && Date.now() - cached.fetchedAt < CACHE_TTL) {
       setResult(cached.data);
       return;
@@ -59,7 +63,7 @@ export function useUserPlan(): UserPlanData {
     if (fetchingRef.current) return;
     fetchingRef.current = true;
 
-    fetch(key)
+    fetch(CACHE_KEY)
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
         if (!data) {
@@ -67,7 +71,7 @@ export function useUserPlan(): UserPlanData {
           return;
         }
         const resolved: UserPlanData = { ...data, loading: false, authenticated: true };
-        cache.set(key, { data: resolved, fetchedAt: Date.now() });
+        cache.set(CACHE_KEY, { data: resolved, fetchedAt: Date.now() });
         setResult(resolved);
       })
       .catch(() => setResult(UNAUTHENTICATED))
