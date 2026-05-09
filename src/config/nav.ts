@@ -38,6 +38,8 @@ export const toolsNavItems: NavItem[] = [
 export const resourcesNavItems: NavItem[] = [
   { label: 'Getting Started', href: '/getting-started', keywords: 'getting started' },
   { label: 'Blog', href: '/blog', keywords: 'blog guides seo readme github profile avatar cards' },
+  { label: 'GitHub README Generator', href: '/github-readme-generator', keywords: 'github readme generator markdown profile project' },
+  { label: 'GitHub Avatar Generator', href: '/github-avatar', keywords: 'github avatar profile picture developer avatar' },
   { label: 'Theme Catalog', href: '/themes', keywords: 'themes catalog palette cards avatars skins profile' },
   { label: 'Examples Gallery', href: '/examples', keywords: 'examples gallery cards avatars themes' },
   { label: 'Docs / Themes', href: '/docs/themes', keywords: 'docs themes' },

@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import type { CSSProperties } from 'react';
 import { JsonLd } from '@/components/seo/JsonLd';
-import { breadcrumbJsonLd, faqJsonLd } from '@/lib/seo';
+import { breadcrumbJsonLd, faqJsonLd, webPageJsonLd } from '@/lib/seo';
 import type { SeoLandingPageContent } from '@/lib/seo-content/landing-pages';
 
 interface SeoLandingPageProps {
@@ -13,6 +13,13 @@ export function SeoLandingPage({ content }: SeoLandingPageProps) {
     <main style={{ minHeight: '100vh', background: '#050505', color: '#fafafa' }}>
       <JsonLd data={breadcrumbJsonLd([{ name: 'Home', path: '/' }, { name: content.title, path: `/${content.slug}` }])} />
       <JsonLd data={faqJsonLd(content.faqs)} />
+      <JsonLd data={webPageJsonLd({
+        name: content.title,
+        description: content.description,
+        path: `/${content.slug}`,
+        image: content.preview.src,
+        keywords: content.keywords,
+      })} />
 
       <section style={{ padding: '132px 24px 78px', borderBottom: '1px solid #121212', background: 'radial-gradient(circle at 78% 16%, rgba(34,197,94,0.18), transparent 34%), #050505' }}>
         <div style={{ maxWidth: 1120, margin: '0 auto', display: 'grid', gridTemplateColumns: 'minmax(0, 1.05fr) minmax(280px, 430px)', gap: 44, alignItems: 'center' }} className="seo-hero">

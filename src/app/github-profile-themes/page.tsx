@@ -7,6 +7,7 @@ const content = seoLandingPages['github-profile-themes'];
 export const metadata: Metadata = {
   title: content.title,
   description: content.description,
+  keywords: content.keywords,
   alternates: { canonical: `/${content.slug}` },
   openGraph: {
     title: content.title,

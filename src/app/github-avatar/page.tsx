@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { SeoLandingPage } from '@/components/seo/SeoLandingPage';
 import { seoLandingPages } from '@/lib/seo-content/landing-pages';
 
-const content = seoLandingPages['github-profile-avatar-generator'];
+const content = seoLandingPages['github-avatar'];
 
 export const metadata: Metadata = {
   title: content.title,
@@ -23,6 +23,6 @@ export const metadata: Metadata = {
   },
 };
 
-export default function GitHubProfileAvatarGeneratorPage() {
+export default function GitHubAvatarPage() {
   return <SeoLandingPage content={content} />;
 }

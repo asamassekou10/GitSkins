@@ -2,6 +2,7 @@ export interface SeoLandingPageContent {
   slug: string;
   title: string;
   description: string;
+  keywords: string[];
   eyebrow: string;
   heroTitle: string;
   heroCopy: string;
@@ -17,8 +18,9 @@ export interface SeoLandingPageContent {
 export const seoLandingPages: Record<string, SeoLandingPageContent> = {
   'github-profile-readme-generator': {
     slug: 'github-profile-readme-generator',
-    title: 'GitHub Profile README Generator',
-    description: 'Create a polished GitHub profile README with AI, animated sections, profile cards, themes, and copy-ready Markdown.',
+    title: 'GitHub Profile README Generator | AI README Templates',
+    description: 'Generate a polished GitHub profile README with animated sections, badges, project highlights, stats cards, themes, and copy-ready Markdown.',
+    keywords: ['github profile readme generator', 'profile readme generator', 'github profile readme', 'github readme template', 'animated github readme'],
     eyebrow: 'README generator',
     heroTitle: 'Generate a GitHub profile README that looks designed.',
     heroCopy: 'GitSkins helps developers turn their GitHub activity, projects, stack, and visual style into a structured profile README with theme-matched cards and animated Markdown blocks.',
@@ -39,7 +41,7 @@ export const seoLandingPages: Record<string, SeoLandingPageContent> = {
       { title: 'Copy the README block', copy: 'Paste the generated Markdown into your profile repository and refine the final details.' },
     ],
     examples: [
-      { title: 'README examples', copy: 'See structures for junior developers, senior engineers, maintainers, and freelancers.', href: '/blog/github-profile-readme-examples' },
+      { title: 'README templates', copy: 'See structures for job seekers, students, maintainers, builders, and senior engineers.', href: '/blog/best-github-profile-readme-templates' },
       { title: 'README animations', copy: 'Learn where typing SVGs, dividers, and motion help or distract.', href: '/blog/best-github-readme-animations' },
       { title: 'Profile strategy', copy: 'Build the first screen around a clear signal and proof.', href: '/blog/how-to-make-github-profile-stand-out' },
     ],
@@ -49,10 +51,46 @@ export const seoLandingPages: Record<string, SeoLandingPageContent> = {
       { question: 'Can I add animations to the generated README?', answer: 'Yes. GitSkins supports animated README elements such as typing headers, visual dividers, badges, and theme-matched cards.' },
     ],
   },
+  'github-readme-generator': {
+    slug: 'github-readme-generator',
+    title: 'GitHub README Generator | Profile & Project README Builder',
+    description: 'Create GitHub READMEs for profiles and projects with AI structure, badges, animated sections, cards, and copy-ready Markdown.',
+    keywords: ['github readme generator', 'readme generator', 'github readme', 'github readme template', 'project readme generator'],
+    eyebrow: 'README builder',
+    heroTitle: 'Build a GitHub README people actually read.',
+    heroCopy: 'Use GitSkins to generate structured README drafts for GitHub profiles and projects, then add badges, animated sections, profile cards, language widgets, and clear calls to action.',
+    primaryCta: { label: 'Generate a README', href: '/readme-generator' },
+    secondaryCta: { label: 'See README examples', href: '/blog/github-profile-readme-examples' },
+    preview: {
+      src: '/api/premium-card?username=octocat&theme=matrix&variant=terminal&avatar=persona',
+      alt: 'GitHub README generator preview with profile card',
+    },
+    benefits: [
+      { title: 'Profile and project structure', copy: 'Start from a clear outline for who you are, what the repository does, how to use it, and what visitors should do next.' },
+      { title: 'Visual README blocks', copy: 'Add badges, typing headers, dividers, cards, stats, and language charts without losing readability.' },
+      { title: 'Copy-ready Markdown', copy: 'Generate blocks you can paste into GitHub and refine in your own repository.' },
+    ],
+    steps: [
+      { title: 'Choose profile or project', copy: 'Use profile mode for personal branding or project mode for repository documentation.' },
+      { title: 'Add GitHub context', copy: 'Let GitSkins use public repository and profile signals to draft useful sections.' },
+      { title: 'Polish and publish', copy: 'Copy the Markdown, adjust final wording, and commit it to your README file.' },
+    ],
+    examples: [
+      { title: 'Profile README generator', copy: 'Create a personal GitHub profile README with visuals and profile context.', href: '/github-profile-readme-generator' },
+      { title: 'README generator guide', copy: 'Learn what a strong GitHub README should include before you publish.', href: '/blog/github-readme-generator-guide' },
+      { title: 'README animation guide', copy: 'Use motion tastefully in GitHub READMEs.', href: '/blog/best-github-readme-animations' },
+    ],
+    faqs: [
+      { question: 'Can GitSkins generate a project README?', answer: 'GitSkins is strongest for profile READMEs today, but the generated structure also helps with project README sections such as overview, setup, stack, and links.' },
+      { question: 'Can I add GitHub stats cards to the README?', answer: 'Yes. GitSkins generates profile, stats, language, and streak card embeds that can be pasted into GitHub READMEs.' },
+      { question: 'Is the generated README editable?', answer: 'Yes. GitSkins gives you Markdown so you can edit every line before publishing.' },
+    ],
+  },
   'github-readme-stats-card': {
     slug: 'github-readme-stats-card',
-    title: 'GitHub README Stats Card Generator',
+    title: 'GitHub README Stats Card Generator | Stats, Languages & Streaks',
     description: 'Design GitHub README stats cards, language charts, streak widgets, and profile cards with premium themes and copy-ready Markdown.',
+    keywords: ['github readme stats card', 'github stats card', 'github language card', 'github streak card', 'github profile card'],
     eyebrow: 'GitHub cards',
     heroTitle: 'Create GitHub stats cards that match your profile.',
     heroCopy: 'Use GitSkins to generate profile cards, stats widgets, language charts, and streak cards with one consistent theme across your GitHub README.',
@@ -85,8 +123,9 @@ export const seoLandingPages: Record<string, SeoLandingPageContent> = {
   },
   'github-profile-avatar-generator': {
     slug: 'github-profile-avatar-generator',
-    title: 'GitHub Profile Avatar Generator',
+    title: 'GitHub Profile Avatar Generator | Developer Profile Pictures',
     description: 'Generate theme-matched GitHub profile pictures, developer avatars, and project personas for README cards and profile branding.',
+    keywords: ['github profile avatar generator', 'github avatar', 'github avatars', 'avatar for github', 'developer avatar generator'],
     eyebrow: 'Avatar generator',
     heroTitle: 'Create a GitHub avatar that matches your developer brand.',
     heroCopy: 'Generate profile pictures and project personas that share the same colors and visual language as your GitSkins cards, themes, and README assets.',
@@ -107,7 +146,7 @@ export const seoLandingPages: Record<string, SeoLandingPageContent> = {
       { title: 'Export and reuse', copy: 'Download the image or copy a URL for GitHub, docs, launch pages, and social posts.' },
     ],
     examples: [
-      { title: 'Avatar branding guide', copy: 'Learn how profile pictures support developer recognition.', href: '/blog/developer-avatar-branding' },
+      { title: 'Professional avatar guide', copy: 'Learn size, contrast, format, and profile-picture choices for GitHub.', href: '/blog/professional-github-avatar-guide' },
       { title: 'Theme systems', copy: 'Find palettes that work across avatars and cards.', href: '/themes' },
       { title: 'Project persona generator', copy: 'Generate a character based on repository signals.', href: '/avatar/persona' },
     ],
@@ -117,10 +156,46 @@ export const seoLandingPages: Record<string, SeoLandingPageContent> = {
       { question: 'What is a project persona?', answer: 'A project persona is a character-style visual identity generated from a repository or developer project context.' },
     ],
   },
+  'github-avatar': {
+    slug: 'github-avatar',
+    title: 'GitHub Avatar Generator | Create Developer Avatars',
+    description: 'Create a GitHub avatar or developer profile picture that matches your README, profile cards, themes, and project identity.',
+    keywords: ['github avatar', 'github avatars', 'avatar for github', 'github profile picture', 'developer avatar'],
+    eyebrow: 'GitHub avatar',
+    heroTitle: 'Create a GitHub avatar people remember.',
+    heroCopy: 'Generate profile pictures that stay readable in GitHub comments, pull requests, profile pages, package pages, and README cards while matching your developer theme.',
+    primaryCta: { label: 'Create GitHub Avatar', href: '/avatar' },
+    secondaryCta: { label: 'Try project persona', href: '/avatar/persona' },
+    preview: {
+      src: '/api/avatar?username=octocat&family=character&character=cyber-samurai&theme=neon&expression=confident&size=800',
+      alt: 'GitHub avatar generator character preview',
+    },
+    benefits: [
+      { title: 'Readable at small sizes', copy: 'Use bold shapes, contrast, and simple silhouettes that still work in issue threads and contribution activity.' },
+      { title: 'Theme-matched visuals', copy: 'Match your avatar with GitSkins cards, browser themes, README blocks, and hosted profile skins.' },
+      { title: 'Character or abstract options', copy: 'Choose expressive characters, pixel styles, geometric looks, or project personas depending on your profile tone.' },
+    ],
+    steps: [
+      { title: 'Enter your GitHub username', copy: 'Seed the avatar with a consistent identity that can be regenerated later.' },
+      { title: 'Pick a theme and style', copy: 'Try Neon, Dracula, Matrix, Zen, Studio, and other visual systems.' },
+      { title: 'Download or embed', copy: 'Use the PNG as your GitHub profile picture or reuse the generated URL in README assets.' },
+    ],
+    examples: [
+      { title: 'Profile avatar generator', copy: 'Open the full themed avatar generator.', href: '/github-profile-avatar-generator' },
+      { title: 'Professional avatar guide', copy: 'Learn how profile pictures support recognition on GitHub.', href: '/blog/professional-github-avatar-guide' },
+      { title: 'Theme catalog', copy: 'Find a palette that fits your profile.', href: '/themes' },
+    ],
+    faqs: [
+      { question: 'What size should a GitHub avatar be?', answer: 'A square image works best. GitSkins generates large square avatars that can be downloaded and uploaded to GitHub.' },
+      { question: 'Can I use the avatar outside GitHub?', answer: 'Yes. You can reuse generated avatars for docs, portfolios, social profiles, and launch graphics.' },
+      { question: 'Should a GitHub avatar be a photo or illustration?', answer: 'Either can work. Illustrations are useful when you want a memorable developer brand that matches your README and visual theme.' },
+    ],
+  },
   'github-profile-themes': {
     slug: 'github-profile-themes',
-    title: 'GitHub Profile Themes',
+    title: 'GitHub Profile Themes | Cards, Avatars & README Styles',
     description: 'Browse GitHub profile themes for cards, stats widgets, avatars, README animations, profile skins, and browser extension previews.',
+    keywords: ['github profile themes', 'github readme themes', 'github profile design', 'github profile cards', 'github avatar themes'],
     eyebrow: 'Theme systems',
     heroTitle: 'Choose one theme for your entire GitHub profile.',
     heroCopy: 'GitSkins themes work across profile cards, stats, language widgets, streaks, avatars, README animations, hosted profile skins, and the Chrome extension.',
@@ -153,8 +228,9 @@ export const seoLandingPages: Record<string, SeoLandingPageContent> = {
   },
   'github-profile-browser-extension': {
     slug: 'github-profile-browser-extension',
-    title: 'GitHub Profile Browser Extension',
+    title: 'GitHub Profile Browser Extension | GitSkins Chrome Extension',
     description: 'Install the GitSkins Chrome extension to create GitHub profile cards, avatars, README snippets, and profile skin links directly from GitHub.',
+    keywords: ['github profile browser extension', 'gitskins extension', 'github chrome extension', 'github profile tools'],
     eyebrow: 'Chrome extension',
     heroTitle: 'Use GitSkins directly on GitHub profile pages.',
     heroCopy: 'The GitSkins Chrome extension adds a profile action bar to GitHub so you can detect usernames, create cards, open avatars, copy README snippets, and preview profile skins faster.',

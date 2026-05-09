@@ -72,3 +72,32 @@ export function faqJsonLd(faqs: Array<{ question: string; answer: string }>) {
     })),
   };
 }
+
+export function webPageJsonLd(page: {
+  name: string;
+  description: string;
+  path: string;
+  image?: string;
+  keywords?: string[];
+}) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: page.name,
+    description: page.description,
+    url: absoluteUrl(page.path),
+    image: page.image ? absoluteUrl(page.image) : absoluteUrl('/opengraph-image'),
+    keywords: page.keywords?.join(', '),
+    isPartOf: {
+      '@type': 'WebSite',
+      name: 'GitSkins',
+      url: siteConfig.url,
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'GitSkins',
+      url: siteConfig.url,
+      logo: absoluteUrl('/logo-mark.png'),
+    },
+  };
+}
