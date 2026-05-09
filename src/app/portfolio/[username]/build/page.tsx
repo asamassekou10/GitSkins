@@ -66,6 +66,7 @@ export default function PortfolioBuildPage() {
   const [publishLoading, setPublishLoading] = useState(false);
   const [activeBuildId, setActiveBuildId] = useState<string | null>(null);
   const [publishedSlug, setPublishedSlug] = useState<string | null>(null);
+  const [showSavedVersions, setShowSavedVersions] = useState(false);
   const [savedBuilds, setSavedBuilds] = useState<SavedPortfolioBuild[]>([]);
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -346,12 +347,9 @@ export default function PortfolioBuildPage() {
         </div>
 
         <header style={styles.hero}>
-          <div>
+          <div style={styles.heroCopyBlock}>
             <div style={styles.eyebrow}>Portfolio Studio</div>
-            <h1 style={styles.title}>Turn @{username} into a polished developer portfolio.</h1>
-            <p style={styles.subtitle}>
-              Pick a direction, let GitSkins read the strongest GitHub signals, then generate an editable portfolio with case studies, proof points, and production-ready HTML/CSS.
-            </p>
+            <h1 style={styles.title}>Build @{username}’s portfolio.</h1>
           </div>
           <form onSubmit={handleUsernameChange} style={styles.userForm}>
             <label style={styles.label} htmlFor="portfolio-username">GitHub username</label>
@@ -378,7 +376,6 @@ export default function PortfolioBuildPage() {
                 <span style={styles.panelKicker}>1</span>
                 <div>
                   <h2 style={styles.panelTitle}>Choose a template</h2>
-                  <p style={styles.panelCopy}>Start with a clear portfolio strategy.</p>
                 </div>
               </div>
               <div style={styles.templateGrid}>
@@ -395,8 +392,6 @@ export default function PortfolioBuildPage() {
                   >
                     <span style={{ ...styles.templateSwatch, background: template.accent }} />
                     <span style={styles.templateName}>{template.name}</span>
-                    <span style={styles.templateBestFor}>{template.bestFor}</span>
-                    <span style={styles.templateTagline}>{template.tagline}</span>
                   </button>
                 ))}
               </div>
@@ -406,8 +401,7 @@ export default function PortfolioBuildPage() {
               <div style={styles.panelHeader}>
                 <span style={styles.panelKicker}>2</span>
                 <div>
-                  <h2 style={styles.panelTitle}>Set the goal</h2>
-                  <p style={styles.panelCopy}>The copy should optimize for the outcome.</p>
+                  <h2 style={styles.panelTitle}>Goal</h2>
                 </div>
               </div>
               <SegmentedControl
@@ -421,8 +415,7 @@ export default function PortfolioBuildPage() {
               <div style={styles.panelHeader}>
                 <span style={styles.panelKicker}>3</span>
                 <div>
-                  <h2 style={styles.panelTitle}>Pick the voice</h2>
-                  <p style={styles.panelCopy}>Keep it aligned with the audience.</p>
+                  <h2 style={styles.panelTitle}>Voice</h2>
                 </div>
               </div>
               <SegmentedControl
@@ -447,24 +440,23 @@ export default function PortfolioBuildPage() {
             </button>
 
             {html && (
-              <button type="button" onClick={downloadZip} style={styles.downloadButton}>
-                Download HTML/CSS ZIP
-              </button>
-            )}
-
-            {html && (
-              <button
-                type="button"
-                onClick={saveCurrentBuild}
-                disabled={saveLoading}
-                style={{
-                  ...styles.downloadButton,
-                  opacity: saveLoading ? 0.55 : 1,
-                  cursor: saveLoading ? 'not-allowed' : 'pointer',
-                }}
-              >
-                {saveLoading ? 'Saving...' : 'Save version'}
-              </button>
+              <div style={styles.actionGrid}>
+                <button type="button" onClick={downloadZip} style={styles.downloadButton}>
+                  Download ZIP
+                </button>
+                <button
+                  type="button"
+                  onClick={saveCurrentBuild}
+                  disabled={saveLoading}
+                  style={{
+                    ...styles.downloadButton,
+                    opacity: saveLoading ? 0.55 : 1,
+                    cursor: saveLoading ? 'not-allowed' : 'pointer',
+                  }}
+                >
+                  {saveLoading ? 'Saving...' : 'Save'}
+                </button>
+              </div>
             )}
 
             {html && !publishedSlug && (
@@ -503,23 +495,25 @@ export default function PortfolioBuildPage() {
 
             {savedBuilds.length > 0 && (
               <section style={styles.panel}>
-                <div style={styles.panelHeader}>
-                  <span style={styles.panelKicker}>↺</span>
+                <button type="button" onClick={() => setShowSavedVersions((value) => !value)} style={styles.savedToggle}>
                   <div>
                     <h2 style={styles.panelTitle}>Saved versions</h2>
-                    <p style={styles.panelCopy}>Restore a previous portfolio draft.</p>
+                    <p style={styles.panelCopy}>{savedBuilds.length} saved draft{savedBuilds.length === 1 ? '' : 's'}</p>
                   </div>
-                </div>
-                <div style={styles.savedList}>
-                  {savedBuilds.map((build) => (
-                    <button key={build.id} type="button" onClick={() => restoreBuild(build)} style={styles.savedItem}>
-                      <span style={styles.savedTitle}>{build.title}</span>
-                      <span style={styles.savedMeta}>
-                        {build.template} · {build.publishedSlug ? `Live at /p/${build.publishedSlug}` : new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }).format(new Date(build.updatedAt))}
-                      </span>
-                    </button>
-                  ))}
-                </div>
+                  <span style={styles.savedToggleIcon}>{showSavedVersions ? '−' : '+'}</span>
+                </button>
+                {showSavedVersions && (
+                  <div style={styles.savedList}>
+                    {savedBuilds.slice(0, 8).map((build) => (
+                      <button key={build.id} type="button" onClick={() => restoreBuild(build)} style={styles.savedItem}>
+                        <span style={styles.savedTitle}>{build.title}</span>
+                        <span style={styles.savedMeta}>
+                          {build.template} · {build.publishedSlug ? `Live at /p/${build.publishedSlug}` : new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }).format(new Date(build.updatedAt))}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </section>
             )}
           </aside>
@@ -662,14 +656,14 @@ const styles: Record<string, CSSProperties> = {
   shell: {
     width: 'min(1480px, 100%)',
     margin: '0 auto',
-    padding: '112px 22px 72px',
+    padding: '90px 22px 48px',
   },
   topBar: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: 16,
-    marginBottom: 28,
+    marginBottom: 14,
   },
   backLink: {
     color: '#9ca3af',
@@ -702,14 +696,17 @@ const styles: Record<string, CSSProperties> = {
   },
   hero: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))',
-    gap: 24,
-    alignItems: 'end',
-    marginBottom: 26,
+    gridTemplateColumns: 'minmax(0, 1fr) minmax(240px, 340px)',
+    gap: 18,
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  heroCopyBlock: {
+    minWidth: 0,
   },
   eyebrow: {
     display: 'inline-flex',
-    marginBottom: 14,
+    marginBottom: 8,
     color: '#4ade80',
     fontSize: 12,
     fontWeight: 950,
@@ -719,9 +716,9 @@ const styles: Record<string, CSSProperties> = {
   title: {
     margin: 0,
     maxWidth: 900,
-    fontSize: 'clamp(42px, 6vw, 86px)',
-    lineHeight: 0.92,
-    letterSpacing: '-0.065em',
+    fontSize: 'clamp(34px, 4.8vw, 62px)',
+    lineHeight: 0.95,
+    letterSpacing: '-0.055em',
     fontWeight: 950,
   },
   subtitle: {
@@ -732,8 +729,8 @@ const styles: Record<string, CSSProperties> = {
     lineHeight: 1.7,
   },
   userForm: {
-    padding: 16,
-    borderRadius: 20,
+    padding: 12,
+    borderRadius: 16,
     background: 'rgba(255,255,255,0.045)',
     border: '1px solid #222',
   },
@@ -770,7 +767,7 @@ const styles: Record<string, CSSProperties> = {
     cursor: 'pointer',
   },
   errorBanner: {
-    marginBottom: 18,
+    marginBottom: 12,
     padding: '13px 16px',
     borderRadius: 14,
     border: '1px solid rgba(239,68,68,0.4)',
@@ -789,19 +786,19 @@ const styles: Record<string, CSSProperties> = {
   },
   workspace: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 390px), 1fr))',
-    gap: 18,
+    gridTemplateColumns: '320px minmax(0, 1fr)',
+    gap: 14,
     alignItems: 'start',
   },
   sidebar: {
     display: 'grid',
-    gap: 14,
+    gap: 10,
     position: 'sticky',
     top: 94,
   },
   panel: {
-    padding: 16,
-    borderRadius: 22,
+    padding: 12,
+    borderRadius: 18,
     background: 'rgba(12,12,12,0.92)',
     border: '1px solid #222',
     boxShadow: '0 20px 80px rgba(0,0,0,0.22)',
@@ -810,23 +807,23 @@ const styles: Record<string, CSSProperties> = {
     display: 'flex',
     gap: 12,
     alignItems: 'flex-start',
-    marginBottom: 14,
+    marginBottom: 10,
   },
   panelKicker: {
-    width: 28,
-    height: 28,
-    borderRadius: 10,
+    width: 24,
+    height: 24,
+    borderRadius: 8,
     display: 'grid',
     placeItems: 'center',
     background: '#f5f5f5',
     color: '#050505',
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: 950,
     flexShrink: 0,
   },
   panelTitle: {
     margin: 0,
-    fontSize: 17,
+    fontSize: 15,
     lineHeight: 1.12,
     letterSpacing: '-0.035em',
   },
@@ -838,17 +835,18 @@ const styles: Record<string, CSSProperties> = {
   },
   templateGrid: {
     display: 'grid',
-    gap: 9,
+    gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+    gap: 7,
   },
   templateCard: {
-    display: 'grid',
-    gridTemplateColumns: '18px minmax(0, 1fr)',
-    gap: '4px 10px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: 8,
     width: '100%',
     textAlign: 'left',
     border: '1px solid #232323',
-    borderRadius: 16,
-    padding: 13,
+    borderRadius: 13,
+    padding: '10px 9px',
     color: '#fafafa',
     cursor: 'pointer',
     transition: 'border-color 0.2s ease, transform 0.2s ease, background 0.2s ease',
@@ -860,8 +858,11 @@ const styles: Record<string, CSSProperties> = {
     marginTop: 2,
   },
   templateName: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: 950,
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
   },
   templateBestFor: {
     gridColumn: '2',
@@ -878,15 +879,15 @@ const styles: Record<string, CSSProperties> = {
   segmentWrap: {
     display: 'flex',
     flexWrap: 'wrap',
-    gap: 8,
+    gap: 6,
   },
   segmentButton: {
     border: '1px solid #2a2a2a',
     borderRadius: 999,
     background: '#101010',
     color: '#999',
-    padding: '9px 12px',
-    fontSize: 12,
+    padding: '8px 10px',
+    fontSize: 11,
     fontWeight: 900,
     cursor: 'pointer',
   },
@@ -896,7 +897,7 @@ const styles: Record<string, CSSProperties> = {
     borderColor: '#f5f5f5',
   },
   generateButton: {
-    minHeight: 54,
+    minHeight: 48,
     border: 'none',
     borderRadius: 16,
     fontSize: 15,
@@ -905,7 +906,7 @@ const styles: Record<string, CSSProperties> = {
     boxShadow: '0 18px 60px rgba(34,197,94,0.12)',
   },
   downloadButton: {
-    minHeight: 50,
+    minHeight: 44,
     border: '1px solid #2a2a2a',
     borderRadius: 16,
     background: '#111',
@@ -914,8 +915,13 @@ const styles: Record<string, CSSProperties> = {
     fontWeight: 900,
     cursor: 'pointer',
   },
+  actionGrid: {
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gap: 8,
+  },
   publishButton: {
-    minHeight: 54,
+    minHeight: 48,
     border: 'none',
     borderRadius: 16,
     background: 'linear-gradient(135deg, #f5f5f5, #a7f3d0)',
@@ -928,8 +934,8 @@ const styles: Record<string, CSSProperties> = {
   publishPanel: {
     display: 'grid',
     gap: 8,
-    padding: 14,
-    borderRadius: 18,
+    padding: 12,
+    borderRadius: 16,
     border: '1px solid rgba(34,197,94,0.28)',
     background: 'rgba(34,197,94,0.08)',
   },
@@ -961,6 +967,31 @@ const styles: Record<string, CSSProperties> = {
   savedList: {
     display: 'grid',
     gap: 8,
+    marginTop: 10,
+  },
+  savedToggle: {
+    width: '100%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+    border: 'none',
+    background: 'transparent',
+    color: '#fafafa',
+    padding: 0,
+    textAlign: 'left',
+    cursor: 'pointer',
+  },
+  savedToggleIcon: {
+    width: 26,
+    height: 26,
+    borderRadius: 999,
+    background: '#181818',
+    color: '#fafafa',
+    display: 'grid',
+    placeItems: 'center',
+    fontSize: 16,
+    fontWeight: 950,
   },
   savedItem: {
     width: '100%',
