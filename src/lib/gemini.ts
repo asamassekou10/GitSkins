@@ -13,6 +13,14 @@
 import { GoogleGenAI, HarmCategory, HarmBlockThreshold, ThinkingLevel, type GenerateContentConfig } from '@google/genai';
 import type { ExtendedProfileData, ReadmeGoal, ReadmeStructure, ReadmeTone, ReadmeMotionStyle } from '@/types/readme';
 import { buildReadmeStrategy } from '@/lib/readme-generator';
+import {
+  getPortfolioGoal,
+  getPortfolioTemplate,
+  getPortfolioTone,
+  type PortfolioGoal,
+  type PortfolioTemplateId,
+  type PortfolioTone,
+} from '@/lib/portfolio-templates';
 
 // Safety settings for content generation
 const safetySettings: GenerateContentConfig['safetySettings'] = [
@@ -828,17 +836,34 @@ Return ONLY JSON array:
 export async function generatePortfolioWebsite(
   profileData: ExtendedProfileData,
   username: string,
-  caseStudies: PortfolioCaseStudy[]
+  caseStudies: PortfolioCaseStudy[],
+  options?: {
+    template?: PortfolioTemplateId;
+    goal?: PortfolioGoal;
+    tone?: PortfolioTone;
+  }
 ): Promise<{ html: string; css: string }> {
   const caseStudiesJson = JSON.stringify(caseStudies, null, 2);
   const topLangs = profileData.languages.slice(0, 5).map((l) => l.name).join(', ');
+  const template = getPortfolioTemplate(options?.template);
+  const goal = getPortfolioGoal(options?.goal);
+  const tone = getPortfolioTone(options?.tone);
 
   const prompt = `You are an elite frontend developer and designer. Generate a professional, production-quality single-page portfolio website for a software developer.
+
+**Portfolio Strategy:**
+- Template: ${template.name}
+- Template direction: ${template.prompt}
+- Goal: ${goal.label}. ${goal.prompt}
+- Tone: ${tone.label}. ${tone.prompt}
+- Accent color: ${template.accent}
 
 **Design:**
 - **Background:** Black (#000000) only for the page background.
 - **Main text:** White (#ffffff) for headings and body copy.
-- **Everything else in color:** Use a single accent color (e.g. #22c55e green, or #3b82f6 blue) for: links, buttons, tech stack pills/badges, card borders or top accent bars, icons, hover states, and any decorative elements. Secondary elements can use gray (#888, #666) or the accent at lower opacity. The page should feel black-and-white with clear, colorful accents.
+- **Everything else in color:** Use ${template.accent} as the single accent color for links, buttons, tech stack pills/badges, card borders or top accent bars, icons, hover states, and any decorative elements. Secondary elements can use gray (#888, #666) or the accent at lower opacity. The page should feel black-and-white with clear, colorful accents.
+- **Animation polish:** Add tasteful CSS-only transitions and scroll-friendly motion cues. Use hover transforms, focus states, subtle reveal-style classes, and reduced-motion support. Do not add external animation libraries.
+- **Premium feel:** The page should look like a modern portfolio product, not a generic AI page. Use strong spacing, careful typography, and sections with intentional rhythm.
 
 **Profile:**
 - Username: ${username}
@@ -858,10 +883,13 @@ ${caseStudiesJson}
 4. **PROJECT PLACEHOLDERS (no external images):** For each case study card, use a placeholder only: an inline SVG or a CSS-styled div. For example: a div with aspect-ratio 16/9, background linear-gradient with the accent color at low opacity, and the repo name or a simple code/terminal icon as inline SVG in the center. Do NOT use <img> or any external URLs. The placeholder must be self-contained (inline SVG or CSS only) so it works with zero network requests.
 5. **LAYOUT:**
    - **Hero:** Avatar, name (large), bio. Use accent for avatar border or link.
+   - **Positioning strip:** 3 compact proof points based on followers, repositories, stars, contribution/activity, or top languages.
    - **Projects:** Grid. Each card: placeholder block at top (inline SVG or CSS div), then title, problem, approach, impact, tech pills (in accent color), link to repo.
    - **Skills:** Top languages as colored pills or tags.
+   - **Contact CTA:** Clear final call to action aligned with the selected goal.
 6. **Footer:** Minimal; "Built with GitSkins" with accent link.
-7. **CSS:** Production-quality. Responsive. No Tailwind/Bootstrap. Pure CSS.
+7. **CSS:** Production-quality. Responsive. No Tailwind/Bootstrap. Pure CSS. Include @media (prefers-reduced-motion: reduce).
+8. **Accessibility:** Use semantic sections, readable contrast, visible focus states, and meaningful link labels.
 
 Return ONLY the two code blocks (html then css).`;
 

@@ -23,6 +23,7 @@ model User {
   creditBalance CreditBalance?
   creditTransactions CreditTransaction[]
   readmeGenerations ReadmeGeneration[]
+  portfolioBuilds PortfolioBuild[]
 }
 
 model Account {
@@ -120,4 +121,22 @@ model ReadmeGeneration {
   createdAt DateTime @default(now())
 
   @@index([userId, createdAt])
+}
+
+model PortfolioBuild {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  username  String
+  title     String
+  template  String
+  goal      String
+  tone      String
+  html      String   @db.Text
+  css       String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, createdAt])
+  @@index([userId, username])
 }

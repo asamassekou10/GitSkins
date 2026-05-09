@@ -11,12 +11,23 @@ import { getUserPlanById } from '@/lib/server-usage';
 import { z } from 'zod';
 import { fetchProfileForReadme } from '@/lib/github';
 import { buildPortfolioCaseStudies, generatePortfolioWebsite, isGeminiConfigured } from '@/lib/gemini';
+import {
+  portfolioGoals,
+  portfolioTemplates,
+  portfolioTones,
+  type PortfolioGoal,
+  type PortfolioTemplateId,
+  type PortfolioTone,
+} from '@/lib/portfolio-templates';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 const requestSchema = z.object({
   username: z.string().min(1).max(39),
+  template: z.enum(portfolioTemplates.map((template) => template.id) as [string, ...string[]]).optional(),
+  goal: z.enum(portfolioGoals.map((goal) => goal.id) as [string, ...string[]]).optional(),
+  tone: z.enum(portfolioTones.map((tone) => tone.id) as [string, ...string[]]).optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -38,7 +49,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { username } = requestSchema.parse(body);
+    const { username, template, goal, tone } = requestSchema.parse(body);
 
     const profileData = await fetchProfileForReadme(username);
 
@@ -50,7 +61,11 @@ export async function POST(request: NextRequest) {
     }
 
     const caseStudies = await buildPortfolioCaseStudies(profileData, username);
-    const { html, css } = await generatePortfolioWebsite(profileData, username, caseStudies);
+    const { html, css } = await generatePortfolioWebsite(profileData, username, caseStudies, {
+      template: template as PortfolioTemplateId | undefined,
+      goal: goal as PortfolioGoal | undefined,
+      tone: tone as PortfolioTone | undefined,
+    });
 
     return NextResponse.json({
       success: true,

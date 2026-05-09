@@ -2,19 +2,48 @@
 
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState, type CSSProperties } from 'react';
 import JSZip from 'jszip';
 import { ThinkingProgress } from '@/components/ThinkingProgress';
 import { useThinkingProgress } from '@/hooks/useThinkingProgress';
+import {
+  portfolioGoals,
+  portfolioTemplates,
+  portfolioTones,
+  type PortfolioGoal,
+  type PortfolioTemplateId,
+  type PortfolioTone,
+} from '@/lib/portfolio-templates';
+
+type PreviewMode = 'desktop' | 'tablet' | 'mobile';
+
+interface SavedPortfolioBuild {
+  id: string;
+  username: string;
+  title: string;
+  template: PortfolioTemplateId;
+  goal: PortfolioGoal;
+  tone: PortfolioTone;
+  html: string;
+  css: string;
+  createdAt: string;
+  updatedAt: string;
+}
 
 const EDIT_SUGGESTIONS = [
-  'Add smooth scroll animations',
-  'Add a skills section with language bars',
-  'Make it more like a Stripe/Linear landing page',
-  'Add a testimonials or recommendations section',
-  'Add dark/light theme toggle',
-  'Improve mobile responsiveness',
+  'Rewrite the hero for hiring managers',
+  'Make the project cards more premium',
+  'Add stronger product CTAs',
+  'Add smooth CSS-only animations',
+  'Make the layout more minimal',
+  'Improve the mobile spacing',
 ];
+
+const previewWidths: Record<PreviewMode, string> = {
+  desktop: '100%',
+  tablet: '760px',
+  mobile: '390px',
+};
 
 export default function PortfolioBuildPage() {
   const router = useRouter();
@@ -23,12 +52,24 @@ export default function PortfolioBuildPage() {
   const username = rawUsername.startsWith('@') ? rawUsername.slice(1) : rawUsername;
 
   const [inputUsername, setInputUsername] = useState(username);
+  const [selectedTemplate, setSelectedTemplate] = useState<PortfolioTemplateId>('terminal-pro');
+  const [selectedGoal, setSelectedGoal] = useState<PortfolioGoal>('get-hired');
+  const [selectedTone, setSelectedTone] = useState<PortfolioTone>('premium');
+  const [previewMode, setPreviewMode] = useState<PreviewMode>('desktop');
   const [html, setHtml] = useState('');
   const [css, setCss] = useState('');
   const [loading, setLoading] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
+  const [saveLoading, setSaveLoading] = useState(false);
+  const [savedBuilds, setSavedBuilds] = useState<SavedPortfolioBuild[]>([]);
+  const [savedMessage, setSavedMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [editMessage, setEditMessage] = useState('');
+
+  const selectedTemplateDetails = useMemo(
+    () => portfolioTemplates.find((template) => template.id === selectedTemplate) ?? portfolioTemplates[0],
+    [selectedTemplate]
+  );
 
   const {
     activeIndex: websiteActiveIndex,
@@ -37,8 +78,8 @@ export default function PortfolioBuildPage() {
     complete: websiteComplete,
     reset: websiteReset,
   } = useThinkingProgress(
-    ['Fetching GitHub profile', 'Building case studies', 'Generating website'],
-    { intervalMs: 1500 }
+    ['Reading GitHub signal', 'Ranking projects', 'Writing case studies', 'Designing portfolio system'],
+    { intervalMs: 1400 }
   );
   const {
     activeIndex: editActiveIndex,
@@ -46,14 +87,30 @@ export default function PortfolioBuildPage() {
     start: editStart,
     complete: editComplete,
     reset: editReset,
-  } = useThinkingProgress(['Applying changes…'], { intervalMs: 800 });
+  } = useThinkingProgress(['Understanding edit', 'Rewriting section', 'Refreshing preview'], { intervalMs: 900 });
 
   const handleUsernameChange = (e: React.FormEvent) => {
     e.preventDefault();
-    if (inputUsername.trim() && inputUsername.trim() !== username) {
-      router.push(`/portfolio/${inputUsername.trim()}/build`);
+    const nextUsername = inputUsername.trim().replace(/^@/, '');
+    if (nextUsername && nextUsername !== username) {
+      router.push(`/portfolio/${nextUsername}/build`);
     }
   };
+
+  const loadSavedBuilds = useCallback(async () => {
+    try {
+      const response = await fetch(`/api/portfolio-builds?username=${encodeURIComponent(username)}`);
+      if (!response.ok) return;
+      const data = await response.json();
+      setSavedBuilds(data.builds ?? []);
+    } catch {
+      // Saved builds are a convenience layer; generation should still work if loading fails.
+    }
+  }, [username]);
+
+  useEffect(() => {
+    loadSavedBuilds();
+  }, [loadSavedBuilds]);
 
   const generateWebsite = useCallback(async () => {
     setError(null);
@@ -63,12 +120,18 @@ export default function PortfolioBuildPage() {
       const res = await fetch('/api/ai/portfolio-website', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username }),
+        body: JSON.stringify({
+          username,
+          template: selectedTemplate,
+          goal: selectedGoal,
+          tone: selectedTone,
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to generate website');
       setHtml(data.html || '');
       setCss(data.css || '');
+      setSavedMessage(null);
       websiteComplete();
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to generate website');
@@ -76,7 +139,7 @@ export default function PortfolioBuildPage() {
     } finally {
       setLoading(false);
     }
-  }, [username, websiteStart, websiteComplete, websiteReset]);
+  }, [username, selectedTemplate, selectedGoal, selectedTone, websiteStart, websiteComplete, websiteReset]);
 
   const applyEdit = useCallback(async () => {
     if (!editMessage.trim() || !html) return;
@@ -103,10 +166,6 @@ export default function PortfolioBuildPage() {
     }
   }, [html, css, editMessage, editStart, editComplete, editReset]);
 
-  const setSuggestion = useCallback((text: string) => {
-    setEditMessage(text);
-  }, []);
-
   const downloadZip = useCallback(async () => {
     if (!html) return;
     const fullHtml = css
@@ -114,6 +173,7 @@ export default function PortfolioBuildPage() {
       : html;
     const zip = new JSZip();
     zip.file('index.html', fullHtml);
+    zip.file('README.txt', `Portfolio generated by GitSkins for @${username}\nTemplate: ${selectedTemplateDetails.name}\n`);
     const blob = await zip.generateAsync({ type: 'blob' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -121,12 +181,52 @@ export default function PortfolioBuildPage() {
     a.download = `${username}-portfolio.zip`;
     a.click();
     URL.revokeObjectURL(url);
-  }, [html, css, username]);
+  }, [html, css, username, selectedTemplateDetails.name]);
+
+  const saveCurrentBuild = useCallback(async () => {
+    if (!html) return;
+    setSaveLoading(true);
+    setError(null);
+    setSavedMessage(null);
+    try {
+      const response = await fetch('/api/portfolio-builds', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username,
+          title: `${selectedTemplateDetails.name} portfolio for @${username}`,
+          template: selectedTemplate,
+          goal: selectedGoal,
+          tone: selectedTone,
+          html,
+          css,
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Failed to save portfolio');
+      setSavedBuilds((current) => [data.build, ...current.filter((build) => build.id !== data.build.id)].slice(0, 20));
+      setSavedMessage('Portfolio version saved.');
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to save portfolio');
+    } finally {
+      setSaveLoading(false);
+    }
+  }, [html, css, username, selectedTemplate, selectedGoal, selectedTone, selectedTemplateDetails.name]);
+
+  const restoreBuild = useCallback((build: SavedPortfolioBuild) => {
+    setSelectedTemplate(build.template);
+    setSelectedGoal(build.goal);
+    setSelectedTone(build.tone);
+    setHtml(build.html);
+    setCss(build.css);
+    setSavedMessage(`Loaded ${build.title}`);
+    setError(null);
+  }, []);
 
   const previewDoc = html
     ? (() => {
         const cspMeta =
-          '<meta http-equiv="Content-Security-Policy" content="img-src \'self\' https: data:;">';
+          '<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; img-src https: data:; style-src \'unsafe-inline\'; font-src data:;">';
         const withStyle = css
           ? html.replace('</head>', `<style>${css}</style></head>`)
           : html;
@@ -134,340 +234,730 @@ export default function PortfolioBuildPage() {
       })()
     : '';
 
-  const baseStyles = {
-    page: {
-      minHeight: '100vh',
-      background: 'linear-gradient(180deg, #0a0a0a 0%, #111 50%, #0a0a0a 100%)',
-      color: '#fff',
-      fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
-    },
-    main: {
-      paddingTop: '100px',
-      paddingBottom: '80px',
-      paddingLeft: 'clamp(16px, 4vw, 24px)',
-      paddingRight: 'clamp(16px, 4vw, 24px)',
-    },
-    container: {
-      maxWidth: '1100px',
-      margin: '0 auto' as const,
-    },
-    breadcrumb: {
-      marginBottom: '24px',
-      display: 'flex' as const,
-      alignItems: 'center' as const,
-      gap: '12px',
-      flexWrap: 'wrap' as const,
-    },
-    title: {
-      fontSize: 'clamp(26px, 5vw, 40px)',
-      fontWeight: 700,
-      marginBottom: '8px',
-    },
-    subtitle: {
-      color: '#888',
-      fontSize: 'clamp(14px, 2vw, 16px)',
-      lineHeight: 1.5,
-    },
-    errorBanner: {
-      marginBottom: '16px',
-      padding: '12px 16px',
-      background: 'rgba(239,68,68,0.15)',
-      border: '1px solid rgba(239,68,68,0.4)',
-      borderRadius: '12px',
-      color: '#fca5a5',
-      fontSize: '14px',
-    },
-    toolbar: {
-      display: 'flex' as const,
-      gap: '12px',
-      flexWrap: 'wrap' as const,
-      marginBottom: '24px',
-    },
-    btnPrimary: {
-      padding: '14px 24px',
-      minHeight: '48px',
-      background: '#22c55e',
-      color: '#000',
-      border: 'none',
-      borderRadius: '12px',
-      fontWeight: 600,
-      fontSize: '15px',
-      cursor: 'pointer',
-      transition: 'all 0.2s ease',
-    },
-    btnSecondary: {
-      padding: '14px 24px',
-      minHeight: '48px',
-      background: '#1a1a1a',
-      border: '1px solid #333',
-      borderRadius: '12px',
-      color: '#e5e5e5',
-      fontWeight: 600,
-      fontSize: '15px',
-      cursor: 'pointer',
-      transition: 'all 0.2s ease',
-    },
-    chatCard: {
-      background: '#111',
-      border: '1px solid #2a2a2a',
-      borderRadius: '16px',
-      overflow: 'hidden' as const,
-      marginBottom: '24px',
-    },
-    chatHeader: {
-      padding: '16px 20px',
-      background: '#161616',
-      borderBottom: '1px solid #2a2a2a',
-      fontSize: '14px',
-      fontWeight: 600,
-      color: '#e5e5e5',
-      display: 'flex' as const,
-      alignItems: 'center' as const,
-      gap: '8px',
-    },
-    chatInputRow: {
-      display: 'flex' as const,
-      gap: '12px',
-      flexWrap: 'wrap' as const,
-      padding: '16px 20px',
-      alignItems: 'flex-end' as const,
-    },
-    textarea: {
-      flex: '1 1 280px',
-      minHeight: '88px',
-      padding: '14px 16px',
-      background: '#1a1a1a',
-      border: '1px solid #333',
-      borderRadius: '12px',
-      color: '#fff',
-      fontSize: '15px',
-      resize: 'vertical' as const,
-      outline: 'none',
-      fontFamily: 'inherit',
-    },
-    chipRow: {
-      display: 'flex' as const,
-      flexWrap: 'wrap' as const,
-      gap: '8px',
-      padding: '0 20px 16px',
-    },
-    chip: {
-      padding: '8px 14px',
-      background: '#1a1a1a',
-      border: '1px solid #333',
-      borderRadius: '999px',
-      color: '#a1a1a1',
-      fontSize: '13px',
-      cursor: 'pointer',
-      transition: 'all 0.15s ease',
-    },
-    previewWrapper: {
-      border: '1px solid #2a2a2a',
-      borderRadius: '16px',
-      overflow: 'hidden' as const,
-      background: '#0a0a0a',
-    },
-    previewLabel: {
-      padding: '12px 16px',
-      background: '#161616',
-      color: '#888',
-      fontSize: '13px',
-      fontWeight: 500,
-    },
-    emptyState: {
-      padding: 'clamp(40px, 8vw, 60px) 20px',
-      textAlign: 'center' as const,
-      color: '#666',
-      border: '1px dashed #333',
-      borderRadius: '16px',
-      fontSize: '15px',
-    },
-    input: {
-      padding: '12px 16px',
-      background: '#111',
-      border: '1px solid #333',
-      borderRadius: '8px',
-      color: '#fff',
-      fontSize: '14px',
-      outline: 'none',
-      width: '240px',
-    },
-    changeBtn: {
-      padding: '12px 20px',
-      background: '#333',
-      color: '#fff',
-      border: 'none',
-      borderRadius: '8px',
-      fontWeight: 500,
-      fontSize: '14px',
-      cursor: 'pointer',
-    },
-  };
-
   return (
-    <div style={baseStyles.page}>
-      <main style={baseStyles.main}>
-        <div style={baseStyles.container}>
-          <div style={baseStyles.breadcrumb}>
-            <Link
-              href={`/portfolio/${username}`}
-              style={{ color: '#888', textDecoration: 'none', fontSize: '14px', fontWeight: 500 }}
-            >
-              ← Portfolio
-            </Link>
+    <main style={styles.page}>
+      <section style={styles.shell}>
+        <div style={styles.topBar}>
+          <Link href={`/portfolio/${username}`} style={styles.backLink}>← Case studies</Link>
+          <div style={styles.topActions}>
+            {(['desktop', 'tablet', 'mobile'] as PreviewMode[]).map((mode) => (
+              <button
+                key={mode}
+                type="button"
+                onClick={() => setPreviewMode(mode)}
+                style={{
+                  ...styles.modeButton,
+                  ...(previewMode === mode ? styles.modeButtonActive : {}),
+                }}
+              >
+                {mode}
+              </button>
+            ))}
           </div>
+        </div>
 
-          <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 12px', background: 'rgba(255, 255, 255, 0.1)', border: '1px solid rgba(255, 255, 255, 0.2)', borderRadius: '100px', fontSize: '12px', fontWeight: 500, color: '#fff', marginBottom: '16px' }}>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
-              AI Portfolio Builder
-            </div>
-            <h1 style={baseStyles.title}>Portfolio Website Builder</h1>
-            <p style={baseStyles.subtitle}>
-              Generate a minimalist, black & white coder portfolio for @{username}.
+        <header style={styles.hero}>
+          <div>
+            <div style={styles.eyebrow}>Portfolio Studio</div>
+            <h1 style={styles.title}>Turn @{username} into a polished developer portfolio.</h1>
+            <p style={styles.subtitle}>
+              Pick a direction, let GitSkins read the strongest GitHub signals, then generate an editable portfolio with case studies, proof points, and production-ready HTML/CSS.
             </p>
-            
-            {/* Username Change Form */}
-            <form onSubmit={handleUsernameChange} style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '24px' }}>
+          </div>
+          <form onSubmit={handleUsernameChange} style={styles.userForm}>
+            <label style={styles.label} htmlFor="portfolio-username">GitHub username</label>
+            <div style={styles.userInputRow}>
               <input
+                id="portfolio-username"
                 type="text"
                 value={inputUsername}
                 onChange={(e) => setInputUsername(e.target.value)}
-                placeholder="GitHub Username"
-                style={baseStyles.input}
+                placeholder="octocat"
+                style={styles.input}
               />
-              <button type="submit" style={baseStyles.changeBtn}>
-                Change User
-              </button>
-            </form>
-          </div>
-
-          {error && <div style={baseStyles.errorBanner}>{error}</div>}
-
-          {loading && (
-            <div style={{ marginBottom: '16px' }}>
-              <ThinkingProgress
-                steps={websiteSteps}
-                activeIndex={websiteActiveIndex}
-                variant="card"
-              />
+              <button type="submit" style={styles.smallButton}>Load</button>
             </div>
-          )}
+          </form>
+        </header>
 
-          <div style={baseStyles.toolbar}>
+        {error && <div style={styles.errorBanner}>{error}</div>}
+
+        <div style={styles.workspace}>
+          <aside style={styles.sidebar}>
+            <section style={styles.panel}>
+              <div style={styles.panelHeader}>
+                <span style={styles.panelKicker}>1</span>
+                <div>
+                  <h2 style={styles.panelTitle}>Choose a template</h2>
+                  <p style={styles.panelCopy}>Start with a clear portfolio strategy.</p>
+                </div>
+              </div>
+              <div style={styles.templateGrid}>
+                {portfolioTemplates.map((template) => (
+                  <button
+                    key={template.id}
+                    type="button"
+                    onClick={() => setSelectedTemplate(template.id)}
+                    style={{
+                      ...styles.templateCard,
+                      borderColor: selectedTemplate === template.id ? template.accent : '#232323',
+                      background: selectedTemplate === template.id ? 'rgba(255,255,255,0.055)' : '#0d0d0d',
+                    }}
+                  >
+                    <span style={{ ...styles.templateSwatch, background: template.accent }} />
+                    <span style={styles.templateName}>{template.name}</span>
+                    <span style={styles.templateBestFor}>{template.bestFor}</span>
+                    <span style={styles.templateTagline}>{template.tagline}</span>
+                  </button>
+                ))}
+              </div>
+            </section>
+
+            <section style={styles.panel}>
+              <div style={styles.panelHeader}>
+                <span style={styles.panelKicker}>2</span>
+                <div>
+                  <h2 style={styles.panelTitle}>Set the goal</h2>
+                  <p style={styles.panelCopy}>The copy should optimize for the outcome.</p>
+                </div>
+              </div>
+              <SegmentedControl
+                items={portfolioGoals}
+                value={selectedGoal}
+                onChange={(value) => setSelectedGoal(value as PortfolioGoal)}
+              />
+            </section>
+
+            <section style={styles.panel}>
+              <div style={styles.panelHeader}>
+                <span style={styles.panelKicker}>3</span>
+                <div>
+                  <h2 style={styles.panelTitle}>Pick the voice</h2>
+                  <p style={styles.panelCopy}>Keep it aligned with the audience.</p>
+                </div>
+              </div>
+              <SegmentedControl
+                items={portfolioTones}
+                value={selectedTone}
+                onChange={(value) => setSelectedTone(value as PortfolioTone)}
+              />
+            </section>
+
             <button
               type="button"
               onClick={generateWebsite}
               disabled={loading}
               style={{
-                ...baseStyles.btnPrimary,
-                background: loading ? '#333' : '#fff',
-                color: loading ? '#666' : '#000',
+                ...styles.generateButton,
+                background: loading ? '#242424' : selectedTemplateDetails.accent,
+                color: selectedTemplateDetails.accent === '#e5e7eb' ? '#050505' : '#050505',
                 cursor: loading ? 'not-allowed' : 'pointer',
               }}
             >
-              {loading ? 'Generating…' : 'Generate website'}
+              {loading ? 'Generating portfolio...' : 'Generate premium portfolio'}
             </button>
+
             {html && (
-              <button type="button" onClick={downloadZip} style={baseStyles.btnSecondary}>
-                Download ZIP
+              <button type="button" onClick={downloadZip} style={styles.downloadButton}>
+                Download HTML/CSS ZIP
               </button>
             )}
-          </div>
 
-          {html && (
-            <div style={baseStyles.chatCard}>
-              <div style={baseStyles.chatHeader}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                </svg>
-                Edit with AI
-              </div>
-              {editLoading && (
-                <div style={{ marginBottom: '12px' }}>
-                  <ThinkingProgress
-                    steps={editSteps}
-                    activeIndex={editActiveIndex}
-                    variant="inline"
-                  />
+            {html && (
+              <button
+                type="button"
+                onClick={saveCurrentBuild}
+                disabled={saveLoading}
+                style={{
+                  ...styles.downloadButton,
+                  opacity: saveLoading ? 0.55 : 1,
+                  cursor: saveLoading ? 'not-allowed' : 'pointer',
+                }}
+              >
+                {saveLoading ? 'Saving...' : 'Save version'}
+              </button>
+            )}
+
+            {savedMessage && <div style={styles.successBanner}>{savedMessage}</div>}
+
+            {savedBuilds.length > 0 && (
+              <section style={styles.panel}>
+                <div style={styles.panelHeader}>
+                  <span style={styles.panelKicker}>↺</span>
+                  <div>
+                    <h2 style={styles.panelTitle}>Saved versions</h2>
+                    <p style={styles.panelCopy}>Restore a previous portfolio draft.</p>
+                  </div>
                 </div>
-              )}
-              <div style={baseStyles.chipRow}>
-                {EDIT_SUGGESTIONS.map((s) => (
-                  <button
-                    key={s}
-                    type="button"
-                    onClick={() => setSuggestion(s)}
-                    style={baseStyles.chip}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.borderColor = '#22c55e';
-                      e.currentTarget.style.color = '#22c55e';
+                <div style={styles.savedList}>
+                  {savedBuilds.map((build) => (
+                    <button key={build.id} type="button" onClick={() => restoreBuild(build)} style={styles.savedItem}>
+                      <span style={styles.savedTitle}>{build.title}</span>
+                      <span style={styles.savedMeta}>
+                        {build.template} · {new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }).format(new Date(build.updatedAt))}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </section>
+            )}
+          </aside>
+
+          <section style={styles.previewColumn}>
+            {loading && (
+              <div style={styles.progressCard}>
+                <ThinkingProgress steps={websiteSteps} activeIndex={websiteActiveIndex} variant="card" />
+              </div>
+            )}
+
+            {html && (
+              <div style={styles.editorPanel}>
+                <div style={styles.editorHeader}>
+                  <div>
+                    <h2 style={styles.panelTitle}>Edit with AI</h2>
+                    <p style={styles.panelCopy}>Ask for section rewrites, layout changes, animation polish, or stronger CTAs.</p>
+                  </div>
+                  {editLoading && <ThinkingProgress steps={editSteps} activeIndex={editActiveIndex} variant="inline" />}
+                </div>
+                <div style={styles.suggestionRow}>
+                  {EDIT_SUGGESTIONS.map((suggestion) => (
+                    <button key={suggestion} type="button" onClick={() => setEditMessage(suggestion)} style={styles.suggestionChip}>
+                      {suggestion}
+                    </button>
+                  ))}
+                </div>
+                <div style={styles.editRow}>
+                  <textarea
+                    value={editMessage}
+                    onChange={(e) => setEditMessage(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        applyEdit();
+                      }
                     }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.borderColor = '#333';
-                      e.currentTarget.style.color = '#a1a1a1';
+                    placeholder="Example: Rewrite the hero for a senior frontend role and make the project cards more editorial."
+                    style={styles.textarea}
+                    rows={3}
+                  />
+                  <button
+                    type="button"
+                    onClick={applyEdit}
+                    disabled={editLoading || !editMessage.trim()}
+                    style={{
+                      ...styles.applyButton,
+                      opacity: editLoading || !editMessage.trim() ? 0.45 : 1,
+                      cursor: editLoading || !editMessage.trim() ? 'not-allowed' : 'pointer',
                     }}
                   >
-                    {s}
+                    {editLoading ? 'Applying...' : 'Apply edit'}
                   </button>
-                ))}
+                </div>
               </div>
-              <div style={baseStyles.chatInputRow}>
-                <textarea
-                  value={editMessage}
-                  onChange={(e) => setEditMessage(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                      e.preventDefault();
-                      applyEdit();
-                    }
-                  }}
-                  placeholder="Describe the change you want, e.g. Make the header bigger and use a blue accent"
-                  style={baseStyles.textarea}
-                  rows={3}
-                />
-                <button
-                  type="button"
-                  onClick={applyEdit}
-                  disabled={editLoading || !editMessage.trim()}
-                  style={{
-                    ...baseStyles.btnPrimary,
-                    padding: '14px 28px',
-                    minWidth: '120px',
-                    background: editLoading || !editMessage.trim() ? '#333' : '#22c55e',
-                    color: editLoading || !editMessage.trim() ? '#666' : '#000',
-                    cursor: editLoading || !editMessage.trim() ? 'not-allowed' : 'pointer',
-                  }}
-                >
-                  {editLoading ? 'Applying…' : 'Apply'}
-                </button>
-              </div>
-            </div>
-          )}
+            )}
 
-          {previewDoc ? (
-            <div style={baseStyles.previewWrapper}>
-              <div style={baseStyles.previewLabel}>Live preview</div>
-              <iframe
-                title="Portfolio preview"
-                srcDoc={previewDoc}
-                style={{
-                  width: '100%',
-                  height: 'clamp(400px, 70vh, 800px)',
-                  minHeight: '400px',
-                  border: 'none',
-                  display: 'block',
-                }}
-                sandbox="allow-same-origin"
-              />
+            <div style={styles.previewChrome}>
+              <div style={styles.previewHeader}>
+                <div style={styles.windowDots}>
+                  <span style={{ ...styles.dot, background: '#ef4444' }} />
+                  <span style={{ ...styles.dot, background: '#f59e0b' }} />
+                  <span style={{ ...styles.dot, background: '#22c55e' }} />
+                </div>
+                <span style={styles.previewUrl}>gitskins.dev/{username}</span>
+                <span style={{ ...styles.previewBadge, borderColor: selectedTemplateDetails.accent, color: selectedTemplateDetails.accent }}>
+                  {selectedTemplateDetails.name}
+                </span>
+              </div>
+              <div style={styles.previewStage}>
+                {previewDoc ? (
+                  <iframe
+                    title="Portfolio preview"
+                    srcDoc={previewDoc}
+                    style={{
+                      width: previewWidths[previewMode],
+                      maxWidth: '100%',
+                      height: 'clamp(520px, 72vh, 860px)',
+                      border: 'none',
+                      borderRadius: previewMode === 'desktop' ? 0 : 24,
+                      display: 'block',
+                      background: '#000',
+                      boxShadow: previewMode === 'desktop' ? 'none' : '0 24px 80px rgba(0,0,0,0.45)',
+                      transition: 'width 0.28s ease, border-radius 0.28s ease',
+                    }}
+                    sandbox=""
+                  />
+                ) : (
+                  <div style={styles.emptyState}>
+                    <div style={{ ...styles.emptyOrb, background: selectedTemplateDetails.accent }} />
+                    <h2 style={styles.emptyTitle}>Your generated portfolio preview will appear here.</h2>
+                    <p style={styles.emptyCopy}>
+                      Choose a template and generate a portfolio. You can edit the result with natural language and export it as a ZIP.
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
-          ) : (
-            <div style={baseStyles.emptyState}>
-              Click “Generate website” to create your portfolio page. You can then edit it with natural language and download it as a ZIP file.
-            </div>
-          )}
+          </section>
         </div>
-      </main>
+      </section>
+    </main>
+  );
+}
+
+function SegmentedControl({
+  items,
+  value,
+  onChange,
+}: {
+  items: Array<{ id: string; label: string }>;
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <div style={styles.segmentWrap}>
+      {items.map((item) => (
+        <button
+          key={item.id}
+          type="button"
+          onClick={() => onChange(item.id)}
+          style={{
+            ...styles.segmentButton,
+            ...(value === item.id ? styles.segmentButtonActive : {}),
+          }}
+        >
+          {item.label}
+        </button>
+      ))}
     </div>
   );
 }
+
+const styles: Record<string, CSSProperties> = {
+  page: {
+    minHeight: '100vh',
+    background: 'radial-gradient(circle at 12% 6%, rgba(34,197,94,0.12), transparent 26%), radial-gradient(circle at 88% 12%, rgba(139,92,246,0.13), transparent 30%), #050505',
+    color: '#f7f7f7',
+  },
+  shell: {
+    width: 'min(1480px, 100%)',
+    margin: '0 auto',
+    padding: '112px 22px 72px',
+  },
+  topBar: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 16,
+    marginBottom: 28,
+  },
+  backLink: {
+    color: '#9ca3af',
+    textDecoration: 'none',
+    fontSize: 14,
+    fontWeight: 800,
+  },
+  topActions: {
+    display: 'flex',
+    gap: 8,
+    padding: 5,
+    borderRadius: 999,
+    border: '1px solid #202020',
+    background: 'rgba(255,255,255,0.04)',
+  },
+  modeButton: {
+    border: 'none',
+    borderRadius: 999,
+    background: 'transparent',
+    color: '#7d7d7d',
+    padding: '8px 12px',
+    fontSize: 12,
+    fontWeight: 900,
+    textTransform: 'capitalize',
+    cursor: 'pointer',
+  },
+  modeButtonActive: {
+    background: '#f5f5f5',
+    color: '#050505',
+  },
+  hero: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))',
+    gap: 24,
+    alignItems: 'end',
+    marginBottom: 26,
+  },
+  eyebrow: {
+    display: 'inline-flex',
+    marginBottom: 14,
+    color: '#4ade80',
+    fontSize: 12,
+    fontWeight: 950,
+    letterSpacing: 1.2,
+    textTransform: 'uppercase',
+  },
+  title: {
+    margin: 0,
+    maxWidth: 900,
+    fontSize: 'clamp(42px, 6vw, 86px)',
+    lineHeight: 0.92,
+    letterSpacing: '-0.065em',
+    fontWeight: 950,
+  },
+  subtitle: {
+    margin: '18px 0 0',
+    maxWidth: 790,
+    color: '#a3a3a3',
+    fontSize: 17,
+    lineHeight: 1.7,
+  },
+  userForm: {
+    padding: 16,
+    borderRadius: 20,
+    background: 'rgba(255,255,255,0.045)',
+    border: '1px solid #222',
+  },
+  label: {
+    display: 'block',
+    color: '#777',
+    fontSize: 11,
+    fontWeight: 900,
+    textTransform: 'uppercase',
+    letterSpacing: 0.7,
+    marginBottom: 8,
+  },
+  userInputRow: {
+    display: 'flex',
+    gap: 8,
+  },
+  input: {
+    minWidth: 0,
+    flex: 1,
+    padding: '12px 13px',
+    borderRadius: 12,
+    border: '1px solid #303030',
+    background: '#0b0b0b',
+    color: '#fafafa',
+    outline: 'none',
+  },
+  smallButton: {
+    border: 'none',
+    borderRadius: 12,
+    padding: '0 14px',
+    background: '#f5f5f5',
+    color: '#050505',
+    fontWeight: 900,
+    cursor: 'pointer',
+  },
+  errorBanner: {
+    marginBottom: 18,
+    padding: '13px 16px',
+    borderRadius: 14,
+    border: '1px solid rgba(239,68,68,0.4)',
+    background: 'rgba(239,68,68,0.12)',
+    color: '#fca5a5',
+    fontSize: 14,
+  },
+  successBanner: {
+    padding: '12px 14px',
+    borderRadius: 14,
+    border: '1px solid rgba(34,197,94,0.32)',
+    background: 'rgba(34,197,94,0.1)',
+    color: '#86efac',
+    fontSize: 13,
+    fontWeight: 850,
+  },
+  workspace: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 390px), 1fr))',
+    gap: 18,
+    alignItems: 'start',
+  },
+  sidebar: {
+    display: 'grid',
+    gap: 14,
+    position: 'sticky',
+    top: 94,
+  },
+  panel: {
+    padding: 16,
+    borderRadius: 22,
+    background: 'rgba(12,12,12,0.92)',
+    border: '1px solid #222',
+    boxShadow: '0 20px 80px rgba(0,0,0,0.22)',
+  },
+  panelHeader: {
+    display: 'flex',
+    gap: 12,
+    alignItems: 'flex-start',
+    marginBottom: 14,
+  },
+  panelKicker: {
+    width: 28,
+    height: 28,
+    borderRadius: 10,
+    display: 'grid',
+    placeItems: 'center',
+    background: '#f5f5f5',
+    color: '#050505',
+    fontSize: 12,
+    fontWeight: 950,
+    flexShrink: 0,
+  },
+  panelTitle: {
+    margin: 0,
+    fontSize: 17,
+    lineHeight: 1.12,
+    letterSpacing: '-0.035em',
+  },
+  panelCopy: {
+    margin: '5px 0 0',
+    color: '#888',
+    fontSize: 13,
+    lineHeight: 1.45,
+  },
+  templateGrid: {
+    display: 'grid',
+    gap: 9,
+  },
+  templateCard: {
+    display: 'grid',
+    gridTemplateColumns: '18px minmax(0, 1fr)',
+    gap: '4px 10px',
+    width: '100%',
+    textAlign: 'left',
+    border: '1px solid #232323',
+    borderRadius: 16,
+    padding: 13,
+    color: '#fafafa',
+    cursor: 'pointer',
+    transition: 'border-color 0.2s ease, transform 0.2s ease, background 0.2s ease',
+  },
+  templateSwatch: {
+    width: 14,
+    height: 14,
+    borderRadius: 999,
+    marginTop: 2,
+  },
+  templateName: {
+    fontSize: 14,
+    fontWeight: 950,
+  },
+  templateBestFor: {
+    gridColumn: '2',
+    color: '#7d7d7d',
+    fontSize: 12,
+    fontWeight: 800,
+  },
+  templateTagline: {
+    gridColumn: '2',
+    color: '#a3a3a3',
+    fontSize: 12,
+    lineHeight: 1.45,
+  },
+  segmentWrap: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  segmentButton: {
+    border: '1px solid #2a2a2a',
+    borderRadius: 999,
+    background: '#101010',
+    color: '#999',
+    padding: '9px 12px',
+    fontSize: 12,
+    fontWeight: 900,
+    cursor: 'pointer',
+  },
+  segmentButtonActive: {
+    background: '#f5f5f5',
+    color: '#050505',
+    borderColor: '#f5f5f5',
+  },
+  generateButton: {
+    minHeight: 54,
+    border: 'none',
+    borderRadius: 16,
+    fontSize: 15,
+    fontWeight: 950,
+    cursor: 'pointer',
+    boxShadow: '0 18px 60px rgba(34,197,94,0.12)',
+  },
+  downloadButton: {
+    minHeight: 50,
+    border: '1px solid #2a2a2a',
+    borderRadius: 16,
+    background: '#111',
+    color: '#fafafa',
+    fontSize: 14,
+    fontWeight: 900,
+    cursor: 'pointer',
+  },
+  savedList: {
+    display: 'grid',
+    gap: 8,
+  },
+  savedItem: {
+    width: '100%',
+    display: 'grid',
+    gap: 5,
+    textAlign: 'left',
+    border: '1px solid #242424',
+    borderRadius: 14,
+    background: '#0e0e0e',
+    color: '#fafafa',
+    padding: 12,
+    cursor: 'pointer',
+  },
+  savedTitle: {
+    fontSize: 13,
+    fontWeight: 900,
+    lineHeight: 1.25,
+  },
+  savedMeta: {
+    color: '#777',
+    fontSize: 11,
+    fontWeight: 750,
+  },
+  previewColumn: {
+    display: 'grid',
+    gap: 14,
+    minWidth: 0,
+  },
+  progressCard: {
+    borderRadius: 20,
+    border: '1px solid #222',
+    overflow: 'hidden',
+  },
+  editorPanel: {
+    padding: 16,
+    borderRadius: 22,
+    border: '1px solid #222',
+    background: 'rgba(12,12,12,0.92)',
+  },
+  editorHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    gap: 16,
+    marginBottom: 14,
+  },
+  suggestionRow: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 12,
+  },
+  suggestionChip: {
+    border: '1px solid #2b2b2b',
+    borderRadius: 999,
+    background: '#111',
+    color: '#b4b4b4',
+    padding: '8px 12px',
+    fontSize: 12,
+    fontWeight: 850,
+    cursor: 'pointer',
+  },
+  editRow: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 260px), 1fr))',
+    gap: 10,
+    alignItems: 'stretch',
+  },
+  textarea: {
+    minHeight: 82,
+    resize: 'vertical',
+    border: '1px solid #303030',
+    borderRadius: 15,
+    background: '#090909',
+    color: '#fafafa',
+    outline: 'none',
+    padding: '13px 14px',
+    fontFamily: 'inherit',
+    fontSize: 14,
+    lineHeight: 1.5,
+  },
+  applyButton: {
+    border: 'none',
+    borderRadius: 15,
+    background: '#f5f5f5',
+    color: '#050505',
+    fontSize: 14,
+    fontWeight: 950,
+    cursor: 'pointer',
+  },
+  previewChrome: {
+    border: '1px solid #222',
+    borderRadius: 24,
+    background: '#0b0b0b',
+    overflow: 'hidden',
+    boxShadow: '0 30px 110px rgba(0,0,0,0.34)',
+  },
+  previewHeader: {
+    minHeight: 48,
+    display: 'grid',
+    gridTemplateColumns: 'auto minmax(0, 1fr) auto',
+    alignItems: 'center',
+    gap: 12,
+    padding: '0 15px',
+    borderBottom: '1px solid #202020',
+    background: '#111',
+  },
+  windowDots: {
+    display: 'flex',
+    gap: 7,
+  },
+  dot: {
+    width: 10,
+    height: 10,
+    borderRadius: 999,
+  },
+  previewUrl: {
+    minWidth: 0,
+    color: '#777',
+    fontSize: 12,
+    fontWeight: 800,
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+  },
+  previewBadge: {
+    border: '1px solid',
+    borderRadius: 999,
+    padding: '5px 9px',
+    fontSize: 11,
+    fontWeight: 950,
+  },
+  previewStage: {
+    minHeight: 560,
+    display: 'grid',
+    placeItems: 'center',
+    background: 'linear-gradient(135deg, #070707, #111)',
+    overflow: 'auto',
+    padding: 0,
+  },
+  emptyState: {
+    maxWidth: 520,
+    padding: 34,
+    textAlign: 'center',
+  },
+  emptyOrb: {
+    width: 66,
+    height: 66,
+    borderRadius: 24,
+    margin: '0 auto 20px',
+    opacity: 0.95,
+    boxShadow: '0 0 80px currentColor',
+  },
+  emptyTitle: {
+    margin: '0 0 10px',
+    fontSize: 32,
+    lineHeight: 1,
+    letterSpacing: '-0.05em',
+  },
+  emptyCopy: {
+    margin: 0,
+    color: '#8d8d8d',
+    lineHeight: 1.7,
+  },
+};
