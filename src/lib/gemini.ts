@@ -54,6 +54,18 @@ function isQuotaExceeded(error: unknown): boolean {
   return msg.includes('429') || msg.includes('RESOURCE_EXHAUSTED') || msg.includes('quota');
 }
 
+/** Some Gemini-compatible model IDs do not support thinkingConfig. Retry without it. */
+function isThinkingUnsupported(error: unknown): boolean {
+  if (!error) return false;
+  const err = error as { code?: number; status?: number; response?: { status?: number }; message?: string };
+  const msg = err.message?.toString().toLowerCase() ?? '';
+  return Boolean(
+    (err.code === 400 || err.status === 400 || err.response?.status === 400) &&
+      msg.includes('thinking') &&
+      msg.includes('not supported')
+  );
+}
+
 /**
  * Base config for generation calls
  */
@@ -61,11 +73,11 @@ function baseConfig(options?: {
   thinking?: 'high' | 'low' | 'medium';
   includeThoughts?: boolean;
   grounding?: boolean;
-}): GenerateContentConfig {
+}, disableThinking = false): GenerateContentConfig {
   const config: GenerateContentConfig = {
     safetySettings,
   };
-  if (options?.thinking) {
+  if (options?.thinking && !disableThinking) {
     const levelMap = { high: ThinkingLevel.HIGH, low: ThinkingLevel.LOW, medium: ThinkingLevel.MEDIUM };
     config.thinkingConfig = {
       thinkingLevel: levelMap[options.thinking],
@@ -96,14 +108,14 @@ async function generate(
   const fastModel = getModelName('fast');
   let model = options?.model || fastModel;
 
-  const doGenerate = async (useModel: string) => {
+  const doGenerate = async (useModel: string, disableThinking = false) => {
     const response = await ai.models.generateContent({
       model: useModel,
       contents: prompt,
-      config: baseConfig(options),
+      config: baseConfig(options, disableThinking),
     });
     let thoughts: string | undefined;
-    if (options?.includeThoughts && response.candidates?.[0]?.content?.parts) {
+    if (options?.includeThoughts && !disableThinking && response.candidates?.[0]?.content?.parts) {
       const thoughtParts = response.candidates[0].content.parts
         .filter((p) => p.thought && p.text)
         .map((p) => p.text);
@@ -117,9 +129,19 @@ async function generate(
   try {
     return await doGenerate(model);
   } catch (err) {
+    if (isThinkingUnsupported(err) && options?.thinking) {
+      return await doGenerate(model, true);
+    }
     if (isQuotaExceeded(err) && model === proModel) {
       model = fastModel;
-      return await doGenerate(model);
+      try {
+        return await doGenerate(model);
+      } catch (fallbackErr) {
+        if (isThinkingUnsupported(fallbackErr) && options?.thinking) {
+          return await doGenerate(model, true);
+        }
+        throw fallbackErr;
+      }
     }
     throw err;
   }
