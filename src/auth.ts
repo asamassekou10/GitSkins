@@ -6,24 +6,38 @@ import { PrismaAdapter } from '@auth/prisma-adapter';
 import { db } from '@/lib/db';
 import { sendWelcomeEmail } from '@/lib/email';
 
+const providers = [
+  ...(process.env.AUTH_GITHUB_ID && process.env.AUTH_GITHUB_SECRET
+    ? [
+        GitHub({
+          clientId: process.env.AUTH_GITHUB_ID,
+          clientSecret: process.env.AUTH_GITHUB_SECRET,
+          authorization: { params: { scope: 'read:user user:email' } },
+        }),
+      ]
+    : []),
+  ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
+    ? [
+        Google({
+          clientId: process.env.GOOGLE_CLIENT_ID,
+          clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        }),
+      ]
+    : []),
+  ...(process.env.RESEND_API_KEY
+    ? [
+        Resend({
+          apiKey: process.env.RESEND_API_KEY,
+          from: 'GitSkins <noreply@gitskins.com>',
+        }),
+      ]
+    : []),
+];
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(db),
   session: { strategy: 'jwt' },
-  providers: [
-    GitHub({
-      clientId: process.env.AUTH_GITHUB_ID!,
-      clientSecret: process.env.AUTH_GITHUB_SECRET!,
-      authorization: { params: { scope: 'read:user user:email' } },
-    }),
-    Google({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    }),
-    Resend({
-      apiKey: process.env.RESEND_API_KEY,
-      from: 'GitSkins <noreply@gitskins.com>',
-    }),
-  ],
+  providers,
   pages: { signIn: '/auth' },
   events: {
     async createUser({ user }) {

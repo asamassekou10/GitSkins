@@ -21,7 +21,7 @@ export interface Plan {
 }
 
 export interface UserSubscription {
-  odp: string; // Unique user ID (stored in localStorage or from Stripe)
+  id: string;
   plan: PlanType;
   purchasedAt?: string;
   stripeCustomerId?: string;
@@ -29,7 +29,7 @@ export interface UserSubscription {
 }
 
 export interface UsageData {
-visitorId: string;
+  visitorId: string;
   readmeGenerationsUsed: number;
   readmeGenerationsReset: string; // ISO date of next reset
   lastGenerationAt?: string;

@@ -25,8 +25,11 @@ async function storeEmail(email: string): Promise<void> {
     }
   }
 
-  // Fallback: log to server console (visible in Vercel logs)
-  console.log(`[WAITLIST] ${new Date().toISOString()} — ${email}`);
+  // Avoid writing raw emails to server logs. In local development we only log a
+  // redacted marker so contributors know the request reached the fallback path.
+  if (process.env.NODE_ENV !== 'production') {
+    console.log(`[WAITLIST] ${new Date().toISOString()} — ${email.replace(/(^.).*(@.*$)/, '$1***$2')}`);
+  }
 }
 
 export async function POST(request: NextRequest) {
