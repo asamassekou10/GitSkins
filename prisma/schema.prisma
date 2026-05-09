@@ -134,9 +134,12 @@ model PortfolioBuild {
   tone      String
   html      String   @db.Text
   css       String   @db.Text
+  publishedSlug String? @unique
+  publishedAt DateTime?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([userId, createdAt])
   @@index([userId, username])
+  @@index([publishedSlug])
 }

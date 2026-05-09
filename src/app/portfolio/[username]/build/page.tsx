@@ -26,6 +26,8 @@ interface SavedPortfolioBuild {
   tone: PortfolioTone;
   html: string;
   css: string;
+  publishedSlug: string | null;
+  publishedAt: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -61,6 +63,9 @@ export default function PortfolioBuildPage() {
   const [loading, setLoading] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
   const [saveLoading, setSaveLoading] = useState(false);
+  const [publishLoading, setPublishLoading] = useState(false);
+  const [activeBuildId, setActiveBuildId] = useState<string | null>(null);
+  const [publishedSlug, setPublishedSlug] = useState<string | null>(null);
   const [savedBuilds, setSavedBuilds] = useState<SavedPortfolioBuild[]>([]);
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -131,6 +136,8 @@ export default function PortfolioBuildPage() {
       if (!res.ok) throw new Error(data.error || 'Failed to generate website');
       setHtml(data.html || '');
       setCss(data.css || '');
+      setActiveBuildId(null);
+      setPublishedSlug(null);
       setSavedMessage(null);
       websiteComplete();
     } catch (e) {
@@ -205,6 +212,8 @@ export default function PortfolioBuildPage() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Failed to save portfolio');
       setSavedBuilds((current) => [data.build, ...current.filter((build) => build.id !== data.build.id)].slice(0, 20));
+      setActiveBuildId(data.build.id);
+      setPublishedSlug(data.build.publishedSlug);
       setSavedMessage('Portfolio version saved.');
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to save portfolio');
@@ -219,9 +228,89 @@ export default function PortfolioBuildPage() {
     setSelectedTone(build.tone);
     setHtml(build.html);
     setCss(build.css);
+    setActiveBuildId(build.id);
+    setPublishedSlug(build.publishedSlug);
     setSavedMessage(`Loaded ${build.title}`);
     setError(null);
   }, []);
+
+  const publishCurrentBuild = useCallback(async () => {
+    let buildId = activeBuildId;
+
+    if (!buildId) {
+      if (!html) return;
+      setSaveLoading(true);
+      setError(null);
+      setSavedMessage(null);
+      try {
+        const response = await fetch('/api/portfolio-builds', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            username,
+            title: `${selectedTemplateDetails.name} portfolio for @${username}`,
+            template: selectedTemplate,
+            goal: selectedGoal,
+            tone: selectedTone,
+            html,
+            css,
+          }),
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Failed to save portfolio');
+        buildId = data.build.id;
+        setActiveBuildId(buildId);
+        setSavedBuilds((current) => [data.build, ...current.filter((build) => build.id !== data.build.id)].slice(0, 20));
+      } catch (e) {
+        setError(e instanceof Error ? e.message : 'Failed to save portfolio');
+        setSaveLoading(false);
+        return;
+      } finally {
+        setSaveLoading(false);
+      }
+    }
+
+    setPublishLoading(true);
+    setError(null);
+    try {
+      const response = await fetch('/api/portfolio-builds/publish', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ buildId, slug: username }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Failed to publish portfolio');
+      setPublishedSlug(data.build.publishedSlug);
+      setSavedBuilds((current) => [data.build, ...current.filter((build) => build.id !== data.build.id)].slice(0, 20));
+      setSavedMessage(`Portfolio published at ${data.url}`);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to publish portfolio');
+    } finally {
+      setPublishLoading(false);
+    }
+  }, [activeBuildId, html, css, username, selectedTemplate, selectedGoal, selectedTone, selectedTemplateDetails.name]);
+
+  const unpublishCurrentBuild = useCallback(async () => {
+    if (!activeBuildId) return;
+    setPublishLoading(true);
+    setError(null);
+    try {
+      const response = await fetch('/api/portfolio-builds/unpublish', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ buildId: activeBuildId }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Failed to unpublish portfolio');
+      setPublishedSlug(null);
+      setSavedBuilds((current) => [data.build, ...current.filter((build) => build.id !== data.build.id)].slice(0, 20));
+      setSavedMessage('Portfolio unpublished.');
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to unpublish portfolio');
+    } finally {
+      setPublishLoading(false);
+    }
+  }, [activeBuildId]);
 
   const previewDoc = html
     ? (() => {
@@ -378,6 +467,38 @@ export default function PortfolioBuildPage() {
               </button>
             )}
 
+            {html && !publishedSlug && (
+              <button
+                type="button"
+                onClick={publishCurrentBuild}
+                disabled={publishLoading || saveLoading}
+                style={{
+                  ...styles.publishButton,
+                  opacity: publishLoading || saveLoading ? 0.55 : 1,
+                  cursor: publishLoading || saveLoading ? 'not-allowed' : 'pointer',
+                }}
+              >
+                {publishLoading ? 'Publishing...' : 'Publish live portfolio'}
+              </button>
+            )}
+
+            {publishedSlug && (
+              <div style={styles.publishPanel}>
+                <div style={styles.publishLabel}>Live portfolio</div>
+                <Link href={`/p/${publishedSlug}`} target="_blank" style={styles.publishLink}>
+                  /p/{publishedSlug}
+                </Link>
+                <button
+                  type="button"
+                  onClick={unpublishCurrentBuild}
+                  disabled={publishLoading}
+                  style={styles.unpublishButton}
+                >
+                  {publishLoading ? 'Updating...' : 'Unpublish'}
+                </button>
+              </div>
+            )}
+
             {savedMessage && <div style={styles.successBanner}>{savedMessage}</div>}
 
             {savedBuilds.length > 0 && (
@@ -394,7 +515,7 @@ export default function PortfolioBuildPage() {
                     <button key={build.id} type="button" onClick={() => restoreBuild(build)} style={styles.savedItem}>
                       <span style={styles.savedTitle}>{build.title}</span>
                       <span style={styles.savedMeta}>
-                        {build.template} · {new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }).format(new Date(build.updatedAt))}
+                        {build.template} · {build.publishedSlug ? `Live at /p/${build.publishedSlug}` : new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }).format(new Date(build.updatedAt))}
                       </span>
                     </button>
                   ))}
@@ -791,6 +912,50 @@ const styles: Record<string, CSSProperties> = {
     color: '#fafafa',
     fontSize: 14,
     fontWeight: 900,
+    cursor: 'pointer',
+  },
+  publishButton: {
+    minHeight: 54,
+    border: 'none',
+    borderRadius: 16,
+    background: 'linear-gradient(135deg, #f5f5f5, #a7f3d0)',
+    color: '#050505',
+    fontSize: 14,
+    fontWeight: 950,
+    cursor: 'pointer',
+    boxShadow: '0 18px 70px rgba(34,197,94,0.15)',
+  },
+  publishPanel: {
+    display: 'grid',
+    gap: 8,
+    padding: 14,
+    borderRadius: 18,
+    border: '1px solid rgba(34,197,94,0.28)',
+    background: 'rgba(34,197,94,0.08)',
+  },
+  publishLabel: {
+    color: '#86efac',
+    fontSize: 11,
+    fontWeight: 950,
+    textTransform: 'uppercase',
+    letterSpacing: 0.7,
+  },
+  publishLink: {
+    color: '#fafafa',
+    fontSize: 14,
+    fontWeight: 950,
+    textDecoration: 'none',
+    overflowWrap: 'anywhere',
+  },
+  unpublishButton: {
+    justifySelf: 'start',
+    border: '1px solid rgba(255,255,255,0.16)',
+    borderRadius: 999,
+    background: 'rgba(0,0,0,0.22)',
+    color: '#cfcfcf',
+    padding: '8px 12px',
+    fontSize: 12,
+    fontWeight: 850,
     cursor: 'pointer',
   },
   savedList: {

@@ -4,6 +4,7 @@ import { auth } from '@/auth';
 import { db } from '@/lib/db';
 import { getUserPlanById } from '@/lib/server-usage';
 import { portfolioGoals, portfolioTemplates, portfolioTones } from '@/lib/portfolio-templates';
+import { portfolioBuildPayload } from '@/lib/portfolio-builds';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -62,17 +63,15 @@ export async function GET(request: NextRequest) {
       tone: true,
       html: true,
       css: true,
+      publishedSlug: true,
+      publishedAt: true,
       createdAt: true,
       updatedAt: true,
     },
   });
 
   return NextResponse.json({
-    builds: builds.map((build) => ({
-      ...build,
-      createdAt: build.createdAt.toISOString(),
-      updatedAt: build.updatedAt.toISOString(),
-    })),
+    builds: builds.map(portfolioBuildPayload),
   });
 }
 
@@ -105,6 +104,8 @@ export async function POST(request: NextRequest) {
       tone: true,
       html: true,
       css: true,
+      publishedSlug: true,
+      publishedAt: true,
       createdAt: true,
       updatedAt: true,
     },
@@ -112,10 +113,6 @@ export async function POST(request: NextRequest) {
 
   return NextResponse.json({
     success: true,
-    build: {
-      ...build,
-      createdAt: build.createdAt.toISOString(),
-      updatedAt: build.updatedAt.toISOString(),
-    },
+    build: portfolioBuildPayload(build),
   });
 }
