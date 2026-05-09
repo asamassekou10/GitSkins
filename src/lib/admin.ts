@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
+import { db } from '@/lib/db';
 
 const DEFAULT_ADMIN_EMAILS = ['alhassane.samassekou@gmail.com'];
 const DEFAULT_ADMIN_USERNAMES = ['asamassekou10'];
@@ -29,23 +30,90 @@ export function isAdminUser(user: { email?: string | null; username?: string | n
   );
 }
 
-export async function getAdminSession() {
+export function adminJson(data: unknown, status = 200) {
+  return NextResponse.json(data, {
+    status,
+    headers: {
+      'Cache-Control': 'no-store',
+    },
+  });
+}
+
+function isTrustedMutationOrigin(request?: Request): boolean {
+  if (!request || request.method === 'GET' || request.method === 'HEAD') {
+    return true;
+  }
+
+  const origin = request.headers.get('origin');
+  if (!origin) {
+    return false;
+  }
+
+  const allowedOrigins = new Set<string>();
+
+  try {
+    allowedOrigins.add(new URL(request.url).origin);
+  } catch {
+    // Keep checking NEXTAUTH_URL below.
+  }
+
+  if (process.env.NEXTAUTH_URL) {
+    try {
+      allowedOrigins.add(new URL(process.env.NEXTAUTH_URL).origin);
+    } catch {
+      // Ignore malformed env values and rely on the request URL.
+    }
+  }
+
+  return allowedOrigins.has(origin);
+}
+
+export async function getAdminAuthState() {
   const session = await auth();
   const user = session?.user as { id?: string; email?: string | null; username?: string | null; name?: string | null } | undefined;
 
-  if (!session?.user || !isAdminUser(user)) {
+  if (!session?.user || !user) {
+    return { status: 'unauthenticated' as const, session: null, user: null };
+  }
+
+  const dbUser = user.id
+    ? await db.user.findUnique({
+        where: { id: user.id },
+        select: { id: true, email: true, username: true, name: true },
+      })
+    : null;
+
+  const resolvedUser = dbUser ?? user;
+
+  if (!isAdminUser(resolvedUser)) {
+    return { status: 'forbidden' as const, session, user: resolvedUser };
+  }
+
+  return { status: 'admin' as const, session, user: resolvedUser };
+}
+
+export async function getAdminSession() {
+  const state = await getAdminAuthState();
+  if (state.status !== 'admin') {
     return null;
   }
 
-  return { session, user };
+  return { session: state.session, user: state.user };
 }
 
-export async function requireAdminApi() {
+export async function requireAdminApi(request?: Request) {
+  if (!isTrustedMutationOrigin(request)) {
+    return {
+      admin: null,
+      response: adminJson({ error: 'Invalid request origin' }, 403),
+    };
+  }
+
   const admin = await getAdminSession();
   if (!admin) {
     return {
       admin: null,
-      response: NextResponse.json({ error: 'Forbidden' }, { status: 403 }),
+      response: adminJson({ error: 'Forbidden' }, 403),
     };
   }
 

@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { requireAdminApi } from '@/lib/admin';
+import { NextRequest } from 'next/server';
+import { adminJson, requireAdminApi } from '@/lib/admin';
 import { db } from '@/lib/db';
 
 export const runtime = 'nodejs';
@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
 
   const q = request.nextUrl.searchParams.get('q')?.trim();
   if (!q || q.length < 2) {
-    return NextResponse.json({ error: 'Search query must be at least 2 characters' }, { status: 400 });
+    return adminJson({ error: 'Search query must be at least 2 characters' }, 400);
   }
 
   const month = currentMonth();
@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
     },
   });
 
-  return NextResponse.json({
+  return adminJson({
     users: users.map((user) => ({
       id: user.id,
       email: user.email,

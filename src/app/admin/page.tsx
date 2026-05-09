@@ -1,12 +1,19 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { auth } from '@/auth';
-import { isAdminUser } from '@/lib/admin';
+import type { Metadata } from 'next';
+import { getAdminAuthState } from '@/lib/admin';
 import { db } from '@/lib/db';
 import AdminClient from './AdminClient';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
+export const metadata: Metadata = {
+  title: 'Admin | GitSkins',
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 function currentMonth(): string {
   const now = new Date();
@@ -14,14 +21,13 @@ function currentMonth(): string {
 }
 
 export default async function AdminPage() {
-  const session = await auth();
+  const adminState = await getAdminAuthState();
 
-  if (!session?.user) {
+  if (adminState.status === 'unauthenticated') {
     redirect('/auth?callbackUrl=/admin');
   }
 
-  const sessionUser = session.user as { email?: string | null; username?: string | null };
-  if (!isAdminUser(sessionUser)) {
+  if (adminState.status === 'forbidden') {
     return (
       <main style={{ minHeight: '100vh', background: '#050505', color: '#fafafa', display: 'grid', placeItems: 'center', padding: 24 }}>
         <section style={{ maxWidth: 520, textAlign: 'center', border: '1px solid #1f1f1f', borderRadius: 26, background: '#0b0b0b', padding: 34 }}>

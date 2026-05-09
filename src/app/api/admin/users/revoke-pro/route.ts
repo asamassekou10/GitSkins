@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { z } from 'zod';
-import { requireAdminApi } from '@/lib/admin';
+import { adminJson, isAdminUser, requireAdminApi } from '@/lib/admin';
 import { db } from '@/lib/db';
 
 export const runtime = 'nodejs';
@@ -11,21 +11,42 @@ const bodySchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
-  const { response } = await requireAdminApi();
+  const { admin, response } = await requireAdminApi(request);
   if (response) return response;
 
   const body = bodySchema.safeParse(await request.json().catch(() => null));
   if (!body.success) {
-    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
+    return adminJson({ error: 'Invalid request body' }, 400);
   }
 
   const user = await db.user.findUnique({
     where: { id: body.data.userId },
-    select: { id: true, email: true, username: true },
+    select: {
+      id: true,
+      email: true,
+      username: true,
+      subscription: {
+        select: {
+          stripeSubscriptionId: true,
+          stripeCustomerId: true,
+        },
+      },
+    },
   });
 
   if (!user) {
-    return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    return adminJson({ error: 'User not found' }, 404);
+  }
+
+  if (admin?.user.id === user.id || isAdminUser(user)) {
+    return adminJson({ error: 'Admin accounts cannot be downgraded from this panel' }, 400);
+  }
+
+  if (user.subscription?.stripeSubscriptionId) {
+    return adminJson(
+      { error: 'This user has a Stripe subscription. Cancel or update it in Stripe first.' },
+      400
+    );
   }
 
   await db.subscription.upsert({
@@ -43,7 +64,7 @@ export async function POST(request: NextRequest) {
     },
   });
 
-  return NextResponse.json({
+  return adminJson({
     success: true,
     message: `Revoked Pro for ${user.email ?? user.username ?? user.id}`,
   });

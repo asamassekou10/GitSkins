@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { z } from 'zod';
-import { requireAdminApi } from '@/lib/admin';
+import { adminJson, requireAdminApi } from '@/lib/admin';
 import { db } from '@/lib/db';
 
 export const runtime = 'nodejs';
@@ -11,12 +11,12 @@ const bodySchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
-  const { response } = await requireAdminApi();
+  const { response } = await requireAdminApi(request);
   if (response) return response;
 
   const body = bodySchema.safeParse(await request.json().catch(() => null));
   if (!body.success) {
-    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
+    return adminJson({ error: 'Invalid request body' }, 400);
   }
 
   const user = await db.user.findUnique({
@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
   });
 
   if (!user) {
-    return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    return adminJson({ error: 'User not found' }, 404);
   }
 
   await db.subscription.upsert({
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
     },
   });
 
-  return NextResponse.json({
+  return adminJson({
     success: true,
     message: `Granted Pro to ${user.email ?? user.username ?? user.id}`,
   });
