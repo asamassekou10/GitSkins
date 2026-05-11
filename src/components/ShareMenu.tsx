@@ -70,11 +70,21 @@ export function ShareMenu({
     track('download');
     try {
       const res = await fetch(imageUrl);
+      if (!res.ok) {
+        throw new Error('Image request failed');
+      }
+      const contentType = res.headers.get('content-type') ?? '';
+      if (!contentType.startsWith('image/')) {
+        throw new Error(`Unexpected image content type: ${contentType}`);
+      }
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = downloadFilename;
+      const extension = contentType.includes('svg') ? 'svg' : contentType.includes('png') ? 'png' : contentType.includes('jpeg') || contentType.includes('jpg') ? 'jpg' : '';
+      a.download = extension
+        ? downloadFilename.replace(/\.[a-z0-9]+$/i, `.${extension}`)
+        : downloadFilename;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);

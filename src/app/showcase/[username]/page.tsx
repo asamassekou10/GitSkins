@@ -301,15 +301,25 @@ function ShowcaseContent() {
     try {
       setDownloading(true);
       const response = await fetch(premiumCardUrl);
+      if (!response.ok) {
+        throw new Error('Preview image request failed');
+      }
+      const contentType = response.headers.get('content-type') ?? 'image/svg+xml';
+      if (!contentType.startsWith('image/')) {
+        throw new Error(`Unexpected preview content type: ${contentType}`);
+      }
+      const extension = contentType.includes('svg') ? 'svg' : contentType.includes('png') ? 'png' : 'img';
       const blob = await response.blob();
       const objectUrl = URL.createObjectURL(blob);
       const anchor = document.createElement('a');
       anchor.href = objectUrl;
-      anchor.download = `gitskins-${username}-${skin.id}.png`;
+      anchor.download = `gitskins-${username}-${skin.id}.${extension}`;
       document.body.appendChild(anchor);
       anchor.click();
       anchor.remove();
       URL.revokeObjectURL(objectUrl);
+    } catch {
+      window.open(premiumCardUrl, '_blank', 'noopener,noreferrer');
     } finally {
       setDownloading(false);
     }
@@ -643,7 +653,7 @@ function ShowcaseContent() {
                     shareUrl={shareUrl}
                     shareText={`Check out my ${skin.label} GitSkins profile skin`}
                     imageUrl={premiumCardUrl}
-                    downloadFilename={`gitskins-${username}-${skin.id}.png`}
+                    downloadFilename={`gitskins-${username}-${skin.id}.svg`}
                     context={{ username, theme: skin.id, widget: 'profile-skin', source: 'showcase' }}
                   />
                 </div>
