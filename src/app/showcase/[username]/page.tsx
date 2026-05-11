@@ -1,7 +1,8 @@
 'use client';
 
-import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
+import { toPng } from 'html-to-image';
 import { useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { analytics } from '@/components/AnalyticsProvider';
@@ -226,6 +227,7 @@ function ShowcaseContent() {
   const [showCopied, setShowCopied] = useState(false);
   const [copiedReadmeBlock, setCopiedReadmeBlock] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const showcaseRef = useRef<HTMLElement | null>(null);
   const skin = getProfileSkin(selectedSkinId);
 
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
@@ -300,30 +302,30 @@ function ShowcaseContent() {
   const downloadPreview = useCallback(async () => {
     try {
       setDownloading(true);
-      const response = await fetch(premiumCardUrl);
-      if (!response.ok) {
-        throw new Error('Preview image request failed');
+      if (!showcaseRef.current) {
+        throw new Error('Showcase preview is not ready');
       }
-      const contentType = response.headers.get('content-type') ?? 'image/svg+xml';
-      if (!contentType.startsWith('image/')) {
-        throw new Error(`Unexpected preview content type: ${contentType}`);
-      }
-      const extension = contentType.includes('svg') ? 'svg' : contentType.includes('png') ? 'png' : 'img';
-      const blob = await response.blob();
-      const objectUrl = URL.createObjectURL(blob);
+      const dataUrl = await toPng(showcaseRef.current, {
+        cacheBust: true,
+        pixelRatio: 2,
+        backgroundColor: skin.background,
+        filter: (node) => {
+          if (!(node instanceof HTMLElement)) return true;
+          return node.dataset.captureHidden !== 'true';
+        },
+      });
       const anchor = document.createElement('a');
-      anchor.href = objectUrl;
-      anchor.download = `gitskins-${username}-${skin.id}.${extension}`;
+      anchor.href = dataUrl;
+      anchor.download = `gitskins-showcase-${username}-${skin.id}.png`;
       document.body.appendChild(anchor);
       anchor.click();
       anchor.remove();
-      URL.revokeObjectURL(objectUrl);
     } catch {
       window.open(premiumCardUrl, '_blank', 'noopener,noreferrer');
     } finally {
       setDownloading(false);
     }
-  }, [premiumCardUrl, skin.id, username]);
+  }, [premiumCardUrl, skin.background, skin.id, username]);
 
   const applyUsername = useCallback(() => {
     const cleaned = draftUsername.trim().replace(/^@/, '');
@@ -552,6 +554,7 @@ function ShowcaseContent() {
         </motion.div>
 
         <motion.section
+          ref={showcaseRef}
           layout
           initial={{ opacity: 0, scale: 0.97 }}
           animate={{ opacity: 1, scale: 1 }}
