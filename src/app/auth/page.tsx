@@ -96,7 +96,7 @@ export default function AuthPage() {
 
           <div style={{ position: 'relative', minHeight: 285, maxWidth: 620 }}>
             <motion.img
-              src={`/api/premium-card?username=${previewUsername}&theme=${previewTheme}&variant=glass&avatar=persona`}
+              src={`/api/premium-card?username=${previewUsername}&theme=${previewTheme}&variant=glass`}
               alt="GitSkins profile card preview"
               animate={{ y: [0, -8, 0], rotate: [-0.8, 0.6, -0.8] }}
               transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}

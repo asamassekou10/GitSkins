@@ -48,7 +48,7 @@ export default function ExamplesPage() {
               const theme = themes[index % themes.length];
               return (
                 <motion.div key={username} whileHover={{ y: -4 }} style={{ borderRadius: 22, border: '1px solid #1d1d1d', background: 'radial-gradient(circle at 80% 10%, rgba(34,197,94,0.14), transparent 40%), #0b0b0b', padding: 16, overflow: 'hidden' }}>
-                  <img src={`/api/premium-card?username=${username}&theme=${theme.id}&variant=glass&avatar=persona`} alt={`${username} GitSkins card`} style={{ width: '100%', borderRadius: 14, boxShadow: '0 24px 70px rgba(0,0,0,0.42)' }} />
+                  <img src={`/api/premium-card?username=${username}&theme=${theme.id}&variant=glass`} alt={`${username} GitSkins card`} style={{ width: '100%', borderRadius: 14, boxShadow: '0 24px 70px rgba(0,0,0,0.42)' }} />
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginTop: 14 }}>
                     <div>
                       <div style={{ color: '#fff', fontWeight: 850 }}>@{username}</div>

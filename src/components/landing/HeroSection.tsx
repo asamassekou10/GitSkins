@@ -13,7 +13,7 @@ interface HeroSectionProps {
 }
 
 function cardUrl(username: string, theme: string) {
-  return `/api/premium-card?username=${encodeURIComponent(username)}&theme=${theme}&variant=glass&avatar=persona&avatarFallback=v2`;
+  return `/api/premium-card?username=${encodeURIComponent(username)}&theme=${theme}&variant=glass`;
 }
 
 function avatarUrl(username: string, theme: string, style = 'open-peeps') {

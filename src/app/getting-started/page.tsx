@@ -38,8 +38,8 @@ const widgets = [
     id: 'profile-card',
     name: 'Profile Card',
     description: 'Best first embed for a polished README header.',
-    preview: '/api/premium-card?username=octocat&theme=github-dark&variant=glass&avatar=persona',
-    markdown: '![GitHub Profile Card](https://gitskins.com/api/premium-card?username=YOUR_USERNAME&theme=github-dark&variant=glass&avatar=persona)',
+    preview: '/api/premium-card?username=octocat&theme=github-dark&variant=glass',
+    markdown: '![GitHub Profile Card](https://gitskins.com/api/premium-card?username=YOUR_USERNAME&theme=github-dark&variant=glass)',
   },
   {
     id: 'stats',
@@ -139,7 +139,7 @@ export default function GettingStartedPage() {
             }}
           >
             <div style={{ borderRadius: 22, overflow: 'hidden', background: '#0a0a0a', border: '1px solid #202020' }}>
-              <img src="/api/premium-card?username=octocat&theme=github-dark&variant=glass&avatar=persona" alt="GitSkins profile card preview" style={{ display: 'block', width: '100%', height: 'auto' }} />
+              <img src="/api/premium-card?username=octocat&theme=github-dark&variant=glass" alt="GitSkins profile card preview" style={{ display: 'block', width: '100%', height: 'auto' }} />
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginTop: 12 }}>
               {['/api/avatar?username=octocat&family=character&character=terminal-mage&theme=github-dark&size=200', '/api/stats?username=octocat&theme=github-dark', '/api/languages?username=octocat&theme=github-dark'].map((src) => (

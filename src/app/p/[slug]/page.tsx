@@ -34,13 +34,13 @@ export async function generateMetadata({ params }: PublishedPortfolioPageProps):
       title,
       description,
       url: absoluteUrl(`/p/${slug}`),
-      images: [`/api/premium-card?username=${encodeURIComponent(build.username)}&theme=studio&variant=persona&avatar=persona`],
+      images: [`/api/premium-card?username=${encodeURIComponent(build.username)}&theme=studio&variant=persona`],
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
-      images: [`/api/premium-card?username=${encodeURIComponent(build.username)}&theme=studio&variant=persona&avatar=persona`],
+      images: [`/api/premium-card?username=${encodeURIComponent(build.username)}&theme=studio&variant=persona`],
     },
   };
 }

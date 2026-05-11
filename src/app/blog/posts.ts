@@ -27,7 +27,7 @@ export const blogPosts: BlogPost[] = [
     category: 'Profile Strategy',
     readTime: '7 min read',
     updated: '2026-05-02',
-    hero: '/api/premium-card?username=octocat&theme=github-dark&variant=glass&avatar=persona',
+    hero: '/api/premium-card?username=octocat&theme=github-dark&variant=glass',
     sections: [
       {
         heading: 'Lead with a clear signal',
@@ -77,7 +77,7 @@ export const blogPosts: BlogPost[] = [
     category: 'README Design',
     readTime: '8 min read',
     updated: '2026-05-02',
-    hero: '/api/premium-card?username=torvalds&theme=matrix&variant=terminal&avatar=persona',
+    hero: '/api/premium-card?username=torvalds&theme=matrix&variant=terminal',
     sections: [
       {
         heading: 'The reliable profile README structure',
@@ -203,7 +203,7 @@ export const blogPosts: BlogPost[] = [
     category: 'README Motion',
     readTime: '8 min read',
     updated: '2026-05-02',
-    hero: '/api/premium-card?username=octocat&theme=neon&variant=glass&avatar=persona',
+    hero: '/api/premium-card?username=octocat&theme=neon&variant=glass',
     sections: [
       {
         heading: 'Use motion to guide attention, not decorate everything',
@@ -264,7 +264,7 @@ export const blogPosts: BlogPost[] = [
     category: 'README Design',
     readTime: '11 min read',
     updated: '2026-05-09',
-    hero: '/api/premium-card?username=octocat&theme=matrix&variant=terminal&avatar=persona',
+    hero: '/api/premium-card?username=octocat&theme=matrix&variant=terminal',
     sections: [
       {
         heading: 'Start with the README job, not the template',
@@ -432,7 +432,7 @@ export const blogPosts: BlogPost[] = [
     category: 'README Templates',
     readTime: '12 min read',
     updated: '2026-05-09',
-    hero: '/api/premium-card?username=torvalds&theme=studio&variant=persona&avatar=persona',
+    hero: '/api/premium-card?username=torvalds&theme=studio&variant=persona',
     sections: [
       {
         heading: 'The best template depends on the visitor',
@@ -546,7 +546,7 @@ export const blogPosts: BlogPost[] = [
     category: 'Product Update',
     readTime: '5 min read',
     updated: '2026-05-04',
-    hero: '/api/premium-card?username=octocat&theme=matrix&variant=persona&avatar=persona',
+    hero: '/api/premium-card?username=octocat&theme=matrix&variant=persona',
     sections: [
       {
         heading: 'A theme should be more than a color picker',

@@ -27,7 +27,7 @@ export const seoLandingPages: Record<string, SeoLandingPageContent> = {
     primaryCta: { label: 'Open README Studio', href: '/readme-generator' },
     secondaryCta: { label: 'Browse README examples', href: '/blog/github-profile-readme-examples' },
     preview: {
-      src: '/api/premium-card?username=octocat&theme=neon&variant=glass&avatar=persona',
+      src: '/api/premium-card?username=octocat&theme=neon&variant=glass',
       alt: 'Generated GitHub profile README card preview',
     },
     benefits: [
@@ -62,7 +62,7 @@ export const seoLandingPages: Record<string, SeoLandingPageContent> = {
     primaryCta: { label: 'Generate a README', href: '/readme-generator' },
     secondaryCta: { label: 'See README examples', href: '/blog/github-profile-readme-examples' },
     preview: {
-      src: '/api/premium-card?username=octocat&theme=matrix&variant=terminal&avatar=persona',
+      src: '/api/premium-card?username=octocat&theme=matrix&variant=terminal',
       alt: 'GitHub README generator preview with profile card',
     },
     benefits: [
@@ -202,7 +202,7 @@ export const seoLandingPages: Record<string, SeoLandingPageContent> = {
     primaryCta: { label: 'Browse Theme Catalog', href: '/themes' },
     secondaryCta: { label: 'View Matrix theme', href: '/themes/matrix' },
     preview: {
-      src: '/api/premium-card?username=octocat&theme=matrix&variant=persona&avatar=persona',
+      src: '/api/premium-card?username=octocat&theme=matrix&variant=persona',
       alt: 'GitHub profile theme system preview',
     },
     benefits: [
@@ -237,7 +237,7 @@ export const seoLandingPages: Record<string, SeoLandingPageContent> = {
     primaryCta: { label: 'Install Chrome Extension', href: '/extension' },
     secondaryCta: { label: 'Browse themes', href: '/themes' },
     preview: {
-      src: '/api/premium-card?username=octocat&theme=studio&variant=persona&avatar=persona',
+      src: '/api/premium-card?username=octocat&theme=studio&variant=persona',
       alt: 'GitSkins browser extension profile card preview',
     },
     benefits: [

@@ -8,7 +8,7 @@ import { landingThemes } from '@/lib/landing-themes';
 const categories = ['all', 'original', 'seasonal', 'holiday', 'developer', 'aesthetic'] as const;
 
 function themeUrl(themeId: string) {
-  return `/api/premium-card?username=octocat&theme=${themeId}&variant=persona&avatar=persona`;
+  return `/api/premium-card?username=octocat&theme=${themeId}&variant=persona`;
 }
 
 export default function ThemesPage() {

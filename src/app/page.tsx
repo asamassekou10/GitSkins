@@ -290,7 +290,7 @@ export default function Home() {
 
               <div style={{ position: 'relative', minHeight: 430 }}>
                 {[
-                  ['/api/premium-card?username=octocat&theme=matrix&variant=persona&avatar=persona', 0, 0, 330],
+                  ['/api/premium-card?username=octocat&theme=matrix&variant=persona', 0, 0, 330],
                   ['/api/avatar?username=octocat&family=character&theme=matrix&size=400', 220, 188, 150],
                   ['/api/languages?username=octocat&theme=matrix', 24, 286, 260],
                 ].map(([src, left, top, width], index) => (

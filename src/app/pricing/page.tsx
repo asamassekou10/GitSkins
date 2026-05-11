@@ -223,7 +223,7 @@ export default function PricingPage() {
             viewport={{ once: true }}
             style={{ minHeight: 220, borderRadius: 20, border: '1px solid #1d1d1d', background: 'radial-gradient(circle at 80% 18%, rgba(34,197,94,0.2), transparent 38%), #0b0b0b', padding: 14, display: 'grid', placeItems: 'center', overflow: 'hidden' }}
           >
-            <img src="/api/premium-card?username=octocat&theme=matrix&variant=glass&avatar=persona" alt="Premium GitSkins card preview" style={{ width: '100%', maxWidth: 720, borderRadius: 16, boxShadow: '0 28px 90px rgba(0,0,0,0.48)' }} />
+            <img src="/api/premium-card?username=octocat&theme=matrix&variant=glass" alt="Premium GitSkins card preview" style={{ width: '100%', maxWidth: 720, borderRadius: 16, boxShadow: '0 28px 90px rgba(0,0,0,0.48)' }} />
           </motion.div>
           <motion.div
             initial={{ opacity: 0, y: 14 }}

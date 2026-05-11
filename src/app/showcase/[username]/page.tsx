@@ -220,6 +220,7 @@ function ShowcaseContent() {
   const rawUsername = params.username as string;
   const username = rawUsername?.startsWith('@') ? rawUsername.slice(1) : (rawUsername || '');
   const [selectedSkinId, setSelectedSkinId] = useState(searchParams.get('skin') ?? 'renaissance');
+  const [avatarMode, setAvatarMode] = useState<'github' | 'gitskins'>(searchParams.get('avatar') === 'gitskins' ? 'gitskins' : 'github');
   const [draftUsername, setDraftUsername] = useState(username);
   const [density, setDensity] = useState<'editorial' | 'compact'>('editorial');
   const [showcaseData, setShowcaseData] = useState<ShowcaseData | null>(null);
@@ -231,11 +232,14 @@ function ShowcaseContent() {
   const skin = getProfileSkin(selectedSkinId);
 
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
-  const avatarUrl = `${baseUrl}/api/avatar?username=${encodeURIComponent(username)}&family=character&character=${skin.character}&theme=${skin.theme}&expression=${skin.expression}&size=400`;
-  const premiumCardUrl = `${baseUrl}/api/premium-card?username=${encodeURIComponent(username)}&theme=${skin.theme}&variant=persona&avatar=persona`;
+  const gitskinsAvatarUrl = `${baseUrl}/api/avatar?username=${encodeURIComponent(username)}&family=character&character=${skin.character}&theme=${skin.theme}&expression=${skin.expression}&size=400`;
+  const avatarUrl = avatarMode === 'github'
+    ? showcaseData?.avatarUrl || gitskinsAvatarUrl
+    : gitskinsAvatarUrl;
+  const premiumCardUrl = `${baseUrl}/api/premium-card?username=${encodeURIComponent(username)}&theme=${skin.theme}&variant=persona${avatarMode === 'gitskins' ? '&avatar=persona' : ''}`;
   const statsUrl = `${baseUrl}/api/stats?username=${encodeURIComponent(username)}&theme=${skin.theme}`;
   const languagesUrl = `${baseUrl}/api/languages?username=${encodeURIComponent(username)}&theme=${skin.theme}`;
-  const shareUrl = `${baseUrl}/showcase/${username}?skin=${skin.id}`;
+  const shareUrl = `${baseUrl}/showcase/${username}?skin=${skin.id}${avatarMode === 'gitskins' ? '&avatar=gitskins' : ''}`;
 
   useEffect(() => {
     setDraftUsername(username);
@@ -292,12 +296,14 @@ function ShowcaseContent() {
   }, [shareUrl, skin.id, username]);
 
   const copyReadmeBlock = useCallback(async () => {
-    const markdown = `[![${username}'s GitSkins profile skin](${productionUrl}/api/premium-card?username=${encodeURIComponent(username)}&theme=${skin.theme}&variant=persona&avatar=persona)](${productionUrl}/showcase/${encodeURIComponent(username)}?skin=${skin.id})`;
+    const avatarParam = avatarMode === 'gitskins' ? '&avatar=persona' : '';
+    const showcaseAvatarParam = avatarMode === 'gitskins' ? '&avatar=gitskins' : '';
+    const markdown = `[![${username}'s GitSkins profile skin](${productionUrl}/api/premium-card?username=${encodeURIComponent(username)}&theme=${skin.theme}&variant=persona${avatarParam})](${productionUrl}/showcase/${encodeURIComponent(username)}?skin=${skin.id}${showcaseAvatarParam})`;
     await navigator.clipboard.writeText(markdown);
     setCopiedReadmeBlock(true);
     setTimeout(() => setCopiedReadmeBlock(false), 2000);
     analytics.trackMarkdownCopy('profile-skin-readme-block', skin.id, username, 'showcase');
-  }, [skin.id, skin.theme, username]);
+  }, [avatarMode, skin.id, skin.theme, username]);
 
   const downloadPreview = useCallback(async () => {
     try {
@@ -330,8 +336,8 @@ function ShowcaseContent() {
   const applyUsername = useCallback(() => {
     const cleaned = draftUsername.trim().replace(/^@/, '');
     if (!cleaned) return;
-    window.location.href = `/showcase/${encodeURIComponent(cleaned)}?skin=${skin.id}`;
-  }, [draftUsername, skin.id]);
+    window.location.href = `/showcase/${encodeURIComponent(cleaned)}?skin=${skin.id}${avatarMode === 'gitskins' ? '&avatar=gitskins' : ''}`;
+  }, [avatarMode, draftUsername, skin.id]);
 
   if (!username) {
     return (
@@ -512,6 +518,30 @@ function ShowcaseContent() {
                 }}
               >
                 {mode}
+              </button>
+            ))}
+          </div>
+          <div style={{ display: 'flex', padding: 4, borderRadius: 12, background: skin.surface, border: `1px solid ${skin.border}` }}>
+            {([
+              ['github', 'GitHub photo'],
+              ['gitskins', 'GitSkins avatar'],
+            ] as const).map(([mode, label]) => (
+              <button
+                key={mode}
+                type="button"
+                onClick={() => setAvatarMode(mode)}
+                style={{
+                  padding: '8px 11px',
+                  borderRadius: 9,
+                  border: 'none',
+                  background: avatarMode === mode ? skin.accent : 'transparent',
+                  color: avatarMode === mode ? '#050505' : skin.muted,
+                  fontSize: 12,
+                  fontWeight: 900,
+                  cursor: 'pointer',
+                }}
+              >
+                {label}
               </button>
             ))}
           </div>
