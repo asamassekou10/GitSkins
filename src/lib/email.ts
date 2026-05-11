@@ -78,7 +78,7 @@ export async function sendPaymentConfirmationEmail(
         <p style="color:#888;margin:0 0 24px">${detail}</p>
 
         <p style="line-height:1.7;color:#ccc">
-          You now have unlimited README generations, all 20 premium themes,
+          You now have higher daily generation limits, all 20 premium themes,
           watermark-free widgets, and priority rendering.
         </p>
 

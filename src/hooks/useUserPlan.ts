@@ -8,8 +8,15 @@ export interface UserPlanData {
   readmeGenerationsUsed: number;
   readmeGenerationsLimit: number;
   readmeGenerationsRemaining: number;
+  readmeGenerationsDailyUsed?: number;
+  readmeGenerationsDailyLimit?: number;
+  readmeGenerationsDailyRemaining?: number;
+  portfolioGenerationsDailyUsed?: number;
+  portfolioGenerationsDailyLimit?: number;
+  portfolioGenerationsDailyRemaining?: number;
   creditsRemaining?: number;
   month: string;
+  day?: string;
   loading: boolean;
   authenticated: boolean;
 }

@@ -9,7 +9,7 @@ const faqs = [
   },
   {
     question: 'What is free and what requires Pro?',
-    answer: 'Free users get the core card tools, the original free themes, and limited README generations. Pro unlocks all premium themes, premium avatars, AI profile tools, high-resolution exports, and unlimited README generations.',
+    answer: 'Free users get the core card tools, the original free themes, and limited README generations. Pro unlocks all premium themes, premium avatars, AI profile tools, high-resolution exports, and higher daily generation limits.',
   },
   {
     question: 'Why are some themes or avatar styles locked?',

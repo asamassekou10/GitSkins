@@ -80,8 +80,8 @@ export default function SettingsPage() {
             </div>
             <p style={{ color: '#888', lineHeight: 1.55, margin: '0 0 18px', fontSize: 14 }}>
               {usage.plan === 'pro'
-                ? 'You have access to premium themes, avatars, AI tools, and unlimited README generations.'
-                : 'Upgrade when you need premium themes, avatars, AI tools, and unlimited README generations.'}
+                ? 'You have access to premium themes, avatars, AI tools, and higher daily generation limits.'
+                : 'Upgrade when you need premium themes, avatars, AI tools, and higher daily generation limits.'}
             </p>
             {usage.plan === 'pro' ? (
               <button type="button" onClick={openPortal} disabled={portalLoading} style={primaryButton}>
@@ -96,8 +96,11 @@ export default function SettingsPage() {
           <section style={cardStyle}>
             <h2 style={cardTitle}>Usage</h2>
             <dl style={{ margin: 0, display: 'grid', gap: 12 }}>
-              <Info label="README remaining" value={usage.plan === 'pro' ? 'Unlimited' : String(usage.readmeGenerationsRemaining)} />
-              <Info label="Monthly free limit" value={usage.plan === 'pro' ? 'Unlimited' : String(usage.readmeGenerationsLimit)} />
+              <Info label={usage.plan === 'pro' ? 'README remaining today' : 'README remaining'} value={String(usage.readmeGenerationsRemaining)} />
+              <Info label={usage.plan === 'pro' ? 'Daily Pro limit' : 'Monthly free limit'} value={String(usage.readmeGenerationsLimit)} />
+              {usage.plan === 'pro' ? (
+                <Info label="Portfolio remaining today" value={String(usage.portfolioGenerationsDailyRemaining ?? 0)} />
+              ) : null}
               <Info label="Credit balance" value={String(usage.creditsRemaining ?? 0)} />
             </dl>
           </section>

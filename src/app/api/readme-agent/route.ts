@@ -58,11 +58,13 @@ export async function POST(request: NextRequest) {
     if (!usageCheck.allowed) {
       return new Response(
         JSON.stringify({
-          error: 'Monthly README generation limit reached',
+          error: usageCheck.plan === 'pro' ? 'Daily README generation limit reached' : 'Monthly README generation limit reached',
+          message: usageCheck.plan === 'pro' ? 'Daily README generation limit reached' : 'Monthly README generation limit reached',
           code: 'LIMIT_REACHED',
           remaining: 0,
           limit: usageCheck.limit,
           plan: usageCheck.plan,
+          period: usageCheck.period,
         }),
         { status: 429, headers: { 'Content-Type': 'application/json' } }
       );

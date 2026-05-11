@@ -105,11 +105,14 @@ export async function POST(request: NextRequest) {
       if (!usageCheckBefore.allowed) {
         return NextResponse.json(
           {
-            error: 'You have used your free README generations for this month.',
+            error: usageCheckBefore.plan === 'pro'
+              ? 'Daily README generation limit reached.'
+              : 'You have used your free README generations for this month.',
             code: 'LIMIT_REACHED',
             remaining: 0,
             limit: usageCheckBefore.limit,
             plan: usageCheckBefore.plan,
+            period: usageCheckBefore.period,
           },
           { status: 429 }
         );

@@ -445,7 +445,10 @@ export default function ReadmeGeneratorPage() {
                   </span>
                 ) : userIsPro ? (
                   <span style={{ fontSize: '14px', color: '#888' }}>
-                    Generations: <span style={{ color: '#22c55e', fontWeight: 600 }}>Unlimited</span>
+                    Generations today:{' '}
+                    <span style={{ color: effectiveRemaining > 0 ? '#22c55e' : '#ef4444', fontWeight: 600 }}>
+                      {effectiveRemaining}/{effectiveLimit}
+                    </span>
                   </span>
                 ) : (
                   <>

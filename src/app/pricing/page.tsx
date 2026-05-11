@@ -23,14 +23,15 @@ const FREE_FEATURES = [
   '5 README generations / month',
   `${FREE_THEMES.length} themes (Satan, Neon, Zen, GitHub Dark, Dracula)`,
   'All 4 profile widgets',
-  'GitHub Wrapped',
-  'Repo Visualizer',
+  'Basic profile showcase',
+  'Card and avatar previews',
   'Daily Dev Card',
-  'Portfolio Builder',
+  'Portfolio Builder preview',
 ];
 
 const PRO_FEATURES = [
-  'Unlimited README generations',
+  '25 README generations / day',
+  '10 portfolio website generations / day',
   `All ${PRO_THEMES.length} premium themes`,
   'No watermark on widgets',
   'Priority widget rendering',
@@ -185,7 +186,7 @@ export default function PricingPage() {
             Start free. Unlock the full profile kit when you need it.
           </h1>
           <p style={{ fontSize: '16px', color: '#888', maxWidth: '700px', margin: '0 auto 18px', lineHeight: 1.55 }}>
-            Free gives you the essentials. Pro unlocks the premium themes, avatars, AI profile tools, and unlimited README generations that make GitSkins feel like a complete identity system.
+            Free gives you the essentials. Pro unlocks premium themes, avatars, AI profile tools, and higher daily generation limits that make GitSkins feel like a complete identity system.
           </p>
 
           {/* Billing toggle */}

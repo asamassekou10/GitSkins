@@ -422,7 +422,7 @@ export default function Home() {
                 ['01', 'Enter a username', 'Preview cards, stats, avatars, and themes from a public GitHub profile.'],
                 ['02', 'Choose the identity', 'Pick the card style, avatar family, and theme that match the developer brand.'],
                 ['03', 'Copy or save', 'Use Markdown/HTML embeds in a README or save the configuration to your workspace.'],
-                ['04', 'Upgrade when ready', 'Unlock premium themes, high-res avatars, Pro AI tools, and unlimited README generation.'],
+                ['04', 'Upgrade when ready', 'Unlock premium themes, high-res avatars, Pro AI tools, and higher daily generation limits.'],
               ].map(([step, title, copy]) => (
                 <StaggerItem key={step}>
                   <div style={{ minHeight: 220, borderRadius: 22, border: '1px solid #1d1d1d', background: '#0b0b0b', padding: 22, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>

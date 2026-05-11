@@ -222,7 +222,7 @@ export default function GettingStartedPage() {
             <ul style={listStyle}>
               <li>All premium themes and avatar styles</li>
               <li>AI profile tools and project personas</li>
-              <li>Unlimited README generations</li>
+              <li>Higher daily README and portfolio generation limits</li>
             </ul>
             <Link href="/pricing" style={{ ...primaryButton, marginTop: 18, padding: '12px 16px', fontSize: 14 }}>
               Compare plans

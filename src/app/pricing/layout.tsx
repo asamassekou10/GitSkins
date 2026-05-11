@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   description: 'Compare GitSkins Free and Pro plans for premium GitHub profile cards, avatars, themes, AI tools, and README generation.',
   openGraph: {
     title: 'GitSkins Pricing',
-    description: 'Start free, then upgrade for premium themes, avatars, AI profile tools, and unlimited README generation.',
+    description: 'Start free, then upgrade for premium themes, avatars, AI profile tools, and higher daily generation limits.',
   },
 };
 

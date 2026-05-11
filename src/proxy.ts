@@ -28,6 +28,7 @@ const AI_ROUTE_PREFIXES = [
   '/api/ai/',
   '/api/wrapped',
   '/api/visualize',
+  '/api/daily-generate-text',
 ];
 
 const memoryRateLimit = new Map<string, { count: number; resetAt: number }>();

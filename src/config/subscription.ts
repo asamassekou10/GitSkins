@@ -20,9 +20,10 @@ export const PRO_THEMES = [
   ...ALL_THEMES.aesthetic,
 ] as const;
 
-/** Monthly README generation limits per plan. */
+/** README generation limits per plan. */
 export const FREE_TIER_README_LIMIT = 5;
-export const PRO_TIER_README_LIMIT = 9999;
+export const PRO_TIER_README_DAILY_LIMIT = 25;
+export const PRO_TIER_PORTFOLIO_DAILY_LIMIT = 10;
 
 export const PLANS: Record<'free' | 'pro', Plan> = {
   free: {
@@ -35,8 +36,8 @@ export const PLANS: Record<'free' | 'pro', Plan> = {
       '5 README generations per month',
       '5 themes (Satan, Neon, Zen, GitHub Dark, Dracula)',
       'All profile widgets',
-      'GitHub Wrapped',
-      'Repo Visualizer',
+      'Basic profile showcase',
+      'Card and avatar previews',
     ],
     limits: {
       readmeGenerations: FREE_TIER_README_LIMIT,
@@ -51,9 +52,10 @@ export const PLANS: Record<'free' | 'pro', Plan> = {
     name: 'Pro',
     price: 9,
     priceLabel: '$9 / month',
-    description: 'Unlimited everything',
+    description: 'Higher daily limits and premium tools',
     features: [
-      'Unlimited README generations',
+      `${PRO_TIER_README_DAILY_LIMIT} README generations per day`,
+      `${PRO_TIER_PORTFOLIO_DAILY_LIMIT} portfolio website generations per day`,
       'All 20 premium themes',
       'No watermark on widgets',
       'Priority widget rendering',
@@ -61,7 +63,7 @@ export const PLANS: Record<'free' | 'pro', Plan> = {
       'All AI features',
     ],
     limits: {
-      readmeGenerations: PRO_TIER_README_LIMIT,
+      readmeGenerations: PRO_TIER_README_DAILY_LIMIT,
       themes: [...PRO_THEMES],
       hasWatermark: false,
       hasPriorityRendering: true,

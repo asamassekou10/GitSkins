@@ -7,7 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
-import { getUserPlanById } from '@/lib/server-usage';
+import { checkPortfolioAllowedById, getUserPlanById, incrementPortfolioUsageById } from '@/lib/server-usage';
 import { z } from 'zod';
 import { fetchProfileForReadme } from '@/lib/github';
 import { buildPortfolioCaseStudies, generatePortfolioWebsite, isGeminiConfigured } from '@/lib/gemini';
@@ -41,6 +41,20 @@ export async function POST(request: NextRequest) {
     if (plan !== 'pro') {
       return NextResponse.json({ error: 'Pro plan required. Upgrade at gitskins.com/pricing', code: 'UPGRADE_REQUIRED' }, { status: 403 });
     }
+    const usageCheck = await checkPortfolioAllowedById(userId);
+    if (!usageCheck.allowed) {
+      return NextResponse.json(
+        {
+          error: 'Daily portfolio generation limit reached',
+          code: 'LIMIT_REACHED',
+          remaining: usageCheck.remaining,
+          limit: usageCheck.limit,
+          used: usageCheck.used,
+          plan: usageCheck.plan,
+        },
+        { status: 429 }
+      );
+    }
     if (!isGeminiConfigured()) {
       return NextResponse.json(
         { error: 'AI features not available. Please ensure GEMINI_API_KEY is configured.', code: 'AI_NOT_CONFIGURED' },
@@ -60,6 +74,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const usageAfter = await incrementPortfolioUsageById(userId);
+    if (!usageAfter) {
+      return NextResponse.json(
+        { error: 'Daily portfolio generation limit reached', code: 'LIMIT_REACHED' },
+        { status: 429 }
+      );
+    }
+
     const caseStudies = await buildPortfolioCaseStudies(profileData, username);
     const { html, css } = await generatePortfolioWebsite(profileData, username, caseStudies, {
       template: template as PortfolioTemplateId | undefined,
@@ -71,6 +93,12 @@ export async function POST(request: NextRequest) {
       success: true,
       html,
       css,
+      usage: {
+        remaining: usageAfter.remaining,
+        limit: usageAfter.limit,
+        used: usageAfter.used,
+        plan: usageAfter.plan,
+      },
     });
   } catch (error) {
     if (error instanceof z.ZodError) {

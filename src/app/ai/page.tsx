@@ -92,7 +92,7 @@ export default function AIFeaturesPage() {
           'Deep profile intelligence & benchmarks',
           'Auto-generated portfolio case studies',
           'GitHub profile AI chat assistant',
-          'Unlimited AI requests',
+          'Higher daily limits for generation tools',
         ]}
       />
     );

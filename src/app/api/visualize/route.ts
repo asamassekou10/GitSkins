@@ -8,8 +8,10 @@
 
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
+import { auth } from '@/auth';
 import { fetchRepoTree } from '@/lib/github';
 import { streamRepoArchitecture, isGeminiConfigured } from '@/lib/gemini';
+import { getUserPlanById } from '@/lib/server-usage';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -21,6 +23,23 @@ const requestSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    const session = await auth();
+    const userId = (session?.user as { id?: string } | undefined)?.id;
+    if (!userId) {
+      return new Response(
+        JSON.stringify({ error: 'Sign in required', code: 'UNAUTHENTICATED' }),
+        { status: 401, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const plan = await getUserPlanById(userId);
+    if (plan !== 'pro') {
+      return new Response(
+        JSON.stringify({ error: 'Pro plan required. Upgrade at gitskins.com/pricing', code: 'UPGRADE_REQUIRED' }),
+        { status: 403, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
     const body = await request.json();
     const { owner, repo } = requestSchema.parse(body);
 

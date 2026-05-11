@@ -172,7 +172,7 @@ export default function ReadmeAgentPage() {
           'Multiple style options (Minimal, Detailed, Creative)',
           'Deep GitHub analysis for stronger profile positioning',
           'One-click copy to clipboard',
-          'Unlimited generations',
+          'Higher daily generation limits',
         ]}
       />
     );

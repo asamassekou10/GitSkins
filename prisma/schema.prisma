@@ -24,6 +24,7 @@ model User {
   creditTransactions CreditTransaction[]
   readmeGenerations ReadmeGeneration[]
   portfolioBuilds PortfolioBuild[]
+  dailyUsage DailyUsage[]
 }
 
 model Account {
@@ -76,6 +77,20 @@ model Usage {
   updatedAt             DateTime @updatedAt
 
   @@unique([userId, month])
+}
+
+model DailyUsage {
+  id                       String   @id @default(cuid())
+  userId                   String
+  user                     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  day                      String
+  readmeGenerationsUsed    Int      @default(0)
+  portfolioGenerationsUsed Int      @default(0)
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+
+  @@unique([userId, day])
+  @@index([day])
 }
 
 model CreditBalance {

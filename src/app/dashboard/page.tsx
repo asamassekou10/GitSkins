@@ -13,8 +13,15 @@ interface UsageSnapshot {
   readmeGenerationsUsed: number;
   readmeGenerationsLimit: number;
   readmeGenerationsRemaining: number;
+  readmeGenerationsDailyUsed?: number;
+  readmeGenerationsDailyLimit?: number;
+  readmeGenerationsDailyRemaining?: number;
+  portfolioGenerationsDailyUsed?: number;
+  portfolioGenerationsDailyLimit?: number;
+  portfolioGenerationsDailyRemaining?: number;
   creditsRemaining?: number;
   month: string;
+  day?: string;
   dbAvailable: boolean;
 }
 
@@ -172,7 +179,7 @@ export default function DashboardPage() {
   const remaining = usage?.readmeGenerationsRemaining ?? 0;
   const limit = usage?.readmeGenerationsLimit ?? PLANS.free.limits.readmeGenerations;
   const creditsRemaining = usage?.creditsRemaining ?? 0;
-  const atLimit = !isPro && remaining === 0;
+  const atLimit = remaining === 0;
 
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://gitskins.com';
   const widgetTheme = 'zen';
@@ -312,7 +319,7 @@ export default function DashboardPage() {
               <span style={{ color: isPro ? '#22c55e' : '#fff', fontWeight: 600, fontSize: '18px' }}>{isPro ? 'Pro' : 'Free Plan'}</span>
             </div>
             <p style={{ color: '#666', fontSize: '14px', margin: '0 0 16px' }}>
-              {isPro ? 'Unlimited README generations and all 20 themes' : `${FREE_THEMES.length} themes · ${PLANS.free.limits.readmeGenerations} README generations / month`}
+              {isPro ? `${PLANS.pro.limits.readmeGenerations} README generations / day · all 20 themes` : `${FREE_THEMES.length} themes · ${PLANS.free.limits.readmeGenerations} README generations / month`}
             </p>
             {isPro ? (
               <button onClick={openPortal} disabled={portalLoading} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 16px', background: 'transparent', border: '1px solid #2a2a2a', borderRadius: '8px', color: '#888', fontSize: '13px', fontWeight: 600, cursor: portalLoading ? 'not-allowed' : 'pointer' }}>
@@ -337,19 +344,15 @@ export default function DashboardPage() {
               <>
                 <div style={{ marginBottom: '16px' }}>
                   <span style={{ fontSize: '32px', fontWeight: 700, color: atLimit ? '#ef4444' : '#fff' }}>
-                    {isPro ? '∞' : remaining}
+                    {remaining}
                   </span>
-                  {!isPro && (
-                    <span style={{ fontSize: '16px', color: '#888', marginLeft: '8px' }}>/ {limit} remaining</span>
-                  )}
+                  <span style={{ fontSize: '16px', color: '#888', marginLeft: '8px' }}>/ {limit} remaining</span>
                 </div>
-                {!isPro && (
-                  <div style={{ height: '8px', background: '#2a2a2a', borderRadius: '4px', overflow: 'hidden', marginBottom: '12px' }}>
-                    <div style={{ height: '100%', width: `${Math.min(100, (remaining / limit) * 100)}%`, background: remaining > 2 ? '#22c55e' : '#ef4444', borderRadius: '4px', transition: 'width 0.3s' }} />
-                  </div>
-                )}
+                <div style={{ height: '8px', background: '#2a2a2a', borderRadius: '4px', overflow: 'hidden', marginBottom: '12px' }}>
+                  <div style={{ height: '100%', width: `${limit > 0 ? Math.min(100, (remaining / limit) * 100) : 0}%`, background: remaining > 2 ? '#22c55e' : '#ef4444', borderRadius: '4px', transition: 'width 0.3s' }} />
+                </div>
                 <p style={{ color: '#666', fontSize: '13px', margin: 0 }}>
-                  {isPro ? 'Unlimited with Pro' : creditsRemaining > 0 ? `${creditsRemaining} paid credit${creditsRemaining === 1 ? '' : 's'} available` : 'Resets on the 1st of next month'}
+                  {isPro ? 'Daily Pro limit resets tomorrow' : creditsRemaining > 0 ? `${creditsRemaining} paid credit${creditsRemaining === 1 ? '' : 's'} available` : 'Resets on the 1st of next month'}
                 </p>
               </>
             )}
@@ -463,7 +466,7 @@ export default function DashboardPage() {
               </span>
             </div>
             <p style={{ color: '#888', fontSize: '14px', margin: '0 0 20px', lineHeight: 1.6 }}>
-              Upgrade to Pro for unlimited generations, or buy a one-time credit pack to top up without a subscription.
+              Upgrade to Pro for higher daily generation limits, or buy a one-time credit pack to top up without a subscription.
             </p>
             <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
               <Link href="/pricing" style={{ padding: '10px 20px', background: '#22c55e', borderRadius: '8px', color: '#000', fontSize: '14px', fontWeight: 700, textDecoration: 'none' }}>
