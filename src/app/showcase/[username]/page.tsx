@@ -233,8 +233,9 @@ function ShowcaseContent() {
 
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
   const gitskinsAvatarUrl = `${baseUrl}/api/avatar?username=${encodeURIComponent(username)}&family=character&character=${skin.character}&theme=${skin.theme}&expression=${skin.expression}&size=400`;
+  const githubAvatarUrl = `${baseUrl}/api/github-avatar?username=${encodeURIComponent(username)}&size=400`;
   const avatarUrl = avatarMode === 'github'
-    ? showcaseData?.avatarUrl || gitskinsAvatarUrl
+    ? githubAvatarUrl
     : gitskinsAvatarUrl;
   const premiumCardUrl = `${baseUrl}/api/premium-card?username=${encodeURIComponent(username)}&theme=${skin.theme}&variant=persona${avatarMode === 'gitskins' ? '&avatar=persona' : ''}`;
   const statsUrl = `${baseUrl}/api/stats?username=${encodeURIComponent(username)}&theme=${skin.theme}`;
