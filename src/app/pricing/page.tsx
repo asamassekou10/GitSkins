@@ -169,22 +169,22 @@ export default function PricingPage() {
       />
       <JsonLd data={faqJsonLd(PRICING_FAQS.map(({ q, a }) => ({ question: q, answer: a })))} />
       <div style={{ minHeight: '100vh', background: '#050505', color: '#fafafa' }}>
-      <div style={{ maxWidth: '1040px', margin: '0 auto', padding: '100px 24px 80px' }}>
+      <div style={{ maxWidth: '1120px', margin: '0 auto', padding: '86px 24px 56px' }}>
 
         {/* Header */}
-        <div style={{ textAlign: 'center', marginBottom: '56px', position: 'relative' }}>
+        <div style={{ textAlign: 'center', marginBottom: '28px', position: 'relative' }}>
           {upgraded && (
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 20px', background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.4)', borderRadius: '100px', color: '#22c55e', fontSize: '14px', fontWeight: 600, marginBottom: '32px' }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '8px 16px', background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.4)', borderRadius: '100px', color: '#22c55e', fontSize: '13px', fontWeight: 600, marginBottom: '16px' }}>
               <CheckIcon /> You&apos;re now on Pro!
             </div>
           )}
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '7px 12px', borderRadius: 999, background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.24)', color: '#4ade80', fontSize: 12, fontWeight: 850, letterSpacing: 0.4, marginBottom: 20 }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '6px 11px', borderRadius: 999, background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.24)', color: '#4ade80', fontSize: 11, fontWeight: 850, letterSpacing: 0.4, marginBottom: 14 }}>
             Profile brand pricing
           </div>
-          <h1 style={{ fontSize: 'clamp(38px, 6vw, 72px)', fontWeight: 900, letterSpacing: '-0.055em', lineHeight: 0.95, margin: '0 auto 18px', maxWidth: 780 }}>
-            Start free. Upgrade when your profile needs the full kit.
+          <h1 style={{ fontSize: 'clamp(34px, 5vw, 58px)', fontWeight: 900, letterSpacing: '-0.055em', lineHeight: 0.95, margin: '0 auto 12px', maxWidth: 780 }}>
+            Start free. Unlock the full profile kit when you need it.
           </h1>
-          <p style={{ fontSize: '18px', color: '#888', maxWidth: '620px', margin: '0 auto 32px', lineHeight: 1.65 }}>
+          <p style={{ fontSize: '16px', color: '#888', maxWidth: '700px', margin: '0 auto 18px', lineHeight: 1.55 }}>
             Free gives you the essentials. Pro unlocks the premium themes, avatars, AI profile tools, and unlimited README generations that make GitSkins feel like a complete identity system.
           </p>
 
@@ -216,12 +216,12 @@ export default function PricingPage() {
         </div>
 
         {/* Visual proof */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 310px), 1fr))', gap: '18px', alignItems: 'stretch', marginBottom: '56px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.2fr) minmax(260px, 0.8fr)', gap: '14px', alignItems: 'stretch', marginBottom: '28px' }} className="pricing-proof">
           <motion.div
             initial={{ opacity: 0, y: 14 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            style={{ minHeight: 320, borderRadius: 24, border: '1px solid #1d1d1d', background: 'radial-gradient(circle at 80% 18%, rgba(34,197,94,0.2), transparent 38%), #0b0b0b', padding: 22, display: 'grid', placeItems: 'center', overflow: 'hidden' }}
+            style={{ minHeight: 220, borderRadius: 20, border: '1px solid #1d1d1d', background: 'radial-gradient(circle at 80% 18%, rgba(34,197,94,0.2), transparent 38%), #0b0b0b', padding: 14, display: 'grid', placeItems: 'center', overflow: 'hidden' }}
           >
             <img src="/api/premium-card?username=octocat&theme=matrix&variant=glass&avatar=persona" alt="Premium GitSkins card preview" style={{ width: '100%', maxWidth: 720, borderRadius: 16, boxShadow: '0 28px 90px rgba(0,0,0,0.48)' }} />
           </motion.div>
@@ -230,30 +230,30 @@ export default function PricingPage() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.08 }}
-            style={{ borderRadius: 24, border: '1px solid #1d1d1d', background: '#0b0b0b', padding: 22, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 20 }}
+            style={{ borderRadius: 20, border: '1px solid #1d1d1d', background: '#0b0b0b', padding: 18, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 14 }}
           >
             <div>
               <div style={{ color: '#22c55e', fontSize: 12, fontWeight: 850, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 10 }}>Pro unlocks</div>
-              <h2 style={{ margin: '0 0 12px', fontSize: 28, lineHeight: 1, letterSpacing: '-0.035em' }}>The parts people actually notice.</h2>
+              <h2 style={{ margin: '0 0 10px', fontSize: 24, lineHeight: 1, letterSpacing: '-0.035em' }}>The parts people actually notice.</h2>
               <p style={{ color: '#888', lineHeight: 1.6, margin: 0, fontSize: 14 }}>Premium cards, character avatars, advanced themes, AI profile intelligence, and the tools that make everything match.</p>
             </div>
             <div style={{ display: 'flex', gap: 10 }}>
               {['open-peeps', 'bottts', 'pixel-art'].map((style) => (
-                <img key={style} src={`/api/avatar?username=octocat-${style}&theme=matrix&family=dicebear&dicebearStyle=${style}&size=400`} alt="" style={{ width: 70, height: 70, borderRadius: 18, border: '1px solid rgba(255,255,255,0.12)' }} />
+                <img key={style} src={`/api/avatar?username=octocat-${style}&theme=matrix&family=dicebear&dicebearStyle=${style}&size=400`} alt="" style={{ width: 58, height: 58, borderRadius: 15, border: '1px solid rgba(255,255,255,0.12)' }} />
               ))}
             </div>
           </motion.div>
         </div>
 
         {/* Plans Grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', alignItems: 'start', marginBottom: '64px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(270px, 1fr))', gap: '16px', alignItems: 'start', marginBottom: '36px' }}>
 
           {/* Free Plan */}
-          <div style={{ background: '#0a0a0a', border: '1px solid #1a1a1a', borderRadius: '20px', padding: '36px', display: 'flex', flexDirection: 'column', gap: '28px' }}>
+          <div style={{ background: '#0a0a0a', border: '1px solid #1a1a1a', borderRadius: '18px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <div>
               <div style={{ fontSize: '13px', fontWeight: 600, color: '#666', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '12px' }}>Free</div>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginBottom: '8px' }}>
-                <span style={{ fontSize: '48px', fontWeight: 700, letterSpacing: '-0.03em' }}>$0</span>
+                <span style={{ fontSize: '40px', fontWeight: 700, letterSpacing: '-0.03em' }}>$0</span>
                 <span style={{ fontSize: '16px', color: '#666' }}>/ month</span>
               </div>
               <p style={{ color: '#666', fontSize: '14px', lineHeight: 1.6, margin: 0 }}>{PLANS.free.description}</p>
@@ -282,7 +282,7 @@ export default function PricingPage() {
           </div>
 
           {/* Pro Plan */}
-          <div style={{ background: 'linear-gradient(160deg, #0d1f10 0%, #0a0a0a 100%)', border: '1px solid rgba(34,197,94,0.35)', borderRadius: '20px', padding: '36px', display: 'flex', flexDirection: 'column', gap: '28px', position: 'relative', boxShadow: '0 0 40px rgba(34,197,94,0.08)' }}>
+          <div style={{ background: 'linear-gradient(160deg, #0d1f10 0%, #0a0a0a 100%)', border: '1px solid rgba(34,197,94,0.35)', borderRadius: '18px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px', position: 'relative', boxShadow: '0 0 40px rgba(34,197,94,0.08)' }}>
             <div style={{ position: 'absolute', top: '-12px', left: '50%', transform: 'translateX(-50%)', background: '#22c55e', color: '#000', fontSize: '11px', fontWeight: 700, padding: '4px 14px', borderRadius: '100px', textTransform: 'uppercase', letterSpacing: '0.5px', whiteSpace: 'nowrap' }}>
               Most popular
             </div>
@@ -324,11 +324,11 @@ export default function PricingPage() {
           </div>
 
           {/* Lifetime */}
-          <div style={{ background: '#0a0a0a', border: '1px solid #2a2a2a', borderRadius: '20px', padding: '36px', display: 'flex', flexDirection: 'column', gap: '28px' }}>
+          <div style={{ background: '#0a0a0a', border: '1px solid #2a2a2a', borderRadius: '18px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <div>
               <div style={{ fontSize: '13px', fontWeight: 600, color: '#888', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '12px' }}>Pro Lifetime</div>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginBottom: '8px' }}>
-                <span style={{ fontSize: '48px', fontWeight: 700, letterSpacing: '-0.03em' }}>$49</span>
+                <span style={{ fontSize: '40px', fontWeight: 700, letterSpacing: '-0.03em' }}>$49</span>
                 <span style={{ fontSize: '16px', color: '#666' }}>one-time</span>
               </div>
               <p style={{ color: '#666', fontSize: '14px', lineHeight: 1.6, margin: 0 }}>Pay once, Pro forever.</p>
@@ -432,6 +432,13 @@ export default function PricingPage() {
           GitSkins never stores your card details.
         </p>
       </div>
+      <style>{`
+        @media (max-width: 820px) {
+          .pricing-proof {
+            grid-template-columns: 1fr !important;
+          }
+        }
+      `}</style>
     </div>
     </>
   );

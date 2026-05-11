@@ -345,7 +345,7 @@ function ShowcaseContent() {
     >
       <PatternLayer skin={skin} />
 
-      <div style={{ position: 'relative', zIndex: 1, maxWidth: 1440, margin: '0 auto', padding: '96px 24px 72px' }}>
+      <div style={{ position: 'relative', zIndex: 1, maxWidth: 1440, margin: '0 auto', padding: '84px 20px 46px' }}>
         <motion.div
           initial={{ opacity: 0, y: -14 }}
           animate={{ opacity: 1, y: 0 }}
@@ -353,16 +353,16 @@ function ShowcaseContent() {
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            gap: 20,
-            marginBottom: 24,
+            gap: 14,
+            marginBottom: 12,
           }}
         >
           <div>
-            <div style={{ color: skin.accent, fontSize: 12, fontWeight: 900, textTransform: 'uppercase', letterSpacing: 1.8 }}>Profile Skin Preview</div>
-            <h1 style={{ margin: '8px 0 6px', fontSize: 'clamp(34px, 5vw, 76px)', lineHeight: 0.92, letterSpacing: '-0.045em' }}>
+            <div style={{ color: skin.accent, fontSize: 11, fontWeight: 900, textTransform: 'uppercase', letterSpacing: 1.5 }}>Profile Skin Preview</div>
+            <h1 style={{ margin: '6px 0 4px', fontSize: 'clamp(30px, 4vw, 54px)', lineHeight: 0.95, letterSpacing: '-0.045em' }}>
               @{username}, fully skinned.
             </h1>
-            <p style={{ margin: 0, color: skin.muted, fontSize: 16, maxWidth: 620 }}>
+            <p style={{ margin: 0, color: skin.muted, fontSize: 14, maxWidth: 620, lineHeight: 1.45 }}>
               A hosted GitSkins profile page inspired by GitHub, rebuilt with theme art, character avatars, animated cards, and shareable polish.
             </p>
           </div>
@@ -371,7 +371,7 @@ function ShowcaseContent() {
               type="button"
               onClick={copyShowcase}
               style={{
-                padding: '12px 18px',
+                padding: '10px 14px',
                 borderRadius: 12,
                 border: `1px solid ${skin.border}`,
                 background: skin.surface,
@@ -386,7 +386,7 @@ function ShowcaseContent() {
               type="button"
               onClick={copyReadmeBlock}
               style={{
-                padding: '12px 18px',
+                padding: '10px 14px',
                 borderRadius: 12,
                 border: `1px solid ${skin.border}`,
                 background: skin.surface,
@@ -402,7 +402,7 @@ function ShowcaseContent() {
               onClick={downloadPreview}
               disabled={downloading}
               style={{
-                padding: '12px 18px',
+                padding: '10px 14px',
                 borderRadius: 12,
                 border: `1px solid ${skin.border}`,
                 background: skin.surface,
@@ -416,7 +416,7 @@ function ShowcaseContent() {
             <Link
               href="/pricing"
               style={{
-                padding: '12px 18px',
+                padding: '10px 14px',
                 borderRadius: 12,
                 background: skin.accent,
                 color: '#050505',
@@ -438,11 +438,11 @@ function ShowcaseContent() {
             display: 'grid',
             gridTemplateColumns: 'minmax(240px, 1fr) auto auto',
             gap: 10,
-            padding: 12,
-            borderRadius: 18,
+            padding: 9,
+            borderRadius: 15,
             background: 'rgba(0,0,0,0.22)',
             border: `1px solid ${skin.border}`,
-            marginBottom: 14,
+            marginBottom: 8,
             backdropFilter: 'blur(18px)',
           }}
           className="showcase-builder"
@@ -456,7 +456,7 @@ function ShowcaseContent() {
             aria-label="GitHub username"
             style={{
               minWidth: 0,
-              padding: '12px 14px',
+              padding: '10px 12px',
               borderRadius: 12,
               border: `1px solid ${skin.border}`,
               background: skin.surface,
@@ -470,7 +470,7 @@ function ShowcaseContent() {
             type="button"
             onClick={applyUsername}
             style={{
-              padding: '12px 16px',
+              padding: '10px 14px',
               borderRadius: 12,
               border: `1px solid ${skin.border}`,
               background: skin.surface,
@@ -513,8 +513,8 @@ function ShowcaseContent() {
             display: 'flex',
             gap: 10,
             overflowX: 'auto',
-            padding: '8px 0 24px',
-            marginBottom: 8,
+            padding: '6px 0 12px',
+            marginBottom: 4,
           }}
         >
           {profileSkins.map((option) => (
@@ -527,7 +527,7 @@ function ShowcaseContent() {
               }}
               style={{
                 flex: '0 0 auto',
-                padding: '10px 14px',
+                padding: '8px 12px',
                 borderRadius: 999,
                 border: `1px solid ${option.id === skin.id ? skin.accent : skin.border}`,
                 background: option.id === skin.id ? `${skin.accent}24` : skin.surface,
@@ -548,7 +548,7 @@ function ShowcaseContent() {
           transition={{ duration: 0.45 }}
           style={{
             border: `1px solid ${skin.border}`,
-            borderRadius: 30,
+            borderRadius: 24,
             background: 'rgba(0,0,0,0.24)',
             boxShadow: `0 30px 120px rgba(0,0,0,0.38), 0 0 80px ${skin.glow}`,
             overflow: 'hidden',
@@ -557,13 +557,13 @@ function ShowcaseContent() {
         >
           <div
             style={{
-              height: 70,
+              height: 54,
               borderBottom: `1px solid ${skin.border}`,
               background: 'rgba(0,0,0,0.34)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              padding: '0 22px',
+              padding: '0 16px',
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontWeight: 900 }}>
@@ -580,9 +580,9 @@ function ShowcaseContent() {
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: 'minmax(260px, 360px) 1fr',
-              gap: 28,
-              padding: 28,
+              gridTemplateColumns: 'minmax(220px, 300px) 1fr',
+              gap: 18,
+              padding: 18,
             }}
             className="showcase-shell"
           >
@@ -592,53 +592,53 @@ function ShowcaseContent() {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.16, type: 'spring', stiffness: 120, damping: 16 }}
                 style={{
-                  width: 'min(100%, 300px)',
+                  width: 'min(100%, 210px)',
                   aspectRatio: '1',
                   borderRadius: skin.id === 'renaissance' ? 18 : '50%',
                   padding: 8,
                   background: `linear-gradient(135deg, ${skin.accent}, ${skin.accent2})`,
                   boxShadow: `0 18px 70px ${skin.glow}`,
-                  marginBottom: 22,
+                  marginBottom: 14,
                 }}
               >
                 <img src={avatarUrl} alt={`${username} avatar`} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: skin.id === 'renaissance' ? 12 : '50%' }} />
               </motion.div>
-              <h2 style={{ margin: '0 0 4px', fontSize: 31, letterSpacing: '-0.04em' }}>{username}</h2>
-              <p style={{ margin: '0 0 18px', color: skin.muted, fontSize: 17 }}>{displayName} · @{username}</p>
-              <p style={{ color: skin.text, lineHeight: 1.7, marginBottom: 18 }}>
+              <h2 style={{ margin: '0 0 4px', fontSize: 25, letterSpacing: '-0.04em' }}>{username}</h2>
+              <p style={{ margin: '0 0 12px', color: skin.muted, fontSize: 14 }}>{displayName} · @{username}</p>
+              <p style={{ color: skin.text, lineHeight: 1.55, marginBottom: 12, fontSize: 14 }}>
                 {bio}
               </p>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 10, marginBottom: 18 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 8, marginBottom: 12 }}>
                 {[
                   ['Stars', showcaseData?.stats.totalStars],
                   ['Repos', showcaseData?.stats.totalRepos],
                   ['Followers', showcaseData?.stats.followers],
                   ['Contribs', showcaseData?.stats.totalContributions],
                 ].map(([label, value]) => (
-                  <div key={label} style={{ padding: '10px 12px', borderRadius: 14, background: skin.surfaceStrong, border: `1px solid ${skin.border}` }}>
-                    <div style={{ color: skin.text, fontSize: 20, fontWeight: 950 }}>{typeof value === 'number' ? value.toLocaleString() : dataLoading ? '...' : '0'}</div>
+                  <div key={label} style={{ padding: '8px 10px', borderRadius: 12, background: skin.surfaceStrong, border: `1px solid ${skin.border}` }}>
+                    <div style={{ color: skin.text, fontSize: 17, fontWeight: 950 }}>{typeof value === 'number' ? value.toLocaleString() : dataLoading ? '...' : '0'}</div>
                     <div style={{ color: skin.muted, fontSize: 11, textTransform: 'uppercase', letterSpacing: 1 }}>{label}</div>
                   </div>
                 ))}
               </div>
-              <div style={{ display: 'grid', gap: 10 }}>
+              {density === 'editorial' && <div style={{ display: 'grid', gap: 8 }}>
                 {['Profile README system', 'Theme-aware avatar pack', 'Hosted portfolio skin', 'Animated visual kit'].map((item) => (
-                  <div key={item} style={{ padding: '12px 14px', borderRadius: 14, background: skin.surface, border: `1px solid ${skin.border}`, color: skin.muted }}>
+                  <div key={item} style={{ padding: '9px 11px', borderRadius: 12, background: skin.surface, border: `1px solid ${skin.border}`, color: skin.muted, fontSize: 13 }}>
                     <span style={{ color: skin.accent, marginRight: 8 }}>✦</span>{item}
                   </div>
                 ))}
-              </div>
+              </div>}
             </aside>
 
-            <section style={{ display: 'grid', gap: 22 }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1.25fr 0.75fr', gap: 18 }} className="showcase-grid">
-                <div style={{ padding: 18, borderRadius: 22, background: skin.surface, border: `1px solid ${skin.border}` }}>
+            <section style={{ display: 'grid', gap: 14 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1.25fr 0.75fr', gap: 14 }} className="showcase-grid">
+                <div style={{ padding: 12, borderRadius: 18, background: skin.surface, border: `1px solid ${skin.border}` }}>
                   <img src={premiumCardUrl} alt={`${username} premium GitSkins card`} style={{ width: '100%', borderRadius: 16, display: 'block' }} />
                 </div>
-                <div style={{ padding: 18, borderRadius: 22, background: skin.surface, border: `1px solid ${skin.border}` }}>
+                <div style={{ padding: 14, borderRadius: 18, background: skin.surface, border: `1px solid ${skin.border}` }}>
                   <div style={{ color: skin.accent, fontSize: 12, fontWeight: 900, textTransform: 'uppercase', letterSpacing: 1.4 }}>Skin Template</div>
-                  <h3 style={{ margin: '10px 0', fontSize: 30, letterSpacing: '-0.04em' }}>{skin.label}</h3>
-                  <p style={{ color: skin.muted, lineHeight: 1.65, margin: 0 }}>{skin.tagline}</p>
+                  <h3 style={{ margin: '8px 0', fontSize: 24, letterSpacing: '-0.04em' }}>{skin.label}</h3>
+                  <p style={{ color: skin.muted, lineHeight: 1.55, margin: 0, fontSize: 14 }}>{skin.tagline}</p>
                   <ShareMenu
                     shareUrl={shareUrl}
                     shareText={`Check out my ${skin.label} GitSkins profile skin`}
@@ -649,22 +649,22 @@ function ShowcaseContent() {
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: density === 'compact' ? 'repeat(4, minmax(0, 1fr))' : 'repeat(2, minmax(0, 1fr))', gap: 18 }} className="showcase-grid">
+              <div style={{ display: 'grid', gridTemplateColumns: density === 'compact' ? 'repeat(4, minmax(0, 1fr))' : 'repeat(2, minmax(0, 1fr))', gap: 12 }} className="showcase-grid">
                 {repoCards.map((repo, index) => (
                   <RepoCard key={repo.name} name={repo.name} description={repo.description} language={repo.language} stars={repo.stars} forks={repo.forks} skin={skin} delay={0.12 + index * 0.07} />
                 ))}
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 18 }} className="showcase-grid">
-                <div style={{ padding: 18, borderRadius: 22, background: skin.surface, border: `1px solid ${skin.border}` }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }} className="showcase-grid">
+                <div style={{ padding: 12, borderRadius: 18, background: skin.surface, border: `1px solid ${skin.border}` }}>
                   <img src={statsUrl} alt={`${username} stats`} style={{ width: '100%', borderRadius: 16, display: 'block' }} />
                 </div>
-                <div style={{ padding: 18, borderRadius: 22, background: skin.surface, border: `1px solid ${skin.border}` }}>
+                <div style={{ padding: 12, borderRadius: 18, background: skin.surface, border: `1px solid ${skin.border}` }}>
                   <img src={languagesUrl} alt={`${username} languages`} style={{ width: '100%', borderRadius: 16, display: 'block' }} />
                 </div>
               </div>
 
-              <div style={{ padding: 22, borderRadius: 24, background: skin.surface, border: `1px solid ${skin.border}` }}>
+              <div style={{ padding: 14, borderRadius: 18, background: skin.surface, border: `1px solid ${skin.border}` }}>
                 <ContributionGraph username={username} skin={skin} data={showcaseData} />
               </div>
             </section>
