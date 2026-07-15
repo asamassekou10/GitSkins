@@ -32,6 +32,30 @@ function withAnimationDelay(styleAttr: string, seconds: number): string {
 }
 
 /**
+ * Fetch an image and return it as a base64 data URI so it can be embedded
+ * directly in the SVG. GitHub strips external resource loads from README SVGs,
+ * so the avatar has to be inlined rather than referenced by URL. Returns null
+ * on failure, letting the caller fall back to a placeholder.
+ */
+async function fetchAvatarDataUri(url: string): Promise<string | null> {
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 7000);
+    const res = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeoutId);
+    if (!res.ok) throw new Error(`avatar fetch failed: ${res.status}`);
+    const contentType = res.headers.get('content-type') || 'image/png';
+    if (!contentType.startsWith('image/')) throw new Error(`not an image: ${contentType}`);
+    const buffer = Buffer.from(await res.arrayBuffer());
+    if (buffer.byteLength === 0) throw new Error('empty avatar response');
+    return `data:${contentType};base64,${buffer.toString('base64')}`;
+  } catch (e) {
+    console.warn('card-animated: avatar embed failed, using placeholder:', e);
+    return null;
+  }
+}
+
+/**
  * Generate animated SVG card
  */
 async function generateAnimatedCardSVG(
@@ -54,11 +78,16 @@ async function generateAnimatedCardSVG(
   const animations = getThemeAnimations(theme.name as PremiumThemeName);
   const backgroundPattern = getAnimatedBackgroundPattern(theme.name as PremiumThemeName, theme);
 
+  // Inline the avatar as a data URI — GitHub blocks external image loads in
+  // README SVGs, so a remote <image href> would render blank.
+  const avatarDataUri = await fetchAvatarDataUri(data.avatarUrl);
+
   // SVG Structure
   const svg = `
 <svg width="${imageConfig.width}" height="${imageConfig.height}"
      viewBox="0 0 ${imageConfig.width} ${imageConfig.height}"
-     xmlns="http://www.w3.org/2000/svg">
+     xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink">
 
   <defs>
     ${animations.defs}
@@ -90,9 +119,13 @@ async function generateAnimatedCardSVG(
 
   <!-- Header Section -->
   <g transform="translate(40, 50)">
-    <!-- Avatar Circle -->
-    <circle cx="40" cy="40" r="40" fill="${theme.colors.border}" opacity="0.2"/>
-    <circle cx="40" cy="40" r="38" fill="#fff" opacity="0.1">${animations.avatarPulse}</circle>
+    <!-- Avatar: inlined image clipped to a circle, with a placeholder fallback -->
+    <clipPath id="animAvatarClip"><circle cx="40" cy="40" r="38"/></clipPath>
+    <circle cx="40" cy="40" r="40" fill="${theme.colors.border}" opacity="0.2">${animations.avatarPulse}</circle>
+    ${avatarDataUri
+      ? `<image xlink:href="${avatarDataUri}" x="2" y="2" width="76" height="76" clip-path="url(#animAvatarClip)" preserveAspectRatio="xMidYMid slice"/>
+    <circle cx="40" cy="40" r="38" fill="none" stroke="${theme.colors.accent}" stroke-width="2" stroke-opacity="0.6"/>`
+      : `<circle cx="40" cy="40" r="38" fill="#fff" opacity="0.1"/>`}
 
     <!-- Username -->
     <text x="100" y="45" class="title primary" ${animations.textGlow}>
