@@ -353,8 +353,8 @@ function getThemeAnimations(themeName: PremiumThemeName) {
         languageFadeIn: 'style="animation: fadeIn 1s ease-out forwards; opacity: 0;"',
         progressBar: 'style="animation: progressGrow 2s ease-out forwards; transform-origin: left; transform-box: fill-box;"',
         overlayEffects: `
-          <circle cx="400" cy="300" r="250" fill="none" stroke="#84a59d" stroke-width="8" opacity="0.08" style="animation: breathe 8s ease-in-out infinite; transform-origin: center;">
-            <animateTransform attributeName="transform" type="rotate" from="0 400 300" to="360 400 300" dur="300s" repeatCount="indefinite"/>
+          <circle cx="1440" cy="720" r="340" fill="none" stroke="#84a59d" stroke-width="8" opacity="0.08" style="animation: breathe 8s ease-in-out infinite; transform-origin: center;">
+            <animateTransform attributeName="transform" type="rotate" from="0 1440 720" to="360 1440 720" dur="300s" repeatCount="indefinite"/>
           </circle>
         `,
       };
