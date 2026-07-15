@@ -102,10 +102,10 @@ async function generateAnimatedCardSVG(
     .secondary { fill: ${theme.colors.secondary}; }
     .accent { fill: ${theme.colors.accent}; }
 
-    .title { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', sans-serif; font-size: 28px; font-weight: 600; }
-    .subtitle { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', sans-serif; font-size: 16px; }
-    .stat-label { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', sans-serif; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .stat-value { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', sans-serif; font-size: 18px; font-weight: 700; }
+    .title { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', sans-serif; font-size: 44px; font-weight: 600; }
+    .subtitle { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', sans-serif; font-size: 22px; }
+    .stat-label { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', sans-serif; font-size: 20px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .stat-value { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', sans-serif; font-size: 40px; font-weight: 700; }
   </style>
 
   <!-- Background -->
@@ -113,28 +113,32 @@ async function generateAnimatedCardSVG(
 
   ${backgroundPattern}
 
+  <!-- Ambient overlay effects, drawn behind the content so they read as a
+       background glow rather than covering the text -->
+  ${animations.overlayEffects}
+
   <!-- Main Card Container -->
   <rect x="0" y="0" width="${imageConfig.width}" height="${imageConfig.height}"
         class="border" rx="20">${animations.cardAnimation}</rect>
 
   <!-- Header Section -->
-  <g transform="translate(40, 50)">
+  <g transform="translate(60, 60)">
     <!-- Avatar: inlined image clipped to a circle, with a placeholder fallback -->
-    <clipPath id="animAvatarClip"><circle cx="40" cy="40" r="38"/></clipPath>
-    <circle cx="40" cy="40" r="40" fill="${theme.colors.border}" opacity="0.2">${animations.avatarPulse}</circle>
+    <clipPath id="animAvatarClip"><circle cx="70" cy="70" r="68"/></clipPath>
+    <circle cx="70" cy="70" r="70" fill="${theme.colors.border}" opacity="0.2">${animations.avatarPulse}</circle>
     ${avatarDataUri
-      ? `<image xlink:href="${avatarDataUri}" x="2" y="2" width="76" height="76" clip-path="url(#animAvatarClip)" preserveAspectRatio="xMidYMid slice"/>
-    <circle cx="40" cy="40" r="38" fill="none" stroke="${theme.colors.accent}" stroke-width="2" stroke-opacity="0.6"/>`
-      : `<circle cx="40" cy="40" r="38" fill="#fff" opacity="0.1"/>`}
+      ? `<image xlink:href="${avatarDataUri}" x="2" y="2" width="136" height="136" clip-path="url(#animAvatarClip)" preserveAspectRatio="xMidYMid slice"/>
+    <circle cx="70" cy="70" r="68" fill="none" stroke="${theme.colors.accent}" stroke-width="3" stroke-opacity="0.6"/>`
+      : `<circle cx="70" cy="70" r="68" fill="#fff" opacity="0.1"/>`}
 
     <!-- Username -->
-    <text x="100" y="45" class="title primary" ${animations.textGlow}>
+    <text x="180" y="66" class="title primary" ${animations.textGlow}>
       ${data.name || username}
     </text>
 
     <!-- Bio -->
     ${bio ? `
-    <text x="100" y="70" class="subtitle secondary" opacity="0.9">
+    <text x="180" y="114" class="subtitle secondary" opacity="0.9">
       ${bio}
     </text>
     ` : ''}
@@ -145,57 +149,55 @@ async function generateAnimatedCardSVG(
        animation lives on the inner g. Keeping them separate prevents a
        fadeIn keyframe that animates transform from clobbering the layout
        translate and collapsing the blocks on top of each other. -->
-  <g transform="translate(40, 150)">
+  <g transform="translate(60, 240)">
     <!-- Stars -->
     <g transform="translate(0, 0)">
       <g ${animations.statsFadeIn}>
-        <rect x="0" y="0" width="230" height="80" class="card-bg" rx="12" opacity="0.3"/>
-        <text x="16" y="28" class="stat-label secondary">⭐ Stars</text>
-        <text x="16" y="58" class="stat-value accent">${totalStars.toLocaleString()}</text>
+        <rect x="0" y="0" width="460" height="150" class="card-bg" rx="16" opacity="0.3"/>
+        <text x="28" y="52" class="stat-label secondary">⭐ Stars</text>
+        <text x="28" y="112" class="stat-value accent">${totalStars.toLocaleString()}</text>
       </g>
     </g>
 
     <!-- Contributions -->
-    <g transform="translate(250, 0)">
+    <g transform="translate(500, 0)">
       <g ${withAnimationDelay(animations.statsFadeIn, 0.1)}>
-        <rect x="0" y="0" width="230" height="80" class="card-bg" rx="12" opacity="0.3"/>
-        <text x="16" y="28" class="stat-label secondary">📊 Contributions</text>
-        <text x="16" y="58" class="stat-value accent">${totalContributions.toLocaleString()}</text>
+        <rect x="0" y="0" width="460" height="150" class="card-bg" rx="16" opacity="0.3"/>
+        <text x="28" y="52" class="stat-label secondary">📊 Contributions</text>
+        <text x="28" y="112" class="stat-value accent">${totalContributions.toLocaleString()}</text>
       </g>
     </g>
 
     <!-- Languages -->
-    <g transform="translate(500, 0)">
+    <g transform="translate(1000, 0)">
       <g ${withAnimationDelay(animations.statsFadeIn, 0.2)}>
-        <rect x="0" y="0" width="200" height="80" class="card-bg" rx="12" opacity="0.3"/>
-        <text x="16" y="28" class="stat-label secondary">🎨 Languages</text>
-        <text x="16" y="58" class="stat-value accent">${totalLanguages}</text>
+        <rect x="0" y="0" width="460" height="150" class="card-bg" rx="16" opacity="0.3"/>
+        <text x="28" y="52" class="stat-label secondary">🎨 Languages</text>
+        <text x="28" y="112" class="stat-value accent">${totalLanguages}</text>
       </g>
     </g>
   </g>
 
   <!-- Languages Section -->
-  <g transform="translate(40, 260)">
+  <g transform="translate(60, 440)">
     <text x="0" y="0" class="stat-label secondary">Top Languages</text>
 
     ${topLanguages
       .map((lang, i) => {
         // Each language has equal representation since we don't have byte counts
-        const barWidth = 560 / topLanguages.length;
+        const barWidth = 1220 / topLanguages.length;
         return `
-      <g transform="translate(0, ${30 + i * 25})">
+      <g transform="translate(0, ${44 + i * 52})">
         <g ${withAnimationDelay(animations.languageFadeIn, 0.4 + i * 0.1)}>
           <text x="0" y="0" class="subtitle primary">${lang.name}</text>
-          <rect x="120" y="-12" width="560" height="16" fill="${theme.colors.border}" opacity="0.2" rx="8"/>
-          <rect x="120" y="-12" width="${barWidth}" height="16" fill="${lang.color || theme.colors.accent}" rx="8" ${animations.progressBar}/>
+          <rect x="260" y="-22" width="1220" height="28" fill="${theme.colors.border}" opacity="0.2" rx="14"/>
+          <rect x="260" y="-22" width="${barWidth}" height="28" fill="${lang.color || theme.colors.accent}" rx="14" ${animations.progressBar}/>
         </g>
       </g>
     `;
       })
       .join('')}
   </g>
-
-  ${animations.overlayEffects}
 </svg>
   `.trim();
 
@@ -252,8 +254,8 @@ function getThemeAnimations(themeName: PremiumThemeName) {
         languageFadeIn: 'style="animation: fadeIn 0.6s ease-out forwards; opacity: 0;"',
         progressBar: 'style="animation: progressGrow 1.5s ease-out forwards; transform-origin: left; transform-box: fill-box;"',
         overlayEffects: `
-          <ellipse cx="200" cy="500" rx="150" ry="100" fill="url(#flameGradient)" opacity="0.15" style="animation: pulse 4s ease-in-out infinite;"/>
-          <ellipse cx="600" cy="520" rx="120" ry="80" fill="#ff6b35" opacity="0.1" style="animation: pulse 3s ease-in-out infinite; animation-delay: 1s;"/>
+          <ellipse cx="1560" cy="60" rx="320" ry="220" fill="url(#flameGradient)" opacity="0.12" style="animation: pulse 5s ease-in-out infinite;"/>
+          <ellipse cx="1520" cy="780" rx="280" ry="170" fill="#ff6b35" opacity="0.07" style="animation: pulse 4s ease-in-out infinite; animation-delay: 1s;"/>
         `,
       };
 
