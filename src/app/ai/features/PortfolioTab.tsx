@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { toDisplayText } from '@/lib/ai-text';
 import { ThinkingProgress } from '@/components/ThinkingProgress';
 import type { PortfolioCaseStudy } from './types';
 
@@ -68,13 +69,13 @@ export function PortfolioTab({ username, loading, portfolio, portfolioSteps, por
               </div>
 
               <div style={{ marginTop: '14px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                {cs.stack.map((tech) => (
-                  <span key={`${cs.repo}-${tech}`} style={{ padding: '4px 10px', background: '#1a1a1a', borderRadius: '999px', fontSize: '12px', color: '#888' }}>{tech}</span>
+                {cs.stack.map((tech, i) => (
+                  <span key={`${cs.repo}-${i}`} style={{ padding: '4px 10px', background: '#1a1a1a', borderRadius: '999px', fontSize: '12px', color: '#888' }}>{toDisplayText(tech)}</span>
                 ))}
               </div>
 
               <ul style={{ marginTop: '12px', color: '#cfcfcf', paddingLeft: '18px' }}>
-                {cs.highlights.map((h, i) => <li key={`${cs.repo}-h-${i}`} style={{ marginBottom: '6px' }}>{h}</li>)}
+                {cs.highlights.map((h, i) => <li key={`${cs.repo}-h-${i}`} style={{ marginBottom: '6px' }}>{toDisplayText(h)}</li>)}
               </ul>
             </div>
           ))}
