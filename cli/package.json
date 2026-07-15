@@ -1,0 +1,41 @@
+{
+  "name": "gitskins",
+  "version": "0.1.0",
+  "description": "Commit self-updating, themed GitHub profile widgets to your repo — no more hot-linking. Renders GitSkins cards to static SVG/PNG files via a GitHub Action.",
+  "type": "module",
+  "bin": {
+    "gitskins": "bin/gitskins.js"
+  },
+  "scripts": {
+    "test": "node --test",
+    "prepublishOnly": "node --test"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "bin",
+    "src",
+    "templates",
+    "action.yml",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "github",
+    "readme",
+    "profile",
+    "svg",
+    "widget",
+    "gitskins",
+    "github-action",
+    "cli"
+  ],
+  "homepage": "https://gitskins.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gitskins/gitskins",
+    "directory": "cli"
+  },
+  "license": "MIT"
+}
