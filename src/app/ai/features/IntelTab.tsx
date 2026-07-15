@@ -1,6 +1,7 @@
 'use client';
 
 import { ThinkingProgress } from '@/components/ThinkingProgress';
+import { toDisplayText } from '@/lib/ai-text';
 import type { ProfileIntel } from './types';
 
 interface Props {
@@ -54,19 +55,19 @@ export function IntelTab({ username, loading, intel, intelSteps, intelActiveInde
             <div style={{ background: '#1a1a1a', borderRadius: '12px', padding: '16px' }}>
               <div style={{ color: '#22c55e', fontWeight: 600, marginBottom: '8px' }}>Strengths</div>
               <ul style={{ color: '#cfcfcf', paddingLeft: '18px', margin: 0 }}>
-                {intel.strengths.map((item, i) => <li key={`s-${i}`} style={{ marginBottom: '6px' }}>{item}</li>)}
+                {intel.strengths.map((item, i) => <li key={`s-${i}`} style={{ marginBottom: '6px' }}>{toDisplayText(item)}</li>)}
               </ul>
             </div>
             <div style={{ background: '#1a1a1a', borderRadius: '12px', padding: '16px' }}>
               <div style={{ color: '#fbbf24', fontWeight: 600, marginBottom: '8px' }}>Gaps to Close</div>
               <ul style={{ color: '#cfcfcf', paddingLeft: '18px', margin: 0 }}>
-                {intel.gaps.map((item, i) => <li key={`g-${i}`} style={{ marginBottom: '6px' }}>{item}</li>)}
+                {intel.gaps.map((item, i) => <li key={`g-${i}`} style={{ marginBottom: '6px' }}>{toDisplayText(item)}</li>)}
               </ul>
             </div>
             <div style={{ background: '#1a1a1a', borderRadius: '12px', padding: '16px' }}>
               <div style={{ color: '#60a5fa', fontWeight: 600, marginBottom: '8px' }}>Next Actions</div>
               <ul style={{ color: '#cfcfcf', paddingLeft: '18px', margin: 0 }}>
-                {intel.recommendations.map((item, i) => <li key={`r-${i}`} style={{ marginBottom: '6px' }}>{item}</li>)}
+                {intel.recommendations.map((item, i) => <li key={`r-${i}`} style={{ marginBottom: '6px' }}>{toDisplayText(item)}</li>)}
               </ul>
             </div>
           </div>

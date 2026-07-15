@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { toDisplayText } from '@/lib/ai-text';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { ThinkingProgress } from '@/components/ThinkingProgress';
@@ -179,15 +180,15 @@ export default function PortfolioPage() {
                     </div>
                   </div>
                   <div style={{ marginTop: '14px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                    {caseStudy.stack.map((tech) => (
-                      <span key={`${caseStudy.repo}-${tech}`} style={{ padding: '4px 10px', background: '#1a1a1a', borderRadius: '999px', fontSize: '12px', color: '#888' }}>
-                        {tech}
+                    {caseStudy.stack.map((tech, idx) => (
+                      <span key={`${caseStudy.repo}-${idx}`} style={{ padding: '4px 10px', background: '#1a1a1a', borderRadius: '999px', fontSize: '12px', color: '#888' }}>
+                        {toDisplayText(tech)}
                       </span>
                     ))}
                   </div>
                   <ul style={{ marginTop: '12px', color: '#cfcfcf', paddingLeft: '18px' }}>
                     {caseStudy.highlights.map((highlight, idx) => (
-                      <li key={`${caseStudy.repo}-h-${idx}`} style={{ marginBottom: '6px' }}>{highlight}</li>
+                      <li key={`${caseStudy.repo}-h-${idx}`} style={{ marginBottom: '6px' }}>{toDisplayText(highlight)}</li>
                     ))}
                   </ul>
                 </div>

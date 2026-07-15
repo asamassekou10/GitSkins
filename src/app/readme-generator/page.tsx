@@ -8,24 +8,7 @@ import { FREE_THEMES } from '@/config/subscription';
 import { ThinkingProgress } from '@/components/ThinkingProgress';
 import { useThinkingProgress } from '@/hooks/useThinkingProgress';
 import { invalidateUserPlanCache, useUserPlan } from '@/hooks/useUserPlan';
-
-/**
- * Coerce a refinement note to a display string. The model sometimes returns
- * objects like { improvement, details } instead of plain strings; rendering an
- * object as a React child throws (React error #31). This also protects notes
- * already saved in older generations.
- */
-function noteToText(note: unknown): string {
-  if (typeof note === 'string') return note;
-  if (note && typeof note === 'object') {
-    const o = note as Record<string, unknown>;
-    const parts = [o.improvement, o.suggestion, o.note, o.title, o.details, o.detail, o.description]
-      .filter((v): v is string => typeof v === 'string' && v.trim().length > 0);
-    if (parts.length > 0) return parts.join(' — ');
-    return JSON.stringify(note);
-  }
-  return String(note);
-}
+import { toDisplayText } from '@/lib/ai-text';
 
 type ReadmeStyle = 'minimal' | 'detailed' | 'creative';
 type SectionType = 'header' | 'about' | 'skills' | 'stats' | 'projects' | 'streak' | 'connect';
@@ -294,7 +277,7 @@ export default function ReadmeGeneratorPage() {
         throw new Error(data.error || 'Failed to generate README');
       }
 
-      setRefinementNotes(Array.isArray(data.refinementNotes) ? data.refinementNotes.map(noteToText) : null);
+      setRefinementNotes(Array.isArray(data.refinementNotes) ? data.refinementNotes.map(toDisplayText) : null);
       setAgentReasoning(typeof data.reasoning === 'string' ? data.reasoning : null);
       setGeneratedReadme(data.readme);
       setAiProvider(data.aiProvider || null);
@@ -1307,7 +1290,7 @@ export default function ReadmeGeneratorPage() {
                   </div>
                   {readmeScore?.suggestions?.length ? (
                     <ul style={{ margin: '14px 0 0', paddingLeft: 18, color: '#a1a1a1', fontSize: 13, lineHeight: 1.6 }}>
-                      {readmeScore.suggestions.map((suggestion) => <li key={suggestion}>{suggestion}</li>)}
+                      {readmeScore.suggestions.map((suggestion, i) => <li key={i}>{toDisplayText(suggestion)}</li>)}
                     </ul>
                   ) : null}
                 </div>
@@ -1355,7 +1338,7 @@ export default function ReadmeGeneratorPage() {
                   </div>
                   <ul style={{ margin: 0, paddingLeft: '20px', color: '#a1a1a1', fontSize: '13px', lineHeight: 1.6 }}>
                     {refinementNotes.map((note, i) => (
-                      <li key={i}>{noteToText(note)}</li>
+                      <li key={i}>{toDisplayText(note)}</li>
                     ))}
                   </ul>
                 </div>

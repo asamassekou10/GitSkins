@@ -13,6 +13,7 @@
 import { GoogleGenAI, HarmCategory, HarmBlockThreshold, ThinkingLevel, type GenerateContentConfig } from '@google/genai';
 import type { ExtendedProfileData, ReadmeGoal, ReadmeStructure, ReadmeTone, ReadmeMotionStyle } from '@/types/readme';
 import { buildReadmeStrategy } from '@/lib/readme-generator';
+import { toTextArray } from '@/lib/ai-text';
 import {
   getPortfolioGoal,
   getPortfolioTemplate,
@@ -21,32 +22,6 @@ import {
   type PortfolioTemplateId,
   type PortfolioTone,
 } from '@/lib/portfolio-templates';
-
-/**
- * Coerce a single refinement note to a string.
- *
- * The critique prompt asks for a JSON array of short strings, but the model
- * sometimes returns objects like `{ improvement, details }`. Rendering those
- * objects directly crashes the client (React error #31), so normalize any
- * object shape into a readable string here at the source.
- */
-function noteToString(note: unknown): string {
-  if (typeof note === 'string') return note;
-  if (note && typeof note === 'object') {
-    const o = note as Record<string, unknown>;
-    const parts = [o.improvement, o.suggestion, o.note, o.title, o.details, o.detail, o.description]
-      .filter((v): v is string => typeof v === 'string' && v.trim().length > 0);
-    if (parts.length > 0) return parts.join(' — ');
-    return JSON.stringify(note);
-  }
-  return String(note);
-}
-
-/** Parse a model response into a clean array of string notes. */
-function normalizeNotes(raw: unknown): string[] {
-  if (!Array.isArray(raw)) return [];
-  return raw.map(noteToString).filter((s) => s.trim().length > 0);
-}
 
 // Safety settings for content generation
 const safetySettings: GenerateContentConfig['safetySettings'] = [
@@ -322,7 +297,7 @@ Output ONLY the markdown content. No explanations or code blocks around it.`;
     const cleanedCritique = critiqueResult.text.replace(/```json\n?|\n?```/g, '').trim();
     let refinementNotes: string[] | undefined;
     try {
-      refinementNotes = normalizeNotes(JSON.parse(cleanedCritique));
+      refinementNotes = toTextArray(JSON.parse(cleanedCritique));
     } catch {
       refinementNotes = undefined;
     }
@@ -497,7 +472,7 @@ Output ONLY the markdown content. No explanations or code blocks around it.`;
     let notes: string[] = [];
     try {
       const cleaned = critiqueText.replace(/```json\n?|\n?```/g, '').trim();
-      notes = normalizeNotes(JSON.parse(cleaned));
+      notes = toTextArray(JSON.parse(cleaned));
     } catch {
       // If parsing fails, skip refinement
     }
@@ -626,7 +601,8 @@ Respond with ONLY a JSON object (no markdown code blocks):
 
   try {
     const cleanedText = result.text.replace(/```json\n?|\n?```/g, '').trim();
-    return JSON.parse(cleanedText);
+    const parsed = JSON.parse(cleanedText) as ProfileAnalysis;
+    return { ...parsed, strengths: toTextArray(parsed.strengths) };
   } catch {
     return {
       developerType: 'Versatile Developer',
@@ -759,7 +735,13 @@ Return ONLY JSON:
 
   try {
     const cleaned = result.text.replace(/```json\n?|\n?```/g, '').trim();
-    return JSON.parse(cleaned);
+    const parsed = JSON.parse(cleaned) as ProfileIntel;
+    return {
+      ...parsed,
+      strengths: toTextArray(parsed.strengths),
+      gaps: toTextArray(parsed.gaps),
+      recommendations: toTextArray(parsed.recommendations),
+    };
   } catch {
     return {
       summary: 'A consistent contributor with growing momentum and solid project breadth.',
@@ -828,7 +810,12 @@ Return ONLY JSON array:
   const result = await generate(prompt, { model: getModelName('pro'), thinking: 'high' });
   try {
     const cleaned = result.text.replace(/```json\n?|\n?```/g, '').trim();
-    return JSON.parse(cleaned);
+    const parsed = JSON.parse(cleaned) as PortfolioCaseStudy[];
+    return (Array.isArray(parsed) ? parsed : []).map((cs) => ({
+      ...cs,
+      stack: toTextArray(cs.stack),
+      highlights: toTextArray(cs.highlights),
+    }));
   } catch {
     if (repoList.length === 0) {
       return [

@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { toDisplayText } from '@/lib/ai-text';
 import { ThinkingProgress } from '@/components/ThinkingProgress';
 import type { ProfileAnalysis, ProfileData } from './types';
 import { THEME_COLORS } from './types';
@@ -67,9 +68,9 @@ export function AnalyzeTab({ username, analyzing, analysis, profileData, analyze
           <div style={{ marginBottom: '24px' }}>
             <h3 style={{ fontSize: '14px', color: '#888', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '12px' }}>Key Strengths</h3>
             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-              {analysis.strengths.map((strength) => (
-                <span key={strength} style={{ padding: '6px 14px', background: 'rgba(34,197,94,0.15)', border: '1px solid rgba(34,197,94,0.3)', borderRadius: '20px', color: '#22c55e', fontSize: '14px' }}>
-                  {strength}
+              {analysis.strengths.map((strength, i) => (
+                <span key={i} style={{ padding: '6px 14px', background: 'rgba(34,197,94,0.15)', border: '1px solid rgba(34,197,94,0.3)', borderRadius: '20px', color: '#22c55e', fontSize: '14px' }}>
+                  {toDisplayText(strength)}
                 </span>
               ))}
             </div>
