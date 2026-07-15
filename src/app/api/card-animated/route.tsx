@@ -17,6 +17,21 @@ import type { PremiumThemeName } from '@/types/premium-theme';
 export const runtime = 'nodejs';
 
 /**
+ * Merge an `animation-delay` into an existing `style="…"` attribute string.
+ *
+ * The staggered fade-in groups need a per-element delay. Emitting a second
+ * `style="animation-delay: …"` next to the fade-in `style` produces a duplicate
+ * attribute, which is invalid XML and makes the whole SVG fail to render when
+ * embedded via <img> (i.e. in a GitHub README). Merging keeps a single
+ * well-formed `style` attribute.
+ */
+function withAnimationDelay(styleAttr: string, seconds: number): string {
+  if (!styleAttr) return '';
+  const inner = styleAttr.slice('style="'.length, -1).replace(/;\s*$/, '');
+  return `style="${inner}; animation-delay: ${seconds}s;"`;
+}
+
+/**
  * Generate animated SVG card
  */
 async function generateAnimatedCardSVG(
@@ -71,13 +86,13 @@ async function generateAnimatedCardSVG(
 
   <!-- Main Card Container -->
   <rect x="0" y="0" width="${imageConfig.width}" height="${imageConfig.height}"
-        class="border" rx="20" ${animations.cardAnimation}/>
+        class="border" rx="20">${animations.cardAnimation}</rect>
 
   <!-- Header Section -->
   <g transform="translate(40, 50)">
     <!-- Avatar Circle -->
     <circle cx="40" cy="40" r="40" fill="${theme.colors.border}" opacity="0.2"/>
-    <circle cx="40" cy="40" r="38" fill="#fff" opacity="0.1" ${animations.avatarPulse}/>
+    <circle cx="40" cy="40" r="38" fill="#fff" opacity="0.1">${animations.avatarPulse}</circle>
 
     <!-- Username -->
     <text x="100" y="45" class="title primary" ${animations.textGlow}>
@@ -102,14 +117,14 @@ async function generateAnimatedCardSVG(
     </g>
 
     <!-- Contributions -->
-    <g transform="translate(250, 0)" ${animations.statsFadeIn} style="animation-delay: 0.1s">
+    <g transform="translate(250, 0)" ${withAnimationDelay(animations.statsFadeIn, 0.1)}>
       <rect x="0" y="0" width="230" height="80" class="card-bg" rx="12" opacity="0.3"/>
       <text x="16" y="28" class="stat-label secondary">📊 Contributions</text>
       <text x="16" y="58" class="stat-value accent">${totalContributions.toLocaleString()}</text>
     </g>
 
     <!-- Languages -->
-    <g transform="translate(500, 0)" ${animations.statsFadeIn} style="animation-delay: 0.2s">
+    <g transform="translate(500, 0)" ${withAnimationDelay(animations.statsFadeIn, 0.2)}>
       <rect x="0" y="0" width="200" height="80" class="card-bg" rx="12" opacity="0.3"/>
       <text x="16" y="28" class="stat-label secondary">🎨 Languages</text>
       <text x="16" y="58" class="stat-value accent">${totalLanguages}</text>
@@ -125,7 +140,7 @@ async function generateAnimatedCardSVG(
         // Each language has equal representation since we don't have byte counts
         const barWidth = 560 / topLanguages.length;
         return `
-      <g transform="translate(0, ${30 + i * 25})" ${animations.languageFadeIn} style="animation-delay: ${0.4 + i * 0.1}s">
+      <g transform="translate(0, ${30 + i * 25})" ${withAnimationDelay(animations.languageFadeIn, 0.4 + i * 0.1)}>
         <text x="0" y="0" class="subtitle primary">${lang.name}</text>
         <rect x="120" y="-12" width="560" height="16" fill="${theme.colors.border}" opacity="0.2" rx="8"/>
         <rect x="120" y="-12" width="${barWidth}" height="16" fill="${lang.color || theme.colors.accent}" rx="8" ${animations.progressBar}/>

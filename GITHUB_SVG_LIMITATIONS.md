@@ -70,15 +70,44 @@ These are the limits worth designing around — not "animation is impossible":
   data, and social sharing — but as an *addition*, not a replacement for the
   animated README cards.
 
-## Still open / not fully verified
+## What we found in our own output (and fixed)
 
-- We proved the *techniques* animate on GitHub and that `card-animated` uses
-  only those techniques with no external resources. A final belt-and-suspenders
-  check is to embed each theme in a real README and eyeball it across
-  browsers — worth doing once and pinning screenshots in `examples/`.
+Rendering `/api/card-animated` in an actual `<img>` — GitHub's exact context —
+revealed that **our cards were failing to render entirely**: a blank/broken
+image, for *every* theme. The cause was not GitHub's sanitizer. Our SVG was
+**invalid XML**, and an `<img>` (and GitHub) parses SVG strictly, so it refused
+to decode it. Two generation bugs produced the malformed markup:
+
+1. **`<animate>` child jammed into an opening tag.** The border/avatar
+   animations were interpolated *inside* the `<rect>`/`<circle>` tag
+   (`<rect … rx="20" <animate …/>/>`) instead of as child elements. Strict XML
+   parse error → whole card fails.
+2. **Duplicate `style` attribute.** The staggered fade-in groups emitted a
+   second `style="animation-delay: …"` next to the fade-in `style`, which is a
+   duplicate attribute → parse error.
+
+Both are fixed in `src/app/api/card-animated/route.tsx` (animations are now
+proper children; the delay is merged into a single `style`). After the fix all
+five themes are valid XML and render + animate in an `<img>`.
+
+> Lenient HTML parsing (inline `<svg>` in a page, or a browser preview) hid this
+> — it tolerated the malformed markup. Only the strict `<img>`/XML path exposed
+> it, which is exactly the path GitHub uses. Test in an `<img>`, not inline.
+
+## Still open
+
+- **Deploy required.** The fix lives in the route; the live endpoint serves the
+  old (broken) output until deployed.
+- **Layout polish.** With the cards finally rendering, a separate pre-existing
+  issue is visible: the three stat blocks (Stars / Contributions / Languages)
+  overlap instead of sitting side-by-side, and some labels collide. Tracked
+  separately from the XML fix.
+- **Cross-browser eyeball.** Worth embedding each theme in a real README once
+  and capturing screenshots after the layout polish lands.
 
 ---
 
-**Bottom line:** Animated SVG cards work in GitHub READMEs. The constraints that
-matter are *no JS, no interactivity, and no external resources* — all of which
-our current cards already respect.
+**Bottom line:** The animation *techniques* work in GitHub READMEs — the
+constraints that matter are *no JS, no interactivity, and no external
+resources*. Our cards additionally have to be **valid XML**, which they now are
+after fixing two malformed-markup bugs.
