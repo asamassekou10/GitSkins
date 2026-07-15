@@ -1,201 +1,84 @@
-# GitHub SVG Animation Limitations
+# GitHub SVG: What Works and What Doesn't
 
-## 🚨 The Reality
+> **Corrected July 2026.** An earlier version of this doc claimed GitHub strips
+> all SVG animations and advised abandoning animated cards. That was wrong.
+> Externally-hosted SVGs embedded with `![](url)` **do animate on GitHub** —
+> both SMIL and CSS animation run. This doc records what was actually verified,
+> so we build on the real constraints instead of imagined ones.
 
-After testing, we discovered that **GitHub sanitizes SVG animations** in README files. Here's what happens:
+## TL;DR
 
-### What GitHub Blocks:
-- ❌ `<style>` tags with CSS animations
-- ❌ `@keyframes` animations
-- ❌ JavaScript (always blocked)
-- ❌ `<animate>` SMIL elements (mostly stripped)
-- ❌ External resources (fonts, images)
-- ❌ `<script>` tags (obviously)
+When an SVG is referenced from a README with Markdown image syntax
+(`![alt](https://…/card.svg)`), GitHub proxies it through its image cache
+(camo) and the browser renders it inside an `<img>`. In that context:
 
-### What GitHub Allows:
-- ✅ Basic SVG shapes (rect, circle, path, etc.)
-- ✅ Static gradients
-- ✅ Filters (blur, glow) - sometimes
-- ✅ Static transforms
-- ❌ **Most animations are stripped**
+- ✅ **SMIL animation** (`<animate>`, `<animateTransform>`, `<animateMotion>`) runs.
+- ✅ **CSS animation** (`<style>` with `@keyframes` + `animation:`) runs.
+- ✅ **Gradients, filters (blur/glow), clip paths, real `<text>`** render.
+- ✅ **Raster images embedded as `data:` URIs** (base64) render.
+- ❌ **JavaScript** (`<script>`, `on*` handlers) never executes.
+- ❌ **Interactivity** — hover/click/`:hover`, focus, links *inside* the SVG — does nothing.
+- ❌ **External resource loads** — remote fonts, `<image href="https://…">`, external stylesheets — are blocked.
 
-## 📊 Test Results
+Our `/api/card-animated` endpoint stays entirely inside the ✅ column: it uses
+only SMIL + CSS animation, gradients, and shapes, embeds nothing external, and
+ships no script. That is why it animates in a README.
 
-When you embed an animated SVG in a GitHub README:
-```markdown
-![Card](https://gitskins.com/api/card-animated?username=torvalds&theme=satan)
-```
+## How we verified this
 
-GitHub's sanitizer:
-1. Fetches the SVG
-2. Parses it through their sanitizer
-3. Strips `<style>` tags
-4. Strips `<animate>` elements
-5. Removes most animation-related attributes
-6. Renders a **static version**
+Two of the most widely used README widgets prove the two animation techniques
+independently, both embedded via `![](url)`:
 
-## 🔍 Why This Happens
+| Reference widget | Technique it uses | Result on GitHub |
+| --- | --- | --- |
+| `readme-typing-svg` | SMIL `<animate>` (no CSS) | Animates |
+| `github-readme-activity-graph` | CSS `<style>` + `@keyframes` (no SMIL) | Animates |
 
-GitHub prioritizes **security** over features:
-- Prevent XSS attacks
-- Block tracking pixels
-- Stop malicious scripts
-- Reduce bandwidth for animations
+`card-animated`'s SVG uses **both** of those techniques and references **no**
+external resources — so it behaves like the widgets above, not like a
+sanitized-static image.
 
-## 💡 Alternative Approaches
+## The real constraints (these are true)
 
-Since GitHub blocks SVG animations, we have better options:
+These are the limits worth designing around — not "animation is impossible":
 
-### 1. **Animated GIF** (Limited)
-- ✅ GitHub supports GIFs
-- ❌ Large file sizes (500KB - 2MB)
-- ❌ Poor quality
-- ❌ No transparency
-- ⚠️ Not recommended
+1. **No JavaScript, no interactivity.** SVG-in-`<img>` is a movie, not an app.
+   No hover states, no clicks inside the SVG. To make a card clickable, wrap the
+   whole image in a link: `[![card](card.svg)](https://…)`.
+2. **External resources are blocked → inline everything.** This is why our cards
+   embed the avatar as a `data:` URI and use system/inlined fonts. A remote
+   `<image href="https://avatars.githubusercontent.com/…">` would render blank.
+3. **GitHub caches aggressively.** Images are proxied and cached by camo, so an
+   updated card can lag. Bust it with a version query (`…&v=2`).
+4. **Animation has no persistent state.** It restarts on each page load; there's
+   no way to pause/scrub or remember progress.
+5. **Low-power / reduced-motion.** Some browsers pause SVG animation in
+   low-power mode or under `prefers-reduced-motion`. Design so the *first frame*
+   already looks good — never hide essential content behind an animation.
 
-### 2. **APNG (Animated PNG)** (Better)
-- ✅ GitHub supports APNG
-- ✅ Better quality than GIF
-- ✅ Transparency support
-- ❌ Still large (300KB - 1MB)
-- ⚠️ Moderate option
+## Design implications for GitSkins
 
-### 3. **Keep Static SVG + Link to Interactive Showcase**
-- ✅ Lightweight (15-30KB)
-- ✅ High quality
-- ✅ Scalable
-- ✅ Link to animated version on our site
-- ✅ **RECOMMENDED**
+- **Ship the animated cards as a real feature.** They are a genuine
+  differentiator over static-only tools (github-readme-stats, profile-trophy).
+- **Keep the first frame legible.** Because of caching and reduced-motion, the
+  static first frame must stand on its own.
+- **Always inline assets** (avatars as `data:` URIs, no remote fonts). Any
+  external reference silently breaks the card.
+- **Offer a static fallback** (`/api/premium-card`) for users who prefer it or
+  hit a rendering quirk.
+- **The interactive showcase is still worth building** — for hover/click, live
+  data, and social sharing — but as an *addition*, not a replacement for the
+  animated README cards.
 
-### 4. **Build Interactive Showcase Website** (Best UX)
-- ✅ Full animations without restrictions
-- ✅ Real interactivity (clicks, hovers)
-- ✅ Live data updates
-- ✅ Share URL: `gitskins.com/showcase/@username`
-- ✅ **BEST OPTION**
+## Still open / not fully verified
 
-## 🎯 Recommended Path Forward
-
-### Option A: Enhanced Static Cards + Showcase Link
-Keep the beautiful static SVG cards we have, but add a prominent link:
-
-```markdown
-![GitSkins Card](https://gitskins.com/api/card-animated?username=torvalds&theme=satan)
-
-**[🎬 View Animated Version →](https://gitskins.com/showcase/@torvalds?theme=satan)**
-```
-
-The showcase page would have:
-- Full CSS/JS animations
-- Interactive elements
-- Real-time data
-- No GitHub restrictions
-
-### Option B: Subtle APNG Animations
-Generate animated PNGs with:
-- Gentle pulse effects
-- Progress bar growth
-- Fade-in animations
-- File size target: < 200KB
-
-### Option C: Hybrid Approach
-1. Static SVG in README (fast, lightweight)
-2. Click opens modal with animated version
-3. Use GitHub's image zoom feature
-
-## 📈 What Other Projects Do
-
-**github-readme-stats** (18M+ views):
-- Static SVG only
-- No animations
-- Focuses on data quality
-
-**github-profile-trophy**:
-- Static SVG with gradients
-- No animations
-- Clean design
-
-**github-readme-streak-stats**:
-- Static SVG
-- Animated GIF version (optional)
-- Users prefer static (faster)
-
-**Conclusion**: Most successful projects use **static** images and focus on:
-- Clean design
-- Fast loading
-- Accurate data
-- Easy customization
-
-## 🎬 Our Unique Value Proposition
-
-Instead of trying to animate in GitHub (blocked), we should:
-
-1. **Make the best static cards** (we already have this!)
-   - Beautiful themes
-   - Custom fonts (via PNG)
-   - Clean layouts
-   - Fast loading
-
-2. **Build an interactive showcase** (Phase 2)
-   - `gitskins.com/showcase/@username`
-   - Full animations, no restrictions
-   - Shareable on social media
-   - Embed on personal sites
-
-3. **Offer both options**
-   - Static for GitHub READMEs
-   - Interactive for portfolios/social
-   - Best of both worlds
-
-## ✅ Recommended Action
-
-**Stop trying to animate in GitHub**. Instead:
-
-1. Keep our static SVG/PNG cards (already working great)
-2. Build the interactive showcase website
-3. Market it as: *"Preview your animated profile, then embed the static version in your README"*
-
-This is more honest, better UX, and leverages our strengths.
+- We proved the *techniques* animate on GitHub and that `card-animated` uses
+  only those techniques with no external resources. A final belt-and-suspenders
+  check is to embed each theme in a real README and eyeball it across
+  browsers — worth doing once and pinning screenshots in `examples/`.
 
 ---
 
-## 🔧 Technical Details
-
-### GitHub's Sanitizer Code
-GitHub uses a custom sanitizer that:
-```ruby
-# Strips dangerous elements
-DANGEROUS_ELEMENTS = ['script', 'style', 'animate', 'animateMotion', ...]
-
-# Removes animation attributes
-DANGEROUS_ATTRS = ['onload', 'onclick', 'animation', ...]
-```
-
-### What Actually Works
-```svg
-<!-- ✅ This renders -->
-<svg>
-  <rect fill="red" />
-  <circle fill="blue" />
-  <text>Hello</text>
-</svg>
-
-<!-- ❌ This gets stripped -->
-<svg>
-  <style>
-    @keyframes pulse { ... }
-  </style>
-  <animate attributeName="opacity" ... />
-</svg>
-```
-
-## 📚 Sources
-
-- GitHub's sanitization policy
-- Testing in actual READMEs
-- Community reports
-- Other project experiences
-
----
-
-**Bottom Line**: GitHub SVG animations don't work. Build the interactive showcase instead! 🚀
+**Bottom line:** Animated SVG cards work in GitHub READMEs. The constraints that
+matter are *no JS, no interactivity, and no external resources* — all of which
+our current cards already respect.
