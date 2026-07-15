@@ -108,26 +108,36 @@ async function generateAnimatedCardSVG(
   </g>
 
   <!-- Stats Section -->
+  <!-- Layout lives on the outer g (transform attribute); the fade-in
+       animation lives on the inner g. Keeping them separate prevents a
+       fadeIn keyframe that animates transform from clobbering the layout
+       translate and collapsing the blocks on top of each other. -->
   <g transform="translate(40, 150)">
     <!-- Stars -->
-    <g ${animations.statsFadeIn}>
-      <rect x="0" y="0" width="230" height="80" class="card-bg" rx="12" opacity="0.3"/>
-      <text x="16" y="28" class="stat-label secondary">⭐ Stars</text>
-      <text x="16" y="58" class="stat-value accent">${totalStars.toLocaleString()}</text>
+    <g transform="translate(0, 0)">
+      <g ${animations.statsFadeIn}>
+        <rect x="0" y="0" width="230" height="80" class="card-bg" rx="12" opacity="0.3"/>
+        <text x="16" y="28" class="stat-label secondary">⭐ Stars</text>
+        <text x="16" y="58" class="stat-value accent">${totalStars.toLocaleString()}</text>
+      </g>
     </g>
 
     <!-- Contributions -->
-    <g transform="translate(250, 0)" ${withAnimationDelay(animations.statsFadeIn, 0.1)}>
-      <rect x="0" y="0" width="230" height="80" class="card-bg" rx="12" opacity="0.3"/>
-      <text x="16" y="28" class="stat-label secondary">📊 Contributions</text>
-      <text x="16" y="58" class="stat-value accent">${totalContributions.toLocaleString()}</text>
+    <g transform="translate(250, 0)">
+      <g ${withAnimationDelay(animations.statsFadeIn, 0.1)}>
+        <rect x="0" y="0" width="230" height="80" class="card-bg" rx="12" opacity="0.3"/>
+        <text x="16" y="28" class="stat-label secondary">📊 Contributions</text>
+        <text x="16" y="58" class="stat-value accent">${totalContributions.toLocaleString()}</text>
+      </g>
     </g>
 
     <!-- Languages -->
-    <g transform="translate(500, 0)" ${withAnimationDelay(animations.statsFadeIn, 0.2)}>
-      <rect x="0" y="0" width="200" height="80" class="card-bg" rx="12" opacity="0.3"/>
-      <text x="16" y="28" class="stat-label secondary">🎨 Languages</text>
-      <text x="16" y="58" class="stat-value accent">${totalLanguages}</text>
+    <g transform="translate(500, 0)">
+      <g ${withAnimationDelay(animations.statsFadeIn, 0.2)}>
+        <rect x="0" y="0" width="200" height="80" class="card-bg" rx="12" opacity="0.3"/>
+        <text x="16" y="28" class="stat-label secondary">🎨 Languages</text>
+        <text x="16" y="58" class="stat-value accent">${totalLanguages}</text>
+      </g>
     </g>
   </g>
 
@@ -140,10 +150,12 @@ async function generateAnimatedCardSVG(
         // Each language has equal representation since we don't have byte counts
         const barWidth = 560 / topLanguages.length;
         return `
-      <g transform="translate(0, ${30 + i * 25})" ${withAnimationDelay(animations.languageFadeIn, 0.4 + i * 0.1)}>
-        <text x="0" y="0" class="subtitle primary">${lang.name}</text>
-        <rect x="120" y="-12" width="560" height="16" fill="${theme.colors.border}" opacity="0.2" rx="8"/>
-        <rect x="120" y="-12" width="${barWidth}" height="16" fill="${lang.color || theme.colors.accent}" rx="8" ${animations.progressBar}/>
+      <g transform="translate(0, ${30 + i * 25})">
+        <g ${withAnimationDelay(animations.languageFadeIn, 0.4 + i * 0.1)}>
+          <text x="0" y="0" class="subtitle primary">${lang.name}</text>
+          <rect x="120" y="-12" width="560" height="16" fill="${theme.colors.border}" opacity="0.2" rx="8"/>
+          <rect x="120" y="-12" width="${barWidth}" height="16" fill="${lang.color || theme.colors.accent}" rx="8" ${animations.progressBar}/>
+        </g>
       </g>
     `;
       })
