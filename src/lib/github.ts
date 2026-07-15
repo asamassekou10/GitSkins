@@ -187,7 +187,7 @@ function transformResponse(
  * @returns GitHubData object or null if user not found
  * @throws Error for API failures (rate limits, network errors, etc.)
  */
-export async function fetchGitHubData(
+async function _fetchGitHubDataRaw(
   username: string
 ): Promise<GitHubData | null> {
   try {
@@ -233,6 +233,23 @@ export async function fetchGitHubData(
     // Re-throw unexpected errors
     throw error;
   }
+}
+
+/**
+ * Fetch base profile data for the card widgets.
+ *
+ * Cached (10 min) so the card / premium-card / card-animated routes don't make
+ * a live GitHub GraphQL call on every README view — matching the sibling
+ * widget cache in {@link fetchExtendedGitHubData}.
+ */
+export function fetchGitHubData(
+  username: string
+): Promise<GitHubData | null> {
+  return withCache(
+    `github:card:${username}`,
+    600,
+    () => _fetchGitHubDataRaw(username)
+  );
 }
 
 /**
