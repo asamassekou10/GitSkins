@@ -22,6 +22,32 @@ import {
   type PortfolioTone,
 } from '@/lib/portfolio-templates';
 
+/**
+ * Coerce a single refinement note to a string.
+ *
+ * The critique prompt asks for a JSON array of short strings, but the model
+ * sometimes returns objects like `{ improvement, details }`. Rendering those
+ * objects directly crashes the client (React error #31), so normalize any
+ * object shape into a readable string here at the source.
+ */
+function noteToString(note: unknown): string {
+  if (typeof note === 'string') return note;
+  if (note && typeof note === 'object') {
+    const o = note as Record<string, unknown>;
+    const parts = [o.improvement, o.suggestion, o.note, o.title, o.details, o.detail, o.description]
+      .filter((v): v is string => typeof v === 'string' && v.trim().length > 0);
+    if (parts.length > 0) return parts.join(' — ');
+    return JSON.stringify(note);
+  }
+  return String(note);
+}
+
+/** Parse a model response into a clean array of string notes. */
+function normalizeNotes(raw: unknown): string[] {
+  if (!Array.isArray(raw)) return [];
+  return raw.map(noteToString).filter((s) => s.trim().length > 0);
+}
+
 // Safety settings for content generation
 const safetySettings: GenerateContentConfig['safetySettings'] = [
   { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_NONE },
@@ -296,7 +322,7 @@ Output ONLY the markdown content. No explanations or code blocks around it.`;
     const cleanedCritique = critiqueResult.text.replace(/```json\n?|\n?```/g, '').trim();
     let refinementNotes: string[] | undefined;
     try {
-      refinementNotes = JSON.parse(cleanedCritique);
+      refinementNotes = normalizeNotes(JSON.parse(cleanedCritique));
     } catch {
       refinementNotes = undefined;
     }
@@ -471,7 +497,7 @@ Output ONLY the markdown content. No explanations or code blocks around it.`;
     let notes: string[] = [];
     try {
       const cleaned = critiqueText.replace(/```json\n?|\n?```/g, '').trim();
-      notes = JSON.parse(cleaned);
+      notes = normalizeNotes(JSON.parse(cleaned));
     } catch {
       // If parsing fails, skip refinement
     }
