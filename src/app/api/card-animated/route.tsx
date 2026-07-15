@@ -17,6 +17,45 @@ import type { PremiumThemeName } from '@/types/premium-theme';
 export const runtime = 'nodejs';
 
 /**
+ * Merge an `animation-delay` into an existing `style="…"` attribute string.
+ *
+ * The staggered fade-in groups need a per-element delay. Emitting a second
+ * `style="animation-delay: …"` next to the fade-in `style` produces a duplicate
+ * attribute, which is invalid XML and makes the whole SVG fail to render when
+ * embedded via <img> (i.e. in a GitHub README). Merging keeps a single
+ * well-formed `style` attribute.
+ */
+function withAnimationDelay(styleAttr: string, seconds: number): string {
+  if (!styleAttr) return '';
+  const inner = styleAttr.slice('style="'.length, -1).replace(/;\s*$/, '');
+  return `style="${inner}; animation-delay: ${seconds}s;"`;
+}
+
+/**
+ * Fetch an image and return it as a base64 data URI so it can be embedded
+ * directly in the SVG. GitHub strips external resource loads from README SVGs,
+ * so the avatar has to be inlined rather than referenced by URL. Returns null
+ * on failure, letting the caller fall back to a placeholder.
+ */
+async function fetchAvatarDataUri(url: string): Promise<string | null> {
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 7000);
+    const res = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeoutId);
+    if (!res.ok) throw new Error(`avatar fetch failed: ${res.status}`);
+    const contentType = res.headers.get('content-type') || 'image/png';
+    if (!contentType.startsWith('image/')) throw new Error(`not an image: ${contentType}`);
+    const buffer = Buffer.from(await res.arrayBuffer());
+    if (buffer.byteLength === 0) throw new Error('empty avatar response');
+    return `data:${contentType};base64,${buffer.toString('base64')}`;
+  } catch (e) {
+    console.warn('card-animated: avatar embed failed, using placeholder:', e);
+    return null;
+  }
+}
+
+/**
  * Generate animated SVG card
  */
 async function generateAnimatedCardSVG(
@@ -39,11 +78,16 @@ async function generateAnimatedCardSVG(
   const animations = getThemeAnimations(theme.name as PremiumThemeName);
   const backgroundPattern = getAnimatedBackgroundPattern(theme.name as PremiumThemeName, theme);
 
+  // Inline the avatar as a data URI — GitHub blocks external image loads in
+  // README SVGs, so a remote <image href> would render blank.
+  const avatarDataUri = await fetchAvatarDataUri(data.avatarUrl);
+
   // SVG Structure
   const svg = `
 <svg width="${imageConfig.width}" height="${imageConfig.height}"
      viewBox="0 0 ${imageConfig.width} ${imageConfig.height}"
-     xmlns="http://www.w3.org/2000/svg">
+     xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink">
 
   <defs>
     ${animations.defs}
@@ -58,10 +102,10 @@ async function generateAnimatedCardSVG(
     .secondary { fill: ${theme.colors.secondary}; }
     .accent { fill: ${theme.colors.accent}; }
 
-    .title { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', sans-serif; font-size: 28px; font-weight: 600; }
-    .subtitle { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', sans-serif; font-size: 16px; }
-    .stat-label { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', sans-serif; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .stat-value { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', sans-serif; font-size: 18px; font-weight: 700; }
+    .title { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', sans-serif; font-size: 44px; font-weight: 600; }
+    .subtitle { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', sans-serif; font-size: 22px; }
+    .stat-label { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', sans-serif; font-size: 20px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .stat-value { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', sans-serif; font-size: 40px; font-weight: 700; }
   </style>
 
   <!-- Background -->
@@ -69,73 +113,91 @@ async function generateAnimatedCardSVG(
 
   ${backgroundPattern}
 
+  <!-- Ambient overlay effects, drawn behind the content so they read as a
+       background glow rather than covering the text -->
+  ${animations.overlayEffects}
+
   <!-- Main Card Container -->
   <rect x="0" y="0" width="${imageConfig.width}" height="${imageConfig.height}"
-        class="border" rx="20" ${animations.cardAnimation}/>
+        class="border" rx="20">${animations.cardAnimation}</rect>
 
   <!-- Header Section -->
-  <g transform="translate(40, 50)">
-    <!-- Avatar Circle -->
-    <circle cx="40" cy="40" r="40" fill="${theme.colors.border}" opacity="0.2"/>
-    <circle cx="40" cy="40" r="38" fill="#fff" opacity="0.1" ${animations.avatarPulse}/>
+  <g transform="translate(60, 60)">
+    <!-- Avatar: inlined image clipped to a circle, with a placeholder fallback -->
+    <clipPath id="animAvatarClip"><circle cx="70" cy="70" r="68"/></clipPath>
+    <circle cx="70" cy="70" r="70" fill="${theme.colors.border}" opacity="0.2">${animations.avatarPulse}</circle>
+    ${avatarDataUri
+      ? `<image xlink:href="${avatarDataUri}" x="2" y="2" width="136" height="136" clip-path="url(#animAvatarClip)" preserveAspectRatio="xMidYMid slice"/>
+    <circle cx="70" cy="70" r="68" fill="none" stroke="${theme.colors.accent}" stroke-width="3" stroke-opacity="0.6"/>`
+      : `<circle cx="70" cy="70" r="68" fill="#fff" opacity="0.1"/>`}
 
     <!-- Username -->
-    <text x="100" y="45" class="title primary" ${animations.textGlow}>
+    <text x="180" y="66" class="title primary" ${animations.textGlow}>
       ${data.name || username}
     </text>
 
     <!-- Bio -->
     ${bio ? `
-    <text x="100" y="70" class="subtitle secondary" opacity="0.9">
+    <text x="180" y="114" class="subtitle secondary" opacity="0.9">
       ${bio}
     </text>
     ` : ''}
   </g>
 
   <!-- Stats Section -->
-  <g transform="translate(40, 150)">
+  <!-- Layout lives on the outer g (transform attribute); the fade-in
+       animation lives on the inner g. Keeping them separate prevents a
+       fadeIn keyframe that animates transform from clobbering the layout
+       translate and collapsing the blocks on top of each other. -->
+  <g transform="translate(60, 240)">
     <!-- Stars -->
-    <g ${animations.statsFadeIn}>
-      <rect x="0" y="0" width="230" height="80" class="card-bg" rx="12" opacity="0.3"/>
-      <text x="16" y="28" class="stat-label secondary">⭐ Stars</text>
-      <text x="16" y="58" class="stat-value accent">${totalStars.toLocaleString()}</text>
+    <g transform="translate(0, 0)">
+      <g ${animations.statsFadeIn}>
+        <rect x="0" y="0" width="460" height="150" class="card-bg" rx="16" opacity="0.3"/>
+        <text x="28" y="52" class="stat-label secondary">⭐ Stars</text>
+        <text x="28" y="112" class="stat-value accent">${totalStars.toLocaleString()}</text>
+      </g>
     </g>
 
     <!-- Contributions -->
-    <g transform="translate(250, 0)" ${animations.statsFadeIn} style="animation-delay: 0.1s">
-      <rect x="0" y="0" width="230" height="80" class="card-bg" rx="12" opacity="0.3"/>
-      <text x="16" y="28" class="stat-label secondary">📊 Contributions</text>
-      <text x="16" y="58" class="stat-value accent">${totalContributions.toLocaleString()}</text>
+    <g transform="translate(500, 0)">
+      <g ${withAnimationDelay(animations.statsFadeIn, 0.1)}>
+        <rect x="0" y="0" width="460" height="150" class="card-bg" rx="16" opacity="0.3"/>
+        <text x="28" y="52" class="stat-label secondary">📊 Contributions</text>
+        <text x="28" y="112" class="stat-value accent">${totalContributions.toLocaleString()}</text>
+      </g>
     </g>
 
     <!-- Languages -->
-    <g transform="translate(500, 0)" ${animations.statsFadeIn} style="animation-delay: 0.2s">
-      <rect x="0" y="0" width="200" height="80" class="card-bg" rx="12" opacity="0.3"/>
-      <text x="16" y="28" class="stat-label secondary">🎨 Languages</text>
-      <text x="16" y="58" class="stat-value accent">${totalLanguages}</text>
+    <g transform="translate(1000, 0)">
+      <g ${withAnimationDelay(animations.statsFadeIn, 0.2)}>
+        <rect x="0" y="0" width="460" height="150" class="card-bg" rx="16" opacity="0.3"/>
+        <text x="28" y="52" class="stat-label secondary">🎨 Languages</text>
+        <text x="28" y="112" class="stat-value accent">${totalLanguages}</text>
+      </g>
     </g>
   </g>
 
   <!-- Languages Section -->
-  <g transform="translate(40, 260)">
+  <g transform="translate(60, 440)">
     <text x="0" y="0" class="stat-label secondary">Top Languages</text>
 
     ${topLanguages
       .map((lang, i) => {
         // Each language has equal representation since we don't have byte counts
-        const barWidth = 560 / topLanguages.length;
+        const barWidth = 1220 / topLanguages.length;
         return `
-      <g transform="translate(0, ${30 + i * 25})" ${animations.languageFadeIn} style="animation-delay: ${0.4 + i * 0.1}s">
-        <text x="0" y="0" class="subtitle primary">${lang.name}</text>
-        <rect x="120" y="-12" width="560" height="16" fill="${theme.colors.border}" opacity="0.2" rx="8"/>
-        <rect x="120" y="-12" width="${barWidth}" height="16" fill="${lang.color || theme.colors.accent}" rx="8" ${animations.progressBar}/>
+      <g transform="translate(0, ${44 + i * 52})">
+        <g ${withAnimationDelay(animations.languageFadeIn, 0.4 + i * 0.1)}>
+          <text x="0" y="0" class="subtitle primary">${lang.name}</text>
+          <rect x="260" y="-22" width="1220" height="28" fill="${theme.colors.border}" opacity="0.2" rx="14"/>
+          <rect x="260" y="-22" width="${barWidth}" height="28" fill="${lang.color || theme.colors.accent}" rx="14" ${animations.progressBar}/>
+        </g>
       </g>
     `;
       })
       .join('')}
   </g>
-
-  ${animations.overlayEffects}
 </svg>
   `.trim();
 
@@ -181,8 +243,8 @@ function getThemeAnimations(themeName: PremiumThemeName) {
             to { opacity: 1; transform: translateY(0); }
           }
           @keyframes progressGrow {
-            from { width: 0; }
-            to { width: 100%; }
+            from { transform: scaleX(0); }
+            to { transform: scaleX(1); }
           }
         `,
         textGlow: 'filter="url(#glow)"',
@@ -190,10 +252,10 @@ function getThemeAnimations(themeName: PremiumThemeName) {
         cardAnimation: `<animate attributeName="stroke-opacity" values="0.5;1;0.5" dur="3s" repeatCount="indefinite"/>`,
         statsFadeIn: 'style="animation: fadeIn 0.6s ease-out forwards; opacity: 0;"',
         languageFadeIn: 'style="animation: fadeIn 0.6s ease-out forwards; opacity: 0;"',
-        progressBar: 'style="animation: progressGrow 1.5s ease-out forwards; transform-origin: left;"',
+        progressBar: 'style="animation: progressGrow 1.5s ease-out forwards; transform-origin: left; transform-box: fill-box;"',
         overlayEffects: `
-          <ellipse cx="200" cy="500" rx="150" ry="100" fill="url(#flameGradient)" opacity="0.15" style="animation: pulse 4s ease-in-out infinite;"/>
-          <ellipse cx="600" cy="520" rx="120" ry="80" fill="#ff6b35" opacity="0.1" style="animation: pulse 3s ease-in-out infinite; animation-delay: 1s;"/>
+          <ellipse cx="1560" cy="60" rx="320" ry="220" fill="url(#flameGradient)" opacity="0.12" style="animation: pulse 5s ease-in-out infinite;"/>
+          <ellipse cx="1520" cy="780" rx="280" ry="170" fill="#ff6b35" opacity="0.07" style="animation: pulse 4s ease-in-out infinite; animation-delay: 1s;"/>
         `,
       };
 
@@ -238,8 +300,8 @@ function getThemeAnimations(themeName: PremiumThemeName) {
             to { opacity: 1; transform: translateY(0); }
           }
           @keyframes progressGrow {
-            from { width: 0; }
-            to { width: 100%; }
+            from { transform: scaleX(0); }
+            to { transform: scaleX(1); }
           }
           @keyframes pulse {
             0%, 100% { opacity: 0.3; }
@@ -251,7 +313,7 @@ function getThemeAnimations(themeName: PremiumThemeName) {
         cardAnimation: `<animate attributeName="stroke" values="#00ffff;#ff00ff;#00ffff" dur="4s" repeatCount="indefinite"/>`,
         statsFadeIn: 'style="animation: fadeIn 0.6s ease-out forwards; opacity: 0;"',
         languageFadeIn: 'style="animation: fadeIn 0.6s ease-out forwards; opacity: 0;"',
-        progressBar: 'style="animation: progressGrow 1.5s ease-out forwards;"',
+        progressBar: 'style="animation: progressGrow 1.5s ease-out forwards; transform-origin: left; transform-box: fill-box;"',
         overlayEffects: `
           <rect x="0" y="0" width="100%" height="2" fill="#00ffff" opacity="0.4" style="animation: scanline 6s linear infinite;"/>
           <rect x="0" y="20" width="100%" height="1" fill="#ff00ff" opacity="0.2" style="animation: scanline 8s linear infinite; animation-delay: 2s;"/>
@@ -280,8 +342,8 @@ function getThemeAnimations(themeName: PremiumThemeName) {
             to { opacity: 1; }
           }
           @keyframes progressGrow {
-            from { width: 0; }
-            to { width: 100%; }
+            from { transform: scaleX(0); }
+            to { transform: scaleX(1); }
           }
         `,
         textGlow: '',
@@ -289,10 +351,10 @@ function getThemeAnimations(themeName: PremiumThemeName) {
         cardAnimation: '',
         statsFadeIn: 'style="animation: fadeIn 1s ease-out forwards; opacity: 0;"',
         languageFadeIn: 'style="animation: fadeIn 1s ease-out forwards; opacity: 0;"',
-        progressBar: 'style="animation: progressGrow 2s ease-out forwards;"',
+        progressBar: 'style="animation: progressGrow 2s ease-out forwards; transform-origin: left; transform-box: fill-box;"',
         overlayEffects: `
-          <circle cx="400" cy="300" r="250" fill="none" stroke="#84a59d" stroke-width="8" opacity="0.08" style="animation: breathe 8s ease-in-out infinite; transform-origin: center;">
-            <animateTransform attributeName="transform" type="rotate" from="0 400 300" to="360 400 300" dur="300s" repeatCount="indefinite"/>
+          <circle cx="1440" cy="720" r="340" fill="none" stroke="#84a59d" stroke-width="8" opacity="0.08" style="animation: breathe 8s ease-in-out infinite; transform-origin: center;">
+            <animateTransform attributeName="transform" type="rotate" from="0 1440 720" to="360 1440 720" dur="300s" repeatCount="indefinite"/>
           </circle>
         `,
       };
@@ -306,8 +368,8 @@ function getThemeAnimations(themeName: PremiumThemeName) {
             to { opacity: 1; }
           }
           @keyframes progressGrow {
-            from { width: 0; }
-            to { width: 100%; }
+            from { transform: scaleX(0); }
+            to { transform: scaleX(1); }
           }
         `,
         textGlow: '',
@@ -315,7 +377,7 @@ function getThemeAnimations(themeName: PremiumThemeName) {
         cardAnimation: '',
         statsFadeIn: 'style="animation: fadeIn 0.8s ease-out forwards; opacity: 0;"',
         languageFadeIn: 'style="animation: fadeIn 0.8s ease-out forwards; opacity: 0;"',
-        progressBar: 'style="animation: progressGrow 1.2s ease-out forwards;"',
+        progressBar: 'style="animation: progressGrow 1.2s ease-out forwards; transform-origin: left; transform-box: fill-box;"',
         overlayEffects: '',
       };
 
@@ -344,8 +406,8 @@ function getThemeAnimations(themeName: PremiumThemeName) {
             to { opacity: 1; transform: translateY(0); }
           }
           @keyframes progressGrow {
-            from { width: 0; }
-            to { width: 100%; }
+            from { transform: scaleX(0); }
+            to { transform: scaleX(1); }
           }
           @keyframes dotPulse {
             0%, 100% { r: 6; opacity: 0.2; }
@@ -357,7 +419,7 @@ function getThemeAnimations(themeName: PremiumThemeName) {
         cardAnimation: `<animate attributeName="stroke-opacity" values="0.8;1;0.8" dur="4s" repeatCount="indefinite"/>`,
         statsFadeIn: 'style="animation: fadeIn 0.6s ease-out forwards; opacity: 0;"',
         languageFadeIn: 'style="animation: fadeIn 0.6s ease-out forwards; opacity: 0;"',
-        progressBar: 'style="animation: progressGrow 1.5s ease-out forwards;"',
+        progressBar: 'style="animation: progressGrow 1.5s ease-out forwards; transform-origin: left; transform-box: fill-box;"',
         overlayEffects: `
           <circle cx="100" cy="80" r="6" fill="#bd93f9" style="animation: dotPulse 3s ease-in-out infinite;"/>
           <circle cx="120" cy="110" r="6" fill="#ff79c6" style="animation: dotPulse 3s ease-in-out infinite; animation-delay: 0.5s;"/>
