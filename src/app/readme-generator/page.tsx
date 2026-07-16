@@ -88,15 +88,6 @@ const animatedSections: { id: AnimatedSection; label: string }[] = [
   { id: 'social', label: 'Social' },
 ];
 
-const themeAccent: Record<string, string> = {
-  satan: 'FF4500',
-  neon: '00FFFF',
-  zen: '00FF88',
-  'github-dark': '22C55E',
-  dracula: 'FF79C6',
-  aurora: '2DD4BF',
-};
-
 const careerRoles: { id: CareerRole; label: string; description: string }[] = [
   { id: 'frontend', label: 'Frontend Engineer', description: 'UI/UX, performance, design systems' },
   { id: 'backend', label: 'Backend Engineer', description: 'APIs, scalability, data reliability' },
@@ -194,25 +185,6 @@ export default function ReadmeGeneratorPage() {
     [careerMode, agentLoop, careerRole]
   );
   const readmeProgress = useThinkingProgress(readmeStepLabels, { intervalMs: 1200 });
-  const animationPreview = useMemo(() => {
-    const color = themeAccent[theme] ?? '22C55E';
-    const lines = typingLines
-      .split('\n')
-      .map((line) => line.trim())
-      .filter(Boolean)
-      .slice(0, 4);
-    const typingUrl = lines.length
-      ? `https://readme-typing-svg.demolab.com?font=Fira+Code&weight=700&size=28&duration=2800&pause=900&color=${color}&center=true&vCenter=true&width=820&lines=${lines.map((line) => line.replace(/\s+/g, '+')).join(';')}`
-      : '';
-    return {
-      color,
-      typingUrl,
-      avatarUrl: `/api/avatar?username=${encodeURIComponent(username || 'octocat')}&theme=${theme}&family=character&size=240`,
-      dividerUrl: 'https://capsule-render.vercel.app/api?type=rect&height=2&color=gradient&customColorList=12,20,24&section=footer',
-      snakeUrl: `https://raw.githubusercontent.com/${username || 'octocat'}/${username || 'octocat'}/output/github-snake.svg`,
-    };
-  }, [theme, typingLines, username]);
-
   const animatedSectionPreview = useMemo(() => {
     const cleanUsername = username.trim() || 'octocat';
     const buildParams = (section: AnimatedSection, absolute = false) => {
@@ -669,11 +641,12 @@ export default function ReadmeGeneratorPage() {
               </div>
             </div>
 
-            <div style={{ marginBottom: '32px' }}>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: '#fff', marginBottom: '12px' }}>
-                Structure & Tone
-              </label>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: 14 }}>
+            <details className="readme-advanced-drawer">
+              <summary>
+                <span>Advanced writing settings</span>
+                <small>Structure and tone</small>
+              </summary>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: 14, marginTop: 14 }}>
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                   {structureOptions.map((option) => (
                     <button
@@ -716,14 +689,15 @@ export default function ReadmeGeneratorPage() {
                   ))}
                 </div>
               </div>
-            </div>
+            </details>
 
             {/* Motion & Visuals */}
-            <div style={{ marginBottom: '32px' }}>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: '#fff', marginBottom: '12px' }}>
-                Motion & Visuals
-              </label>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '10px', marginBottom: '14px' }}>
+            <details className="readme-advanced-drawer">
+              <summary>
+                <span>Customize animations</span>
+                <small>{motionOptions.find((option) => option.id === motionStyle)?.label ?? 'Subtle'}</small>
+              </summary>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '10px', marginTop: 14, marginBottom: '14px' }}>
                 {motionOptions.map((option) => (
                   <button
                     key={option.id}
@@ -781,35 +755,9 @@ export default function ReadmeGeneratorPage() {
                       </label>
                     ))}
                   </div>
-                  <div style={{ padding: 14, background: '#080808', border: '1px solid #2a2a2a', borderRadius: 12 }}>
-                    <div style={{ color: '#aaa', fontSize: 13, fontWeight: 800, marginBottom: 12 }}>Animation preview</div>
-                    <div style={{ display: 'grid', gap: 10 }}>
-                      {typingHeadline && animationPreview.typingUrl && (
-                        <div style={{ padding: 10, borderRadius: 10, background: '#0d1117', border: '1px solid #1f2937', overflow: 'hidden' }}>
-                          <img src={animationPreview.typingUrl} alt="Typing headline preview" style={{ width: '100%', height: 'auto', display: 'block' }} />
-                        </div>
-                      )}
-                      {avatarBlock && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 10, borderRadius: 10, background: '#0d1117', border: '1px solid #1f2937' }}>
-                          <img src={animationPreview.avatarUrl} alt="Avatar block preview" width={58} height={58} style={{ borderRadius: 16 }} />
-                          <span style={{ color: '#888', fontSize: 12 }}>Theme-matched avatar block</span>
-                        </div>
-                      )}
-                      {animatedDivider && (
-                        <div style={{ padding: 10, borderRadius: 10, background: '#0d1117', border: '1px solid #1f2937' }}>
-                          <img src={animationPreview.dividerUrl} alt="Animated divider preview" style={{ width: '100%', height: 10, objectFit: 'cover', display: 'block' }} />
-                        </div>
-                      )}
-                      {contributionSnake && (
-                        <div style={{ padding: 10, borderRadius: 10, background: 'rgba(88,166,255,0.08)', border: '1px solid rgba(88,166,255,0.24)', color: '#9cc9ff', fontSize: 12, lineHeight: 1.5 }}>
-                          Contribution snake will include a README image block and a GitHub Actions workflow file after generation.
-                        </div>
-                      )}
-                    </div>
-                  </div>
                 </div>
               )}
-            </div>
+            </details>
 
             {/* Animated Section Preview */}
             <div className="readme-animated-section-panel" style={{ marginBottom: '32px' }}>
@@ -844,6 +792,8 @@ export default function ReadmeGeneratorPage() {
                 </button>
               </div>
 
+              <details className="readme-compact-details">
+                <summary>Social links</summary>
               <div
                 style={{
                   padding: '16px',
@@ -896,6 +846,7 @@ export default function ReadmeGeneratorPage() {
                   </label>
                 </div>
               </div>
+              </details>
 
               <div style={{ display: 'grid', gap: '14px' }}>
                 {animatedSectionPreview.map((section) => (
@@ -997,17 +948,6 @@ export default function ReadmeGeneratorPage() {
                     }}
                   >
                     {option.label}
-                    <span
-                      style={{
-                        display: 'block',
-                        fontSize: '12px',
-                        fontWeight: 400,
-                        color: '#666',
-                        marginTop: '4px',
-                      }}
-                    >
-                      {option.description}
-                    </span>
                   </button>
                 ))}
               </div>
@@ -1069,18 +1009,11 @@ export default function ReadmeGeneratorPage() {
             </div>
 
             {/* Career Mode */}
-            <div style={{ marginBottom: '32px' }}>
-              <label
-                style={{
-                  display: 'block',
-                  fontSize: '14px',
-                  fontWeight: 600,
-                  color: '#fff',
-                  marginBottom: '12px',
-                }}
-              >
-                Career Mode
-              </label>
+            <details className="readme-advanced-drawer">
+              <summary>
+                <span>Career agent</span>
+                <small>{careerMode ? selectedRole.label : 'Off'}</small>
+              </summary>
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '12px' }}>
                 <button
                   onClick={() => setCareerMode(!careerMode)}
@@ -1113,32 +1046,32 @@ export default function ReadmeGeneratorPage() {
                   {agentLoop ? 'Agent Refinement On' : 'Agent Refinement Off'}
                 </button>
               </div>
-              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                {careerRoles.map((role) => (
-                  <button
-                    key={role.id}
-                    onClick={() => setCareerRole(role.id)}
-                    disabled={!careerMode}
-                    style={{
-                      padding: '10px 16px',
-                      background: careerRole === role.id ? 'rgba(34, 197, 94, 0.15)' : '#0d0d0d',
-                      border: `1px solid ${careerRole === role.id ? '#22c55e' : '#2a2a2a'}`,
-                      borderRadius: '10px',
-                      color: careerRole === role.id ? '#22c55e' : '#888',
-                      fontSize: '13px',
-                      fontWeight: 600,
-                      cursor: careerMode ? 'pointer' : 'not-allowed',
-                      opacity: careerMode ? 1 : 0.6,
-                    }}
-                  >
-                    {role.label}
-                    <span style={{ display: 'block', fontSize: '11px', fontWeight: 400, color: '#666', marginTop: '4px' }}>
-                      {role.description}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </div>
+              <label style={{ display: 'grid', gap: 8, color: '#aaa', fontSize: 13, fontWeight: 700 }}>
+                Target role
+                <select
+                  value={careerRole}
+                  onChange={(event) => setCareerRole(event.target.value as CareerRole)}
+                  disabled={!careerMode}
+                  style={{
+                    width: '100%',
+                    padding: '12px 14px',
+                    background: '#0d0d0d',
+                    border: '1px solid #2a2a2a',
+                    borderRadius: '10px',
+                    color: careerMode ? '#fff' : '#666',
+                    fontSize: '14px',
+                    outline: 'none',
+                    opacity: careerMode ? 1 : 0.65,
+                  }}
+                >
+                  {careerRoles.map((role) => (
+                    <option key={role.id} value={role.id}>
+                      {role.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </details>
 
             {/* Sections Selection */}
             <div style={{ marginBottom: '32px' }}>
@@ -1203,17 +1136,6 @@ export default function ReadmeGeneratorPage() {
                         {sections.includes(section.id) && '✓'}
                       </span>
                       {section.label}
-                    </span>
-                    <span
-                      style={{
-                        display: 'block',
-                        fontSize: '11px',
-                        color: '#666',
-                        marginTop: '4px',
-                        marginLeft: '26px',
-                      }}
-                    >
-                      {section.description}
                     </span>
                   </button>
                 ))}
@@ -1821,6 +1743,60 @@ export default function ReadmeGeneratorPage() {
 
         .readme-form-card > :not(.readme-animated-section-panel) {
           grid-column: 1;
+        }
+
+        .readme-advanced-drawer {
+          grid-column: 1;
+          margin-bottom: 14px;
+          padding: 14px;
+          background: #101010;
+          border: 1px solid #242424;
+          border-radius: 12px;
+        }
+
+        .readme-advanced-drawer summary,
+        .readme-compact-details summary {
+          align-items: center;
+          cursor: pointer;
+          display: flex;
+          gap: 12px;
+          justify-content: space-between;
+          list-style: none;
+        }
+
+        .readme-advanced-drawer summary::-webkit-details-marker,
+        .readme-compact-details summary::-webkit-details-marker {
+          display: none;
+        }
+
+        .readme-advanced-drawer summary span {
+          color: #f5f5f5;
+          font-size: 14px;
+          font-weight: 800;
+        }
+
+        .readme-advanced-drawer summary small {
+          color: #777;
+          font-size: 12px;
+          font-weight: 700;
+        }
+
+        .readme-compact-details {
+          margin-bottom: 14px;
+          padding: 12px;
+          background: #0d0d0d;
+          border: 1px solid #242424;
+          border-radius: 12px;
+        }
+
+        .readme-compact-details summary {
+          color: #aaa;
+          font-size: 13px;
+          font-weight: 800;
+        }
+
+        .readme-compact-details[open] summary {
+          margin-bottom: 12px;
         }
 
         .readme-animated-section-panel {
