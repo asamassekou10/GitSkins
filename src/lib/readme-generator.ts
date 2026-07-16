@@ -311,6 +311,7 @@ ${pinnedReposText || 'No pinned repositories'}
 - Goal: ${goalLabels[config.goal ?? 'personal-brand']}
 - Structure: ${structureLabels[config.structure ?? 'visual']}
 - Tone: ${toneLabels[config.tone ?? 'confident']}
+- AI profile scan: ${config.aiProfileScan ? 'enabled - use public profile and project evidence as source of truth' : 'disabled - keep personalization lighter'}
 - Sections to include: ${sectionsToInclude}
 - Theme for GitSkins widgets: ${config.theme}
 - User-selected visual sections: ${Object.entries(config.sectionAssets ?? {}).map(([section, assets]) => `${section}: ${assets.join(', ')}`).join('; ') || 'default GitSkins visual sections'}
@@ -343,6 +344,7 @@ ${pinnedReposText || 'No pinned repositories'}
 8. End with social links/contact info if available
 9. Include user-provided links exactly when present; do not invent missing social URLs
 10. Do not invent employers, degrees, metrics, links, or project claims that are not supported by the profile data
+11. ${config.aiProfileScan ? 'Use pinned repositories, languages, stars, descriptions, contributions, and public profile fields to make the README more accurate. Mention specific projects only when they are present in the data.' : 'Avoid deep project inference and keep the README closer to the explicit profile fields.'}
 
 Generate ONLY the markdown content, no explanations.`;
 }

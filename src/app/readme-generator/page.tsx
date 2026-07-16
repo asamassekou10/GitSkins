@@ -20,6 +20,7 @@ type ReadmeTone = 'concise' | 'confident' | 'friendly' | 'senior' | 'founder' | 
 type MotionStyle = 'none' | 'subtle' | 'animated' | 'playful';
 type AnimatedSection = 'hero' | 'stats' | 'stack' | 'social';
 type InspectorTab = 'content' | 'style' | 'agent';
+type MediaBinTab = 'profile' | 'visuals' | 'links';
 type SectionAssets = Partial<Record<SectionType, AnimatedSection[]>>;
 type PreviewVisual = {
   id: string;
@@ -281,11 +282,13 @@ export default function ReadmeGeneratorPage() {
   ]);
   const [selectedSection, setSelectedSection] = useState<SectionType>('header');
   const [inspectorTab, setInspectorTab] = useState<InspectorTab>('content');
+  const [mediaBinTab, setMediaBinTab] = useState<MediaBinTab>('profile');
   const [sectionAssets, setSectionAssets] = useState<SectionAssets>({});
   const [careerMode, setCareerMode] = useState(true);
   const [careerRole, setCareerRole] = useState<CareerRole>('fullstack');
   const [agentLoop, setAgentLoop] = useState(true);
   const [useAI, setUseAI] = useState(true);
+  const [aiProfileScan, setAiProfileScan] = useState(true);
   const [goal, setGoal] = useState<ReadmeGoal>('get-hired');
   const [structure, setStructure] = useState<ReadmeStructure>('visual');
   const [tone, setTone] = useState<ReadmeTone>('confident');
@@ -365,9 +368,9 @@ export default function ReadmeGeneratorPage() {
   const readmeStepLabels = useMemo(
     () =>
       careerMode && agentLoop
-        ? ['Fetching GitHub profile', 'Drafting README', `Refining for ${careerRole}`]
-        : ['Fetching GitHub profile', 'Drafting README'],
-    [careerMode, agentLoop, careerRole]
+        ? [aiProfileScan ? 'Scanning profile and projects' : 'Fetching GitHub profile', 'Drafting README', `Refining for ${careerRole}`]
+        : [aiProfileScan ? 'Scanning profile and projects' : 'Fetching GitHub profile', 'Drafting README'],
+    [careerMode, agentLoop, careerRole, aiProfileScan]
   );
   const readmeProgress = useThinkingProgress(readmeStepLabels, { intervalMs: 1200 });
   const animatedSectionPreview = useMemo(() => {
@@ -604,6 +607,7 @@ export default function ReadmeGeneratorPage() {
           careerRole,
           agentLoop,
           useAI,
+          aiProfileScan,
           goal,
           structure,
           tone,
@@ -649,7 +653,7 @@ export default function ReadmeGeneratorPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [authenticated, username, sections, style, theme, careerMode, careerRole, agentLoop, useAI, goal, structure, tone, motionStyle, typingHeadline, typingLines, animatedDivider, contributionSnake, visitorCounter, githubTrophies, avatarBlock, socialWebsite, socialX, socialLinkedIn, socialEmail, generationSectionAssets, readmeProgress.start, readmeProgress.complete, readmeProgress.reset]);
+  }, [authenticated, username, sections, style, theme, careerMode, careerRole, agentLoop, useAI, aiProfileScan, goal, structure, tone, motionStyle, typingHeadline, typingLines, animatedDivider, contributionSnake, visitorCounter, githubTrophies, avatarBlock, socialWebsite, socialX, socialLinkedIn, socialEmail, generationSectionAssets, readmeProgress.start, readmeProgress.complete, readmeProgress.reset]);
 
   const copyToClipboard = async () => {
     const markdown = generatedReadme ?? liveDraftReadme;
@@ -903,61 +907,107 @@ export default function ReadmeGeneratorPage() {
 
             <aside className="readme-media-bin" data-testid="readme-media-bin">
               <div className="readme-panel-tabs">
-                <span className="active">Profile</span>
-                <span>Visuals</span>
-                <span>Links</span>
+                {[
+                  ['profile', 'Profile'],
+                  ['visuals', 'Visuals'],
+                  ['links', 'Links'],
+                ].map(([id, label]) => (
+                  <button
+                    key={id}
+                    type="button"
+                    aria-label={`${label} media bin`}
+                    onClick={() => setMediaBinTab(id as MediaBinTab)}
+                    className={mediaBinTab === id ? 'active' : ''}
+                  >
+                    {label}
+                  </button>
+                ))}
               </div>
 
-              <label className="readme-editor-field">
-                <span>GitHub Username</span>
-                <input
-                  type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  placeholder="octocat"
-                  onKeyDown={(e) => e.key === 'Enter' && generateReadme()}
-                />
-              </label>
+              {mediaBinTab === 'profile' && (
+                <div className="readme-media-tab-panel">
+                  <label className="readme-editor-field">
+                    <span>GitHub Username</span>
+                    <input
+                      type="text"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      placeholder="octocat"
+                      onKeyDown={(e) => e.key === 'Enter' && generateReadme()}
+                    />
+                  </label>
+                  <div className="readme-mini-summary">
+                    <span>Current target</span>
+                    <strong>{username.trim() || 'octocat'} / README.md</strong>
+                    <p>{selectedGoal.description}</p>
+                  </div>
+                </div>
+              )}
 
-              <div className="readme-bin-grid">
-                {themes.map((item) => {
-                  const locked = isThemeLocked(item.id);
-                  return (
-                    <button
-                      key={item.id}
-                      type="button"
-                      onClick={() => !locked && setTheme(item.id)}
-                      disabled={locked}
-                      className={theme === item.id ? 'active' : ''}
-                      style={{ '--theme-color': item.color } as CSSProperties}
-                    >
-                      <span />
-                      {item.name}
-                      {locked ? <small>Pro</small> : null}
-                    </button>
-                  );
-                })}
-              </div>
+              {mediaBinTab === 'visuals' && (
+                <div className="readme-media-tab-panel">
+                  <div className="readme-bin-grid">
+                    {themes.map((item) => {
+                      const locked = isThemeLocked(item.id);
+                      return (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => !locked && setTheme(item.id)}
+                          disabled={locked}
+                          className={theme === item.id ? 'active' : ''}
+                          style={{ '--theme-color': item.color } as CSSProperties}
+                        >
+                          <span />
+                          {item.name}
+                          {locked ? <small>Pro</small> : null}
+                        </button>
+                      );
+                    })}
+                  </div>
 
-              <div className="readme-asset-snippets">
-                <h3>Animated Assets</h3>
-                {animatedSectionPreview.map((section) => {
-                  const isDefaultAsset = selectedDefaultAssets.includes(section.id);
-                  const isManualAsset = selectedManualAssets.includes(section.id);
-                  return (
-                    <button
-                      key={section.id}
-                      type="button"
-                      onClick={() => insertAssetIntoSelectedSection(section.id)}
-                      disabled={isDefaultAsset || isManualAsset}
-                      className={isDefaultAsset ? 'default' : isManualAsset ? 'active' : ''}
-                    >
-                      <span>{section.label}</span>
-                      <small>{isDefaultAsset ? 'Default visual' : isManualAsset ? 'Added' : `Add to ${selectedSectionInspector.title}`}</small>
-                    </button>
-                  );
-                })}
-              </div>
+                  <div className="readme-asset-snippets">
+                    <h3>Animated Assets</h3>
+                    {animatedSectionPreview.map((section) => {
+                      const isDefaultAsset = selectedDefaultAssets.includes(section.id);
+                      const isManualAsset = selectedManualAssets.includes(section.id);
+                      return (
+                        <button
+                          key={section.id}
+                          type="button"
+                          onClick={() => insertAssetIntoSelectedSection(section.id)}
+                          disabled={isDefaultAsset || isManualAsset}
+                          className={isDefaultAsset ? 'default' : isManualAsset ? 'active' : ''}
+                        >
+                          <span>{section.label}</span>
+                          <small>{isDefaultAsset ? 'Default visual' : isManualAsset ? 'Added' : `Add to ${selectedSectionInspector.title}`}</small>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {mediaBinTab === 'links' && (
+                <div className="readme-media-tab-panel">
+                  {[
+                    ['Website', socialWebsite, setSocialWebsite, 'gitskins.com'],
+                    ['X', socialX, setSocialX, 'octocat'],
+                    ['LinkedIn', socialLinkedIn, setSocialLinkedIn, 'in/username'],
+                    ['Email', socialEmail, setSocialEmail, 'hello@example.com'],
+                  ].map(([label, value, setter, placeholder]) => (
+                    <label key={label as string} className="readme-editor-field compact">
+                      <span>{label as string}</span>
+                      <input
+                        type="text"
+                        value={value as string}
+                        onChange={(event) => (setter as (next: string) => void)(event.target.value)}
+                        placeholder={placeholder as string}
+                      />
+                    </label>
+                  ))}
+                </div>
+              )}
             </aside>
 
             <section className="readme-player-monitor" data-testid="readme-preview-monitor">
@@ -1334,6 +1384,18 @@ export default function ReadmeGeneratorPage() {
                     <span>Use AI Enhancement</span>
                     <input type="checkbox" checked={useAI} onChange={(e) => setUseAI(e.target.checked)} />
                   </label>
+                  <div className="readme-ai-scan-card">
+                    <div>
+                      <strong>AI profile scan</strong>
+                      <span>Reads public GitHub profile data, pinned projects, languages, stars, and repo descriptions before writing.</span>
+                    </div>
+                    <input
+                      type="checkbox"
+                      checked={aiProfileScan}
+                      disabled={!useAI}
+                      onChange={(event) => setAiProfileScan(event.target.checked)}
+                    />
+                  </div>
                 </>
               )}
 
@@ -1372,1158 +1434,6 @@ export default function ReadmeGeneratorPage() {
             </section>
           </div>
 
-          <div
-            className="readme-form-card readme-legacy-form-card"
-            style={{
-              background: '#161616',
-              borderRadius: '20px',
-              border: '1px solid #2a2a2a',
-              padding: '32px',
-              marginBottom: '32px',
-            }}
-          >
-            <div className="readme-editor-toolbar">
-              <div>
-                <span>README Studio</span>
-                <strong>{username.trim() || 'octocat'}</strong>
-              </div>
-              <div className="readme-editor-toolbar__meta">
-                <span>{selectedTheme.name}</span>
-                <span>{selectedGoal.label}</span>
-                <span>{sections.length} clips</span>
-              </div>
-            </div>
-
-            {/* Username Input */}
-            <div className="readme-assets-bin" style={{ marginBottom: '32px' }}>
-              <label
-                style={{
-                  display: 'block',
-                  fontSize: '14px',
-                  fontWeight: 600,
-                  color: '#fff',
-                  marginBottom: '12px',
-                }}
-              >
-                GitHub Username
-              </label>
-              <div style={{ display: 'flex', gap: '12px' }}>
-                <input
-                  type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  placeholder="octocat"
-                  onKeyDown={(e) => e.key === 'Enter' && generateReadme()}
-                  style={{
-                    flex: 1,
-                    padding: '14px 20px',
-                    background: '#0d0d0d',
-                    border: '1px solid #2a2a2a',
-                    borderRadius: '12px',
-                    color: '#fff',
-                    fontSize: '16px',
-                    outline: 'none',
-                  }}
-                />
-                {profileData && (
-                  <img
-                    src={profileData.avatarUrl}
-                    alt={profileData.name || username}
-                    style={{
-                      width: '48px',
-                      height: '48px',
-                      borderRadius: '12px',
-                      border: '2px solid #22c55e',
-                    }}
-                  />
-                )}
-              </div>
-              <div style={{ marginTop: '10px' }}>
-                <button
-                  type="button"
-                  onClick={() => setUsername('octocat')}
-                  style={{
-                    padding: '6px 12px',
-                    background: 'rgba(34, 197, 94, 0.15)',
-                    border: '1px solid rgba(34, 197, 94, 0.3)',
-                    borderRadius: '999px',
-                    color: '#22c55e',
-                    fontSize: '12px',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                  }}
-                >
-                  Use demo username
-                </button>
-              </div>
-            </div>
-
-            {/* Strategy Controls */}
-            <div className="readme-inspector-panel" style={{ marginBottom: '32px' }}>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: '#fff', marginBottom: '12px' }}>
-                README Goal
-              </label>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(190px, 1fr))', gap: '10px' }}>
-                {goalOptions.map((option) => (
-                  <button
-                    key={option.id}
-                    onClick={() => setGoal(option.id)}
-                    style={{
-                      padding: '12px 14px',
-                      background: goal === option.id ? 'rgba(34, 197, 94, 0.15)' : '#0d0d0d',
-                      border: `1px solid ${goal === option.id ? '#22c55e' : '#2a2a2a'}`,
-                      borderRadius: '10px',
-                      color: goal === option.id ? '#22c55e' : '#aaa',
-                      fontSize: '13px',
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                      textAlign: 'left',
-                    }}
-                  >
-                    {option.label}
-                    <span style={{ display: 'block', marginTop: 5, color: '#666', fontSize: 11, fontWeight: 400, lineHeight: 1.35 }}>
-                      {option.description}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <details className="readme-advanced-drawer readme-inspector-panel">
-              <summary>
-                <span>Advanced writing settings</span>
-                <small>Structure and tone</small>
-              </summary>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: 14, marginTop: 14 }}>
-                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                  {structureOptions.map((option) => (
-                    <button
-                      key={option.id}
-                      onClick={() => setStructure(option.id)}
-                      title={option.description}
-                      style={{
-                        padding: '9px 12px',
-                        background: structure === option.id ? 'rgba(34, 197, 94, 0.15)' : '#0d0d0d',
-                        border: `1px solid ${structure === option.id ? '#22c55e' : '#2a2a2a'}`,
-                        borderRadius: '999px',
-                        color: structure === option.id ? '#22c55e' : '#888',
-                        fontSize: '12px',
-                        fontWeight: 700,
-                        cursor: 'pointer',
-                      }}
-                    >
-                      {option.label}
-                    </button>
-                  ))}
-                </div>
-                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                  {toneOptions.map((option) => (
-                    <button
-                      key={option.id}
-                      onClick={() => setTone(option.id)}
-                      style={{
-                        padding: '9px 12px',
-                        background: tone === option.id ? 'rgba(34, 197, 94, 0.15)' : '#0d0d0d',
-                        border: `1px solid ${tone === option.id ? '#22c55e' : '#2a2a2a'}`,
-                        borderRadius: '999px',
-                        color: tone === option.id ? '#22c55e' : '#888',
-                        fontSize: '12px',
-                        fontWeight: 700,
-                        cursor: 'pointer',
-                      }}
-                    >
-                      {option.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </details>
-
-            {/* Motion & Visuals */}
-            <details className="readme-advanced-drawer readme-inspector-panel">
-              <summary>
-                <span>Customize animations</span>
-                <small>{motionOptions.find((option) => option.id === motionStyle)?.label ?? 'Subtle'}</small>
-              </summary>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '10px', marginTop: 14, marginBottom: '14px' }}>
-                {motionOptions.map((option) => (
-                  <button
-                    key={option.id}
-                    onClick={() => setMotionStyle(option.id)}
-                    style={{
-                      padding: '12px 14px',
-                      background: motionStyle === option.id ? 'rgba(34, 197, 94, 0.15)' : '#0d0d0d',
-                      border: `1px solid ${motionStyle === option.id ? '#22c55e' : '#2a2a2a'}`,
-                      borderRadius: '10px',
-                      color: motionStyle === option.id ? '#22c55e' : '#aaa',
-                      fontSize: '13px',
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                      textAlign: 'left',
-                    }}
-                  >
-                    {option.label}
-                    <span style={{ display: 'block', marginTop: 5, color: '#666', fontSize: 11, fontWeight: 400, lineHeight: 1.35 }}>
-                      {option.description}
-                    </span>
-                  </button>
-                ))}
-              </div>
-
-              {motionStyle !== 'none' && (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: 14 }}>
-                  <div style={{ padding: 14, background: '#0d0d0d', border: '1px solid #2a2a2a', borderRadius: 12 }}>
-                    <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, color: '#ddd', fontSize: 13, fontWeight: 700, marginBottom: 10 }}>
-                      Typing headline
-                      <input type="checkbox" checked={typingHeadline} onChange={(e) => setTypingHeadline(e.target.checked)} />
-                    </label>
-                    <textarea
-                      value={typingLines}
-                      onChange={(e) => setTypingLines(e.target.value)}
-                      rows={4}
-                      placeholder="One line per typing phrase"
-                      disabled={!typingHeadline}
-                      style={{ width: '100%', resize: 'vertical', padding: 12, background: '#080808', border: '1px solid #242424', borderRadius: 10, color: '#fff', fontSize: 13, lineHeight: 1.5, opacity: typingHeadline ? 1 : 0.55 }}
-                    />
-                  </div>
-                  <div style={{ padding: 14, background: '#0d0d0d', border: '1px solid #2a2a2a', borderRadius: 12 }}>
-                    {[
-                      ['Animated divider', animatedDivider, setAnimatedDivider],
-                      ['Theme avatar block', avatarBlock, setAvatarBlock],
-                      ['Visitor counter', visitorCounter, setVisitorCounter],
-                      ['Contribution snake', contributionSnake, setContributionSnake],
-                      ['GitHub trophies', githubTrophies, setGithubTrophies],
-                    ].map(([label, checked, setter]) => (
-                      <label key={label as string} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, color: '#bbb', fontSize: 13, fontWeight: 650, padding: '8px 0', borderBottom: label === 'GitHub trophies' ? 'none' : '1px solid #1f1f1f' }}>
-                        <span>
-                          {label as string}
-                          {label === 'Contribution snake' && <span style={{ color: '#666', fontSize: 11, marginLeft: 6 }}>setup required</span>}
-                        </span>
-                        <input type="checkbox" checked={checked as boolean} onChange={(e) => (setter as (value: boolean) => void)(e.target.checked)} />
-                      </label>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </details>
-
-            {/* Animated Section Preview */}
-            <div className="readme-animated-section-panel readme-preview-monitor" style={{ marginBottom: '32px' }}>
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  gap: '16px',
-                  marginBottom: '14px',
-                  flexWrap: 'wrap',
-                }}
-              >
-                <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: '#fff' }}>
-                  Animated GitSkins Sections
-                </label>
-                <button
-                  type="button"
-                  onClick={() => copyAnimatedSection('all')}
-                  style={{
-                    padding: '8px 12px',
-                    background: copiedAnimatedSection === 'all' ? '#22c55e' : 'rgba(34, 197, 94, 0.1)',
-                    border: '1px solid rgba(34, 197, 94, 0.3)',
-                    borderRadius: '8px',
-                    color: copiedAnimatedSection === 'all' ? '#050505' : '#22c55e',
-                    fontSize: '12px',
-                    fontWeight: 800,
-                    cursor: 'pointer',
-                  }}
-                >
-                  {copiedAnimatedSection === 'all' ? 'Copied' : 'Copy all sections'}
-                </button>
-              </div>
-
-              <details className="readme-compact-details">
-                <summary>Social links</summary>
-              <div
-                style={{
-                  padding: '16px',
-                  background: '#0d0d0d',
-                  border: '1px solid #2a2a2a',
-                  borderRadius: '14px',
-                  marginBottom: '14px',
-                }}
-              >
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 180px), 1fr))', gap: '10px' }}>
-                  <label style={{ display: 'grid', gap: '6px', color: '#888', fontSize: '12px', fontWeight: 700 }}>
-                    Website
-                    <input
-                      type="text"
-                      value={socialWebsite}
-                      onChange={(e) => setSocialWebsite(e.target.value)}
-                      placeholder="gitskins.com"
-                      style={{ padding: '10px 12px', background: '#080808', border: '1px solid #242424', borderRadius: '9px', color: '#fff', fontSize: '13px', outline: 'none' }}
-                    />
-                  </label>
-                  <label style={{ display: 'grid', gap: '6px', color: '#888', fontSize: '12px', fontWeight: 700 }}>
-                    X
-                    <input
-                      type="text"
-                      value={socialX}
-                      onChange={(e) => setSocialX(e.target.value)}
-                      placeholder="octocat"
-                      style={{ padding: '10px 12px', background: '#080808', border: '1px solid #242424', borderRadius: '9px', color: '#fff', fontSize: '13px', outline: 'none' }}
-                    />
-                  </label>
-                  <label style={{ display: 'grid', gap: '6px', color: '#888', fontSize: '12px', fontWeight: 700 }}>
-                    LinkedIn
-                    <input
-                      type="text"
-                      value={socialLinkedIn}
-                      onChange={(e) => setSocialLinkedIn(e.target.value)}
-                      placeholder="in/username"
-                      style={{ padding: '10px 12px', background: '#080808', border: '1px solid #242424', borderRadius: '9px', color: '#fff', fontSize: '13px', outline: 'none' }}
-                    />
-                  </label>
-                  <label style={{ display: 'grid', gap: '6px', color: '#888', fontSize: '12px', fontWeight: 700 }}>
-                    Email
-                    <input
-                      type="text"
-                      value={socialEmail}
-                      onChange={(e) => setSocialEmail(e.target.value)}
-                      placeholder="hello@example.com"
-                      style={{ padding: '10px 12px', background: '#080808', border: '1px solid #242424', borderRadius: '9px', color: '#fff', fontSize: '13px', outline: 'none' }}
-                    />
-                  </label>
-                </div>
-              </div>
-              </details>
-
-              <div style={{ display: 'grid', gap: '14px' }}>
-                {animatedSectionPreview.map((section) => (
-                  <div
-                    key={section.id}
-                    style={{
-                      background: '#080808',
-                      border: '1px solid #242424',
-                      borderRadius: '14px',
-                      overflow: 'hidden',
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        gap: '12px',
-                        padding: '10px 12px',
-                        borderBottom: '1px solid #1f1f1f',
-                        background: '#0a0a0a',
-                      }}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <span
-                          style={{
-                            width: '8px',
-                            height: '8px',
-                            borderRadius: '50%',
-                            background: themes.find((item) => item.id === theme)?.color || '#22c55e',
-                            boxShadow: `0 0 14px ${themes.find((item) => item.id === theme)?.color || '#22c55e'}`,
-                          }}
-                        />
-                        <span style={{ color: '#f5f5f5', fontSize: '13px', fontWeight: 800 }}>{section.label}</span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => copyAnimatedSection(section.id)}
-                        style={{
-                          padding: '7px 10px',
-                          background: copiedAnimatedSection === section.id ? '#22c55e' : '#161616',
-                          border: '1px solid #2a2a2a',
-                          borderRadius: '8px',
-                          color: copiedAnimatedSection === section.id ? '#050505' : '#fafafa',
-                          fontSize: '12px',
-                          fontWeight: 800,
-                          cursor: 'pointer',
-                        }}
-                      >
-                        {copiedAnimatedSection === section.id ? 'Copied' : 'Copy'}
-                      </button>
-                    </div>
-                    <div style={{ padding: '12px', overflowX: 'auto' }}>
-                      <img
-                        src={section.url}
-                        alt={`${section.label} animated section preview`}
-                        style={{
-                          display: 'block',
-                          width: '100%',
-                          minWidth: '620px',
-                          height: 'auto',
-                          borderRadius: '10px',
-                        }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Style Selection */}
-            <div className="readme-inspector-panel" style={{ marginBottom: '32px' }}>
-              <label
-                style={{
-                  display: 'block',
-                  fontSize: '14px',
-                  fontWeight: 600,
-                  color: '#fff',
-                  marginBottom: '12px',
-                }}
-              >
-                Style
-              </label>
-              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                {styleOptions.map((option) => (
-                  <button
-                    key={option.id}
-                    onClick={() => setStyle(option.id)}
-                    style={{
-                      padding: '12px 20px',
-                      background: style === option.id ? 'rgba(34, 197, 94, 0.15)' : '#0d0d0d',
-                      border: `1px solid ${style === option.id ? '#22c55e' : '#2a2a2a'}`,
-                      borderRadius: '10px',
-                      color: style === option.id ? '#22c55e' : '#888',
-                      fontSize: '14px',
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      transition: 'all 0.2s',
-                    }}
-                  >
-                    {option.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Theme Selection */}
-            <div className="readme-assets-bin readme-theme-bin" style={{ marginBottom: '32px' }}>
-              <label
-                style={{
-                  display: 'block',
-                  fontSize: '14px',
-                  fontWeight: 600,
-                  color: '#fff',
-                  marginBottom: '12px',
-                }}
-              >
-                Widget Theme
-              </label>
-              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                {themes.map((t) => {
-                  const locked = isThemeLocked(t.id);
-                  return (
-                    <button
-                      key={t.id}
-                      onClick={() => !locked && setTheme(t.id)}
-                      disabled={locked}
-                      style={{
-                        padding: '10px 18px',
-                        background: theme === t.id ? `${t.color}20` : '#0d0d0d',
-                        border: `1px solid ${theme === t.id ? t.color : '#2a2a2a'}`,
-                        borderRadius: '8px',
-                        color: locked ? '#555' : theme === t.id ? t.color : '#888',
-                        fontSize: '13px',
-                        fontWeight: 600,
-                        cursor: locked ? 'not-allowed' : 'pointer',
-                        transition: 'all 0.2s',
-                        opacity: locked ? 0.6 : 1,
-                        position: 'relative',
-                      }}
-                    >
-                      {t.name}
-                      {locked && (
-                        <span
-                          style={{
-                            marginLeft: '6px',
-                            fontSize: '10px',
-                            background: '#333',
-                            padding: '2px 6px',
-                            borderRadius: '4px',
-                          }}
-                        >
-                          PRO
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Career Mode */}
-            <details className="readme-advanced-drawer readme-inspector-panel">
-              <summary>
-                <span>Career agent</span>
-                <small>{careerMode ? selectedRole.label : 'Off'}</small>
-              </summary>
-              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '12px' }}>
-                <button
-                  onClick={() => setCareerMode(!careerMode)}
-                  style={{
-                    padding: '12px 20px',
-                    background: careerMode ? 'rgba(34, 197, 94, 0.15)' : '#0d0d0d',
-                    border: `1px solid ${careerMode ? '#22c55e' : '#2a2a2a'}`,
-                    borderRadius: '10px',
-                    color: careerMode ? '#22c55e' : '#888',
-                    fontSize: '14px',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                  }}
-                >
-                  {careerMode ? 'Enabled' : 'Disabled'}
-                </button>
-                <button
-                  onClick={() => setAgentLoop(!agentLoop)}
-                  style={{
-                    padding: '12px 20px',
-                    background: agentLoop ? 'rgba(34, 197, 94, 0.15)' : '#0d0d0d',
-                    border: `1px solid ${agentLoop ? '#22c55e' : '#2a2a2a'}`,
-                    borderRadius: '10px',
-                    color: agentLoop ? '#22c55e' : '#888',
-                    fontSize: '14px',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                  }}
-                >
-                  {agentLoop ? 'Agent Refinement On' : 'Agent Refinement Off'}
-                </button>
-              </div>
-              <label style={{ display: 'grid', gap: 8, color: '#aaa', fontSize: 13, fontWeight: 700 }}>
-                Target role
-                <select
-                  value={careerRole}
-                  onChange={(event) => setCareerRole(event.target.value as CareerRole)}
-                  disabled={!careerMode}
-                  style={{
-                    width: '100%',
-                    padding: '12px 14px',
-                    background: '#0d0d0d',
-                    border: '1px solid #2a2a2a',
-                    borderRadius: '10px',
-                    color: careerMode ? '#fff' : '#666',
-                    fontSize: '14px',
-                    outline: 'none',
-                    opacity: careerMode ? 1 : 0.65,
-                  }}
-                >
-                  {careerRoles.map((role) => (
-                    <option key={role.id} value={role.id}>
-                      {role.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            </details>
-
-            {/* Sections Selection */}
-            <div className="readme-timeline-panel" style={{ marginBottom: '32px' }}>
-              <label
-                style={{
-                  display: 'block',
-                  fontSize: '14px',
-                  fontWeight: 600,
-                  color: '#fff',
-                  marginBottom: '12px',
-                }}
-              >
-                Sections to Include
-              </label>
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
-                  gap: '10px',
-                }}
-              >
-                {availableSections.map((section) => (
-                  <button
-                    key={section.id}
-                    onClick={() => toggleSection(section.id)}
-                    style={{
-                      padding: '12px 16px',
-                      background: sections.includes(section.id)
-                        ? 'rgba(34, 197, 94, 0.1)'
-                        : '#0d0d0d',
-                      border: `1px solid ${sections.includes(section.id) ? '#22c55e' : '#2a2a2a'}`,
-                      borderRadius: '10px',
-                      color: sections.includes(section.id) ? '#fff' : '#888',
-                      fontSize: '13px',
-                      fontWeight: 500,
-                      cursor: 'pointer',
-                      textAlign: 'left',
-                      transition: 'all 0.2s',
-                    }}
-                  >
-                    <span
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                      }}
-                    >
-                      <span
-                        style={{
-                          width: '18px',
-                          height: '18px',
-                          borderRadius: '4px',
-                          background: sections.includes(section.id) ? '#22c55e' : 'transparent',
-                          border: `2px solid ${sections.includes(section.id) ? '#22c55e' : '#444'}`,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: '12px',
-                          color: '#000',
-                        }}
-                      >
-                        {sections.includes(section.id) && '✓'}
-                      </span>
-                      {section.label}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* AI Toggle */}
-            <div className="readme-inspector-panel" style={{ marginBottom: '32px' }}>
-              <button
-                onClick={() => setUseAI(!useAI)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  padding: '14px 20px',
-                  background: useAI ? 'rgba(34, 197, 94, 0.1)' : '#0d0d0d',
-                  border: `1px solid ${useAI ? '#22c55e' : '#2a2a2a'}`,
-                  borderRadius: '10px',
-                  color: '#fff',
-                  fontSize: '14px',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                }}
-              >
-                <span
-                  style={{
-                    width: '40px',
-                    height: '22px',
-                    borderRadius: '11px',
-                    background: useAI ? '#22c55e' : '#444',
-                    position: 'relative',
-                    transition: 'background 0.2s',
-                  }}
-                >
-                  <span
-                    style={{
-                      position: 'absolute',
-                      top: '3px',
-                      left: useAI ? '21px' : '3px',
-                      width: '16px',
-                      height: '16px',
-                      borderRadius: '50%',
-                      background: '#fff',
-                      transition: 'left 0.2s',
-                    }}
-                  />
-                </span>
-                <span>
-                  Use AI Enhancement
-                  <span style={{ color: '#666', marginLeft: '8px', fontSize: '12px' }}>
-                    (Generates more personalized content)
-                  </span>
-                </span>
-              </button>
-            </div>
-
-            {isLoading && (
-              <div style={{ marginBottom: '16px' }}>
-                <ThinkingProgress
-                  steps={readmeProgress.steps}
-                  activeIndex={readmeProgress.activeIndex}
-                  variant="card"
-                />
-              </div>
-            )}
-
-            {/* Generate Button */}
-            <button
-              className="readme-export-button"
-              onClick={generateReadme}
-              disabled={isLoading || !username.trim() || (authenticated && !usageAllowed)}
-              style={{
-                width: '100%',
-                padding: '16px 32px',
-                background: isLoading ? '#1a5f35' : authenticated && !usageAllowed ? '#333' : '#22c55e',
-                border: 'none',
-                borderRadius: '12px',
-                color: authenticated && !usageAllowed ? '#888' : '#000',
-                fontSize: '16px',
-                fontWeight: 700,
-                cursor: isLoading || !username.trim() || (authenticated && !usageAllowed) ? 'not-allowed' : 'pointer',
-                opacity: !username.trim() ? 0.5 : 1,
-                transition: 'all 0.2s',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '10px',
-              }}
-            >
-              {isLoading ? (
-                <>Generating…</>
-              ) : !authenticated ? (
-                <>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
-                    <polyline points="10 17 15 12 10 7" />
-                    <line x1="15" y1="12" x2="3" y2="12" />
-                  </svg>
-                  Sign in for 5 free generations
-                </>
-              ) : !usageAllowed ? (
-                <>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                  </svg>
-                  Limit Reached — Upgrade to Pro
-                </>
-              ) : (
-                <>
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-                  </svg>
-                  Generate README
-                </>
-              )}
-            </button>
-
-            {error && (
-              <div
-                style={{
-                  marginTop: '16px',
-                  padding: '12px 16px',
-                  background: 'rgba(239, 68, 68, 0.1)',
-                  border: '1px solid rgba(239, 68, 68, 0.3)',
-                  borderRadius: '8px',
-                  color: '#ef4444',
-                  fontSize: '14px',
-                }}
-              >
-                {error}
-              </div>
-            )}
-          </div>
-
-          {/* Generated README Output */}
-          {generatedReadme && (
-            <div
-              style={{
-                background: '#111',
-                borderRadius: '16px',
-                border: '1px solid #1f1f1f',
-                overflow: 'hidden',
-              }}
-            >
-              {/* Output Header */}
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  padding: '12px 20px',
-                  borderBottom: '1px solid #1f1f1f',
-                  background: '#0a0a0a',
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  {/* View Mode Toggle */}
-                  <div
-                    style={{
-                      display: 'flex',
-                      background: '#161616',
-                      borderRadius: '8px',
-                      padding: '4px',
-                    }}
-                  >
-                    <button
-                      onClick={() => setViewMode('preview')}
-                      style={{
-                        padding: '6px 14px',
-                        background: viewMode === 'preview' ? '#22c55e' : 'transparent',
-                        border: 'none',
-                        borderRadius: '6px',
-                        color: viewMode === 'preview' ? '#050505' : '#888',
-                        fontSize: '13px',
-                        fontWeight: 600,
-                        cursor: 'pointer',
-                        transition: 'all 0.15s ease',
-                      }}
-                    >
-                      Preview
-                    </button>
-                    <button
-                      onClick={() => setViewMode('code')}
-                      style={{
-                        padding: '6px 14px',
-                        background: viewMode === 'code' ? '#22c55e' : 'transparent',
-                        border: 'none',
-                        borderRadius: '6px',
-                        color: viewMode === 'code' ? '#050505' : '#888',
-                        fontSize: '13px',
-                        fontWeight: 600,
-                        cursor: 'pointer',
-                        transition: 'all 0.15s ease',
-                      }}
-                    >
-                      Code
-                    </button>
-                  </div>
-                  
-                  <span style={{ color: '#666', fontSize: '13px' }}>README.md</span>
-                  
-                  {aiProvider && (
-                    <span
-                      style={{
-                        padding: '4px 10px',
-                        background: 'rgba(34, 197, 94, 0.1)',
-                        border: '1px solid rgba(34, 197, 94, 0.2)',
-                        borderRadius: '100px',
-                        color: '#22c55e',
-                        fontSize: '11px',
-                        fontWeight: 500,
-                      }}
-                    >
-                      {aiProvider === 'gemini_refined' ? 'AI refined' : aiProvider === 'gemini' ? 'AI generated' : aiProvider}
-                    </span>
-                  )}
-                </div>
-
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <button
-                    onClick={copyToClipboard}
-                    style={{
-                      padding: '8px 16px',
-                      background: copied ? '#22c55e' : '#161616',
-                      border: '1px solid #1f1f1f',
-                      borderRadius: '8px',
-                      color: copied ? '#050505' : '#fafafa',
-                      fontSize: '13px',
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      transition: 'all 0.15s ease',
-                    }}
-                  >
-                    {copied ? 'Copied!' : 'Copy'}
-                  </button>
-                  <button
-                    onClick={downloadReadme}
-                    style={{
-                      padding: '8px 16px',
-                      background: '#161616',
-                      border: '1px solid #1f1f1f',
-                      borderRadius: '8px',
-                      color: '#fafafa',
-                      fontSize: '13px',
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      transition: 'all 0.15s ease',
-                    }}
-                  >
-                    Download
-                  </button>
-                </div>
-              </div>
-
-              {/* Profile Agent focus (Career Mode reasoning) */}
-              {agentReasoning && (
-                <div
-                  style={{
-                    padding: '16px 20px',
-                    borderBottom: '1px solid #1f1f1f',
-                    background: 'rgba(34, 197, 94, 0.06)',
-                  }}
-                >
-                  <div style={{ fontSize: '13px', fontWeight: 600, color: '#22c55e', marginBottom: '6px' }}>
-                    Profile Agent focus
-                  </div>
-                  <p style={{ margin: 0, color: '#a1a1a1', fontSize: '13px', lineHeight: 1.5 }}>{agentReasoning}</p>
-                </div>
-              )}
-
-              {/* Strategy and score */}
-              {(strategy || readmeScore) && (
-                <div style={{ padding: '18px 20px', borderBottom: '1px solid #1f1f1f', background: '#0d0d0d' }}>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))', gap: 14 }}>
-                    {readmeScore && (
-                      <div style={{ padding: 16, borderRadius: 14, background: '#151515', border: '1px solid #242424' }}>
-                        <div style={{ color: '#777', fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 6 }}>README Score</div>
-                        <div style={{ color: '#22c55e', fontSize: 42, lineHeight: 1, fontWeight: 900, letterSpacing: '-0.06em' }}>{readmeScore.overall}</div>
-                        <div style={{ color: '#888', fontSize: 12, marginTop: 8 }}>
-                          Clarity {readmeScore.profileClarity} · Proof {readmeScore.projectProof} · Visual {readmeScore.visualConsistency} · Scan {readmeScore.recruiterScanability}
-                        </div>
-                      </div>
-                    )}
-                    {strategy && (
-                      <div style={{ padding: 16, borderRadius: 14, background: '#151515', border: '1px solid #242424' }}>
-                        <div style={{ color: '#777', fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 8 }}>Profile Strategy</div>
-                        <div style={{ color: '#fff', fontSize: 15, fontWeight: 800, marginBottom: 8 }}>{strategy.primaryRole}</div>
-                        <div style={{ color: '#999', fontSize: 13, lineHeight: 1.55 }}>{strategy.profileGoal}</div>
-                      </div>
-                    )}
-                  </div>
-                  {readmeScore?.suggestions?.length ? (
-                    <ul style={{ margin: '14px 0 0', paddingLeft: 18, color: '#a1a1a1', fontSize: 13, lineHeight: 1.6 }}>
-                      {readmeScore.suggestions.map((suggestion, i) => <li key={i}>{toDisplayText(suggestion)}</li>)}
-                    </ul>
-                  ) : null}
-                </div>
-              )}
-
-              {/* Setup files for animations that require GitHub Actions */}
-              {setupInstructions && (
-                <div style={{ padding: '18px 20px', borderBottom: '1px solid #1f1f1f', background: 'rgba(88, 166, 255, 0.06)' }}>
-                  <div style={{ fontSize: '13px', fontWeight: 700, color: '#58a6ff', marginBottom: 6 }}>
-                    {setupInstructions.title}
-                  </div>
-                  <p style={{ margin: '0 0 14px', color: '#a1a1a1', fontSize: 13, lineHeight: 1.55 }}>
-                    {setupInstructions.description}
-                  </p>
-                  {setupInstructions.files.map((file) => (
-                    <div key={file.path} style={{ border: '1px solid #223044', borderRadius: 12, overflow: 'hidden', background: '#071019' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '10px 12px', borderBottom: '1px solid #223044' }}>
-                        <code style={{ color: '#c9d1d9', fontSize: 12 }}>{file.path}</code>
-                        <button
-                          onClick={() => copySetupFile(file.path, file.content)}
-                          style={{ padding: '6px 10px', background: copiedSetupPath === file.path ? '#22c55e' : '#102033', color: copiedSetupPath === file.path ? '#050505' : '#dbeafe', border: '1px solid #28466b', borderRadius: 8, fontSize: 12, fontWeight: 800, cursor: 'pointer' }}
-                        >
-                          {copiedSetupPath === file.path ? 'Copied' : 'Copy file'}
-                        </button>
-                      </div>
-                      <pre style={{ margin: 0, padding: 14, overflowX: 'auto', color: '#c9d1d9', fontSize: 12, lineHeight: 1.55 }}>
-                        <code>{file.content}</code>
-                      </pre>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Agent refinements (when Career Mode + agent loop ran) */}
-              {refinementNotes && refinementNotes.length > 0 && (
-                <div
-                  style={{
-                    padding: '16px 20px',
-                    borderBottom: '1px solid #1f1f1f',
-                    background: 'rgba(34, 197, 94, 0.06)',
-                  }}
-                >
-                  <div style={{ fontSize: '13px', fontWeight: 600, color: '#22c55e', marginBottom: '8px' }}>
-                    Profile Agent applied {refinementNotes.length} improvement{refinementNotes.length !== 1 ? 's' : ''}:
-                  </div>
-                  <ul style={{ margin: 0, paddingLeft: '20px', color: '#a1a1a1', fontSize: '13px', lineHeight: 1.6 }}>
-                    {refinementNotes.map((note, i) => (
-                      <li key={i}>{toDisplayText(note)}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {/* Preview Mode */}
-              {viewMode === 'preview' && (
-                <div
-                  className="markdown-preview"
-                  style={{
-                    padding: '32px',
-                    background: '#0d1117',
-                    maxHeight: '700px',
-                    overflow: 'auto',
-                  }}
-                >
-                  <ReactMarkdown
-                    rehypePlugins={[rehypeRaw]}
-                    components={{
-                      h1: ({ children }) => (
-                        <h1 style={{ fontSize: '28px', fontWeight: 700, borderBottom: '1px solid #21262d', paddingBottom: '12px', marginBottom: '16px', color: '#e6edf3' }}>
-                          {children}
-                        </h1>
-                      ),
-                      h2: ({ children }) => (
-                        <h2 style={{ fontSize: '22px', fontWeight: 600, borderBottom: '1px solid #21262d', paddingBottom: '8px', marginTop: '24px', marginBottom: '16px', color: '#e6edf3' }}>
-                          {children}
-                        </h2>
-                      ),
-                      h3: ({ children }) => (
-                        <h3 style={{ fontSize: '18px', fontWeight: 600, marginTop: '20px', marginBottom: '12px', color: '#e6edf3' }}>
-                          {children}
-                        </h3>
-                      ),
-                      p: ({ children }) => (
-                        <p style={{ marginBottom: '16px', lineHeight: 1.7, color: '#8b949e' }}>
-                          {children}
-                        </p>
-                      ),
-                      a: ({ href, children }) => (
-                        <a href={href} style={{ color: '#58a6ff', textDecoration: 'none' }} target="_blank" rel="noopener noreferrer">
-                          {children}
-                        </a>
-                      ),
-                      img: ({ src, alt }) => (
-                        <img src={src} alt={alt || ''} style={{ maxWidth: '100%', borderRadius: '8px', margin: '8px 0' }} />
-                      ),
-                      ul: ({ children }) => (
-                        <ul style={{ paddingLeft: '24px', marginBottom: '16px', color: '#8b949e' }}>
-                          {children}
-                        </ul>
-                      ),
-                      ol: ({ children }) => (
-                        <ol style={{ paddingLeft: '24px', marginBottom: '16px', color: '#8b949e' }}>
-                          {children}
-                        </ol>
-                      ),
-                      li: ({ children }) => (
-                        <li style={{ marginBottom: '6px', lineHeight: 1.6 }}>
-                          {children}
-                        </li>
-                      ),
-                      code: ({ children, className }) => {
-                        const isInline = !className;
-                        return isInline ? (
-                          <code style={{ background: '#161b22', padding: '2px 6px', borderRadius: '4px', fontSize: '13px', color: '#e6edf3' }}>
-                            {children}
-                          </code>
-                        ) : (
-                          <code style={{ display: 'block', background: '#161b22', padding: '16px', borderRadius: '8px', fontSize: '13px', overflow: 'auto', color: '#e6edf3' }}>
-                            {children}
-                          </code>
-                        );
-                      },
-                      pre: ({ children }) => (
-                        <pre style={{ background: '#161b22', padding: '16px', borderRadius: '8px', overflow: 'auto', marginBottom: '16px' }}>
-                          {children}
-                        </pre>
-                      ),
-                      blockquote: ({ children }) => (
-                        <blockquote style={{ borderLeft: '4px solid #3b434b', paddingLeft: '16px', margin: '16px 0', color: '#8b949e' }}>
-                          {children}
-                        </blockquote>
-                      ),
-                      hr: () => (
-                        <hr style={{ border: 'none', borderTop: '1px solid #21262d', margin: '24px 0' }} />
-                      ),
-                      table: ({ children }) => (
-                        <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '16px' }}>
-                          {children}
-                        </table>
-                      ),
-                      th: ({ children }) => (
-                        <th style={{ border: '1px solid #30363d', padding: '8px 12px', background: '#161b22', color: '#e6edf3', textAlign: 'left' }}>
-                          {children}
-                        </th>
-                      ),
-                      td: ({ children }) => (
-                        <td style={{ border: '1px solid #30363d', padding: '8px 12px', color: '#8b949e' }}>
-                          {children}
-                        </td>
-                      ),
-                    }}
-                  >
-                    {generatedReadme}
-                  </ReactMarkdown>
-                </div>
-              )}
-
-              {/* Code Mode */}
-              {viewMode === 'code' && (
-                <pre
-                  style={{
-                    margin: 0,
-                    padding: '24px',
-                    background: '#0a0a0a',
-                    fontSize: '13px',
-                    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
-                    lineHeight: 1.6,
-                    color: '#a1a1a1',
-                    overflow: 'auto',
-                    maxHeight: '700px',
-                    whiteSpace: 'pre-wrap',
-                    wordBreak: 'break-word',
-                  }}
-                >
-                  {generatedReadme}
-                </pre>
-              )}
-
-              {/* Collapsible Agent log */}
-              <div style={{ borderTop: '1px solid #1f1f1f' }}>
-                <button
-                  type="button"
-                  onClick={() => setAgentLogExpanded(!agentLogExpanded)}
-                  style={{
-                    width: '100%',
-                    padding: '12px 20px',
-                    background: 'transparent',
-                    border: 'none',
-                    color: '#666',
-                    fontSize: '13px',
-                    fontWeight: 500,
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    textAlign: 'left',
-                  }}
-                >
-                  Agent log
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    style={{
-                      transform: agentLogExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-                      transition: 'transform 0.2s',
-                    }}
-                  >
-                    <path d="M6 9l6 6 6-6" />
-                  </svg>
-                </button>
-                {agentLogExpanded && (
-                  <div
-                    style={{
-                      padding: '12px 20px 16px',
-                      background: '#0a0a0a',
-                      fontSize: '13px',
-                      color: '#a1a1a1',
-                      lineHeight: 1.8,
-                    }}
-                  >
-                    <div>1. Fetched GitHub profile.</div>
-                    <div>2. Generated README draft.</div>
-                    {aiProvider === 'gemini_refined' && refinementNotes && refinementNotes.length > 0 && (
-                      <>
-                        <div>3. Critiqued for {careerRole}.</div>
-                        <div>4. Refined README.</div>
-                      </>
-                    )}
-                    {aiProvider !== 'gemini_refined' && <div>3. Done.</div>}
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
         </section>
       </main>
 
@@ -2697,6 +1607,40 @@ export default function ReadmeGeneratorPage() {
         .readme-panel-tabs .active,
         .readme-panel-tabs button.active {
           color: #28d89c;
+        }
+
+        .readme-media-tab-panel {
+          display: grid;
+          gap: 14px;
+        }
+
+        .readme-mini-summary {
+          background: #101010;
+          border: 1px solid #303030;
+          border-radius: 7px;
+          display: grid;
+          gap: 6px;
+          padding: 12px;
+        }
+
+        .readme-mini-summary span {
+          color: #777;
+          font-size: 11px;
+          font-weight: 900;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+        }
+
+        .readme-mini-summary strong {
+          color: #e8e8e8;
+          font-size: 13px;
+        }
+
+        .readme-mini-summary p {
+          color: #8d8d8d;
+          font-size: 12px;
+          line-height: 1.45;
+          margin: 0;
         }
 
         .readme-editor-field {
@@ -3472,6 +2416,35 @@ export default function ReadmeGeneratorPage() {
           gap: 12px;
         }
 
+        .readme-ai-scan-card {
+          align-items: center;
+          background: rgba(88, 166, 255, 0.07);
+          border: 1px solid rgba(88, 166, 255, 0.22);
+          border-radius: 8px;
+          display: flex;
+          gap: 12px;
+          justify-content: space-between;
+          padding: 12px;
+        }
+
+        .readme-ai-scan-card strong {
+          color: #dbeafe;
+          display: block;
+          font-size: 12px;
+          margin-bottom: 4px;
+        }
+
+        .readme-ai-scan-card span {
+          color: #8aa4c7;
+          display: block;
+          font-size: 11px;
+          line-height: 1.35;
+        }
+
+        .readme-ai-scan-card input {
+          flex: 0 0 auto;
+        }
+
         .readme-toggle-stack {
           border-top: 1px solid #2b2b2b;
           display: grid;
@@ -3671,10 +2644,6 @@ export default function ReadmeGeneratorPage() {
           .readme-preview-projects {
             grid-template-columns: 1fr;
           }
-        }
-
-        .readme-legacy-form-card {
-          display: none !important;
         }
 
         .readme-summary-strip {

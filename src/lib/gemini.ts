@@ -169,6 +169,7 @@ export async function generateReadmeWithGemini(
     careerMode?: boolean;
     careerRole?: string;
     agentLoop?: boolean;
+    aiProfileScan?: boolean;
     goal?: ReadmeGoal;
     structure?: ReadmeStructure;
     tone?: ReadmeTone;
@@ -198,6 +199,7 @@ export async function generateReadmeWithGemini(
     style: config.style,
     theme: config.theme,
     includeGitSkins: true,
+    aiProfileScan: config.aiProfileScan,
     goal: config.goal,
     structure: config.structure,
     tone: config.tone,
@@ -220,7 +222,7 @@ export async function generateReadmeWithGemini(
   let reasoning: string | undefined;
   if (config.careerMode) {
     const reasoningResult = await generate(
-      `You are tailoring a GitHub profile README for a ${config.careerRole || 'fullstack'} role. Profile: ${config.username}, top languages: ${topLanguages || 'unknown'}. In 1–2 short sentences, state how you will focus the README for this role (e.g. "Focusing on backend: emphasizing APIs, data pipelines, and reliability."). Be specific to the role. Reply with ONLY that reasoning, no heading.`,
+      `You are tailoring a GitHub profile README for a ${config.careerRole || 'fullstack'} role. Profile: ${config.username}, top languages: ${topLanguages || 'unknown'}. ${config.aiProfileScan ? `Pinned/project evidence:\n${pinnedReposText || 'No pinned repositories'}` : ''} In 1-2 short sentences, state how you will focus the README for this role (e.g. "Focusing on backend: emphasizing APIs, data pipelines, and reliability."). Be specific to the role and supported profile evidence. Reply with ONLY that reasoning, no heading.`,
       { thinking: 'low' }
     );
     reasoning = reasoningResult.text.trim();
@@ -257,6 +259,7 @@ ${pinnedReposText || 'No pinned repositories'}
 - Structure: ${config.structure || 'visual'}
 - Tone: ${strategy.suggestedTone}
 - Motion style: ${config.motionStyle || 'none'}
+- AI profile scan: ${config.aiProfileScan ? 'enabled - use profile and project evidence as source of truth' : 'disabled - keep personalization lighter and avoid deep project inference'}
 - Sections to include: ${config.sections.join(', ')}
 - Widget theme: ${config.theme}
 - User-selected visual sections: ${Object.entries(config.sectionAssets ?? {}).map(([section, assets]) => `${section}: ${assets.join(', ')}`).join('; ') || 'default GitSkins visual sections'}
@@ -312,6 +315,7 @@ ${pinnedReposText || 'No pinned repositories'}
 11. Do not invent jobs, education, metrics, links, or project claims not supported by the profile data
 12. Write featured project blurbs as outcome-oriented proof, not plain repository descriptions
 13. If motion is enabled, leave room for animation blocks near the top and avoid duplicating typing/snake/divider widgets yourself. GitSkins will inject validated animation markdown.
+14. ${config.aiProfileScan ? 'Use the public GitHub profile, pinned repositories, languages, stars, descriptions, contribution data, and profile links as the source of truth. Name specific pinned repositories when present and infer role/stack only from visible evidence.' : 'Use only obvious profile fields and avoid detailed project inference unless the data is explicit.'}
 
 Output ONLY the markdown content. No explanations or code blocks around it.`;
 

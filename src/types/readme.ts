@@ -59,6 +59,7 @@ export interface ReadmeConfig {
   style: ReadmeStyle;
   theme: string;
   includeGitSkins: boolean;
+  aiProfileScan?: boolean;
   goal?: ReadmeGoal;
   structure?: ReadmeStructure;
   tone?: ReadmeTone;
@@ -138,6 +139,7 @@ export interface ReadmeGeneratorRequest {
   style?: ReadmeStyle;
   theme?: string;
   useAI?: boolean;
+  aiProfileScan?: boolean;
   careerMode?: boolean;
   careerRole?: string;
   agentLoop?: boolean;
