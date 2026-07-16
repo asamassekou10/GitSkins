@@ -17,6 +17,7 @@ type ReadmeGoal = 'get-hired' | 'open-source' | 'freelance' | 'indie-hacker' | '
 type ReadmeStructure = 'portfolio' | 'hiring' | 'open-source' | 'founder' | 'minimal' | 'visual' | 'technical';
 type ReadmeTone = 'concise' | 'confident' | 'friendly' | 'senior' | 'founder' | 'playful' | 'recruiter';
 type MotionStyle = 'none' | 'subtle' | 'animated' | 'playful';
+type AnimatedSection = 'hero' | 'stats' | 'stack' | 'social';
 
 const themes = [
   { id: 'satan', name: 'Satan', color: '#ff4500', free: true },
@@ -24,6 +25,7 @@ const themes = [
   { id: 'zen', name: 'Zen', color: '#00ff88', free: true },
   { id: 'github-dark', name: 'GitHub', color: '#238636', free: true },
   { id: 'dracula', name: 'Dracula', color: '#ff79c6', free: false },
+  { id: 'aurora', name: 'Aurora', color: '#2dd4bf', free: false },
 ];
 
 const availableSections: { id: SectionType; label: string; description: string }[] = [
@@ -79,12 +81,20 @@ const motionOptions: { id: MotionStyle; label: string; description: string }[] =
   { id: 'playful', label: 'Playful', description: 'More personality and GitHub flair' },
 ];
 
+const animatedSections: { id: AnimatedSection; label: string }[] = [
+  { id: 'hero', label: 'Hero' },
+  { id: 'stats', label: 'Stats' },
+  { id: 'stack', label: 'Stack' },
+  { id: 'social', label: 'Social' },
+];
+
 const themeAccent: Record<string, string> = {
   satan: 'FF4500',
   neon: '00FFFF',
   zen: '00FF88',
   'github-dark': '22C55E',
   dracula: 'FF79C6',
+  aurora: '2DD4BF',
 };
 
 const careerRoles: { id: CareerRole; label: string; description: string }[] = [
@@ -120,6 +130,11 @@ export default function ReadmeGeneratorPage() {
   const [visitorCounter, setVisitorCounter] = useState(false);
   const [githubTrophies, setGithubTrophies] = useState(false);
   const [avatarBlock, setAvatarBlock] = useState(false);
+  const [socialWebsite, setSocialWebsite] = useState('gitskins.com');
+  const [socialX, setSocialX] = useState('octocat');
+  const [socialLinkedIn, setSocialLinkedIn] = useState('');
+  const [socialEmail, setSocialEmail] = useState('');
+  const [copiedAnimatedSection, setCopiedAnimatedSection] = useState<AnimatedSection | 'all' | null>(null);
 
   const [isLoading, setIsLoading] = useState(false);
   const [generatedReadme, setGeneratedReadme] = useState<string | null>(null);
@@ -194,6 +209,30 @@ export default function ReadmeGeneratorPage() {
       snakeUrl: `https://raw.githubusercontent.com/${username || 'octocat'}/${username || 'octocat'}/output/github-snake.svg`,
     };
   }, [theme, typingLines, username]);
+
+  const animatedSectionPreview = useMemo(() => {
+    const cleanUsername = username.trim() || 'octocat';
+    const buildParams = (section: AnimatedSection, absolute = false) => {
+      const params = new URLSearchParams({ username: cleanUsername, theme });
+      if (section === 'social') {
+        if (socialWebsite.trim()) params.set('website', socialWebsite.trim());
+        if (socialX.trim()) params.set('x', socialX.trim());
+        if (socialLinkedIn.trim()) params.set('linkedin', socialLinkedIn.trim());
+        if (socialEmail.trim()) params.set('email', socialEmail.trim());
+      }
+      const base = absolute ? `https://gitskins.com/api/section/${section}` : `/api/section/${section}`;
+      return `${base}?${params.toString()}`;
+    };
+    return animatedSections.map((section) => {
+      const url = buildParams(section.id);
+      const absoluteUrl = buildParams(section.id, true);
+      return {
+        ...section,
+        url,
+        markdown: `<p align="center">\n  <img src="${absoluteUrl}" alt="${cleanUsername} ${section.label.toLowerCase()} section" />\n</p>`,
+      };
+    });
+  }, [username, theme, socialWebsite, socialX, socialLinkedIn, socialEmail]);
 
 
   useEffect(() => {
@@ -321,6 +360,16 @@ export default function ReadmeGeneratorPage() {
     await navigator.clipboard.writeText(content);
     setCopiedSetupPath(path);
     setTimeout(() => setCopiedSetupPath(null), 2000);
+  };
+
+  const copyAnimatedSection = async (section: AnimatedSection | 'all') => {
+    const markdown = section === 'all'
+      ? animatedSectionPreview.map((item) => item.markdown).join('\n\n')
+      : animatedSectionPreview.find((item) => item.id === section)?.markdown;
+    if (!markdown) return;
+    await navigator.clipboard.writeText(markdown);
+    setCopiedAnimatedSection(section);
+    setTimeout(() => setCopiedAnimatedSection(null), 2000);
   };
 
   const downloadReadme = () => {
@@ -740,6 +789,161 @@ export default function ReadmeGeneratorPage() {
                   </div>
                 </div>
               )}
+            </div>
+
+            {/* Animated Section Preview */}
+            <div style={{ marginBottom: '32px' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '16px',
+                  marginBottom: '14px',
+                  flexWrap: 'wrap',
+                }}
+              >
+                <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: '#fff' }}>
+                  Animated GitSkins Sections
+                </label>
+                <button
+                  type="button"
+                  onClick={() => copyAnimatedSection('all')}
+                  style={{
+                    padding: '8px 12px',
+                    background: copiedAnimatedSection === 'all' ? '#22c55e' : 'rgba(34, 197, 94, 0.1)',
+                    border: '1px solid rgba(34, 197, 94, 0.3)',
+                    borderRadius: '8px',
+                    color: copiedAnimatedSection === 'all' ? '#050505' : '#22c55e',
+                    fontSize: '12px',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {copiedAnimatedSection === 'all' ? 'Copied' : 'Copy all sections'}
+                </button>
+              </div>
+
+              <div
+                style={{
+                  padding: '16px',
+                  background: '#0d0d0d',
+                  border: '1px solid #2a2a2a',
+                  borderRadius: '14px',
+                  marginBottom: '14px',
+                }}
+              >
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 180px), 1fr))', gap: '10px' }}>
+                  <label style={{ display: 'grid', gap: '6px', color: '#888', fontSize: '12px', fontWeight: 700 }}>
+                    Website
+                    <input
+                      type="text"
+                      value={socialWebsite}
+                      onChange={(e) => setSocialWebsite(e.target.value)}
+                      placeholder="gitskins.com"
+                      style={{ padding: '10px 12px', background: '#080808', border: '1px solid #242424', borderRadius: '9px', color: '#fff', fontSize: '13px', outline: 'none' }}
+                    />
+                  </label>
+                  <label style={{ display: 'grid', gap: '6px', color: '#888', fontSize: '12px', fontWeight: 700 }}>
+                    X
+                    <input
+                      type="text"
+                      value={socialX}
+                      onChange={(e) => setSocialX(e.target.value)}
+                      placeholder="octocat"
+                      style={{ padding: '10px 12px', background: '#080808', border: '1px solid #242424', borderRadius: '9px', color: '#fff', fontSize: '13px', outline: 'none' }}
+                    />
+                  </label>
+                  <label style={{ display: 'grid', gap: '6px', color: '#888', fontSize: '12px', fontWeight: 700 }}>
+                    LinkedIn
+                    <input
+                      type="text"
+                      value={socialLinkedIn}
+                      onChange={(e) => setSocialLinkedIn(e.target.value)}
+                      placeholder="in/username"
+                      style={{ padding: '10px 12px', background: '#080808', border: '1px solid #242424', borderRadius: '9px', color: '#fff', fontSize: '13px', outline: 'none' }}
+                    />
+                  </label>
+                  <label style={{ display: 'grid', gap: '6px', color: '#888', fontSize: '12px', fontWeight: 700 }}>
+                    Email
+                    <input
+                      type="text"
+                      value={socialEmail}
+                      onChange={(e) => setSocialEmail(e.target.value)}
+                      placeholder="hello@example.com"
+                      style={{ padding: '10px 12px', background: '#080808', border: '1px solid #242424', borderRadius: '9px', color: '#fff', fontSize: '13px', outline: 'none' }}
+                    />
+                  </label>
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gap: '14px' }}>
+                {animatedSectionPreview.map((section) => (
+                  <div
+                    key={section.id}
+                    style={{
+                      background: '#080808',
+                      border: '1px solid #242424',
+                      borderRadius: '14px',
+                      overflow: 'hidden',
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        gap: '12px',
+                        padding: '10px 12px',
+                        borderBottom: '1px solid #1f1f1f',
+                        background: '#0a0a0a',
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <span
+                          style={{
+                            width: '8px',
+                            height: '8px',
+                            borderRadius: '50%',
+                            background: themes.find((item) => item.id === theme)?.color || '#22c55e',
+                            boxShadow: `0 0 14px ${themes.find((item) => item.id === theme)?.color || '#22c55e'}`,
+                          }}
+                        />
+                        <span style={{ color: '#f5f5f5', fontSize: '13px', fontWeight: 800 }}>{section.label}</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => copyAnimatedSection(section.id)}
+                        style={{
+                          padding: '7px 10px',
+                          background: copiedAnimatedSection === section.id ? '#22c55e' : '#161616',
+                          border: '1px solid #2a2a2a',
+                          borderRadius: '8px',
+                          color: copiedAnimatedSection === section.id ? '#050505' : '#fafafa',
+                          fontSize: '12px',
+                          fontWeight: 800,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        {copiedAnimatedSection === section.id ? 'Copied' : 'Copy'}
+                      </button>
+                    </div>
+                    <div style={{ padding: '12px', overflowX: 'auto' }}>
+                      <img
+                        src={section.url}
+                        alt={`${section.label} animated section preview`}
+                        style={{
+                          display: 'block',
+                          width: '100%',
+                          minWidth: '620px',
+                          height: 'auto',
+                          borderRadius: '10px',
+                        }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
 
             {/* Style Selection */}
