@@ -323,10 +323,12 @@ ${pinnedReposText || 'No pinned repositories'}
 **Instructions:**
 1. Generate a professional, well-structured README.md
 2. Use proper markdown formatting with headers, lists, and sections
-3. For the stats section, include these GitSkins widget URLs:
-   - Profile Card: ![GitHub Stats](https://gitskins.com/api/premium-card?username=${config.username}&theme=${config.theme})
-   - Languages: ![Top Languages](https://gitskins.com/api/languages?username=${config.username}&theme=${config.theme})
-   - Streak: ![Streak Stats](https://gitskins.com/api/streak?username=${config.username}&theme=${config.theme})
+3. For visual GitSkins sections, prefer these first-party animated SVG section URLs:
+   - Hero: <img src="https://gitskins.com/api/section/hero?username=${config.username}&theme=${config.theme}" alt="${config.username} profile hero" />
+   - Stats: <img src="https://gitskins.com/api/section/stats?username=${config.username}&theme=${config.theme}" alt="${config.username} GitHub stats" />
+   - Stack: <img src="https://gitskins.com/api/section/stack?username=${config.username}&theme=${config.theme}" alt="${config.username} language stack" />
+   - Social: <img src="https://gitskins.com/api/section/social?username=${config.username}&theme=${config.theme}" alt="${config.username} social links" />
+   Use the older card/widget URLs only if a non-visual or minimal structure is requested.
 4. Keep the tone ${toneLabels[config.tone ?? 'confident']}
 5. ${config.structure === 'minimal' || config.style === 'minimal' ? 'Keep content brief and focused' : 'Include specific project proof and clear descriptions'}
 6. Use badges for technologies/languages when appropriate
@@ -351,7 +353,7 @@ export function generateReadmeTemplate(
 
   // Header Section
   if (config.sections.includes('header')) {
-    const headerContent = generateHeaderSection(displayName, data, config.style);
+    const headerContent = generateHeaderSection(displayName, data, config);
     sections.push({ id: 'header', type: 'header', content: headerContent });
     markdown += headerContent + '\n\n';
   }
@@ -365,7 +367,7 @@ export function generateReadmeTemplate(
 
   // Skills/Languages Section
   if (config.sections.includes('skills') || config.sections.includes('languages')) {
-    const skillsContent = generateSkillsSection(data, config.style);
+    const skillsContent = generateSkillsSection(data, config);
     sections.push({ id: 'skills', type: 'skills', content: skillsContent });
     markdown += skillsContent + '\n\n';
   }
@@ -393,7 +395,7 @@ export function generateReadmeTemplate(
 
   // Connect Section
   if (config.sections.includes('connect')) {
-    const connectContent = generateConnectSection(data, config.username);
+    const connectContent = generateConnectSection(data, config);
     sections.push({ id: 'connect', type: 'connect', content: connectContent });
     markdown += connectContent + '\n\n';
   }
@@ -419,9 +421,16 @@ export function generateReadmeTemplate(
   };
 }
 
-function generateHeaderSection(name: string, data: ExtendedProfileData, style: ReadmeStyle): string {
+function generateHeaderSection(name: string, data: ExtendedProfileData, config: ReadmeConfig): string {
+  const { style, theme, username } = config;
   if (style === 'minimal') {
     return `# Hi, I'm ${name} 👋`;
+  }
+
+  if (style === 'detailed') {
+    return `<p align="center">
+  <img src="https://gitskins.com/api/section/hero?username=${username}&theme=${theme}" alt="${name} profile hero" />
+</p>`;
   }
 
   if (style === 'creative') {
@@ -463,9 +472,16 @@ function generateAboutSection(data: ExtendedProfileData, style: ReadmeStyle): st
   return about;
 }
 
-function generateSkillsSection(data: ExtendedProfileData, style: ReadmeStyle): string {
+function generateSkillsSection(data: ExtendedProfileData, config: ReadmeConfig): string {
+  const { style, theme, username } = config;
   if (data.languages.length === 0) {
     return '';
+  }
+
+  if (style === 'detailed') {
+    return `<p align="center">
+  <img src="https://gitskins.com/api/section/stack?username=${username}&theme=${theme}" alt="Language stack" />
+</p>`;
   }
 
   let section = style === 'minimal' ? '## Tech Stack\n\n' : '## 🛠️ Languages & Tools\n\n';
@@ -500,6 +516,12 @@ function generateStatsSection(username: string, theme: string, style: ReadmeStyl
 
   if (style === 'minimal') {
     return `${title}![GitHub Stats](https://gitskins.com/api/stats?username=${username}&theme=${theme})`;
+  }
+
+  if (style === 'detailed') {
+    return `${title}<p align="center">
+  <img src="https://gitskins.com/api/section/stats?username=${username}&theme=${theme}" alt="GitHub Stats" />
+</p>`;
   }
 
   return `${title}<p align="center">
@@ -549,8 +571,19 @@ function generateProjectsSection(
   return section;
 }
 
-function generateConnectSection(data: ExtendedProfileData, username: string): string {
+function generateConnectSection(data: ExtendedProfileData, config: ReadmeConfig): string {
+  const { username, theme } = config;
   let section = '## 🤝 Connect With Me\n\n';
+
+  const socialParams = new URLSearchParams();
+  socialParams.set('username', username);
+  socialParams.set('theme', theme);
+  if (data.websiteUrl) socialParams.set('website', data.websiteUrl);
+  if (data.twitterUsername) socialParams.set('x', data.twitterUsername);
+
+  section += `<p align="center">
+  <img src="https://gitskins.com/api/section/social?${socialParams.toString()}" alt="${username} social links" />
+</p>\n\n`;
 
   const links: string[] = [];
 
