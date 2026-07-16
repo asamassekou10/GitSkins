@@ -32,6 +32,7 @@ export type ReadmeTone =
   | 'recruiter';
 
 export type ReadmeMotionStyle = 'none' | 'subtle' | 'animated' | 'playful';
+export type ReadmeAnimatedSection = 'hero' | 'stats' | 'stack' | 'social';
 
 export type ReadmeSectionType =
   | 'header'
@@ -70,6 +71,11 @@ export interface ReadmeConfig {
   visitorCounter?: boolean;
   githubTrophies?: boolean;
   avatarBlock?: boolean;
+  socialWebsite?: string;
+  socialX?: string;
+  socialLinkedIn?: string;
+  socialEmail?: string;
+  sectionAssets?: Partial<Record<ReadmeSectionType, ReadmeAnimatedSection[]>>;
 }
 
 export interface GeneratedReadme {
@@ -147,6 +153,11 @@ export interface ReadmeGeneratorRequest {
   visitorCounter?: boolean;
   githubTrophies?: boolean;
   avatarBlock?: boolean;
+  socialWebsite?: string;
+  socialX?: string;
+  socialLinkedIn?: string;
+  socialEmail?: string;
+  sectionAssets?: Partial<Record<ReadmeSectionType, ReadmeAnimatedSection[]>>;
 }
 
 export interface ExtendedProfileData {

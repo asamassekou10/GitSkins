@@ -313,6 +313,13 @@ ${pinnedReposText || 'No pinned repositories'}
 - Tone: ${toneLabels[config.tone ?? 'confident']}
 - Sections to include: ${sectionsToInclude}
 - Theme for GitSkins widgets: ${config.theme}
+- User-selected visual sections: ${Object.entries(config.sectionAssets ?? {}).map(([section, assets]) => `${section}: ${assets.join(', ')}`).join('; ') || 'default GitSkins visual sections'}
+- User-provided links: ${[
+    config.socialWebsite && `Website ${config.socialWebsite}`,
+    config.socialX && `X ${config.socialX}`,
+    config.socialLinkedIn && `LinkedIn ${config.socialLinkedIn}`,
+    config.socialEmail && `Email ${config.socialEmail}`,
+  ].filter(Boolean).join('; ') || 'use GitHub profile links only'}
 
 **Profile Strategy:**
 - Primary role: ${strategy.primaryRole}
@@ -327,14 +334,15 @@ ${pinnedReposText || 'No pinned repositories'}
    - Hero: <img src="https://gitskins.com/api/section/hero?username=${config.username}&theme=${config.theme}" alt="${config.username} profile hero" />
    - Stats: <img src="https://gitskins.com/api/section/stats?username=${config.username}&theme=${config.theme}" alt="${config.username} GitHub stats" />
    - Stack: <img src="https://gitskins.com/api/section/stack?username=${config.username}&theme=${config.theme}" alt="${config.username} language stack" />
-   - Social: <img src="https://gitskins.com/api/section/social?username=${config.username}&theme=${config.theme}" alt="${config.username} social links" />
+   - Social: <img src="https://gitskins.com/api/section/social?username=${config.username}&theme=${config.theme}${config.socialWebsite ? `&website=${encodeURIComponent(config.socialWebsite)}` : ''}${config.socialX ? `&x=${encodeURIComponent(config.socialX)}` : ''}${config.socialLinkedIn ? `&linkedin=${encodeURIComponent(config.socialLinkedIn)}` : ''}${config.socialEmail ? `&email=${encodeURIComponent(config.socialEmail)}` : ''}" alt="${config.username} social links" />
    Use the older card/widget URLs only if a non-visual or minimal structure is requested.
 4. Keep the tone ${toneLabels[config.tone ?? 'confident']}
 5. ${config.structure === 'minimal' || config.style === 'minimal' ? 'Keep content brief and focused' : 'Include specific project proof and clear descriptions'}
 6. Use badges for technologies/languages when appropriate
 7. Include a proper header with the developer's name
 8. End with social links/contact info if available
-9. Do not invent employers, degrees, metrics, links, or project claims that are not supported by the profile data
+9. Include user-provided links exactly when present; do not invent missing social URLs
+10. Do not invent employers, degrees, metrics, links, or project claims that are not supported by the profile data
 
 Generate ONLY the markdown content, no explanations.`;
 }
@@ -578,8 +586,10 @@ function generateConnectSection(data: ExtendedProfileData, config: ReadmeConfig)
   const socialParams = new URLSearchParams();
   socialParams.set('username', username);
   socialParams.set('theme', theme);
-  if (data.websiteUrl) socialParams.set('website', data.websiteUrl);
-  if (data.twitterUsername) socialParams.set('x', data.twitterUsername);
+  if (config.socialWebsite || data.websiteUrl) socialParams.set('website', config.socialWebsite || data.websiteUrl || '');
+  if (config.socialX || data.twitterUsername) socialParams.set('x', config.socialX || data.twitterUsername || '');
+  if (config.socialLinkedIn) socialParams.set('linkedin', config.socialLinkedIn);
+  if (config.socialEmail) socialParams.set('email', config.socialEmail);
 
   section += `<p align="center">
   <img src="https://gitskins.com/api/section/social?${socialParams.toString()}" alt="${username} social links" />
@@ -589,12 +599,21 @@ function generateConnectSection(data: ExtendedProfileData, config: ReadmeConfig)
 
   links.push(`[![GitHub](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/${username})`);
 
-  if (data.twitterUsername) {
-    links.push(`[![Twitter](https://img.shields.io/badge/Twitter-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white)](https://twitter.com/${data.twitterUsername})`);
+  if (config.socialX || data.twitterUsername) {
+    links.push(`[![Twitter](https://img.shields.io/badge/Twitter-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white)](https://twitter.com/${config.socialX || data.twitterUsername})`);
   }
 
-  if (data.websiteUrl) {
-    links.push(`[![Website](https://img.shields.io/badge/Website-4285F4?style=for-the-badge&logo=google-chrome&logoColor=white)](${data.websiteUrl})`);
+  if (config.socialWebsite || data.websiteUrl) {
+    links.push(`[![Website](https://img.shields.io/badge/Website-4285F4?style=for-the-badge&logo=google-chrome&logoColor=white)](${config.socialWebsite || data.websiteUrl})`);
+  }
+
+  if (config.socialLinkedIn) {
+    const linkedInUrl = config.socialLinkedIn.startsWith('http') ? config.socialLinkedIn : `https://www.linkedin.com/${config.socialLinkedIn}`;
+    links.push(`[![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](${linkedInUrl})`);
+  }
+
+  if (config.socialEmail) {
+    links.push(`[![Email](https://img.shields.io/badge/Email-EA4335?style=for-the-badge&logo=gmail&logoColor=white)](mailto:${config.socialEmail})`);
   }
 
   section += links.join(' ');

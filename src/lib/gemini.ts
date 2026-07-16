@@ -181,6 +181,11 @@ export async function generateReadmeWithGemini(
     visitorCounter?: boolean;
     githubTrophies?: boolean;
     avatarBlock?: boolean;
+    socialWebsite?: string;
+    socialX?: string;
+    socialLinkedIn?: string;
+    socialEmail?: string;
+    sectionAssets?: Record<string, Array<'hero' | 'stats' | 'stack' | 'social'>>;
   }
 ): Promise<{ markdown: string; refinementNotes?: string[]; reasoning?: string }> {
   const topLanguages = profileData.languages.slice(0, 5).map((l) => l.name).join(', ');
@@ -205,6 +210,11 @@ export async function generateReadmeWithGemini(
     visitorCounter: config.visitorCounter,
     githubTrophies: config.githubTrophies,
     avatarBlock: config.avatarBlock,
+    socialWebsite: config.socialWebsite,
+    socialX: config.socialX,
+    socialLinkedIn: config.socialLinkedIn,
+    socialEmail: config.socialEmail,
+    sectionAssets: config.sectionAssets,
   });
 
   let reasoning: string | undefined;
@@ -249,6 +259,13 @@ ${pinnedReposText || 'No pinned repositories'}
 - Motion style: ${config.motionStyle || 'none'}
 - Sections to include: ${config.sections.join(', ')}
 - Widget theme: ${config.theme}
+- User-selected visual sections: ${Object.entries(config.sectionAssets ?? {}).map(([section, assets]) => `${section}: ${assets.join(', ')}`).join('; ') || 'default GitSkins visual sections'}
+- User-provided links: ${[
+    config.socialWebsite && `Website ${config.socialWebsite}`,
+    config.socialX && `X ${config.socialX}`,
+    config.socialLinkedIn && `LinkedIn ${config.socialLinkedIn}`,
+    config.socialEmail && `Email ${config.socialEmail}`,
+  ].filter(Boolean).join('; ') || 'use GitHub profile links only'}
 
 **Profile Strategy:**
 - Primary role: ${strategy.primaryRole}
@@ -257,17 +274,28 @@ ${pinnedReposText || 'No pinned repositories'}
 
 **IMPORTANT - Include these GitSkins widgets:**
 \`\`\`markdown
-<!-- Profile Card -->
-![${config.username}'s GitHub Profile](https://gitskins.com/api/premium-card?username=${config.username}&theme=${config.theme})
+<!-- Hero Section -->
+<p align="center">
+  <img src="https://gitskins.com/api/section/hero?username=${config.username}&theme=${config.theme}" alt="${config.username} profile hero" />
+</p>
 
 <!-- Top Languages -->
-![Top Languages](https://gitskins.com/api/languages?username=${config.username}&theme=${config.theme})
+<p align="center">
+  <img src="https://gitskins.com/api/section/stack?username=${config.username}&theme=${config.theme}" alt="${config.username} language stack" />
+</p>
 
 <!-- GitHub Streak -->
 ![GitHub Streak](https://gitskins.com/api/streak?username=${config.username}&theme=${config.theme})
 
 <!-- GitHub Stats -->
-![GitHub Stats](https://gitskins.com/api/stats?username=${config.username}&theme=${config.theme})
+<p align="center">
+  <img src="https://gitskins.com/api/section/stats?username=${config.username}&theme=${config.theme}" alt="${config.username} GitHub stats" />
+</p>
+
+<!-- Social Links -->
+<p align="center">
+  <img src="https://gitskins.com/api/section/social?username=${config.username}&theme=${config.theme}${config.socialWebsite ? `&website=${encodeURIComponent(config.socialWebsite)}` : ''}${config.socialX ? `&x=${encodeURIComponent(config.socialX)}` : ''}${config.socialLinkedIn ? `&linkedin=${encodeURIComponent(config.socialLinkedIn)}` : ''}${config.socialEmail ? `&email=${encodeURIComponent(config.socialEmail)}` : ''}" alt="${config.username} social links" />
+</p>
 \`\`\`
 
 **Instructions:**
@@ -280,9 +308,10 @@ ${pinnedReposText || 'No pinned repositories'}
 7. Use proper markdown formatting (headers, alignment, badges)
 8. Match the requested style (${config.style})
 9. End with a footer mentioning GitSkins
-10. Do not invent jobs, education, metrics, links, or project claims not supported by the profile data
-11. Write featured project blurbs as outcome-oriented proof, not plain repository descriptions
-12. If motion is enabled, leave room for animation blocks near the top and avoid duplicating typing/snake/divider widgets yourself. GitSkins will inject validated animation markdown.
+10. Include user-provided links exactly when present; do not invent missing social URLs
+11. Do not invent jobs, education, metrics, links, or project claims not supported by the profile data
+12. Write featured project blurbs as outcome-oriented proof, not plain repository descriptions
+13. If motion is enabled, leave room for animation blocks near the top and avoid duplicating typing/snake/divider widgets yourself. GitSkins will inject validated animation markdown.
 
 Output ONLY the markdown content. No explanations or code blocks around it.`;
 

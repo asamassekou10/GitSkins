@@ -67,6 +67,17 @@ const requestSchema = z.object({
   visitorCounter: z.boolean().optional().default(false),
   githubTrophies: z.boolean().optional().default(false),
   avatarBlock: z.boolean().optional().default(false),
+  socialWebsite: z.string().max(200).optional().default(''),
+  socialX: z.string().max(80).optional().default(''),
+  socialLinkedIn: z.string().max(120).optional().default(''),
+  socialEmail: z.string().max(160).optional().default(''),
+  sectionAssets: z
+    .record(
+      z.enum(['header', 'about', 'skills', 'stats', 'languages', 'projects', 'streak', 'connect']),
+      z.array(z.enum(['hero', 'stats', 'stack', 'social'])).max(4)
+    )
+    .optional()
+    .default({}),
 });
 
 export async function POST(request: NextRequest) {
@@ -142,6 +153,11 @@ export async function POST(request: NextRequest) {
         visitorCounter,
         githubTrophies,
         avatarBlock,
+        socialWebsite,
+        socialX,
+        socialLinkedIn,
+        socialEmail,
+        sectionAssets,
       } = validatedData;
 
     // Fetch GitHub profile data
@@ -172,6 +188,11 @@ export async function POST(request: NextRequest) {
       visitorCounter,
       githubTrophies,
       avatarBlock,
+      socialWebsite,
+      socialX,
+      socialLinkedIn,
+      socialEmail,
+      sectionAssets,
     };
 
     let result;
@@ -202,6 +223,11 @@ export async function POST(request: NextRequest) {
           visitorCounter,
           githubTrophies,
           avatarBlock,
+          socialWebsite,
+          socialX,
+          socialLinkedIn,
+          socialEmail,
+          sectionAssets,
         });
 
         if (geminiResult?.markdown) {
