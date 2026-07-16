@@ -182,6 +182,9 @@ export default function ReadmeGeneratorPage() {
   const { loading: planLoading, authenticated } = userPlanData;
   const userIsPro = effectivePlan === 'pro';
   const usageAllowed = authenticated && (userIsPro || effectiveRemaining > 0);
+  const selectedTheme = themes.find((item) => item.id === theme) ?? themes[0];
+  const selectedGoal = goalOptions.find((item) => item.id === goal) ?? goalOptions[0];
+  const selectedRole = careerRoles.find((item) => item.id === careerRole) ?? careerRoles[0];
 
   const readmeStepLabels = useMemo(
     () =>
@@ -474,7 +477,7 @@ export default function ReadmeGeneratorPage() {
 
         {/* Usage Banner */}
         {!planLoading && (
-          <section style={{ maxWidth: '1000px', margin: '0 auto 24px', padding: '0 20px' }}>
+          <section style={{ maxWidth: '1180px', margin: '0 auto 24px', padding: '0 20px' }}>
             <div
               style={{
                 background: !authenticated ? 'rgba(34, 197, 94, 0.08)' : !usageAllowed ? 'rgba(239, 68, 68, 0.1)' : '#161616',
@@ -543,9 +546,26 @@ export default function ReadmeGeneratorPage() {
           </section>
         )}
 
+        <section style={{ maxWidth: '1180px', margin: '0 auto 24px', padding: '0 20px' }}>
+          <div className="readme-summary-strip">
+            {[
+              ['Profile', username.trim() || 'octocat'],
+              ['Goal', selectedGoal.label],
+              ['Theme', selectedTheme.name],
+              ['Agent', careerMode ? selectedRole.label : 'Off'],
+            ].map(([label, value]) => (
+              <div key={label} className="readme-summary-card">
+                <span>{label}</span>
+                <strong>{value}</strong>
+              </div>
+            ))}
+          </div>
+        </section>
+
         {/* Generator Form */}
-        <section style={{ maxWidth: '1000px', margin: '0 auto', padding: '0 20px' }}>
+        <section style={{ maxWidth: '1180px', margin: '0 auto', padding: '0 20px' }}>
           <div
+            className="readme-form-card"
             style={{
               background: '#161616',
               borderRadius: '20px',
@@ -792,7 +812,7 @@ export default function ReadmeGeneratorPage() {
             </div>
 
             {/* Animated Section Preview */}
-            <div style={{ marginBottom: '32px' }}>
+            <div className="readme-animated-section-panel" style={{ marginBottom: '32px' }}>
               <div
                 style={{
                   display: 'flex',
@@ -1752,6 +1772,95 @@ export default function ReadmeGeneratorPage() {
       <style>{`
         @keyframes spin {
           to { transform: rotate(360deg); }
+        }
+
+        .readme-summary-strip {
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 12px;
+        }
+
+        .readme-summary-card {
+          background: #111;
+          border: 1px solid #242424;
+          border-radius: 12px;
+          padding: 14px 16px;
+          min-width: 0;
+        }
+
+        .readme-summary-card span {
+          display: block;
+          color: #666;
+          font-size: 11px;
+          font-weight: 800;
+          letter-spacing: 0.08em;
+          margin-bottom: 5px;
+          text-transform: uppercase;
+        }
+
+        .readme-summary-card strong {
+          display: block;
+          color: #f5f5f5;
+          font-size: 15px;
+          font-weight: 800;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        .readme-form-card {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) 420px;
+          gap: 28px;
+          align-items: start;
+        }
+
+        .readme-form-card > * {
+          min-width: 0;
+        }
+
+        .readme-form-card > :not(.readme-animated-section-panel) {
+          grid-column: 1;
+        }
+
+        .readme-animated-section-panel {
+          grid-column: 2;
+          grid-row: 1 / span 12;
+          position: sticky;
+          top: 96px;
+          max-height: calc(100vh - 120px);
+          overflow: auto;
+          padding: 20px;
+          background: #101010;
+          border: 1px solid #2a2a2a;
+          border-radius: 16px;
+        }
+
+        @media (max-width: 1040px) {
+          .readme-summary-strip {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
+
+          .readme-form-card {
+            grid-template-columns: 1fr;
+          }
+
+          .readme-form-card > :not(.readme-animated-section-panel),
+          .readme-animated-section-panel {
+            grid-column: 1;
+          }
+
+          .readme-animated-section-panel {
+            grid-row: auto;
+            position: static;
+            max-height: none;
+          }
+        }
+
+        @media (max-width: 620px) {
+          .readme-summary-strip {
+            grid-template-columns: 1fr;
+          }
         }
       `}</style>
     </div>
