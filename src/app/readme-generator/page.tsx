@@ -21,6 +21,7 @@ type MotionStyle = 'none' | 'subtle' | 'animated' | 'playful';
 type AnimatedSection = 'hero' | 'stats' | 'stack' | 'social';
 type InspectorTab = 'content' | 'style' | 'agent';
 type MediaBinTab = 'profile' | 'visuals' | 'links';
+type CanvasView = 'preview' | 'github' | 'markdown';
 type SectionAssets = Partial<Record<SectionType, AnimatedSection[]>>;
 type PreviewVisual = {
   id: string;
@@ -317,7 +318,7 @@ export default function ReadmeGeneratorPage() {
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [copiedSetupPath, setCopiedSetupPath] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<'code' | 'preview'>('preview');
+  const [viewMode, setViewMode] = useState<CanvasView>('preview');
   const [refinementNotes, setRefinementNotes] = useState<string[] | null>(null);
   const [agentReasoning, setAgentReasoning] = useState<string | null>(null);
   const [agentLogExpanded, setAgentLogExpanded] = useState(false);
@@ -508,6 +509,28 @@ export default function ReadmeGeneratorPage() {
     return [...included, ...inactive];
   }, [sections]);
 
+  const selectReadmeSection = useCallback((section: SectionType, tab: InspectorTab = 'content') => {
+    setSelectedSection(section);
+    setInspectorTab(tab);
+    window.requestAnimationFrame(() => {
+      document
+        .querySelector(`[data-readme-section="${section}"]`)
+        ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+  }, []);
+
+  const aiScanSignals = useMemo(() => {
+    const enabled = useAI && aiProfileScan;
+    const visuals = Object.values(generationSectionAssets).flat().length;
+    return [
+      { label: 'Profile source', value: enabled ? `${username.trim() || 'octocat'} public GitHub profile` : 'Basic profile fields' },
+      { label: 'Narrative target', value: selectedGoal.label },
+      { label: 'Role inference', value: careerMode ? selectedRole.label : 'General developer profile' },
+      { label: 'Project proof', value: enabled ? 'Pinned repos, stars, languages, descriptions' : 'Only explicit project data' },
+      { label: 'Visual system', value: `${selectedTheme.name} with ${visuals || 'default'} visual cue${visuals === 1 ? '' : 's'}` },
+    ];
+  }, [aiProfileScan, careerMode, generationSectionAssets, selectedGoal.label, selectedRole.label, selectedTheme.name, useAI, username]);
+
 
   useEffect(() => {
     const careerParam = searchParams.get('careerMode');
@@ -521,8 +544,7 @@ export default function ReadmeGeneratorPage() {
   }, [searchParams]);
 
   const toggleSection = (sectionId: SectionType) => {
-    setSelectedSection(sectionId);
-    setInspectorTab('content');
+    selectReadmeSection(sectionId);
     setSections((prev) =>
       prev.includes(sectionId)
         ? prev.filter((s) => s !== sectionId)
@@ -885,9 +907,14 @@ export default function ReadmeGeneratorPage() {
           <div className="readme-video-editor-shell" data-testid="readme-editor-shell">
             <div className="readme-video-topbar" data-testid="readme-editor-topbar">
               <div className="readme-studio-brand">GitSkins README Generator</div>
-              <div>
+              <div className="readme-studio-context">
                 <span>Editing</span>
                 <strong>{username.trim() || 'octocat'} / README.md</strong>
+                <div>
+                  <small>{selectedGoal.label}</small>
+                  <small>{selectedTheme.name}</small>
+                  <small>{careerMode ? selectedRole.label : 'Agent off'}</small>
+                </div>
               </div>
               <div className="readme-topbar-actions" data-testid="readme-editor-actions">
                 <span className="readme-draft-state">{generatedReadme ? 'Generated' : 'Live draft'}</span>
@@ -1015,17 +1042,29 @@ export default function ReadmeGeneratorPage() {
                 <span>README Preview</span>
                 <strong>Editing: {selectedSectionInspector.title}</strong>
                 <div className="readme-monitor-actions">
-                  <button type="button" onClick={() => setViewMode('preview')} className={viewMode === 'preview' ? 'active' : ''}>
-                    Preview
-                  </button>
-                  <button type="button" onClick={() => setViewMode('code')} className={viewMode === 'code' ? 'active' : ''}>
-                    Code
-                  </button>
+                  {[
+                    ['preview', 'Preview'],
+                    ['github', 'GitHub view'],
+                    ['markdown', 'Markdown'],
+                  ].map(([id, label]) => (
+                    <button
+                      key={id}
+                      type="button"
+                      aria-label={`${label} canvas`}
+                      onClick={() => setViewMode(id as CanvasView)}
+                      className={viewMode === id ? 'active' : ''}
+                    >
+                      {label}
+                    </button>
+                  ))}
                 </div>
               </div>
               <div className="readme-document-frame">
-                {viewMode === 'preview' ? (
-                  <div className="readme-document-preview readme-gitskins-preview" data-testid="readme-generated-preview">
+                {viewMode !== 'markdown' ? (
+                  <div
+                    className={`readme-document-preview readme-gitskins-preview ${viewMode === 'github' ? 'github-mode' : ''}`}
+                    data-testid="readme-generated-preview"
+                  >
                     <div className="readme-preview-sourcebar">
                       <span>{previewDocumentMode}</span>
                       <strong>{generatedReadme ? 'Rendering exported markdown' : 'Updates as you edit controls'}</strong>
@@ -1047,22 +1086,20 @@ export default function ReadmeGeneratorPage() {
                         key={section.key}
                         className={`readme-preview-section ${section.id === selectedSection ? 'selected' : ''}`}
                         data-section={section.id}
+                        data-readme-section={section.id}
                         role="button"
                         tabIndex={0}
-                        onClick={() => {
-                          setSelectedSection(section.id);
-                          setInspectorTab('content');
-                        }}
+                        onClick={() => selectReadmeSection(section.id)}
                         onKeyDown={(event) => {
                           if (event.key === 'Enter' || event.key === ' ') {
                             event.preventDefault();
-                            setSelectedSection(section.id);
-                            setInspectorTab('content');
+                            selectReadmeSection(section.id);
                           }
                         }}
                       >
                         <div className="readme-preview-section-heading">
                           <span>{section.label}</span>
+                          <small>{section.assets.length ? `${section.assets.length} visual${section.assets.length === 1 ? '' : 's'}` : 'Text block'}</small>
                           {section.id === selectedSection ? <strong>{section.isGenerated ? 'Viewing' : 'Editing'}</strong> : null}
                         </div>
 
@@ -1396,6 +1433,15 @@ export default function ReadmeGeneratorPage() {
                       onChange={(event) => setAiProfileScan(event.target.checked)}
                     />
                   </div>
+                  <div className="readme-ai-scan-evidence">
+                    <span>Scan evidence</span>
+                    {aiScanSignals.map((signal) => (
+                      <div key={signal.label}>
+                        <small>{signal.label}</small>
+                        <strong>{signal.value}</strong>
+                      </div>
+                    ))}
+                  </div>
                 </>
               )}
 
@@ -1419,15 +1465,13 @@ export default function ReadmeGeneratorPage() {
                   <button
                     key={section.id}
                     type="button"
-                    onClick={() => {
-                      setSelectedSection(section.id);
-                      setInspectorTab('content');
-                    }}
+                    onClick={() => selectReadmeSection(section.id)}
                     className={`${sections.includes(section.id) ? 'active' : ''} ${selectedSection === section.id ? 'selected' : ''}`.trim()}
                     title={section.description}
                   >
                     <span>{sections.includes(section.id) ? '✓' : ''}</span>
-                    {section.label}
+                    <strong>{section.label}</strong>
+                    <small>{getSectionPreviewAssets(section.id).length ? `${getSectionPreviewAssets(section.id).length} visual assets` : section.description}</small>
                   </button>
                 ))}
               </div>
@@ -1471,19 +1515,19 @@ export default function ReadmeGeneratorPage() {
 
         .readme-editor-section {
           max-width: none !important;
-          padding: 0 10px 10px !important;
+          padding: 0 8px 8px !important;
         }
 
         .readme-video-editor-shell {
-          background: #171717;
+          background: #101010;
           border: 1px solid #252525;
           border-radius: 8px;
           display: grid;
-          grid-template-columns: 300px minmax(0, 1fr) 300px;
-          grid-template-rows: 46px minmax(0, 1fr) 180px;
+          grid-template-columns: 310px minmax(560px, 1fr) 320px;
+          grid-template-rows: 56px minmax(0, 1fr) 188px;
           gap: 1px;
-          height: calc(100vh - 22px);
-          min-height: 720px;
+          height: calc(100vh - 18px);
+          min-height: 740px;
           overflow: hidden;
         }
 
@@ -1493,7 +1537,7 @@ export default function ReadmeGeneratorPage() {
           background: #080808;
           border-bottom: 1px solid #252525;
           display: grid;
-          grid-template-columns: 210px 1fr auto;
+          grid-template-columns: 230px minmax(0, 1fr) auto;
           gap: 16px;
           padding: 0 12px;
         }
@@ -1507,6 +1551,24 @@ export default function ReadmeGeneratorPage() {
 
         .readme-video-topbar > div:nth-child(2) {
           text-align: center;
+        }
+
+        .readme-studio-context div {
+          display: flex;
+          gap: 6px;
+          justify-content: center;
+          margin-top: 6px;
+        }
+
+        .readme-studio-context small {
+          background: #151515;
+          border: 1px solid #2b2b2b;
+          border-radius: 999px;
+          color: #9ca3af;
+          font-size: 10px;
+          font-weight: 900;
+          line-height: 1;
+          padding: 5px 8px;
         }
 
         .readme-video-topbar span,
@@ -1773,7 +1835,7 @@ export default function ReadmeGeneratorPage() {
 
         .readme-player-monitor {
           display: grid;
-          grid-template-rows: 34px minmax(0, 1fr);
+          grid-template-rows: 42px minmax(0, 1fr);
           padding: 12px;
         }
 
@@ -1807,7 +1869,9 @@ export default function ReadmeGeneratorPage() {
 
         .readme-document-frame {
           align-items: center;
-          background: #080808;
+          background:
+            radial-gradient(circle at 50% 0%, rgba(88, 166, 255, 0.08), transparent 35%),
+            #080808;
           border: 1px solid #2c2c2c;
           border-radius: 6px;
           display: flex;
@@ -1829,6 +1893,18 @@ export default function ReadmeGeneratorPage() {
           overflow: auto;
           padding: 28px;
           width: 100%;
+        }
+
+        .readme-gitskins-preview.github-mode {
+          background: #0d1117;
+          border-color: #30363d;
+          box-shadow: 0 0 0 1px rgba(88, 166, 255, 0.08), 0 24px 80px rgba(0,0,0,0.48);
+          max-width: 980px;
+        }
+
+        .readme-gitskins-preview.github-mode .readme-preview-sourcebar {
+          background: #161b22;
+          border-color: #30363d;
         }
 
         .readme-document-preview {
@@ -1960,8 +2036,16 @@ export default function ReadmeGeneratorPage() {
         .readme-preview-section-heading {
           align-items: center;
           display: flex;
+          gap: 8px;
           justify-content: space-between;
           min-height: 20px;
+        }
+
+        .readme-preview-section-heading small {
+          color: #6e7681;
+          font-size: 11px;
+          font-weight: 800;
+          margin-left: auto;
         }
 
         .readme-preview-section-heading strong {
@@ -2445,6 +2529,47 @@ export default function ReadmeGeneratorPage() {
           flex: 0 0 auto;
         }
 
+        .readme-ai-scan-evidence {
+          background: #101010;
+          border: 1px solid #303030;
+          border-radius: 8px;
+          display: grid;
+          gap: 8px;
+          margin-top: 12px;
+          padding: 12px;
+        }
+
+        .readme-ai-scan-evidence > span {
+          color: #58a6ff;
+          font-size: 11px;
+          font-weight: 900;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+        }
+
+        .readme-ai-scan-evidence div {
+          background: rgba(88, 166, 255, 0.055);
+          border: 1px solid rgba(88, 166, 255, 0.14);
+          border-radius: 6px;
+          display: grid;
+          gap: 3px;
+          padding: 9px;
+        }
+
+        .readme-ai-scan-evidence small {
+          color: #8aa4c7;
+          font-size: 10px;
+          font-weight: 900;
+          text-transform: uppercase;
+        }
+
+        .readme-ai-scan-evidence strong {
+          color: #dbeafe;
+          font-size: 12px;
+          font-weight: 800;
+          line-height: 1.35;
+        }
+
         .readme-toggle-stack {
           border-top: 1px solid #2b2b2b;
           display: grid;
@@ -2530,10 +2655,33 @@ export default function ReadmeGeneratorPage() {
           text-align: left;
         }
 
+        .readme-track button strong {
+          display: block;
+          font-size: 12px;
+          line-height: 1.1;
+          margin-top: 8px;
+        }
+
+        .readme-track button small {
+          color: rgba(215, 255, 240, 0.68);
+          display: block;
+          font-size: 10px;
+          font-weight: 800;
+          line-height: 1.25;
+          margin-top: 7px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
         .readme-track button:not(.active) {
           background: #111;
           border-color: #2c2c2c;
           color: #777;
+        }
+
+        .readme-track button:not(.active) small {
+          color: #666;
         }
 
         .readme-track button.selected {
