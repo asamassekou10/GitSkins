@@ -153,6 +153,44 @@ const sectionInspectorCopy: Record<SectionType, { title: string; description: st
   },
 };
 
+const sectionWorkflowCopy: Record<SectionType, { focus: string; ai: string; output: string }> = {
+  header: {
+    focus: 'Identity, role, avatar, and opening visual.',
+    ai: 'Uses profile name, bio, avatar, and selected goal to draft the first impression.',
+    output: 'Hero card, short intro, and optional typing headline.',
+  },
+  about: {
+    focus: 'Positioning, credibility, and human profile story.',
+    ai: 'Turns public profile signals into a concise narrative without inventing history.',
+    output: 'About section tuned to the selected role and tone.',
+  },
+  skills: {
+    focus: 'Tech stack, skill badges, and language confidence.',
+    ai: 'Prioritizes languages and stack signals that match profile/project evidence.',
+    output: 'Stack section with badges and GitSkins visual stack.',
+  },
+  stats: {
+    focus: 'Profile metrics, contribution proof, and GitHub activity.',
+    ai: 'Pairs stats widgets with the selected visual theme and avoids overexplaining metrics.',
+    output: 'Stats card layout using the active GitSkins theme.',
+  },
+  projects: {
+    focus: 'Pinned repositories and project proof.',
+    ai: 'Reads repo descriptions, languages, and stars to write specific project blurbs.',
+    output: 'Featured project cards with outcome-oriented copy.',
+  },
+  streak: {
+    focus: 'Contribution consistency and long-term activity.',
+    ai: 'Uses streak/activity as support, not as a substitute for project proof.',
+    output: 'Contribution streak block and optional motion widgets.',
+  },
+  connect: {
+    focus: 'Contact path and social conversion.',
+    ai: 'Uses only provided or public profile links, and never invents social URLs.',
+    output: 'Social row, links, and call to connect.',
+  },
+};
+
 const careerRoles: { id: CareerRole; label: string; description: string }[] = [
   { id: 'frontend', label: 'Frontend Engineer', description: 'UI/UX, performance, design systems' },
   { id: 'backend', label: 'Backend Engineer', description: 'APIs, scalability, data reliability' },
@@ -357,6 +395,7 @@ export default function ReadmeGeneratorPage() {
   const selectedGoal = goalOptions.find((item) => item.id === goal) ?? goalOptions[0];
   const selectedRole = careerRoles.find((item) => item.id === careerRole) ?? careerRoles[0];
   const selectedSectionInspector = sectionInspectorCopy[selectedSection];
+  const selectedSectionWorkflow = sectionWorkflowCopy[selectedSection];
   const selectedSectionIndex = sections.indexOf(selectedSection);
   const selectedSectionIsIncluded = selectedSectionIndex >= 0;
   const selectedDefaultAssets = defaultSectionAssets[selectedSection] ?? [];
@@ -968,6 +1007,15 @@ export default function ReadmeGeneratorPage() {
                     <strong>{username.trim() || 'octocat'} / README.md</strong>
                     <p>{selectedGoal.description}</p>
                   </div>
+                  <div className="readme-profile-scan-panel">
+                    <span>AI scan sources</span>
+                    {aiScanSignals.slice(0, 4).map((signal) => (
+                      <div key={signal.label}>
+                        <small>{signal.label}</small>
+                        <strong>{signal.value}</strong>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
 
@@ -1260,6 +1308,21 @@ export default function ReadmeGeneratorPage() {
                       {selectedSectionInspector.controls.map((control) => (
                         <strong key={control}>{control}</strong>
                       ))}
+                    </div>
+                    <div className="readme-section-brief">
+                      <span>Section brief</span>
+                      <div>
+                        <small>Focus</small>
+                        <p>{selectedSectionWorkflow.focus}</p>
+                      </div>
+                      <div>
+                        <small>AI handling</small>
+                        <p>{selectedSectionWorkflow.ai}</p>
+                      </div>
+                      <div>
+                        <small>Output</small>
+                        <p>{selectedSectionWorkflow.output}</p>
+                      </div>
                     </div>
                     <div className="readme-inserted-assets">
                       <span>Visuals in this section</span>
@@ -1703,6 +1766,48 @@ export default function ReadmeGeneratorPage() {
           font-size: 12px;
           line-height: 1.45;
           margin: 0;
+        }
+
+        .readme-profile-scan-panel {
+          background: #101010;
+          border: 1px solid #303030;
+          border-radius: 7px;
+          display: grid;
+          gap: 8px;
+          padding: 12px;
+        }
+
+        .readme-profile-scan-panel > span {
+          color: #58a6ff;
+          font-size: 11px;
+          font-weight: 900;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+        }
+
+        .readme-profile-scan-panel div {
+          border-top: 1px solid #242424;
+          display: grid;
+          gap: 3px;
+          padding-top: 8px;
+        }
+
+        .readme-profile-scan-panel div:first-of-type {
+          border-top: none;
+          padding-top: 0;
+        }
+
+        .readme-profile-scan-panel small {
+          color: #8aa4c7;
+          font-size: 10px;
+          font-weight: 900;
+          text-transform: uppercase;
+        }
+
+        .readme-profile-scan-panel strong {
+          color: #dbeafe;
+          font-size: 12px;
+          line-height: 1.35;
         }
 
         .readme-editor-field {
@@ -2373,6 +2478,44 @@ export default function ReadmeGeneratorPage() {
           display: flex;
           flex-wrap: wrap;
           gap: 6px;
+        }
+
+        .readme-selected-section .readme-section-brief {
+          border-top: 1px solid #2b2b2b;
+          display: grid;
+          gap: 8px;
+          padding-top: 10px;
+        }
+
+        .readme-section-brief > span {
+          color: #777;
+          font-size: 11px;
+          font-weight: 900;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+        }
+
+        .readme-section-brief div {
+          background: rgba(255, 255, 255, 0.025);
+          border: 1px solid #262626;
+          border-radius: 6px;
+          display: grid;
+          gap: 4px;
+          padding: 9px;
+        }
+
+        .readme-section-brief small {
+          color: #28d89c;
+          font-size: 10px;
+          font-weight: 900;
+          text-transform: uppercase;
+        }
+
+        .readme-section-brief p {
+          color: #9ca3af;
+          font-size: 12px;
+          line-height: 1.4;
+          margin: 0;
         }
 
         .readme-selected-section strong {
